@@ -287,7 +287,7 @@ function animate() {
           <div class="retro-score">${score}</div>
           <button class="retro-btn btn-retry" onclick="location.reload()" aria-label="Retry"></button>
           <button class="retro-btn btn-follow" onclick="window.open('https://www.instagram.com/moataro_k/', '_blank')" aria-label="Follow"></button>
-          <button class="retro-btn btn-x" onclick="window.open('https://twitter.com/YOUR_X_ID', '_blank')" aria-label="Twitter/X"></button>
+          <button class="retro-btn btn-x" onclick="window.open('https://x.com/kanazawamoataro', '_blank')" aria-label="Twitter/X"></button>
           <button class="retro-btn btn-insta" onclick="window.open('https://www.instagram.com/moataro_k/', '_blank')" aria-label="Instagram"></button>
         </div>
       `;
