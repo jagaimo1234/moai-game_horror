@@ -361,10 +361,30 @@ function scheduleMusic() {
 // 初期描画（ループ前）
 renderer.render(scene, camera);
 
-// スタート画面クリックで開始
+// スタート画面クリックで開始（リスタート対応）
 document.getElementById('start-screen').addEventListener('click', () => {
+  // ゲーム状態リセット
+  gameOver = false;
+  score = 0;
+  speed = 0.2;
+  spawnTimer = 0;
+  isLookingBehind = false;
+  lookBehindTimer = 0;
+  targetRotationY = Math.PI;
+
+  // スコア表示リセット
+  document.getElementById('score-container').innerText = 0;
+
+  // 既存のヨーグルト（障害物）を全削除
+  yogurts.forEach(y => scene.remove(y));
+  yogurts.length = 0;
+
+  // モアイ位置リセット
+  moai.position.set(0, 0, 0);
+  moai.rotation.z = 0;
+
+  // スタート画面を非表示
   document.getElementById('start-screen').style.display = 'none';
-  gameStarted = true;
 
   // AudioContext再開（ブラウザポリシー対応）
   if (audioCtx.state === 'suspended') {
@@ -375,7 +395,12 @@ document.getElementById('start-screen').addEventListener('click', () => {
   nextNoteTime = audioCtx.currentTime;
   scheduleMusic();
 
-  animate();
+  // 初回のみアニメーションループ開始
+  if (!gameStarted) {
+    gameStarted = true;
+    animate();
+  }
+  gameStarted = true;
 });
 
 // リサイズ対応
