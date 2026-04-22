@@ -278,16 +278,22 @@ function animate() {
     // 距離チェック（少し余裕を持たせる）
     if (Math.abs(dx) < 0.8 && Math.abs(dz) < 0.5) {
       gameOver = true;
+      isPlayingBGM = false; // BGM停止
       document.getElementById('start-screen').style.display = 'flex';
       document.getElementById('start-screen').style.opacity = '1';
       document.getElementById('start-screen').innerHTML = `
         <div class="start-card" style="color: #ff4a4a;">
-          <h1 style="background: linear-gradient(90deg, #fff, #ff4a4a); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">GAME OVER</h1>
+          <h1 style="background: linear-gradient(90deg, #fff, #ff4a4a); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;">GAME OVER</h1>
           <p class="tap-msg">SCORE: ${score}</p>
-          <p>TAP TO RESTART</p>
+          <button onclick="location.reload()" style="
+            margin-top: 20px; padding: 15px 40px; font-size: 18px;
+            background: rgba(255,255,255,0.15); color: #fff;
+            border: 2px solid rgba(255,255,255,0.3); border-radius: 15px;
+            cursor: pointer; font-family: 'Outfit', sans-serif;
+            backdrop-filter: blur(10px);
+          ">RESTART</button>
         </div>
       `;
-      isPlayingBGM = false; // BGM停止
     }
 
     // 画面外削除
