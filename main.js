@@ -82,19 +82,20 @@ gltfLoader.load(
 createFallbackMoai();
 
 
-// ===== ヨーグルト =====
-const yogurtGeometry = new THREE.CylinderGeometry(0.3, 0.3, 0.8, 16);
-// テクスチャロード試行
-let yogurtMaterial;
-const yogurtTexture = textureLoader.load('./yogurt.png',
-  (tex) => { console.log("Yogurt texture loaded!"); },
+// ===== ユーザー障害物 (以前のヨーグルト) =====
+const userGeometry = new THREE.PlaneGeometry(1.5, 2.5); // 人型に合わせたサイズ
+// テクスチャロード
+let userMaterial;
+const userTexture = textureLoader.load('./user.png',
+  (tex) => { console.log("User texture loaded!"); },
   undefined,
-  (err) => { console.warn("Yogurt texture not found, using default color."); }
+  (err) => { console.warn("User texture not found, using default color."); }
 );
 
-yogurtMaterial = new THREE.MeshStandardMaterial({
-  map: yogurtTexture,
-  color: 0xffffff // テクスチャがない場合は白、ある場合は乗算されるので白でOK
+userMaterial = new THREE.MeshStandardMaterial({
+  map: userTexture,
+  transparent: true,
+  side: THREE.DoubleSide
 });
 
 // もし画像がないときに「真っ黒」になるのを防ぐため、mapが見つからない場合の色指定を変える工夫もできるが、
@@ -108,16 +109,15 @@ yogurtMaterial = new THREE.MeshStandardMaterial({
 const yogurts = [];
 
 function spawnYogurt() {
-  const yogurt = new THREE.Mesh(yogurtGeometry, yogurtMaterial);
+  const yogurt = new THREE.Mesh(userGeometry, userMaterial);
   yogurt.position.set(
     (Math.random() - 0.5) * 6,
-    0.4, // 地面より少し上
+    1.2, // 地面より少し上（足元が地面に付くくらい）
     -20  // 遠くから
   );
 
-  // ヨーグルトを少し傾けたり回転させたり
-  yogurt.rotation.z = (Math.random() - 0.5) * 0.5;
-  yogurt.rotation.x = Math.PI / 2; // 寝かせる？立てる？とりあえず立てるなら0
+  // 回転はさせず、常に正面を向かせる
+  yogurt.rotation.y = 0;
 
   scene.add(yogurt);
   yogurts.push(yogurt);
@@ -139,8 +139,10 @@ window.addEventListener("keyup", (e) => {
 // スマホ操作（ボタン）
 const btnLeft = document.getElementById("btn-left");
 const btnRight = document.getElementById("btn-right");
+const fullscreenBtn = document.getElementById("fullscreen-btn");
 
 function setupBtn(btn, isLeft) {
+  if (!btn) return;
   // タッチ開始 / マウス押し
   const start = (e) => {
     e.preventDefault();
@@ -165,6 +167,21 @@ function setupBtn(btn, isLeft) {
 setupBtn(btnLeft, true);
 setupBtn(btnRight, false);
 
+// 全画面表示
+if (fullscreenBtn) {
+  fullscreenBtn.addEventListener("click", () => {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen().catch((err) => {
+        alert(`Error: ${err.message}`);
+      });
+      fullscreenBtn.innerText = "EXIT FULLSCREEN";
+    } else {
+      document.exitFullscreen();
+      fullscreenBtn.innerText = "FULLSCREEN";
+    }
+  });
+}
+
 // 以前の画面半分タップロジックは削除するか、
 // そのまま残して「ボタンでも画面タップでも」どっちでもいけるようにするか。
 // ユーザーは「ボタンを実装して」と言ったので、明確なボタンを優先し、
@@ -188,7 +205,7 @@ function animate() {
 
   // スコア加算
   score++;
-  document.getElementById('score').innerText = `SCORE: ${score}`;
+  document.getElementById('score-container').innerText = score;
 
   // ----- ホラー要素: 振り返る (Look Behind) -----
   // ランダムに発生 (確率調整: 0.2% / frame -> 500frameに1回くらい)
@@ -254,18 +271,22 @@ function animate() {
     // 回転演出
     yogurt.rotation.y += 0.05;
 
-    // 当たり判定（簡易円柱）
-    // 距離判定
+    // 当たり判定
     const dx = yogurt.position.x - moai.position.x;
     const dz = yogurt.position.z - moai.position.z; // moai.position.z は 0
 
-    // 距離チェック
-    if (Math.abs(dx) < 0.6 && Math.abs(dz) < 0.5) {
+    // 距離チェック（少し余裕を持たせる）
+    if (Math.abs(dx) < 0.8 && Math.abs(dz) < 0.5) {
       gameOver = true;
-      document.getElementById('ui').innerHTML = `<h1>GAME OVER</h1><p>SCORE: ${score}</p><p>RELOAD TO RESTART</p>`;
-      document.getElementById('ui').style.color = "red";
-      document.getElementById('ui').style.textAlign = "center";
-      document.getElementById('ui').style.width = "100%";
+      document.getElementById('start-screen').style.display = 'flex';
+      document.getElementById('start-screen').style.opacity = '1';
+      document.getElementById('start-screen').innerHTML = `
+        <div class="start-card" style="color: #ff4a4a;">
+          <h1 style="background: linear-gradient(90deg, #fff, #ff4a4a); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">GAME OVER</h1>
+          <p class="tap-msg">SCORE: ${score}</p>
+          <p>TAP TO RESTART</p>
+        </div>
+      `;
       isPlayingBGM = false; // BGM停止
     }
 

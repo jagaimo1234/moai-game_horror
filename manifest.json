@@ -1,0 +1,16 @@
+{
+  "name": "MOAI YOGURT AVOID",
+  "short_name": "MoaiAvoid",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#000000",
+  "theme_color": "#00d2ff",
+  "description": "Avoid the flying characters!",
+  "icons": [
+    {
+      "src": "user.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
