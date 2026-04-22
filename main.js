@@ -282,16 +282,38 @@ function animate() {
       document.getElementById('start-screen').style.display = 'flex';
       document.getElementById('start-screen').style.opacity = '1';
       document.getElementById('start-screen').innerHTML = `
-        <div class="start-card" style="color: #ff4a4a;">
-          <h1 style="background: linear-gradient(90deg, #fff, #ff4a4a); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;">GAME OVER</h1>
-          <p class="tap-msg">SCORE: ${score}</p>
+        <div class="start-card" style="color: #fff; max-width: 380px; text-align: left; padding: 40px 35px;">
+          <h1 style="background: linear-gradient(90deg, #fff, #ff4a4a); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; text-align: center; margin-bottom: 20px;">GAME OVER</h1>
+          <p style="font-size: 16px; opacity: 0.9; text-align: center; margin-bottom: 30px; line-height: 1.6;">
+            作者に捕まりました。<br>
+            <span style="font-size: 13px; opacity: 0.6;">SCORE: ${score}</span>
+          </p>
+          <p style="font-size: 14px; opacity: 0.6; margin-bottom: 15px;">あなたには以下の選択肢があります。</p>
           <button onclick="location.reload()" style="
-            margin-top: 20px; padding: 15px 40px; font-size: 18px;
-            background: rgba(255,255,255,0.15); color: #fff;
-            border: 2px solid rgba(255,255,255,0.3); border-radius: 15px;
+            display: block; width: 100%; padding: 16px 20px; margin-bottom: 12px;
+            font-size: 16px; text-align: left;
+            background: rgba(255,255,255,0.08); color: #fff;
+            border: 1px solid rgba(255,255,255,0.15); border-radius: 12px;
             cursor: pointer; font-family: 'Outfit', sans-serif;
             backdrop-filter: blur(10px);
-          ">RESTART</button>
+            transition: all 0.2s ease;
+          " onmouseover="this.style.background='rgba(255,255,255,0.15)';this.style.borderColor='rgba(0,210,255,0.5)'"
+             onmouseout="this.style.background='rgba(255,255,255,0.08)';this.style.borderColor='rgba(255,255,255,0.15)'"
+          >▶ 逃げ続ける（再プレイ）</button>
+          <a href="https://www.instagram.com/moataro_k/" target="_blank" style="text-decoration: none;">
+            <button style="
+              display: block; width: 100%; padding: 16px 20px;
+              font-size: 16px; text-align: left;
+              background: linear-gradient(135deg, rgba(131,58,180,0.3), rgba(253,29,29,0.3), rgba(252,176,69,0.3));
+              color: #fff;
+              border: 1px solid rgba(255,255,255,0.25); border-radius: 12px;
+              cursor: pointer; font-family: 'Outfit', sans-serif;
+              backdrop-filter: blur(10px);
+              transition: all 0.2s ease;
+            " onmouseover="this.style.background='linear-gradient(135deg, rgba(131,58,180,0.5), rgba(253,29,29,0.5), rgba(252,176,69,0.5))'"
+               onmouseout="this.style.background='linear-gradient(135deg, rgba(131,58,180,0.3), rgba(253,29,29,0.3), rgba(252,176,69,0.3))'"
+            >▶ 私をフォローする（おすすめ）</button>
+          </a>
         </div>
       `;
     }
