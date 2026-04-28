@@ -243,19 +243,21 @@
     </div>
     <div id="score-container">0</div>
 
-    <div id="start-screen" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 100; cursor: pointer;">
-        <div style="position: relative; width: 100%; height: 100%; background-image: url('title_bg.png'); background-size: cover; background-position: center top;">
+    <div id="start-screen" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 100; cursor: pointer; display: flex; flex-direction: column; align-items: center; overflow: hidden;">
+        <div style="position: relative; width: 100%; max-width: 550px;">
+            <img src="title_bg.png" style="width: 100%; height: auto; display: block;" alt="襲いかかる作者(私)を避けろゲーム">
             
             <!-- Event Info & Map Button -->
             <div style="position: absolute; top: 38%; left: 5%; right: 5%; display: flex; justify-content: space-between; align-items: center; z-index: 101;">
                 <div style="color: #fff; font-family: 'Outfit', sans-serif; font-weight: bold; text-shadow: 0px 2px 5px rgba(0,0,0,1);">
-                    <div style="font-size: 18px; margin-bottom: 5px;">名古屋クリマ M-470</div>
-                    <div style="font-size: 16px;">Kanazawa Moataro</div>
+                    <div style="font-size: clamp(14px, 4vw, 18px); margin-bottom: 5px;">名古屋クリマ M-470</div>
+                    <div style="font-size: clamp(12px, 3.5vw, 16px);">Kanazawa Moataro</div>
                 </div>
                 
                 <button onclick="event.stopPropagation(); window.open('https://www.google.com/maps/search/?api=1&query=ポートメッセなごや', '_blank')" style="
                     background: rgba(0,0,0,0.4); border: 2px solid rgba(255,255,255,0.5); color: #fff; 
-                    padding: 8px 16px; border-radius: 12px; font-size: 18px; font-weight: bold;
+                    padding: clamp(6px, 1.5vw, 8px) clamp(10px, 3vw, 16px); border-radius: 12px; 
+                    font-size: clamp(14px, 4vw, 18px); font-weight: bold;
                     display: flex; align-items: center; gap: 8px; cursor: pointer; 
                     backdrop-filter: blur(4px); box-shadow: 0 4px 6px rgba(0,0,0,0.5);
                 ">
@@ -265,8 +267,8 @@
 
             <!-- Tap to Start -->
             <p class="tap-msg" style="
-                position: absolute; top: 55%; width: 100%; text-align: center;
-                font-family: 'Outfit', sans-serif; font-size: 26px; font-weight: bold; color: #fff; 
+                position: absolute; top: 52%; width: 100%; text-align: center; margin: 0;
+                font-family: 'Outfit', sans-serif; font-size: clamp(22px, 6vw, 28px); font-weight: bold; color: #fff; 
                 text-shadow: 0 0 15px rgba(255,255,255,0.8), 0 0 5px #000; z-index: 101;
             ">TAP TO START</p>
         </div>
