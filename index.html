@@ -158,6 +158,119 @@
             100% { opacity: 0.4; }
         }
 
+        /* ===== ランキングモーダル ===== */
+        #ranking-modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.85);
+            z-index: 200;
+            justify-content: center;
+            align-items: center;
+        }
+        #ranking-modal.active { display: flex; }
+        .ranking-box {
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            border: 2px solid rgba(255,215,0,0.5);
+            border-radius: 20px;
+            padding: 30px 24px;
+            width: 90%;
+            max-width: 420px;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 0 40px rgba(255,215,0,0.2);
+        }
+        .ranking-title {
+            font-family: 'Outfit', sans-serif;
+            font-size: 24px;
+            font-weight: bold;
+            color: #FFD700;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .ranking-row {
+            display: flex;
+            align-items: center;
+            padding: 10px 8px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            font-family: 'Outfit', sans-serif;
+            color: #fff;
+        }
+        .ranking-row .rank { width: 36px; font-weight: bold; color: #FFD700; }
+        .ranking-row .rname { flex: 1; }
+        .ranking-row .rscore { font-weight: bold; color: #00d2ff; }
+        .ranking-close {
+            margin-top: 20px;
+            width: 100%;
+            padding: 12px;
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.3);
+            color: #fff;
+            border-radius: 12px;
+            font-size: 16px;
+            cursor: pointer;
+            font-family: 'Outfit', sans-serif;
+        }
+
+        /* 名前入力オーバーレイ */
+        #name-input-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.85);
+            z-index: 300;
+            justify-content: center;
+            align-items: center;
+        }
+        #name-input-overlay.active { display: flex; }
+        .name-input-box {
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            border: 2px solid rgba(0,210,255,0.5);
+            border-radius: 20px;
+            padding: 30px 24px;
+            width: 90%;
+            max-width: 380px;
+            text-align: center;
+            box-shadow: 0 0 40px rgba(0,210,255,0.2);
+        }
+        .name-input-box h2 {
+            font-family: 'Outfit', sans-serif;
+            color: #fff;
+            font-size: 20px;
+            margin-bottom: 8px;
+        }
+        .name-input-box .score-display {
+            font-family: 'DotGothic16', sans-serif;
+            color: #FFD700;
+            font-size: 32px;
+            margin-bottom: 16px;
+        }
+        .name-input-box input {
+            width: 100%;
+            padding: 12px;
+            border-radius: 10px;
+            border: 1px solid rgba(255,255,255,0.3);
+            background: rgba(255,255,255,0.1);
+            color: #fff;
+            font-size: 18px;
+            font-family: 'Outfit', sans-serif;
+            text-align: center;
+            box-sizing: border-box;
+            margin-bottom: 16px;
+        }
+        .name-input-box button {
+            width: 100%;
+            padding: 12px;
+            border-radius: 12px;
+            border: none;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            font-family: 'Outfit', sans-serif;
+        }
+        .btn-submit { background: #00d2ff; color: #000; margin-bottom: 10px; }
+        .btn-skip { background: rgba(255,255,255,0.1); color: #fff; border: 1px solid rgba(255,255,255,0.3) !important; }
+
         /* Retro Game Over UI Styles */
         .retro-container {
             position: relative;
@@ -285,6 +398,36 @@
                 color: #FFD700; text-shadow: 0 0 8px rgba(255,215,0,0.8), 0 0 3px #000;
                 z-index: 101; letter-spacing: 0.5px;
             ">🔊 ミュート解除するとBGMがでます</p>
+
+            <!-- Ranking Button -->
+            <button onclick="event.stopPropagation(); window.showRanking()" style="
+                position: absolute; top: 76%; left: 50%; transform: translateX(-50%);
+                background: rgba(255,215,0,0.15); border: 2px solid rgba(255,215,0,0.7); color: #FFD700;
+                padding: clamp(6px,1.5vw,8px) clamp(16px,5vw,28px); border-radius: 20px;
+                font-size: clamp(14px,4vw,18px); font-weight: bold;
+                cursor: pointer; backdrop-filter: blur(4px); white-space: nowrap;
+                z-index: 101; box-shadow: 0 0 12px rgba(255,215,0,0.3);
+            ">👑 RANKING</button>
+        </div>
+    </div>
+
+    <!-- Ranking Modal -->
+    <div id="ranking-modal">
+        <div class="ranking-box">
+            <div class="ranking-title">👑 TOP 10 RANKING</div>
+            <div id="ranking-list"><p style="text-align:center;color:#aaa;">読み込み中...</p></div>
+            <button class="ranking-close" onclick="document.getElementById('ranking-modal').classList.remove('active')">閉じる</button>
+        </div>
+    </div>
+
+    <!-- Name Input Overlay -->
+    <div id="name-input-overlay">
+        <div class="name-input-box">
+            <h2>🎮 スコアを登録しよう！</h2>
+            <div class="score-display" id="final-score-display">0</div>
+            <input type="text" id="player-name-input" placeholder="ニックネーム" maxlength="12">
+            <button class="btn-submit" onclick="window.submitScore()">登録してリプレイ</button>
+            <button class="btn-skip" onclick="location.reload()">スキップしてリプレイ</button>
         </div>
     </div>
 
@@ -294,6 +437,50 @@
         <div id="btn-left" class="btn-joystick">←</div>
         <div id="btn-right" class="btn-joystick">→</div>
     </div>
+
+    <!-- Firebase SDK -->
+    <script type="module">
+      import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js';
+      import { getDatabase, ref, push, query, orderByChild, limitToLast, get } from 'https://www.gstatic.com/firebasejs/10.11.0/firebase-database.js';
+
+      const firebaseConfig = {
+        apiKey: "AIzaSyA8V8kmjfQ0FEE4bq3R4sBC94yLHbWfd-I",
+        authDomain: "moai-horror-game-ranking.firebaseapp.com",
+        databaseURL: "https://moai-horror-game-ranking-default-rtdb.firebaseio.com",
+        projectId: "moai-horror-game-ranking",
+        storageBucket: "moai-horror-game-ranking.firebasestorage.app",
+        messagingSenderId: "889857597584",
+        appId: "1:889857597584:web:5775e2b9753ddc83527815"
+      };
+
+      const app = initializeApp(firebaseConfig);
+      const db = getDatabase(app);
+
+      // スコアを保存する関数
+      window.saveScore = async function(name, score) {
+        try {
+          await push(ref(db, 'scores'), { name, score, timestamp: Date.now() });
+          return true;
+        } catch(e) {
+          console.error(e);
+          return false;
+        }
+      };
+
+      // ランキングを取得する関数
+      window.getTopScores = async function() {
+        try {
+          const q = query(ref(db, 'scores'), orderByChild('score'), limitToLast(10));
+          const snap = await get(q);
+          const results = [];
+          snap.forEach(child => results.push(child.val()));
+          return results.sort((a, b) => b.score - a.score);
+        } catch(e) {
+          console.error(e);
+          return [];
+        }
+      };
+    </script>
 
     <script type="importmap">
     {

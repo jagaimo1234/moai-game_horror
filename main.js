@@ -314,6 +314,17 @@ function animate() {
         </div>
         <!-- ▲▲▲ イベント情報 ここまで ▲▲▲ -->
       `;
+
+      // 名前入力オーバーレイを表示
+      const overlay = document.getElementById('name-input-overlay');
+      const scoreDisplay = document.getElementById('final-score-display');
+      if (overlay && scoreDisplay) {
+        scoreDisplay.textContent = score;
+        overlay.classList.add('active');
+      }
+
+      // 現在のスコアをグローバルに保持
+      window._currentScore = score;
     }
 
     // 画面外削除
@@ -435,3 +446,44 @@ window.addEventListener("resize", () => {
   camera.updateProjectionMatrix();
   renderer.setSize(window.innerWidth, window.innerHeight);
 });
+
+// ===== ランキング関連 =====
+
+// スコア送信
+window.submitScore = async function() {
+  const name = document.getElementById('player-name-input').value.trim() || '名無し';
+  const s = window._currentScore || 0;
+  if (window.saveScore) {
+    await window.saveScore(name, s);
+  }
+  location.reload();
+};
+
+// ランキング表示
+window.showRanking = async function() {
+  const modal = document.getElementById('ranking-modal');
+  const list = document.getElementById('ranking-list');
+  if (!modal || !list) return;
+  modal.classList.add('active');
+  list.innerHTML = '<p style="text-align:center;color:#aaa;">読み込み中...</p>';
+
+  if (!window.getTopScores) {
+    list.innerHTML = '<p style="text-align:center;color:#aaa;">接続中...</p>';
+    return;
+  }
+
+  const scores = await window.getTopScores();
+  if (!scores || scores.length === 0) {
+    list.innerHTML = '<p style="text-align:center;color:#aaa;">まだ記録がありません</p>';
+    return;
+  }
+
+  const medals = ['🥇', '🥈', '🥉'];
+  list.innerHTML = scores.map((s, i) => `
+    <div class="ranking-row">
+      <span class="rank">${medals[i] || (i + 1)}</span>
+      <span class="rname">${s.name}</span>
+      <span class="rscore">${s.score}</span>
+    </div>
+  `).join('');
+};
