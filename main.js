@@ -281,6 +281,7 @@ function animate() {
       isPlayingBGM = false; // BGM停止
       document.getElementById('start-screen').style.display = 'flex';
       document.getElementById('start-screen').style.opacity = '1';
+      document.getElementById('start-screen').style.overflow = 'auto';
       document.getElementById('start-screen').innerHTML = `
         <div class="retro-container">
           <img src="game_over_bg.jpg" alt="Game Over" class="retro-bg">
@@ -290,6 +291,28 @@ function animate() {
           <button class="retro-btn btn-x" onclick="window.open('https://x.com/kanazawamoataro', '_blank')" aria-label="Twitter/X"></button>
           <button class="retro-btn btn-insta" onclick="window.open('https://www.instagram.com/moataro_k/', '_blank')" aria-label="Instagram"></button>
         </div>
+
+        <!-- ▼▼▼ イベント情報の更新はここを書き換えてください（スタート画面と同じ内容にしてください） ▼▼▼ -->
+        <div style="width: 100%; max-width: 550px; display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 20px 0; background: #000; z-index: 101;">
+            
+            <div style="text-align: center; color: #fff; font-family: 'Outfit', sans-serif; font-weight: bold; text-shadow: 0px 2px 5px rgba(0,0,0,1);">
+                <div style="font-size: clamp(16px, 4.5vw, 22px); margin-bottom: 4px;">名古屋クリマ</div>
+                <div style="font-size: clamp(14px, 4vw, 18px); margin-bottom: 4px;">ブースNo. M-470</div>
+                <div style="font-size: clamp(14px, 4vw, 18px);">ブース名 Kanazawa Moataro</div>
+            </div>
+            
+            <button onclick="event.stopPropagation(); window.open('booth_map.jpg', '_blank')" style="
+                background: rgba(0,0,0,0.5); border: 2px solid rgba(255,255,255,0.6); color: #fff; 
+                padding: clamp(6px, 1.5vw, 8px) clamp(16px, 4vw, 24px); border-radius: 20px; 
+                font-size: clamp(14px, 4vw, 18px); font-weight: bold;
+                display: flex; align-items: center; gap: 8px; cursor: pointer; 
+                backdrop-filter: blur(4px); box-shadow: 0 4px 6px rgba(0,0,0,0.5);
+            ">
+                ブース位置を確認🗺️
+            </button>
+
+        </div>
+        <!-- ▲▲▲ イベント情報 ここまで ▲▲▲ -->
       `;
     }
 
