@@ -315,16 +315,14 @@ function animate() {
         <!-- ▲▲▲ イベント情報 ここまで ▲▲▲ -->
       `;
 
-      // 名前入力オーバーレイを表示
-      const overlay = document.getElementById('name-input-overlay');
-      const scoreDisplay = document.getElementById('final-score-display');
-      if (overlay && scoreDisplay) {
-        scoreDisplay.textContent = score;
-        overlay.classList.add('active');
-      }
-
-      // 現在のスコアをグローバルに保持
-      window._currentScore = score;
+      // ランキング機能（現在オフ）
+      // const overlay = document.getElementById('name-input-overlay');
+      // const scoreDisplay = document.getElementById('final-score-display');
+      // if (overlay && scoreDisplay) {
+      //   scoreDisplay.textContent = score;
+      //   overlay.classList.add('active');
+      // }
+      // window._currentScore = score;
     }
 
     // 画面外削除
