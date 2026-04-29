@@ -181,6 +181,22 @@
     .admin-mode .admin-edit-btn { display: block; }
     .admin-mode .admin-edit-desc-btn { display: inline-block; }
 
+    /* Announcement Box */
+    .product-announcement {
+      background: rgba(0, 210, 255, 0.05);
+      border-left: 3px solid #00d2ff;
+      padding: 12px 16px;
+      border-radius: 4px 12px 12px 4px;
+      margin-top: 16px;
+      display: none; /* 初期状態は非表示 */
+    }
+    .product-announcement.has-content { display: block; }
+    .announce-label {
+      font-size: 11px; font-weight: 900; color: #00d2ff;
+      letter-spacing: 1.5px; margin-bottom: 4px; display: flex; align-items: center; gap: 5px;
+    }
+    .announce-text { font-size: 13px; color: #fff; line-height: 1.5; }
+
     /* Epic Story UI */
     .history-epic-story {
       margin: 10px auto 20px; max-width: 600px; padding: 20px 16px;
@@ -254,6 +270,18 @@
       <div style="display:flex; gap:10px; justify-content:flex-end;">
         <button onclick="document.getElementById('desc-modal').style.display='none'" style="padding:8px 16px; background:transparent; border:none; color:#888; cursor:pointer;">キャンセル</button>
         <button id="desc-save-btn" style="padding:8px 24px; background:#00d2ff; color:#000; border:none; border-radius:20px; font-weight:bold; cursor:pointer;">保存</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Edit Announcement Modal -->
+  <div id="announce-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:1000; justify-content:center; align-items:center;">
+    <div style="background:#1e1e2e; padding:20px; border-radius:16px; width:90%; max-width:400px; border:1px solid rgba(255,255,255,0.1);">
+      <h3 style="margin-bottom:15px; font-size:16px; color:#fff;">お知らせの編集</h3>
+      <textarea id="announce-textarea" rows="6" placeholder="少量のみ持ち込みます、限定パーツプレゼントなど..." style="width:100%; background:rgba(0,0,0,0.5); color:white; border:1px solid rgba(255,255,255,0.2); border-radius:8px; padding:12px; margin-bottom:15px; font-family:inherit; resize:vertical; box-sizing:border-box;"></textarea>
+      <div style="display:flex; gap:10px; justify-content:flex-end;">
+        <button onclick="document.getElementById('announce-modal').style.display='none'" style="padding:8px 16px; background:transparent; border:none; color:#888; cursor:pointer;">キャンセル</button>
+        <button id="announce-save-btn" style="padding:8px 24px; background:#00d2ff; color:#000; border:none; border-radius:20px; font-weight:bold; cursor:pointer;">保存</button>
       </div>
     </div>
   </div>
@@ -586,7 +614,20 @@
                     ${badgeLargeHtml}
                   </div>
                   <div class="product-desc" id="desc-text-${p.id}">${(p.desc || '').replace(/\n/g, '<br>')}</div>
-                  <button class="admin-edit-desc-btn" onclick="openDescModal('${p.id}')">✏️ 説明文を編集</button>
+                  
+                  <!-- お知らせ欄 -->
+                  <div class="product-announcement" id="announce-container-${p.id}">
+                    <div class="announce-label">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+                      NOTICE
+                    </div>
+                    <div class="announce-text" id="announce-text-${p.id}"></div>
+                  </div>
+
+                  <div style="display:flex; gap:8px; margin-top:12px;">
+                    <button class="admin-edit-desc-btn" onclick="openDescModal('${p.id}')">✏️ 説明文を編集</button>
+                    <button class="admin-edit-desc-btn" style="border-color:rgba(0,210,255,0.3);color:#00d2ff;" onclick="openAnnounceModal('${p.id}')">📢 お知らせを編集</button>
+                  </div>
                 </div>
               </div>
             </div>`;
@@ -717,7 +758,40 @@
     
     let badgesData = {};
     let descriptionsData = {};
+    let announcementsData = {};
     let currentEditingProductId = null;
+
+    // Listen to announcements
+    onSnapshot(doc(db, "settings", "announcements"), (docSnap) => {
+      if (docSnap.exists()) {
+        announcementsData = docSnap.data();
+      } else {
+        announcementsData = {};
+      }
+      updateAllAnnouncements();
+    }, (error) => {
+      console.error("Firestore announcements read error:", error);
+    });
+
+    function updateAllAnnouncements() {
+      Object.keys(EVENTS).forEach(ev => {
+        EVENTS[ev].products.forEach(p => {
+          if (!p.id) return;
+          const container = document.getElementById(`announce-container-${p.id}`);
+          const textEl = document.getElementById(`announce-text-${p.id}`);
+          if (container && textEl) {
+            const text = announcementsData[p.id];
+            if (text && text.trim() !== '') {
+              textEl.innerHTML = text.replace(/\n/g, '<br>');
+              container.classList.add('has-content');
+            } else {
+              textEl.innerHTML = '';
+              container.classList.remove('has-content');
+            }
+          }
+        });
+      });
+    }
 
     // Listen to descriptions
     onSnapshot(doc(db, "settings", "descriptions"), (docSnap) => {
@@ -825,6 +899,35 @@
       document.getElementById('desc-textarea').value = currentDesc;
       document.getElementById('desc-modal').style.display = 'flex';
     };
+
+    // Open Announcement Edit Modal
+    window.openAnnounceModal = (productId) => {
+      if (!auth.currentUser) return;
+      currentEditingProductId = productId;
+      const currentText = announcementsData[productId] || '';
+      document.getElementById('announce-textarea').value = currentText;
+      document.getElementById('announce-modal').style.display = 'flex';
+    };
+
+    // Save Announcement
+    document.getElementById('announce-save-btn').addEventListener('click', async () => {
+      if (!currentEditingProductId) return;
+      const newText = document.getElementById('announce-textarea').value;
+      const prevText = announcementsData[currentEditingProductId];
+      
+      announcementsData[currentEditingProductId] = newText;
+      updateAllAnnouncements();
+      document.getElementById('announce-modal').style.display = 'none';
+
+      try {
+        await setDoc(doc(db, "settings", "announcements"), announcementsData);
+      } catch (e) {
+        console.error("Firestore write error:", e);
+        alert("保存に失敗しました。Firebaseのルール設定を確認してください。");
+        announcementsData[currentEditingProductId] = prevText;
+        updateAllAnnouncements();
+      }
+    });
 
     // Save Description
     document.getElementById('desc-save-btn').addEventListener('click', async () => {
