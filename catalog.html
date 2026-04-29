@@ -415,6 +415,10 @@
           },
           {
             image: 'images/kurima/glasses_stand.jpg',
+            images: [
+              'images/kurima/glasses_stand.jpg',
+              'images/kurima/glasses_stand/movie.mp4',
+            ],
             name:  'まちょい モアイな\nメガネスタンド',
             desc:  '頭にはメガネクロス付き。マッチョなモアイがメガネをがっしりホールド。'
           },
@@ -630,6 +634,7 @@
                 <div style="position:relative;">
                   ${adminBtnHtml}
                   <img class="main-product-img" id="main-img-${i}" src="${p.image}" alt="${p.name.replace(/\n/g,' ')}">
+                  <video class="main-product-img" id="main-video-${i}" style="display:none; width:100%; height:auto; aspect-ratio:1/1; object-fit:cover;" loop muted playsinline controls></video>
                 </div>
                 ${thumbHtml}
                 <div class="product-info-large">
@@ -676,9 +681,29 @@
     }
 
     // ===== Switch main image in detail =====
-    function setMainImg(slideIndex, imgUrl, thumbEl) {
-      const mainImg = document.getElementById(`main-img-${slideIndex}`);
-      if (mainImg) mainImg.src = imgUrl;
+    function setMainImg(slideIndex, url, thumbEl) {
+      const isVideo = url.toLowerCase().endsWith('.mp4') || url.toLowerCase().endsWith('.mov');
+      const img = document.getElementById(`main-img-${slideIndex}`);
+      const vid = document.getElementById(`main-video-${slideIndex}`);
+      
+      if (isVideo) {
+        if (img) img.style.display = 'none';
+        if (vid) {
+          vid.style.display = 'block';
+          vid.src = url;
+          vid.play().catch(e => console.warn("Video play blocked:", e));
+        }
+      } else {
+        if (vid) {
+          vid.style.display = 'none';
+          vid.pause();
+        }
+        if (img) {
+          img.style.display = 'block';
+          img.src = url;
+        }
+      }
+
       const strip = document.getElementById(`thumbs-${slideIndex}`);
       if (strip) strip.querySelectorAll('.thumb-item').forEach(t => t.classList.remove('active'));
       if (thumbEl) thumbEl.classList.add('active');
