@@ -96,7 +96,20 @@
     .product-desc { font-size: 14px; color: rgba(255,255,255,0.55); line-height: 1.6; margin-bottom: 16px; }
     .product-price-large { font-size: clamp(20px, 5vw, 28px); font-weight: 900; color: #00d2ff; font-family: 'DotGothic16', sans-serif; }
 
-    .carousel-controls { display: flex; justify-content: center; align-items: center; gap: 16px; padding: 10px 0 24px; }
+    /* ===== THUMBNAIL STRIP ===== */
+    .thumb-strip {
+      display: flex; gap: 8px; overflow-x: auto;
+      padding: 12px 16px 16px; scrollbar-width: none;
+    }
+    .thumb-strip::-webkit-scrollbar { display: none; }
+    .thumb-item {
+      min-width: 68px; height: 68px; border-radius: 10px;
+      overflow: hidden; border: 2px solid transparent;
+      cursor: pointer; transition: border-color 0.2s; flex-shrink: 0;
+    }
+    .thumb-item.active { border-color: #00d2ff; box-shadow: 0 0 8px rgba(0,210,255,0.4); }
+    .thumb-item img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
     .carousel-btn {
       width: 44px; height: 44px; background: rgba(255,255,255,0.08);
       border: 1px solid rgba(255,255,255,0.2); border-radius: 50%; color: #fff;
@@ -171,21 +184,45 @@
         products: [
           {
             image: 'images/kurima/moai_robo_mk2_gray.jpg',
+            images: [
+              'images/kurima/moai_robo_mk2_gray.jpg',
+              'images/kurima/moai_robo_mk2_blue.png',
+              'images/kurima/moai_robo_mk2_pink.png',
+              'images/kurima/moai_robo_mk2_trio.jpg',
+            ],
             name:  'MOAI ROBO MARK 2',
-            desc:  '酒よりヨーグルト好きなモアイロボット。組み立て式フィギュア。'
+            desc:  '酒よりヨーグルト好きなモアイロボット。組み立て式フィギュア。カラーバリエーションあり。'
           },
           {
             image: 'images/kurima/moai_robo_mk2_blue.png',
+            images: [
+              'images/kurima/moai_robo_mk2_blue.png',
+              'images/kurima/moai_robo_mk2_gray.jpg',
+              'images/kurima/moai_robo_mk2_pink.png',
+              'images/kurima/moai_robo_mk2_trio.jpg',
+            ],
             name:  'MOAI ROBO MARK 2\nblue edition',
             desc:  'ブルーカラーの限定カラー版。箱付き。'
           },
           {
             image: 'images/kurima/moai_robo_mk2_pink.png',
+            images: [
+              'images/kurima/moai_robo_mk2_pink.png',
+              'images/kurima/moai_robo_mk2_gray.jpg',
+              'images/kurima/moai_robo_mk2_blue.png',
+              'images/kurima/moai_robo_mk2_trio.jpg',
+            ],
             name:  'MOAI ROBO MARK 2\npink edition',
             desc:  'ピンクカラーの限定カラー版。箱付き。'
           },
           {
             image: 'images/kurima/moai_robo_mk2_trio.jpg',
+            images: [
+              'images/kurima/moai_robo_mk2_trio.jpg',
+              'images/kurima/moai_robo_mk2_gray.jpg',
+              'images/kurima/moai_robo_mk2_blue.png',
+              'images/kurima/moai_robo_mk2_pink.png',
+            ],
             name:  'MOAI ROBO MARK 2\n- TRIO EDITION -',
             desc:  'ブルー・グレー・ピンクの3体セット。'
           },
@@ -345,14 +382,23 @@
           </div>`;
       } else {
         products.forEach((p, i) => {
+          const extraImgs = p.images && p.images.length > 1 ? p.images : null;
+          const thumbHtml = extraImgs ? `
+            <div class="thumb-strip" id="thumbs-${i}">
+              ${extraImgs.map((img, j) => `
+                <div class="thumb-item ${j===0?'active':''}" onclick="setMainImg(${i},'${img}',this)">
+                  <img src="${img}" loading="lazy" alt="">
+                </div>`).join('')}
+            </div>` : '';
           track.innerHTML += `
             <div class="carousel-slide">
               <div class="product-card-large">
-                <img src="${p.image}" alt="${p.name.replace(/\n/g,' ')}">
+                <img id="main-img-${i}" src="${p.image}" alt="${p.name.replace(/\n/g,' ')}">
                 <div class="product-info-large">
                   <div class="product-name-large">${p.name.replace(/\n/g,'<br>')}</div>
                   <div class="product-desc">${p.desc || ''}</div>
                 </div>
+                ${thumbHtml}
               </div>
             </div>`;
           dots.innerHTML += `<div class="dot ${i===0?'active':''}" onclick="goToSlide(${i})"></div>`;
@@ -368,6 +414,15 @@
       setView('carousel');
       updateCarousel();
       window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // ===== Switch main image in detail =====
+    function setMainImg(slideIndex, imgUrl, thumbEl) {
+      const mainImg = document.getElementById(`main-img-${slideIndex}`);
+      if (mainImg) mainImg.src = imgUrl;
+      const strip = document.getElementById(`thumbs-${slideIndex}`);
+      if (strip) strip.querySelectorAll('.thumb-item').forEach(t => t.classList.remove('active'));
+      if (thumbEl) thumbEl.classList.add('active');
     }
 
     // ===== View toggle =====
