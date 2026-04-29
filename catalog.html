@@ -148,6 +148,9 @@
     }
     .badge-super { background: linear-gradient(135deg, #ffcc00, #ff6600); color: #fff; }
     .badge-recommend { background: linear-gradient(135deg, #00d2ff, #3a7bd5); color: #fff; }
+    .badge-onsale { background: linear-gradient(135deg, #00b09b, #2ecc71); color: #fff; }
+    .badge-few { background: linear-gradient(135deg, #f39c12, #e67e22); color: #fff; }
+    .badge-soldout { background: linear-gradient(135deg, #7f8c8d, #34495e); color: #fff; }
 
     #admin-modal {
       display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
@@ -554,8 +557,12 @@
           </div>`;
       } else {
         products.forEach((p, i) => {
-          const badgeHtml = `<div class="badge" id="badge-${p.id}" style="display:none;"></div>`;
-          const adminBtnHtml = `<button class="admin-edit-btn" onclick="event.stopPropagation(); toggleBadge('${p.id}')">👍 切替</button>`;
+          const badgeHtml = `<div class="badge" id="badge-${p.id}" style="display:none;margin-right:4px;"></div>`;
+          const stockHtml = `<div class="badge" id="stock-${p.id}" style="display:none;"></div>`;
+          const adminBtnHtml = `
+            <button class="admin-edit-btn" onclick="event.stopPropagation(); toggleBadge('${p.id}')">👍 おすすめ切替</button>
+            <button class="admin-edit-btn" style="top:52px;" onclick="event.stopPropagation(); toggleStock('${p.id}')">📦 在庫切替</button>
+          `;
           tileGrid.innerHTML += `
             <div class="product-card-tile" onclick="openDetail(${i})">
               <div style="position:relative;">
@@ -564,9 +571,12 @@
               </div>
               <div class="product-info-tile">
                 <div class="product-name-tile">${p.name.replace(/\n/g,'<br>')}</div>
-                <div style="display:flex; justify-content:space-between; align-items:center;">
+                <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:4px;">
                   <div class="tile-hint">詳細を見る →</div>
-                  ${badgeHtml}
+                  <div style="display:flex; gap:4px;">
+                    ${badgeHtml}
+                    ${stockHtml}
+                  </div>
                 </div>
               </div>
             </div>`;
@@ -598,7 +608,11 @@
             </div>` : '';
           
           const badgeLargeHtml = `<div class="badge" id="badge-large-${p.id}" style="display:none;"></div>`;
-          const adminBtnHtml = `<button class="admin-edit-btn" onclick="event.stopPropagation(); toggleBadge('${p.id}')">👍 切替</button>`;
+          const stockLargeHtml = `<div class="badge" id="stock-large-${p.id}" style="display:none;"></div>`;
+          const adminBtnHtml = `
+            <button class="admin-edit-btn" onclick="event.stopPropagation(); toggleBadge('${p.id}')">👍 おすすめ切替</button>
+            <button class="admin-edit-btn" style="top:52px;" onclick="event.stopPropagation(); toggleStock('${p.id}')">📦 在庫切替</button>
+          `;
 
           track.innerHTML += `
             <div class="carousel-slide">
@@ -611,7 +625,10 @@
                 <div class="product-info-large">
                   <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:10px;">
                     <div class="product-name-large">${p.name.replace(/\n/g,'<br>')}</div>
-                    ${badgeLargeHtml}
+                    <div style="display:flex; flex-direction:column; align-items:flex-end; gap:4px;">
+                      ${badgeLargeHtml}
+                      ${stockLargeHtml}
+                    </div>
                   </div>
                   <div class="product-desc" id="desc-text-${p.id}">${(p.desc || '').replace(/\n/g, '<br>')}</div>
                   
@@ -792,6 +809,72 @@
         });
       });
     }
+
+    // Listen to stock status
+    let stockData = {};
+    onSnapshot(doc(db, "settings", "stock"), (docSnap) => {
+      if (docSnap.exists()) {
+        stockData = docSnap.data();
+      } else {
+        stockData = {};
+      }
+      updateAllStock();
+    }, (error) => {
+      console.error("Firestore stock read error:", error);
+    });
+
+    function updateAllStock() {
+      Object.keys(EVENTS).forEach(ev => {
+        EVENTS[ev].products.forEach(p => {
+          const id = p.id;
+          if (!id) return;
+          const status = stockData[id] || 'none';
+          const els = [document.getElementById(`stock-${id}`), document.getElementById(`stock-large-${id}`)];
+          els.forEach(el => {
+            if (!el) return;
+            if (status === 'onsale') {
+              el.className = 'badge badge-onsale';
+              el.textContent = '✅ 販売中';
+              el.style.display = 'inline-block';
+            } else if (status === 'few') {
+              el.className = 'badge badge-few';
+              el.textContent = '⚠️ 残りわずか';
+              el.style.display = 'inline-block';
+            } else if (status === 'soldout') {
+              el.className = 'badge badge-soldout';
+              el.textContent = '❌ 売り切れ';
+              el.style.display = 'inline-block';
+            } else {
+              el.style.display = 'none';
+            }
+          });
+        });
+      });
+    }
+
+    // Toggle Stock Status for Admin
+    window.toggleStock = async (productId) => {
+      if (!auth.currentUser) return;
+      const current = stockData[productId] || 'none';
+      let next = 'none';
+      if (current === 'none') next = 'onsale';
+      else if (current === 'onsale') next = 'few';
+      else if (current === 'few') next = 'soldout';
+      else next = 'none';
+
+      const prev = stockData[productId];
+      stockData[productId] = next;
+      updateAllStock(); // optimistic update
+
+      try {
+        await setDoc(doc(db, "settings", "stock"), stockData);
+      } catch (e) {
+        console.error("Firestore write error:", e);
+        alert("在庫の更新に失敗しました。ルールの設定を確認してください。");
+        stockData[productId] = prev;
+        updateAllStock();
+      }
+    };
 
     // Listen to descriptions
     onSnapshot(doc(db, "settings", "descriptions"), (docSnap) => {
