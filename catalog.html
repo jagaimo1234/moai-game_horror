@@ -403,12 +403,13 @@
       },
       history: {
         label: '歴代図鑑',
+        tabDesc: '※歴代図鑑のコーナーは、過去の作品を随時追加し更新していく予定です！準備中のためもう少々お待ちください。',
         products: [
           {
             id: 'first_sold_work',
             image: 'images/history/first_sold_work.jpg',
-            name:  '初代販売モデル',
-            desc:  '記念すべき、初めて世に販売した作品です。\n\n※歴代図鑑のコーナーは、過去の作品を随時追加し更新していく予定です！準備中のためもう少々お待ちください。'
+            name:  'モアイお香たて長男「RYO」',
+            desc:  '記念すべき、初めて世に販売した作品です。'
           }
         ]
       }
@@ -452,9 +453,13 @@
         if (!p.id) p.id = p.image.split('/').pop().split('.')[0];
       });
 
-      // Item count
-      document.getElementById('item-count').textContent =
-        products.length > 0 ? `${products.length}点` : '';
+      // Item count & Tab description
+      const eventData = EVENTS[currentEventKey];
+      let countHtml = products.length > 0 ? `${products.length}点` : '';
+      if (eventData.tabDesc) {
+        countHtml += `<div style="margin-top:10px; color:rgba(255,215,0,0.8); font-size:13px; line-height:1.5; font-weight:bold;">${eventData.tabDesc.replace(/\n/g,'<br>')}</div>`;
+      }
+      document.getElementById('item-count').innerHTML = countHtml;
 
       // --- Tile ---
       const tileGrid = document.getElementById('tile-grid');
