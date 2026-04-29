@@ -82,7 +82,7 @@
     .product-price-tile { font-size: clamp(14px, 4vw, 18px); font-weight: 900; color: #00d2ff; font-family: 'DotGothic16', sans-serif; }
 
     /* ===== CAROUSEL VIEW ===== */
-    .carousel-wrapper { overflow: hidden; }
+    .carousel-wrapper { overflow: hidden; position: relative; }
     .carousel-track { display: flex; transition: transform 0.45s cubic-bezier(0.25, 0.46, 0.45, 0.94); }
     .carousel-slide { min-width: 100%; padding: 10px 24px 30px; display: flex; justify-content: center; }
     .product-card-large {
@@ -110,11 +110,24 @@
     .thumb-item.active { border-color: #00d2ff; box-shadow: 0 0 8px rgba(0,210,255,0.4); }
     .thumb-item img { width: 100%; height: 100%; object-fit: cover; display: block; }
 
-    .carousel-btn {
-      width: 44px; height: 44px; background: rgba(255,255,255,0.08);
-      border: 1px solid rgba(255,255,255,0.2); border-radius: 50%; color: #fff;
-      font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+    .carousel-btn-overlay {
+      position: absolute;
+      top: 150px; /* Mobile middle of image */
+      transform: translateY(-50%);
+      width: 50px; height: 50px;
+      background: transparent;
+      border: none; color: rgba(255,255,255,0.3);
+      font-size: 50px; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: all 0.2s; z-index: 10;
+      -webkit-tap-highlight-color: transparent;
     }
+    @media (min-width: 500px) { .carousel-btn-overlay { top: 220px; } }
+    .carousel-btn-overlay:hover, .carousel-btn-overlay:active {
+      color: #fff; text-shadow: 0 0 10px rgba(0,0,0,0.8);
+    }
+    .carousel-btn-left { left: 5px; }
+    .carousel-btn-right { right: 5px; }
     .carousel-dots { display: flex; gap: 8px; align-items: center; }
     .dot { width: 8px; height: 8px; border-radius: 50%; background: rgba(255,255,255,0.25); cursor: pointer; transition: all 0.2s; }
     .dot.active { background: #00d2ff; width: 20px; border-radius: 4px; }
@@ -165,12 +178,12 @@
     </div>
     <div class="carousel-counter" id="carousel-counter"></div>
     <div class="carousel-wrapper">
+      <button class="carousel-btn-overlay carousel-btn-left" onclick="moveCarousel(-1)">‹</button>
+      <button class="carousel-btn-overlay carousel-btn-right" onclick="moveCarousel(1)">›</button>
       <div class="carousel-track" id="carousel-track"></div>
     </div>
-    <div class="carousel-controls">
-      <button class="carousel-btn" onclick="moveCarousel(-1)">‹</button>
+    <div class="carousel-controls" style="display:flex; justify-content:center; padding: 10px 0 30px;">
       <div class="carousel-dots" id="carousel-dots"></div>
-      <button class="carousel-btn" onclick="moveCarousel(1)">›</button>
     </div>
   </div>
 
@@ -429,11 +442,11 @@
             <div class="carousel-slide">
               <div class="product-card-large">
                 <img id="main-img-${i}" src="${p.image}" alt="${p.name.replace(/\n/g,' ')}">
+                ${thumbHtml}
                 <div class="product-info-large">
                   <div class="product-name-large">${p.name.replace(/\n/g,'<br>')}</div>
                   <div class="product-desc">${p.desc || ''}</div>
                 </div>
-                ${thumbHtml}
               </div>
             </div>`;
           dots.innerHTML += `<div class="dot ${i===0?'active':''}" onclick="goToSlide(${i})"></div>`;
