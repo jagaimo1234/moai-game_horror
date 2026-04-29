@@ -891,6 +891,47 @@
     });
 
     window.addEventListener('viewsBuilt', updateAllBadges);
+
+    // ===== Author Follower (Easter Egg) =====
+    const follower = document.createElement('img');
+    follower.src = 'images/history/founder.png';
+    follower.style.cssText = `
+      position: fixed; top: 0; left: 0; width: 40px; height: 40px;
+      border-radius: 50%; pointer-events: none; z-index: 10000;
+      opacity: 0; transition: opacity 0.5s; object-fit: cover;
+      filter: grayscale(1) contrast(1.5) brightness(0.8);
+      box-shadow: 0 0 10px rgba(0,0,0,0.5);
+    `;
+    document.body.appendChild(follower);
+
+    let mouseX = 0, mouseY = 0;
+    let followX = 0, followY = 0;
+    let isMoving = false;
+    let hideTimer;
+
+    window.addEventListener('mousemove', (e) => {
+      mouseX = e.clientX;
+      mouseY = e.clientY;
+      if (!isMoving) {
+        follower.style.opacity = '0.4';
+        isMoving = true;
+      }
+      clearTimeout(hideTimer);
+      hideTimer = setTimeout(() => {
+        follower.style.opacity = '0';
+        isMoving = false;
+      }, 3000);
+    });
+
+    function animateFollower() {
+      // ぬるっと動く追従
+      followX += (mouseX - followX) * 0.04;
+      followY += (mouseY - followY) * 0.04;
+      // カーソルの右下に少しずらして配置
+      follower.style.transform = `translate(${followX + 20}px, ${followY + 20}px)`;
+      requestAnimationFrame(animateFollower);
+    }
+    animateFollower();
   </script>
 </body>
 </html>
