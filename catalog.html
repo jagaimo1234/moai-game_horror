@@ -894,41 +894,50 @@
 
     // ===== Author Follower (Easter Egg) =====
     const follower = document.createElement('img');
-    follower.src = 'images/history/founder.png';
+    // .jpgの方を優先的に使用
+    follower.src = 'images/history/founder.jpg';
     follower.style.cssText = `
-      position: fixed; top: 0; left: 0; width: 40px; height: 40px;
+      position: fixed; top: 0; left: 0; width: 50px; height: 50px;
       border-radius: 50%; pointer-events: none; z-index: 10000;
       opacity: 0; transition: opacity 0.5s; object-fit: cover;
-      filter: grayscale(1) contrast(1.5) brightness(0.8);
-      box-shadow: 0 0 10px rgba(0,0,0,0.5);
+      filter: grayscale(1) contrast(1.5) brightness(0.9);
+      box-shadow: 0 0 15px rgba(0,0,0,0.5);
+      transform: translate(-100px, -100px);
     `;
     document.body.appendChild(follower);
 
-    let mouseX = 0, mouseY = 0;
-    let followX = 0, followY = 0;
+    let mouseX = -100, mouseY = -100;
+    let followX = -100, followY = -100;
     let isMoving = false;
     let hideTimer;
 
-    window.addEventListener('mousemove', (e) => {
-      mouseX = e.clientX;
-      mouseY = e.clientY;
+    const showFollower = (x, y) => {
+      mouseX = x;
+      mouseY = y;
       if (!isMoving) {
-        follower.style.opacity = '0.4';
+        follower.style.opacity = '0.6';
         isMoving = true;
       }
       clearTimeout(hideTimer);
       hideTimer = setTimeout(() => {
         follower.style.opacity = '0';
         isMoving = false;
-      }, 3000);
-    });
+      }, 2000);
+    };
+
+    window.addEventListener('mousemove', (e) => showFollower(e.clientX, e.clientY));
+    window.addEventListener('touchmove', (e) => {
+      if (e.touches.length > 0) {
+        showFollower(e.touches[0].clientX, e.touches[0].clientY);
+      }
+    }, { passive: true });
 
     function animateFollower() {
-      // ぬるっと動く追従
-      followX += (mouseX - followX) * 0.04;
-      followY += (mouseY - followY) * 0.04;
-      // カーソルの右下に少しずらして配置
-      follower.style.transform = `translate(${followX + 20}px, ${followY + 20}px)`;
+      // ぬるっと動く追従 (少し速度アップ)
+      followX += (mouseX - followX) * 0.08;
+      followY += (mouseY - followY) * 0.08;
+      // カーソルの右下に配置
+      follower.style.transform = `translate(${followX + 15}px, ${followY + 15}px)`;
       requestAnimationFrame(animateFollower);
     }
     animateFollower();
