@@ -370,27 +370,27 @@
                     <div style="font-size: clamp(14px, 4vw, 18px);">ブース名 Kanazawa Moataro</div>
                 </div>
                 
-                <!-- MAPボタン（URLをイベント会場に合わせて変更してください） -->
-                <button onclick="event.stopPropagation(); window.open('booth_map.jpg', '_blank')" style="
-                    background: rgba(0,0,0,0.5); border: 2px solid rgba(255,255,255,0.6); color: #fff; 
-                    padding: clamp(6px, 1.5vw, 8px) clamp(16px, 4vw, 24px); border-radius: 20px; 
-                    font-size: clamp(14px, 4vw, 18px); font-weight: bold;
-                    display: flex; align-items: center; gap: 8px; cursor: pointer; 
-                    backdrop-filter: blur(4px); box-shadow: 0 4px 6px rgba(0,0,0,0.5);
-                ">
-                    ブース位置を確認🗺️
-                </button>
-
-                <!-- お品書きボタン -->
-                <button onclick="event.stopPropagation(); location.href='catalog.html'" style="
-                    background: rgba(0,210,255,0.15); border: 2px solid rgba(0,210,255,0.6); color: #00d2ff; 
-                    padding: clamp(6px, 1.5vw, 8px) clamp(16px, 4vw, 24px); border-radius: 20px; 
-                    font-size: clamp(14px, 4vw, 18px); font-weight: bold;
-                    display: flex; align-items: center; gap: 8px; cursor: pointer; 
-                    backdrop-filter: blur(4px); box-shadow: 0 4px 12px rgba(0,210,255,0.2);
-                ">
-                    📋 お品書き
-                </button>
+                <!-- MAPボタン & お品書きボタン（横並び） -->
+                <div style="display: flex; gap: 10px; flex-wrap: wrap; justify-content: center;">
+                    <button onclick="event.stopPropagation(); window.open('booth_map.jpg', '_blank')" style="
+                        background: rgba(0,0,0,0.5); border: 2px solid rgba(255,255,255,0.6); color: #fff; 
+                        padding: clamp(6px, 1.5vw, 8px) clamp(12px, 3vw, 18px); border-radius: 20px; 
+                        font-size: clamp(12px, 3.5vw, 16px); font-weight: bold;
+                        display: flex; align-items: center; gap: 6px; cursor: pointer; 
+                        backdrop-filter: blur(4px); box-shadow: 0 4px 6px rgba(0,0,0,0.5);
+                    ">
+                        ブース位置を確認🗺️
+                    </button>
+                    <button onclick="event.stopPropagation(); location.href='catalog.html'" style="
+                        background: rgba(0,210,255,0.15); border: 2px solid rgba(0,210,255,0.6); color: #00d2ff; 
+                        padding: clamp(6px, 1.5vw, 8px) clamp(12px, 3vw, 18px); border-radius: 20px; 
+                        font-size: clamp(12px, 3.5vw, 16px); font-weight: bold;
+                        display: flex; align-items: center; gap: 6px; cursor: pointer; 
+                        backdrop-filter: blur(4px); box-shadow: 0 4px 12px rgba(0,210,255,0.2);
+                    ">
+                        📋 お品書き
+                    </button>
+                </div>
 
             </div>
             <!-- ▲▲▲ イベント情報 ここまで ▲▲▲ -->
