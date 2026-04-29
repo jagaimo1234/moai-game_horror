@@ -214,9 +214,6 @@
             image: 'images/kurima/moai_robo_mk2_gray.jpg',
             images: [
               'images/kurima/moai_robo_mk2_gray.jpg',
-              'images/kurima/moai_robo_mk2_blue.png',
-              'images/kurima/moai_robo_mk2_pink.png',
-              'images/kurima/moai_robo_mk2_trio.jpg',
               'images/kurima/moai_robo_mk2/hat_01.png',
               'images/kurima/moai_robo_mk2/hat_02.png',
               'images/kurima/moai_robo_mk2/hat_03.png',
@@ -243,34 +240,16 @@
           },
           {
             image: 'images/kurima/moai_robo_mk2_blue.png',
-            images: [
-              'images/kurima/moai_robo_mk2_blue.png',
-              'images/kurima/moai_robo_mk2_gray.jpg',
-              'images/kurima/moai_robo_mk2_pink.png',
-              'images/kurima/moai_robo_mk2_trio.jpg',
-            ],
             name:  'MOAI ROBO MARK 2\nblue edition',
             desc:  'ブルーカラーの限定カラー版。箱付き。'
           },
           {
             image: 'images/kurima/moai_robo_mk2_pink.png',
-            images: [
-              'images/kurima/moai_robo_mk2_pink.png',
-              'images/kurima/moai_robo_mk2_gray.jpg',
-              'images/kurima/moai_robo_mk2_blue.png',
-              'images/kurima/moai_robo_mk2_trio.jpg',
-            ],
             name:  'MOAI ROBO MARK 2\npink edition',
             desc:  'ピンクカラーの限定カラー版。箱付き。'
           },
           {
             image: 'images/kurima/moai_robo_mk2_trio.jpg',
-            images: [
-              'images/kurima/moai_robo_mk2_trio.jpg',
-              'images/kurima/moai_robo_mk2_gray.jpg',
-              'images/kurima/moai_robo_mk2_blue.png',
-              'images/kurima/moai_robo_mk2_pink.png',
-            ],
             name:  'MOAI ROBO MARK 2\n- TRIO EDITION -',
             desc:  'ブルー・グレー・ピンクの3体セット。'
           },
@@ -500,17 +479,27 @@
 
     // Swipe
     let touchStartX = 0;
+    let touchStartY = 0;
     document.getElementById('carousel-track').addEventListener('touchstart', e => {
       touchStartX = e.touches[0].clientX;
+      touchStartY = e.touches[0].clientY;
     }, { passive: true });
     document.getElementById('carousel-track').addEventListener('touchend', e => {
-      const diff = touchStartX - e.changedTouches[0].clientX;
-      if (Math.abs(diff) > 50) moveCarousel(diff > 0 ? 1 : -1);
+      const diffX = touchStartX - e.changedTouches[0].clientX;
+      const diffY = touchStartY - e.changedTouches[0].clientY;
+      if (Math.abs(diffX) > 50 && Math.abs(diffX) > Math.abs(diffY)) {
+        moveCarousel(diffX > 0 ? 1 : -1);
+      }
     });
 
     // ===== Thumb Strip Drag to Scroll (PC) =====
     function enableDragScroll() {
       document.querySelectorAll('.thumb-strip').forEach(strip => {
+        // Prevent touch events from bubbling up to carousel-track
+        strip.addEventListener('touchstart', e => e.stopPropagation(), { passive: true });
+        strip.addEventListener('touchmove', e => e.stopPropagation(), { passive: true });
+        strip.addEventListener('touchend', e => e.stopPropagation());
+
         let isDown = false;
         let startX;
         let scrollLeft;
