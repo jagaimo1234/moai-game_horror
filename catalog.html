@@ -173,7 +173,6 @@
       z-index: 10; font-size: 13px; font-weight: bold;
     }
     .admin-mode .admin-edit-btn { display: block; }
-    .admin-mode #btn-logout { display: inline-block !important; }
   </style>
 </head>
 <body>
@@ -183,7 +182,6 @@
     <a href="index.html" class="btn-back">← 戻る</a>
     <span class="header-title" id="admin-trigger" style="cursor:default;" title="お品書き">📋 お品書き</span>
     <div class="view-toggle">
-      <button id="btn-logout" title="ログアウト" style="display:none; background:transparent; border:none; color:white; cursor:pointer; margin-right:12px; font-size:18px;">🚪</button>
       <button class="toggle-btn" id="btn-carousel" onclick="setView('carousel')" title="カルーセル">◀▶</button>
       <button class="toggle-btn active" id="btn-tile" onclick="setView('tile')" title="タイル">⊞</button>
     </div>
@@ -697,7 +695,15 @@
     document.querySelector('.page-hero h1').addEventListener('click', () => {
       clicks++;
       if (clicks >= 5) {
-        adminModal.style.display = 'flex';
+        if (auth.currentUser) {
+          if (confirm("現在ログイン中です。管理者モードからログアウトしますか？")) {
+            signOut(auth).then(() => {
+              alert("ログアウトしました。一般画面に戻ります。");
+            });
+          }
+        } else {
+          adminModal.style.display = 'flex';
+        }
         clicks = 0;
       }
       setTimeout(() => clicks = 0, 2000);
@@ -715,13 +721,6 @@
       } catch (e) {
         console.error(e);
         alert("ログイン失敗: " + e.message);
-      }
-    });
-
-    document.getElementById('btn-logout').addEventListener('click', async () => {
-      if(confirm("管理者モードからログアウトしますか？")) {
-        await signOut(auth);
-        alert("ログアウトしました。一般画面に戻ります。");
       }
     });
 
