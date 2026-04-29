@@ -199,6 +199,12 @@
       font-family: 'Shippori Mincho', 'Noto Serif JP', 'Yu Mincho', 'Hiragino Mincho ProN', serif;
       font-size: 18px; color: #FFD700; letter-spacing: 4px; margin-bottom: 12px; font-weight: normal;
     }
+    .epic-portrait {
+      width: 80px; height: 80px; border-radius: 50%; object-fit: cover;
+      margin: 0 auto 16px; display: block; border: 2px solid rgba(255, 215, 0, 0.4);
+      box-shadow: 0 0 15px rgba(255, 215, 0, 0.15); filter: contrast(1.2) grayscale(0.2);
+      background: #fff;
+    }
     .epic-text {
       font-family: 'Shippori Mincho', 'Noto Serif JP', 'Yu Mincho', 'Hiragino Mincho ProN', serif;
       font-size: clamp(13px, 3.5vw, 15px); line-height: 1.6; color: rgba(255, 255, 255, 0.9);
@@ -435,6 +441,7 @@
         heroHtml: `
           <div class="history-epic-story">
             <div class="epic-title">起源 - ORIGIN -</div>
+            <img src="images/history/founder.jpg" class="epic-portrait" alt="創業者 モアたろう">
             <div class="epic-text">
               創業者 モアたろうの手により、<br>
               2022年1月1日、金沢にて Kanazawa Moataro は創業された。<br><br>
