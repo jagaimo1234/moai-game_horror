@@ -89,7 +89,7 @@
       border: 1px solid rgba(255,255,255,0.08); border-radius: 24px;
       overflow: hidden; max-width: 500px; width: 100%; box-shadow: 0 20px 60px rgba(0,0,0,0.5);
     }
-    .main-product-img { width: 100%; aspect-ratio: 1/1; object-fit: cover; display: block; }
+    .main-product-img { width: 100%; aspect-ratio: 1/1; object-fit: contain; background: #000; display: block; }
     .product-info-large { padding: 20px 24px 28px; }
     .product-name-large { font-size: clamp(18px, 5vw, 24px); font-weight: 700; margin-bottom: 8px; line-height: 1.3; }
     .product-desc { font-size: 14px; color: rgba(255,255,255,0.55); line-height: 1.6; margin-bottom: 16px; }
@@ -478,6 +478,18 @@
           },
           {
             image: 'images/kurima/tasogare_moai.jpg',
+            images: [
+              'images/kurima/tasogare_moai.jpg',
+              'images/kurima/tasogare_moai/detail_01.jpg',
+              'images/kurima/tasogare_moai/detail_02.jpg',
+              'images/kurima/tasogare_moai/detail_03.jpg',
+              'images/kurima/tasogare_moai/detail_04.jpg',
+              'images/kurima/tasogare_moai/detail_05.jpg',
+              'images/kurima/tasogare_moai/detail_06.jpg',
+              'images/kurima/tasogare_moai/detail_07.jpg',
+              'images/kurima/tasogare_moai/detail_08.jpg',
+              'images/kurima/tasogare_moai/detail_09.jpg',
+            ],
             name:  '黄昏れモアイ',
             desc:  '仕事前日の憂鬱さを再現。モアイなりにあなたのそばで一緒に黄昏れてくれます。'
           },
