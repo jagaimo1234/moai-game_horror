@@ -142,10 +142,9 @@
 
     /* Badges & Admin UI */
     .badge {
-      position: absolute; bottom: 12px; right: 12px;
-      padding: 6px 12px; border-radius: 20px; font-weight: bold;
-      font-size: 13px; z-index: 5; text-shadow: 0 1px 2px rgba(0,0,0,0.5);
-      box-shadow: 0 4px 10px rgba(0,0,0,0.3); pointer-events: none;
+      display: inline-block; padding: 4px 8px; border-radius: 12px; font-weight: bold;
+      font-size: 11px; text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+      box-shadow: 0 2px 6px rgba(0,0,0,0.3); pointer-events: none; white-space: nowrap;
     }
     .badge-super { background: linear-gradient(135deg, #ffcc00, #ff6600); color: #fff; }
     .badge-recommend { background: linear-gradient(135deg, #00d2ff, #3a7bd5); color: #fff; }
@@ -443,13 +442,15 @@
           tileGrid.innerHTML += `
             <div class="product-card-tile" onclick="openDetail(${i})">
               <div style="position:relative;">
-                ${badgeHtml}
                 ${adminBtnHtml}
                 <img class="main-product-img" src="${p.image}" alt="${p.name.replace(/\n/g,' ')}">
               </div>
               <div class="product-info-tile">
                 <div class="product-name-tile">${p.name.replace(/\n/g,'<br>')}</div>
-                <div class="tile-hint">詳細を見る →</div>
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                  <div class="tile-hint">詳細を見る →</div>
+                  ${badgeHtml}
+                </div>
               </div>
             </div>`;
         });
@@ -486,13 +487,15 @@
             <div class="carousel-slide">
               <div class="product-card-large">
                 <div style="position:relative;">
-                  ${badgeLargeHtml}
                   ${adminBtnHtml}
                   <img class="main-product-img" id="main-img-${i}" src="${p.image}" alt="${p.name.replace(/\n/g,' ')}">
                 </div>
                 ${thumbHtml}
                 <div class="product-info-large">
-                  <div class="product-name-large">${p.name.replace(/\n/g,'<br>')}</div>
+                  <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:10px;">
+                    <div class="product-name-large">${p.name.replace(/\n/g,'<br>')}</div>
+                    ${badgeLargeHtml}
+                  </div>
                   <div class="product-desc">${p.desc || ''}</div>
                 </div>
               </div>
@@ -652,11 +655,11 @@
             if (status === 'super') {
               el.className = 'badge badge-super';
               el.textContent = '👑 超おすすめ';
-              el.style.display = 'block';
+              el.style.display = 'inline-block';
             } else if (status === 'recommend') {
               el.className = 'badge badge-recommend';
               el.textContent = '👍 おすすめ';
-              el.style.display = 'block';
+              el.style.display = 'inline-block';
             } else {
               el.style.display = 'none';
             }
