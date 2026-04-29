@@ -138,8 +138,42 @@
       text-align: center; padding: 60px 20px;
       color: rgba(255,255,255,0.3); font-size: 16px;
       grid-column: 1 / -1;
-    }
     .empty-state .emoji { font-size: 48px; display: block; margin-bottom: 12px; }
+
+    /* Badges & Admin UI */
+    .badge {
+      position: absolute; top: 12px; left: 12px;
+      padding: 6px 12px; border-radius: 20px; font-weight: bold;
+      font-size: 13px; z-index: 5; text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+      box-shadow: 0 4px 10px rgba(0,0,0,0.3); pointer-events: none;
+    }
+    .badge-super { background: linear-gradient(135deg, #ffcc00, #ff6600); color: #fff; }
+    .badge-recommend { background: linear-gradient(135deg, #00d2ff, #3a7bd5); color: #fff; }
+
+    #admin-modal {
+      display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.8); z-index: 100; justify-content: center; align-items: center;
+    }
+    .admin-content {
+      background: #1e1e2e; padding: 30px; border-radius: 20px; width: 90%; max-width: 400px;
+      text-align: center; border: 1px solid rgba(255,255,255,0.1);
+    }
+    .admin-input {
+      width: 100%; padding: 12px; margin-bottom: 15px; border-radius: 8px;
+      border: 1px solid rgba(255,255,255,0.2); background: rgba(0,0,0,0.3); color: white;
+      box-sizing: border-box;
+    }
+    .admin-btn {
+      background: #00d2ff; color: #000; padding: 12px 24px; border-radius: 30px;
+      font-weight: bold; cursor: pointer; border: none; width: 100%;
+    }
+    .admin-edit-btn {
+      display: none; position: absolute; top: 12px; right: 12px;
+      background: rgba(0,0,0,0.7); color: white; padding: 6px 12px;
+      border-radius: 12px; cursor: pointer; border: 1px solid rgba(255,255,255,0.3);
+      z-index: 10; font-size: 13px;
+    }
+    .admin-mode .admin-edit-btn { display: block; }
   </style>
 </head>
 <body>
@@ -147,7 +181,7 @@
   <!-- Header -->
   <div class="header">
     <a href="index.html" class="btn-back">← 戻る</a>
-    <span class="header-title">📋 お品書き</span>
+    <span class="header-title" id="admin-trigger" style="cursor:pointer;" title="ダブルクリックで管理者モード">📋 お品書き</span>
     <div class="view-toggle">
       <button class="toggle-btn" id="btn-carousel" onclick="setView('carousel')" title="カルーセル">◀▶</button>
       <button class="toggle-btn active" id="btn-tile" onclick="setView('tile')" title="タイル">⊞</button>
@@ -158,6 +192,17 @@
   <div class="page-hero">
     <h1>お品書き</h1>
     <p>Kanazawa Moataro</p>
+  </div>
+
+  <!-- Admin Modal -->
+  <div id="admin-modal">
+    <div class="admin-content">
+      <h3 style="margin-bottom:20px;">管理者ログイン</h3>
+      <input type="email" id="admin-email" class="admin-input" placeholder="メールアドレス">
+      <input type="password" id="admin-password" class="admin-input" placeholder="パスワード">
+      <button id="admin-login-btn" class="admin-btn">ログイン</button>
+      <button onclick="document.getElementById('admin-modal').style.display='none'" style="margin-top:15px; background:transparent; border:none; color:#888; cursor:pointer;">キャンセル</button>
+    </div>
   </div>
 
   <!-- Event Tabs -->
@@ -372,6 +417,10 @@
     // ===== Build tile & carousel =====
     function buildViews() {
       const products = EVENTS[currentEventKey].products;
+      // Ensure all products have an ID
+      products.forEach(p => {
+        if (!p.id) p.id = p.image.split('/').pop().split('.')[0];
+      });
 
       // Item count
       document.getElementById('item-count').textContent =
@@ -388,8 +437,12 @@
           </div>`;
       } else {
         products.forEach((p, i) => {
+          const badgeHtml = `<div class="badge" id="badge-${p.id}" style="display:none;"></div>`;
+          const adminBtnHtml = `<button class="admin-edit-btn" onclick="event.stopPropagation(); toggleBadge('${p.id}')">👍 切替</button>`;
           tileGrid.innerHTML += `
             <div class="product-card-tile" onclick="openDetail(${i})">
+              ${badgeHtml}
+              ${adminBtnHtml}
               <img src="${p.image}" alt="${p.name.replace(/\n/g,' ')}">
               <div class="product-info-tile">
                 <div class="product-name-tile">${p.name.replace(/\n/g,'<br>')}</div>
@@ -422,10 +475,18 @@
                   <img src="${img}" loading="lazy" alt="">
                 </div>`).join('')}
             </div>` : '';
+          
+          const badgeLargeHtml = `<div class="badge" id="badge-large-${p.id}" style="display:none;"></div>`;
+          const adminBtnHtml = `<button class="admin-edit-btn" onclick="event.stopPropagation(); toggleBadge('${p.id}')">👍 切替</button>`;
+
           track.innerHTML += `
             <div class="carousel-slide">
               <div class="product-card-large">
-                <img id="main-img-${i}" src="${p.image}" alt="${p.name.replace(/\n/g,' ')}">
+                <div style="position:relative;">
+                  ${badgeLargeHtml}
+                  ${adminBtnHtml}
+                  <img id="main-img-${i}" src="${p.image}" alt="${p.name.replace(/\n/g,' ')}">
+                </div>
                 ${thumbHtml}
                 <div class="product-info-large">
                   <div class="product-name-large">${p.name.replace(/\n/g,'<br>')}</div>
@@ -439,6 +500,7 @@
 
       updateCarousel();
       enableDragScroll();
+      window.dispatchEvent(new Event('viewsBuilt'));
     }
 
     // ===== Open detail from tile =====
@@ -536,6 +598,106 @@
     // ===== Init =====
     buildTabs();
     buildViews();
+  </script>
+
+  <!-- Firebase Integration -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+    import { getFirestore, doc, onSnapshot, setDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+    import { getAuth, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyCkDJBvJPxipgkXXXilGlJuEP7_cSv9FEY",
+      authDomain: "moai-catalog.firebaseapp.com",
+      projectId: "moai-catalog",
+      storageBucket: "moai-catalog.firebasestorage.app",
+      messagingSenderId: "421468245254",
+      appId: "1:421468245254:web:c49e0846d2015820d8a287"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const auth = getAuth(app);
+    
+    let badgesData = {};
+
+    // Listen to all badges
+    onSnapshot(doc(db, "settings", "badges"), (docSnap) => {
+      if (docSnap.exists()) {
+        badgesData = docSnap.data();
+      } else {
+        badgesData = {};
+      }
+      updateAllBadges();
+    });
+
+    function updateAllBadges() {
+      Object.keys(EVENTS).forEach(ev => {
+        EVENTS[ev].products.forEach(p => {
+          const id = p.id;
+          if (!id) return;
+          const status = badgesData[id] || 'none';
+          
+          const els = [document.getElementById(`badge-${id}`), document.getElementById(`badge-large-${id}`)];
+          els.forEach(el => {
+            if (!el) return;
+            if (status === 'super') {
+              el.className = 'badge badge-super';
+              el.textContent = '👑 超おすすめ';
+              el.style.display = 'block';
+            } else if (status === 'recommend') {
+              el.className = 'badge badge-recommend';
+              el.textContent = '👍 おすすめ';
+              el.style.display = 'block';
+            } else {
+              el.style.display = 'none';
+            }
+          });
+        });
+      });
+    }
+
+    // Toggle Badge Function for Admin
+    window.toggleBadge = async (productId) => {
+      if (!auth.currentUser) return;
+      const current = badgesData[productId] || 'none';
+      let next = 'none';
+      if (current === 'none') next = 'recommend';
+      else if (current === 'recommend') next = 'super';
+      else next = 'none';
+      
+      badgesData[productId] = next;
+      updateAllBadges(); // optimistic update
+      await setDoc(doc(db, "settings", "badges"), badgesData);
+    };
+
+    // Admin Auth Logic
+    const adminModal = document.getElementById('admin-modal');
+    document.getElementById('admin-trigger').addEventListener('dblclick', () => {
+      adminModal.style.display = 'flex';
+    });
+
+    document.getElementById('admin-login-btn').addEventListener('click', async () => {
+      const email = document.getElementById('admin-email').value;
+      const pass = document.getElementById('admin-password').value;
+      try {
+        await signInWithEmailAndPassword(auth, email, pass);
+        adminModal.style.display = 'none';
+        alert("管理者モードにログインしました！");
+      } catch (e) {
+        alert("ログイン失敗: パスワードまたはメールアドレスが違います。");
+      }
+    });
+
+    onAuthStateChanged(auth, user => {
+      if (user) {
+        document.body.classList.add('admin-mode');
+      } else {
+        document.body.classList.remove('admin-mode');
+      }
+    });
+
+    window.addEventListener('viewsBuilt', updateAllBadges);
   </script>
 </body>
 </html>
