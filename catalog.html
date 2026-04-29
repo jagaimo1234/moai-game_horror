@@ -100,8 +100,8 @@
     }
 
     /* ===== CAROUSEL VIEW ===== */
-    #carousel-view { display: block; }
-    #tile-view { display: none; }
+    #carousel-view { display: none; }
+    #tile-view { display: block; }
 
     .carousel-wrapper {
       position: relative;
@@ -273,8 +273,8 @@
     <a href="index.html" class="btn-back">← ゲームに戻る</a>
     <span class="header-title">📋 お品書き</span>
     <div class="view-toggle">
-      <button class="toggle-btn active" id="btn-carousel" onclick="setView('carousel')" title="カルーセル">◀▶</button>
-      <button class="toggle-btn" id="btn-tile" onclick="setView('tile')" title="タイル">⊞</button>
+      <button class="toggle-btn" id="btn-carousel" onclick="setView('carousel')" title="カルーセル">◀▶</button>
+      <button class="toggle-btn active" id="btn-tile" onclick="setView('tile')" title="タイル">⊞</button>
     </div>
   </div>
 
@@ -284,8 +284,7 @@
     <p>Kanazawa Moataro</p>
   </div>
 
-  <!-- ===== CAROUSEL VIEW ===== -->
-  <div id="carousel-view">
+  <div id="carousel-view" style="display:none;">
     <div class="items-count" id="carousel-counter">1 / 2</div>
     <div class="carousel-wrapper">
       <div class="carousel-track" id="carousel-track">
