@@ -172,7 +172,14 @@
       border-radius: 12px; cursor: pointer; border: 1px solid rgba(255,255,255,0.4);
       z-index: 10; font-size: 13px; font-weight: bold;
     }
+    .admin-edit-desc-btn {
+      display: none; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.2);
+      color: white; padding: 4px 12px; border-radius: 12px; font-size: 12px; cursor: pointer;
+      margin-top: 8px; transition: background 0.2s;
+    }
+    .admin-edit-desc-btn:hover { background: rgba(255,255,255,0.15); }
     .admin-mode .admin-edit-btn { display: block; }
+    .admin-mode .admin-edit-desc-btn { display: inline-block; }
   </style>
 </head>
 <body>
@@ -202,6 +209,18 @@
         Googleでログイン
       </button>
       <div id="admin-cancel-btn" style="margin-top:20px; color:#888; font-size:13px; cursor:pointer;">キャンセル</div>
+    </div>
+  </div>
+
+  <!-- Edit Description Modal -->
+  <div id="desc-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:1000; justify-content:center; align-items:center;">
+    <div style="background:#1e1e2e; padding:20px; border-radius:16px; width:90%; max-width:400px; border:1px solid rgba(255,255,255,0.1);">
+      <h3 style="margin-bottom:15px; font-size:16px; color:#fff;">説明文の編集</h3>
+      <textarea id="desc-textarea" rows="6" style="width:100%; background:rgba(0,0,0,0.5); color:white; border:1px solid rgba(255,255,255,0.2); border-radius:8px; padding:12px; margin-bottom:15px; font-family:inherit; resize:vertical; box-sizing:border-box;"></textarea>
+      <div style="display:flex; gap:10px; justify-content:flex-end;">
+        <button onclick="document.getElementById('desc-modal').style.display='none'" style="padding:8px 16px; background:transparent; border:none; color:#888; cursor:pointer;">キャンセル</button>
+        <button id="desc-save-btn" style="padding:8px 24px; background:#00d2ff; color:#000; border:none; border-radius:20px; font-weight:bold; cursor:pointer;">保存</button>
+      </div>
     </div>
   </div>
 
@@ -500,7 +519,8 @@
                     <div class="product-name-large">${p.name.replace(/\n/g,'<br>')}</div>
                     ${badgeLargeHtml}
                   </div>
-                  <div class="product-desc">${p.desc || ''}</div>
+                  <div class="product-desc" id="desc-text-${p.id}">${(p.desc || '').replace(/\n/g, '<br>')}</div>
+                  <button class="admin-edit-desc-btn" onclick="openDescModal('${p.id}')">✏️ 説明文を編集</button>
                 </div>
               </div>
             </div>`;
@@ -630,6 +650,33 @@
     const provider = new GoogleAuthProvider();
     
     let badgesData = {};
+    let descriptionsData = {};
+    let currentEditingProductId = null;
+
+    // Listen to descriptions
+    onSnapshot(doc(db, "settings", "descriptions"), (docSnap) => {
+      if (docSnap.exists()) {
+        descriptionsData = docSnap.data();
+      } else {
+        descriptionsData = {};
+      }
+      updateAllDescriptions();
+    }, (error) => {
+      console.error("Firestore descriptions read error:", error);
+    });
+
+    function updateAllDescriptions() {
+      Object.keys(EVENTS).forEach(ev => {
+        EVENTS[ev].products.forEach(p => {
+          if (!p.id) return;
+          const el = document.getElementById(`desc-text-${p.id}`);
+          if (el) {
+            const customDesc = descriptionsData[p.id];
+            el.innerHTML = (customDesc !== undefined ? customDesc : (p.desc || '')).replace(/\n/g, '<br>');
+          }
+        });
+      });
+    }
 
     // Listen to all badges
     onSnapshot(doc(db, "settings", "badges"), (docSnap) => {
@@ -695,6 +742,43 @@
         updateAllBadges();
       }
     };
+
+    // Open Description Edit Modal
+    window.openDescModal = (productId) => {
+      if (!auth.currentUser) return;
+      currentEditingProductId = productId;
+      
+      let defaultDesc = '';
+      Object.keys(EVENTS).forEach(ev => {
+        const found = EVENTS[ev].products.find(x => x.id === productId);
+        if(found) defaultDesc = found.desc || '';
+      });
+
+      const currentDesc = descriptionsData[productId] !== undefined ? descriptionsData[productId] : defaultDesc;
+      
+      document.getElementById('desc-textarea').value = currentDesc;
+      document.getElementById('desc-modal').style.display = 'flex';
+    };
+
+    // Save Description
+    document.getElementById('desc-save-btn').addEventListener('click', async () => {
+      if (!currentEditingProductId) return;
+      const newText = document.getElementById('desc-textarea').value;
+      const prevText = descriptionsData[currentEditingProductId];
+      
+      descriptionsData[currentEditingProductId] = newText;
+      updateAllDescriptions();
+      document.getElementById('desc-modal').style.display = 'none';
+
+      try {
+        await setDoc(doc(db, "settings", "descriptions"), descriptionsData);
+      } catch (e) {
+        console.error("Firestore write error:", e);
+        alert("保存に失敗しました（" + e.message + "）。\nFirebaseのルール設定を確認してください。");
+        descriptionsData[currentEditingProductId] = prevText;
+        updateAllDescriptions();
+      }
+    });
 
     // Admin Auth Logic
     const adminModal = document.getElementById('admin-modal');
