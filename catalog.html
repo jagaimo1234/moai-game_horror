@@ -289,6 +289,11 @@
             desc:  '見ているだけで力が湧いてくる。ガンバレ..!!!'
           },
           {
+            image: 'images/kurima/tegotae_moai_pen.jpg',
+            name:  '手応えを掴んだ\nモアイペン立て',
+            desc:  '何を掴んだのかはわからない。いける..!!!'
+          },
+          {
             image: 'images/kurima/osuwari_moai_pen.jpg',
             name:  'おすわり\nモアイペン立て',
             desc:  'ちょこんとあなたの隣で、あなたの行くすえを見守ります。'
@@ -477,20 +482,20 @@
     }
     function goToSlide(i) { currentSlide = i; updateCarousel(); }
 
-    // Swipe
-    let touchStartX = 0;
-    let touchStartY = 0;
-    document.getElementById('carousel-track').addEventListener('touchstart', e => {
-      touchStartX = e.touches[0].clientX;
-      touchStartY = e.touches[0].clientY;
-    }, { passive: true });
-    document.getElementById('carousel-track').addEventListener('touchend', e => {
-      const diffX = touchStartX - e.changedTouches[0].clientX;
-      const diffY = touchStartY - e.changedTouches[0].clientY;
-      if (Math.abs(diffX) > 50 && Math.abs(diffX) > Math.abs(diffY)) {
-        moveCarousel(diffX > 0 ? 1 : -1);
-      }
-    });
+// Swipe navigation between products disabled – use buttons only
+// let touchStartX = 0;
+// let touchStartY = 0;
+// document.getElementById('carousel-track').addEventListener('touchstart', e => {
+//   touchStartX = e.touches[0].clientX;
+//   touchStartY = e.touches[0].clientY;
+// }, { passive: true });
+// document.getElementById('carousel-track').addEventListener('touchend', e => {
+//   const diffX = touchStartX - e.changedTouches[0].clientX;
+//   const diffY = touchStartY - e.changedTouches[0].clientY;
+//   if (Math.abs(diffX) > 50 && Math.abs(diffX) > Math.abs(diffY)) {
+//     moveCarousel(diffX > 0 ? 1 : -1);
+//   }
+// });
 
     // ===== Thumb Strip Drag to Scroll (PC) =====
     function enableDragScroll() {
