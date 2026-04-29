@@ -279,20 +279,14 @@ function animate() {
     if (Math.abs(dx) < 0.8 && Math.abs(dz) < 0.5) {
       gameOver = true;
       isPlayingBGM = false; // BGM停止
-      
-      // グローバルに関数を定義して、index.htmlのスクリプトから呼べるようにする
-      window.currentScore = score;
-      
-      const startScreen = document.getElementById('start-screen');
-      startScreen.style.display = 'flex';
-      startScreen.style.opacity = '1';
-      startScreen.style.overflow = 'auto';
-      startScreen.innerHTML = `
+      document.getElementById('start-screen').style.display = 'flex';
+      document.getElementById('start-screen').style.opacity = '1';
+      document.getElementById('start-screen').style.overflow = 'auto';
+      document.getElementById('start-screen').innerHTML = `
         <div class="retro-container">
           <img src="game_over_bg.jpg" alt="Game Over" class="retro-bg">
           <div class="retro-score">${score}</div>
-          <!-- リトライボタンで名前入力画面へ -->
-          <button class="retro-btn btn-retry" onclick="window.openScoreRegistration()" aria-label="Register Score"></button>
+          <button class="retro-btn btn-retry" onclick="location.reload()" aria-label="Retry"></button>
           <button class="retro-btn btn-follow" onclick="window.open('https://www.instagram.com/moataro_k/', '_blank')" aria-label="Follow"></button>
           <button class="retro-btn btn-x" onclick="window.open('https://x.com/kanazawamoataro', '_blank')" aria-label="Twitter/X"></button>
           <button class="retro-btn btn-insta" onclick="window.open('https://www.instagram.com/moataro_k/', '_blank')" aria-label="Instagram"></button>
