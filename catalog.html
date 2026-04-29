@@ -631,6 +631,11 @@
         badgesData = {};
       }
       updateAllBadges();
+    }, (error) => {
+      console.error("Firestore read error:", error);
+      if (error.code === 'permission-denied') {
+        console.warn("セキュリティルールにより読み取りが拒否されました。ルールの設定を確認してください。");
+      }
     });
 
     function updateAllBadges() {
@@ -668,9 +673,19 @@
       else if (current === 'recommend') next = 'super';
       else next = 'none';
       
+      const prev = badgesData[productId];
       badgesData[productId] = next;
       updateAllBadges(); // optimistic update
-      await setDoc(doc(db, "settings", "badges"), badgesData);
+      
+      try {
+        await setDoc(doc(db, "settings", "badges"), badgesData);
+      } catch (e) {
+        console.error("Firestore write error:", e);
+        alert("データベースへの保存に失敗しました（" + e.message + "）。\nFirebaseのルール設定（allow write...）が正しく行われているか、または設定したGmailアドレスと現在ログインしているアカウントが一致しているか確認してください。");
+        // Rollback
+        badgesData[productId] = prev;
+        updateAllBadges();
+      }
     };
 
     // Admin Auth Logic
