@@ -961,8 +961,8 @@
       followY += (mouseY - followY) * 0.08;
       // カーソルの右下に配置
       follower.style.transform = `translate(${followX + 10}px, ${followY + 10}px)`;
-      // 吹き出しを作者の左上に配置 (ユーザーの提供画像に合わせる)
-      bubble.style.transform = `translate(${followX - 60}px, ${followY - 80}px)`;
+      // 吹き出しを作者にもっと近づける
+      bubble.style.transform = `translate(${followX - 30}px, ${followY - 65}px)`;
       requestAnimationFrame(animateFollower);
     }
     animateFollower();
