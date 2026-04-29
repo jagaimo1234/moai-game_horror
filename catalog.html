@@ -180,6 +180,34 @@
     .admin-edit-desc-btn:hover { background: rgba(255,255,255,0.15); }
     .admin-mode .admin-edit-btn { display: block; }
     .admin-mode .admin-edit-desc-btn { display: inline-block; }
+
+    /* Epic Story UI */
+    .history-epic-story {
+      margin: 10px auto 30px; max-width: 600px; padding: 30px 20px;
+      background: linear-gradient(180deg, rgba(20,20,30,0.8) 0%, rgba(10,10,15,0.95) 100%);
+      border: 1px solid rgba(255, 215, 0, 0.2); border-radius: 8px;
+      text-align: center; position: relative;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.8), inset 0 0 30px rgba(255,215,0,0.03);
+      animation: fadeInEpic 1s ease-out;
+    }
+    @keyframes fadeInEpic { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    .history-epic-story::before {
+      content: '✦'; position: absolute; top: -14px; left: 50%; transform: translateX(-50%);
+      color: #FFD700; font-size: 18px; background: #0a0a0f; padding: 0 15px;
+    }
+    .epic-title {
+      font-family: 'Shippori Mincho', 'Noto Serif JP', 'Yu Mincho', 'Hiragino Mincho ProN', serif;
+      font-size: 18px; color: #FFD700; letter-spacing: 4px; margin-bottom: 20px; font-weight: normal;
+    }
+    .epic-text {
+      font-family: 'Shippori Mincho', 'Noto Serif JP', 'Yu Mincho', 'Hiragino Mincho ProN', serif;
+      font-size: clamp(13px, 3.5vw, 15px); line-height: 2.2; color: rgba(255, 255, 255, 0.9);
+      letter-spacing: 1px;
+    }
+    .epic-footer {
+      margin-top: 25px; font-size: 11px; color: rgba(255,255,255,0.4);
+      border-top: 1px solid rgba(255,255,255,0.1); padding-top: 15px; line-height: 1.6;
+    }
   </style>
 </head>
 <body>
@@ -227,6 +255,7 @@
   <!-- Event Tabs -->
   <div class="event-tabs" id="event-tabs"></div>
   <div class="item-count" id="item-count"></div>
+  <div id="tab-hero-container" style="padding: 0 16px;"></div>
 
   <!-- Tile View -->
   <div id="tile-view"><div class="tile-grid" id="tile-grid"></div></div>
@@ -403,7 +432,19 @@
       },
       history: {
         label: '歴代図鑑',
-        tabDesc: '※歴代図鑑のコーナーは、過去の作品を随時追加し更新していく予定です！準備中のためもう少々お待ちください。',
+        heroHtml: `
+          <div class="history-epic-story">
+            <div class="epic-title">起源 - ORIGIN -</div>
+            <div class="epic-text">
+              創業者 モアたろうの手により、<br>
+              2022年1月1日、金沢にて Kanazawa Moataro は創業された。<br><br>
+              雪がちらつくその頃、作者はやるせない葛藤の日々を送る中、<br>
+              なぜかモアイにすがるしかなく、<br>
+              その末に、初作品となる「モアイお香立て」の開発に成功した。
+            </div>
+            <div class="epic-footer">※歴代図鑑のコーナーは、過去の作品を随時追加し更新していく予定です！<br>準備中のためもう少々お待ちください。</div>
+          </div>
+        `,
         products: [
           {
             id: 'first_sold_work',
@@ -460,6 +501,9 @@
         countHtml += `<div style="margin-top:10px; color:rgba(255,215,0,0.8); font-size:13px; line-height:1.5; font-weight:bold;">${eventData.tabDesc.replace(/\n/g,'<br>')}</div>`;
       }
       document.getElementById('item-count').innerHTML = countHtml;
+
+      // Hero Container
+      document.getElementById('tab-hero-container').innerHTML = eventData.heroHtml || '';
 
       // --- Tile ---
       const tileGrid = document.getElementById('tile-grid');
