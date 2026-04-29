@@ -905,6 +905,17 @@
     `;
     document.body.appendChild(follower);
 
+    // ===== Speech Bubble =====
+    const bubble = document.createElement('img');
+    bubble.src = 'images/history/serihu.png';
+    bubble.style.cssText = `
+      position: fixed; top: 0; left: 0; width: 100px;
+      pointer-events: none; z-index: 10001;
+      opacity: 0; transition: opacity 0.3s;
+      transform: translate(-100px, -100px);
+    `;
+    document.body.appendChild(bubble);
+
     let mouseX = -100, mouseY = -100;
     let followX = -100, followY = -100;
     let isMoving = false;
@@ -920,6 +931,7 @@
       clearTimeout(hideTimer);
       hideTimer = setTimeout(() => {
         follower.style.opacity = '0';
+        bubble.style.opacity = '0';
         isMoving = false;
       }, 2000);
     };
@@ -931,12 +943,24 @@
       }
     }, { passive: true });
 
+    // ランダムに吹き出しを表示
+    function toggleBubble() {
+      if (isMoving && Math.random() > 0.6) {
+        bubble.style.opacity = '1';
+        setTimeout(() => { bubble.style.opacity = '0'; }, 3000);
+      }
+      setTimeout(toggleBubble, 4000 + Math.random() * 4000);
+    }
+    toggleBubble();
+
     function animateFollower() {
       // ぬるっと動く追従 (少し速度アップ)
       followX += (mouseX - followX) * 0.08;
       followY += (mouseY - followY) * 0.08;
       // カーソルの右下に配置
       follower.style.transform = `translate(${followX + 15}px, ${followY + 15}px)`;
+      // 吹き出しは作者の右上に配置
+      bubble.style.transform = `translate(${followX + 80}px, ${followY - 60}px)`;
       requestAnimationFrame(animateFollower);
     }
     animateFollower();
