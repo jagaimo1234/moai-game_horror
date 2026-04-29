@@ -410,15 +410,15 @@
                 z-index: 101; letter-spacing: 0.5px;
             ">🔊 ミュート解除するとBGMがでます</p>
 
-            <!-- Ranking Button (現在オフ) -->
-            <!-- <button onclick="event.stopPropagation(); window.showRanking()" style="
+            <!-- Ranking Button -->
+            <button id="ranking-btn" onclick="event.stopPropagation(); window.showRanking()" style="
                 position: absolute; top: 76%; left: 50%; transform: translateX(-50%);
                 background: rgba(255,215,0,0.15); border: 2px solid rgba(255,215,0,0.7); color: #FFD700;
                 padding: clamp(6px,1.5vw,8px) clamp(16px,5vw,28px); border-radius: 20px;
                 font-size: clamp(14px,4vw,18px); font-weight: bold;
                 cursor: pointer; backdrop-filter: blur(4px); white-space: nowrap;
                 z-index: 101; box-shadow: 0 0 12px rgba(255,215,0,0.3);
-            ">👑 RANKING</button> -->
+            ">👑 RANKING</button>
         </div>
     </div>
 
@@ -437,7 +437,7 @@
             <h2>🎮 スコアを登録しよう！</h2>
             <div class="score-display" id="final-score-display">0</div>
             <input type="text" id="player-name-input" placeholder="ニックネーム" maxlength="12">
-            <button class="btn-submit" onclick="window.submitScore()">登録してリプレイ</button>
+            <button class="btn-submit" id="btn-submit-score">登録してリプレイ</button>
             <button class="btn-skip" onclick="location.reload()">スキップしてリプレイ</button>
         </div>
     </div>
@@ -467,28 +467,58 @@
       const app = initializeApp(firebaseConfig);
       const db = getDatabase(app);
 
-      // スコアを保存する関数
-      window.saveScore = async function(name, score) {
-        try {
-          await push(ref(db, 'scores'), { name, score, timestamp: Date.now() });
-          return true;
-        } catch(e) {
-          console.error(e);
-          return false;
-        }
-      };
-
-      // ランキングを取得する関数
-      window.getTopScores = async function() {
+      // ランキングを表示
+      window.showRanking = async function() {
+        const modal = document.getElementById('ranking-modal');
+        const list = document.getElementById('ranking-list');
+        modal.classList.add('active');
+        list.innerHTML = '<p style="text-align:center;color:#aaa;">読み込み中...</p>';
+        
         try {
           const q = query(ref(db, 'scores'), orderByChild('score'), limitToLast(10));
           const snap = await get(q);
           const results = [];
-          snap.forEach(child => results.push(child.val()));
-          return results.sort((a, b) => b.score - a.score);
-        } catch(e) {
+          snap.forEach(child => {
+            results.push(child.val());
+          });
+          results.sort((a, b) => b.score - a.score);
+          
+          if (results.length === 0) {
+            list.innerHTML = '<p style="text-align:center;color:#aaa;">データがありません</p>';
+          } else {
+            list.innerHTML = results.map((r, i) => `
+              <div class="ranking-row">
+                <div class="rank">${i + 1}</div>
+                <div class="rname">${r.name || 'ななし'}</div>
+                <div class="rscore">${r.score}</div>
+              </div>
+            `).join('');
+          }
+        } catch (e) {
           console.error(e);
-          return [];
+          list.innerHTML = '<p style="text-align:center;color:#ff4a4a;">エラーが発生しました</p>';
+        }
+      };
+
+      // スコア登録
+      window.submitScore = async function(score) {
+        const name = document.getElementById('player-name-input').value.trim() || 'ななし';
+        const btn = document.getElementById('btn-submit-score');
+        btn.disabled = true;
+        btn.innerText = '送信中...';
+        
+        try {
+          await push(ref(db, 'scores'), {
+            name: name,
+            score: score,
+            timestamp: Date.now()
+          });
+          location.reload();
+        } catch (e) {
+          console.error(e);
+          alert("保存に失敗しました: " + e.message);
+          btn.disabled = false;
+          btn.innerText = '登録してリプレイ';
         }
       };
     </script>
@@ -500,6 +530,23 @@
         "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
       }
     }
+    </script>
+    <script>
+      // スコア登録画面を開く
+      window.openScoreRegistration = function() {
+        const overlay = document.getElementById('name-input-overlay');
+        const scoreDisplay = document.getElementById('final-score-display');
+        if (overlay && scoreDisplay) {
+          scoreDisplay.innerText = window.currentScore || 0;
+          overlay.classList.add('active');
+          
+          // 登録ボタンのクリックイベントを設定
+          const btn = document.getElementById('btn-submit-score');
+          if (btn) {
+            btn.onclick = () => window.submitScore(window.currentScore);
+          }
+        }
+      };
     </script>
     <script type="module" src="./main.js"></script>
 </body>
