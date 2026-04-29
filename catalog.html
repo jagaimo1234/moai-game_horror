@@ -90,7 +90,7 @@
       border: 1px solid rgba(255,255,255,0.08); border-radius: 24px;
       overflow: hidden; max-width: 500px; width: 100%; box-shadow: 0 20px 60px rgba(0,0,0,0.5);
     }
-    .product-card-large img { width: 100%; aspect-ratio: 1/1; object-fit: cover; display: block; }
+    .product-card-large > img { width: 100%; aspect-ratio: 1/1; object-fit: cover; display: block; }
     .product-info-large { padding: 20px 24px 28px; }
     .product-name-large { font-size: clamp(18px, 5vw, 24px); font-weight: 700; margin-bottom: 8px; line-height: 1.3; }
     .product-desc { font-size: 14px; color: rgba(255,255,255,0.55); line-height: 1.6; margin-bottom: 16px; }
@@ -103,9 +103,9 @@
     }
     .thumb-strip::-webkit-scrollbar { display: none; }
     .thumb-item {
-      min-width: 68px; height: 68px; border-radius: 10px;
+      width: 68px; min-width: 68px; height: 68px; border-radius: 10px;
       overflow: hidden; border: 2px solid transparent;
-      cursor: pointer; transition: border-color 0.2s; flex-shrink: 0;
+      cursor: grab; transition: border-color 0.2s; flex-shrink: 0;
     }
     .thumb-item.active { border-color: #00d2ff; box-shadow: 0 0 8px rgba(0,210,255,0.4); }
     .thumb-item img { width: 100%; height: 100%; object-fit: cover; display: block; }
@@ -454,6 +454,7 @@
       }
 
       updateCarousel();
+      enableDragScroll();
     }
 
     // ===== Open detail from tile =====
@@ -506,6 +507,37 @@
       const diff = touchStartX - e.changedTouches[0].clientX;
       if (Math.abs(diff) > 50) moveCarousel(diff > 0 ? 1 : -1);
     });
+
+    // ===== Thumb Strip Drag to Scroll (PC) =====
+    function enableDragScroll() {
+      document.querySelectorAll('.thumb-strip').forEach(strip => {
+        let isDown = false;
+        let startX;
+        let scrollLeft;
+        
+        strip.addEventListener('mousedown', (e) => {
+          isDown = true;
+          strip.style.cursor = 'grabbing';
+          startX = e.pageX - strip.offsetLeft;
+          scrollLeft = strip.scrollLeft;
+        });
+        strip.addEventListener('mouseleave', () => {
+          isDown = false;
+          strip.style.cursor = 'grab';
+        });
+        strip.addEventListener('mouseup', () => {
+          isDown = false;
+          strip.style.cursor = 'grab';
+        });
+        strip.addEventListener('mousemove', (e) => {
+          if (!isDown) return;
+          e.preventDefault();
+          const x = e.pageX - strip.offsetLeft;
+          const walk = (x - startX) * 2;
+          strip.scrollLeft = scrollLeft - walk;
+        });
+      });
+    }
 
     // ===== Init =====
     buildTabs();
