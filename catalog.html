@@ -164,13 +164,11 @@
           {
             image: 'images/kurima/keychain.jpg',
             name:  'モアイロボ ヨーグルトランEX\nカートリッジキーホルダー',
-            price: '要問合せ',
             desc:  'スマホをかざすと遊べる！AR対応ゲームカートリッジ型キーホルダー。'
           },
           {
             image: 'images/kurima/glasses_stand.jpg',
             name:  'まちょい モアイな\nメガネスタンド',
-            price: '要問合せ',
             desc:  '頭にはメガネクロス付き。マッチョなモアイがメガネをがっしりホールド。'
           },
           // ↓ クリマの作品をここに追加
@@ -244,7 +242,6 @@
               <img src="${p.image}" alt="${p.name.replace(/\n/g,' ')}">
               <div class="product-info-tile">
                 <div class="product-name-tile">${p.name.replace(/\n/g,'<br>')}</div>
-                <div class="product-price-tile">${p.price}</div>
               </div>
             </div>`;
         });
@@ -272,7 +269,6 @@
                 <div class="product-info-large">
                   <div class="product-name-large">${p.name.replace(/\n/g,'<br>')}</div>
                   <div class="product-desc">${p.desc || ''}</div>
-                  <div class="product-price-large">${p.price}</div>
                 </div>
               </div>
             </div>`;
