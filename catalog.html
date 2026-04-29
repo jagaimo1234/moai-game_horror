@@ -897,12 +897,13 @@
     // user.png を使用
     follower.src = 'user.png';
     follower.style.cssText = `
-      position: fixed; top: 0; left: 0; width: 50px; height: 50px;
+      position: fixed; top: 0; left: 0; width: 64px; height: 64px;
       border-radius: 50%; pointer-events: none; z-index: 10000;
       opacity: 0; transition: opacity 0.5s; object-fit: cover;
-      filter: grayscale(1) contrast(1.5) brightness(0.9);
-      box-shadow: 0 0 15px rgba(0,0,0,0.5);
+      filter: contrast(1.2) brightness(1.1);
+      box-shadow: 0 0 20px rgba(0,0,0,0.6);
       transform: translate(-100px, -100px);
+      border: 1px solid rgba(255,255,255,0.2);
     `;
     document.body.appendChild(follower);
 
@@ -915,7 +916,7 @@
       mouseX = x;
       mouseY = y;
       if (!isMoving) {
-        follower.style.opacity = '0.6';
+        follower.style.opacity = '0.85';
         isMoving = true;
       }
       clearTimeout(hideTimer);
