@@ -610,10 +610,14 @@
             </div>
 
             <div style="display:flex; gap:15px; align-items:center; margin-top:8px; padding-top:8px; border-top:1px solid var(--border);">
-              <label style="font-size:12px; display:flex; align-items:center; gap:5px; cursor:pointer;">
-                <input type="checkbox" ${isRecommend ? 'checked' : ''} onchange="updateRecommendStatus('${p.id}', this.checked)">
-                🌟 おすすめ
-              </label>
+              <div style="display:flex; align-items:center; gap:5px;">
+                <span style="font-size:12px; opacity:0.6;">ピックアップ:</span>
+                <select onchange="updateRecommendStatus('${p.id}', this.value)" style="font-size:11px; padding:2px; background:var(--bg); color:var(--text); border:1px solid var(--border); border-radius:4px;">
+                  <option value="none" ${badgesData[p.id] === 'none' || !badgesData[p.id] ? 'selected' : ''}>なし</option>
+                  <option value="recommend" ${badgesData[p.id] === 'recommend' ? 'selected' : ''}>👍 おすすめ</option>
+                  <option value="super" ${badgesData[p.id] === 'super' ? 'selected' : ''}>👑 超おすすめ</option>
+                </select>
+              </div>
               <div style="display:flex; align-items:center; gap:5px;">
                 <span style="font-size:12px; opacity:0.6;">手動在庫:</span>
                 <select onchange="updateManualStock('${p.id}', this.value)" style="font-size:11px; padding:2px; background:var(--bg); color:var(--text); border:1px solid var(--border); border-radius:4px;">
@@ -671,11 +675,10 @@
       } catch(e) { console.error(e); alert("保存に失敗しました。"); }
     };
 
-    window.updateRecommendStatus = async (pId, checked) => {
+    window.updateRecommendStatus = async (pId, value) => {
       if (!auth.currentUser) return;
-      const next = checked ? 'recommend' : 'none';
       try {
-        await setDoc(doc(db, "settings", "badges"), { [pId]: next }, { merge: true });
+        await setDoc(doc(db, "settings", "badges"), { [pId]: value }, { merge: true });
       } catch(e) { console.error(e); }
     };
 
