@@ -272,7 +272,10 @@
       <div class="scroll-container">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
           <h2>📦 在庫・価格設定 (<span id="settings-event-name"></span>)</h2>
-          <button class="btn btn-primary" onclick="saveSettings()">変更を保存</button>
+          <div style="display: flex; gap: 10px;">
+            <button class="btn" style="background:#444; color:white; font-size:12px;" onclick="copyInitialToCurrent()">搬入数を現在庫にセット</button>
+            <button class="btn btn-primary" onclick="saveSettings()">変更を保存</button>
+          </div>
         </div>
         <div id="settings-list"></div>
       </div>
@@ -485,13 +488,22 @@
             </div>
             <div class="settings-inputs">
               <div><span style="font-size:10px;display:block;">価格(¥)</span><input type="number" id="price-${p.id}" value="${inv.price}" style="width:65px;"></div>
-              <div><span style="font-size:10px;display:block;">搬入数</span><input type="number" id="initial-${p.id}" value="${inv.initial}" style="width:65px;" onchange="document.getElementById('current-${p.id}').value = this.value"></div>
+              <div><span style="font-size:10px;display:block;">搬入数</span><input type="number" id="initial-${p.id}" value="${inv.initial}" style="width:65px;"></div>
               <div><span style="font-size:10px;display:block;">現在庫</span><input type="number" id="current-${p.id}" value="${inv.current}" style="width:65px;"></div>
             </div>
           </div>
         `;
       });
     }
+
+    window.copyInitialToCurrent = () => {
+      const products = EVENTS[currentEventKey].products || [];
+      products.forEach(p => {
+        const initialVal = document.getElementById(`initial-${p.id}`).value;
+        document.getElementById(`current-${p.id}`).value = initialVal;
+      });
+      alert("搬入数を現在庫の入力欄にコピーしました。\n※この後「変更を保存」を押して確定してください。");
+    };
 
     window.saveSettings = async () => {
       if (!auth.currentUser) return;
