@@ -373,14 +373,10 @@
         products.forEach((p, i) => {
           const badgeHtml = `<div class="badge" id="badge-${p.id}" style="display:none;margin-right:4px;"></div>`;
           const stockHtml = `<div class="badge" id="stock-${p.id}" style="display:none;"></div>`;
-          const adminBtnHtml = `
-            <button class="admin-edit-btn" onclick="event.stopPropagation(); toggleBadge('${p.id}')">👍 おすすめ切替</button>
-            <button class="admin-edit-btn" style="top:52px;" onclick="event.stopPropagation(); toggleStock('${p.id}')">📦 在庫切替</button>
-          `;
+
           tileGrid.innerHTML += `
             <div class="product-card-tile" onclick="openDetail(${i})">
               <div style="position:relative;">
-                ${adminBtnHtml}
                 <img class="main-product-img" src="${p.image}" alt="${p.name.replace(/\n/g,' ')}">
               </div>
               <div class="product-info-tile">
