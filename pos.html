@@ -233,7 +233,10 @@
     <!-- Dashboard View -->
     <section id="dashboard-view" class="view-section">
       <div class="scroll-container">
-        <h2>📊 ダッシュボード (<span id="dash-event-name"></span>)</h2>
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <h2>📊 ダッシュボード (<span id="dash-event-name"></span>)</h2>
+          <button class="btn" style="background:var(--danger); color:white; font-size:12px; padding:6px 12px;" onclick="resetEventData()">テストデータをリセット</button>
+        </div>
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; margin-top: 20px;">
           <div style="background: var(--panel-bg); padding: 20px; border-radius: 12px;">
             <h3>イベント総売上</h3>
@@ -799,6 +802,40 @@
       } catch(e) {
         console.error(e);
         alert("エラーが発生しました。");
+      }
+    };
+
+    window.resetEventData = async () => {
+      if (!auth.currentUser) return;
+      if (!confirm(`本当に「${EVENTS[currentEventKey].label}」の売上記録と在庫変更履歴をすべてリセット（削除）しますか？\n※テスト入力の消去用です。`)) return;
+      if (!confirm("最終確認です。削除したデータは復元できません。\n※現在庫もすべてゼロにリセットされます（価格設定は残ります）。よろしいですか？")) return;
+
+      try {
+        // Clear sales
+        await setDoc(doc(db, "settings", "sales_" + currentEventKey), { records: [] });
+        
+        // Clear inventory logs
+        await setDoc(doc(db, "settings", "inventory_log_" + currentEventKey), { records: [] });
+        
+        // Clear inventory (reset current/initial to 0, keep price)
+        let newInv = {};
+        const products = EVENTS[currentEventKey].products || [];
+        products.forEach(p => {
+          newInv[p.id] = { price: (inventoryData[p.id]?.price || 0), initial: 0, current: 0 };
+        });
+        await setDoc(doc(db, "settings", "inventory_" + currentEventKey), newInv);
+        
+        // Clear global stock badges for this event
+        let newStockStatus = {};
+        products.forEach(p => {
+            newStockStatus[p.id] = 'none';
+        });
+        await setDoc(doc(db, "settings", "stock"), newStockStatus, { merge: true });
+
+        alert("データをリセットしました！");
+      } catch(e) {
+        alert("エラーが発生しました。");
+        console.error(e);
       }
     };
   </script>
