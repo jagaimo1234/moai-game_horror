@@ -90,6 +90,7 @@ const EVENTS = {
       {
         image: 'images/kurima/keychain.jpg',
         images: [
+          'images/kurima/keychain/movie.mp4',
           'images/kurima/keychain.jpg',
           'images/kurima/keychain/detail_01.jpg',
           'images/kurima/keychain/detail_02.jpg',
@@ -98,7 +99,6 @@ const EVENTS = {
           'images/kurima/keychain/detail_05.png',
           'images/kurima/keychain/detail_06.png',
           'images/kurima/keychain/detail_07.png',
-          'images/kurima/keychain/movie.mp4',
         ],
         name:  'モアイロボ ヨーグルトランEX\nカートリッジキーホルダー',
         desc:  'スマホをかざすと遊べる！AR対応ゲームカートリッジ型キーホルダー。'
@@ -106,8 +106,8 @@ const EVENTS = {
       {
         image: 'images/kurima/glasses_stand.jpg',
         images: [
-          'images/kurima/glasses_stand.jpg',
           'images/kurima/glasses_stand/movie.mp4',
+          'images/kurima/glasses_stand.jpg',
         ],
         name:  'まちょい モアイな\nメガネスタンド',
         desc:  '頭にはメガネクロス付き。マッチョなモアイがメガネをがっしりホールド。'
