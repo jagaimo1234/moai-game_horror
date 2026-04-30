@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Kanazawa Moataro POS System</title>
+  <style>
+    :root {
+      --bg: #0f0f13; --panel-bg: #1c1c24; --text: #fff;
+      --accent: #00d2ff; --accent-hover: #00b8e6;
+      --border: rgba(255, 255, 255, 0.1);
+      --success: #2ecc71; --warning: #f39c12; --danger: #e74c3c;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Helvetica Neue', Arial, sans-serif; }
+    body { background: var(--bg); color: var(--text); -webkit-font-smoothing: antialiased; }
+    
+    /* Login Screen */
+    #login-screen {
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      height: 100vh; gap: 20px; text-align: center;
+    }
+    .btn {
+      padding: 12px 24px; border-radius: 8px; border: none; font-size: 16px; font-weight: bold;
+      cursor: pointer; transition: all 0.2s;
+    }
+    .btn-primary { background: var(--accent); color: #000; }
+    .btn-primary:active { background: var(--accent-hover); transform: scale(0.98); }
+    
+    /* Main App */
+    #app-container { display: none; height: 100vh; display: flex; flex-direction: column; }
+    
+    /* Header & System Tabs */
+    header {
+      background: var(--panel-bg); padding: 12px 20px; display: flex; justify-content: space-between;
+      align-items: center; border-bottom: 1px solid var(--border);
+    }
+    .sys-tab-container { display: flex; gap: 10px; }
+    .sys-tab-btn {
+      background: transparent; border: 1px solid var(--border); color: var(--text);
+      padding: 8px 16px; border-radius: 20px; cursor: pointer; transition: 0.2s;
+    }
+    .sys-tab-btn.active { background: var(--text); color: var(--bg); }
+    
+    /* Event Tabs */
+    .event-tabs {
+      display: flex; gap: 12px; padding: 12px 20px; background: #15151a;
+      overflow-x: auto; white-space: nowrap; border-bottom: 1px solid var(--border);
+    }
+    .event-tab {
+      padding: 6px 16px; border-radius: 20px; font-size: 14px; font-weight: bold;
+      cursor: pointer; background: rgba(255,255,255,0.1); transition: 0.2s;
+    }
+    .event-tab.active { background: var(--accent); color: #000; }
+
+    /* Views */
+    .view-section { display: none; flex: 1; overflow: hidden; }
+    .view-section.active { display: flex; }
+    
+    /* POS View */
+    #pos-view { flex-direction: row; }
+    .product-grid {
+      flex: 2; padding: 16px; overflow-y: auto;
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; align-content: start;
+    }
+    .pos-item {
+      background: var(--panel-bg); border: 1px solid var(--border); border-radius: 12px;
+      padding: 10px; cursor: pointer; text-align: center; transition: 0.1s;
+    }
+    .pos-item:active { transform: scale(0.95); border-color: var(--accent); }
+    .pos-item img { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 8px; margin-bottom: 8px; }
+    .pos-item-name { font-size: 12px; line-height: 1.3; height: 32px; overflow: hidden; margin-bottom: 4px; }
+    .pos-item-price { font-weight: bold; color: var(--accent); }
+    .pos-item-stock { font-size: 11px; color: rgba(255,255,255,0.5); }
+    
+    .cart-sidebar {
+      flex: 1; min-width: 300px; max-width: 400px; background: var(--panel-bg); border-left: 1px solid var(--border);
+      display: flex; flex-direction: column;
+    }
+    .cart-header { padding: 16px; font-weight: bold; border-bottom: 1px solid var(--border); }
+    .cart-items { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+    .cart-item { display: flex; justify-content: space-between; align-items: center; }
+    .cart-item-info { flex: 1; }
+    .cart-item-name { font-size: 14px; margin-bottom: 4px; }
+    .cart-item-controls { display: flex; gap: 10px; align-items: center; }
+    .qty-btn { background: rgba(255,255,255,0.1); border: none; color: white; width: 28px; height: 28px; border-radius: 4px; }
+    .cart-footer { padding: 20px; border-top: 1px solid var(--border); }
+    .cart-total { display: flex; justify-content: space-between; font-size: 24px; font-weight: bold; margin-bottom: 20px; }
+    .checkout-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .checkout-btns button { padding: 14px; font-size: 16px; font-weight: bold; border-radius: 8px; border: none; cursor: pointer; color: white; }
+    .btn-cash { background: var(--success); }
+    .btn-paypay { background: #E60012; }
+    .btn-credit { background: var(--accent); color: black !important; grid-column: span 2; }
+    
+    /* Common container for Settings & Dashboard */
+    .scroll-container { flex: 1; overflow-y: auto; padding: 20px; max-width: 800px; margin: 0 auto; width: 100%; }
+    
+    /* Settings View */
+    .settings-row {
+      display: flex; align-items: center; gap: 12px; background: var(--panel-bg); padding: 12px;
+      border-radius: 12px; margin-bottom: 10px;
+    }
+    .settings-row img { width: 50px; height: 50px; border-radius: 6px; object-fit: cover; }
+    .settings-info { flex: 1; }
+    .settings-name { font-size: 14px; }
+    .settings-inputs { display: flex; gap: 10px; }
+    .settings-inputs input {
+      width: 80px; padding: 8px; border-radius: 6px; border: 1px solid var(--border);
+      background: var(--bg); color: var(--text); text-align: right;
+    }
+    
+    /* Mobile adjustments */
+    @media (max-width: 768px) {
+      #pos-view { flex-direction: column; }
+      .product-grid { flex: 1; }
+      .cart-sidebar { flex: none; height: 45vh; max-width: 100%; border-left: none; border-top: 1px solid var(--border); }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Login Screen -->
+  <div id="login-screen">
+    <h2>🔒 管理者ログイン</h2>
+    <p style="color: rgba(255,255,255,0.6); font-size: 14px;">POSシステムを利用するにはログインしてください</p>
+    <button class="btn btn-primary" id="login-btn">Googleでログイン</button>
+  </div>
+
+  <!-- Main App -->
+  <div id="app-container">
+    <header>
+      <div class="sys-tab-container">
+        <button class="sys-tab-btn active" onclick="switchSysTab('pos')">レジ (POS)</button>
+        <button class="sys-tab-btn" onclick="switchSysTab('dashboard')">ダッシュボード</button>
+        <button class="sys-tab-btn" onclick="switchSysTab('settings')">在庫設定</button>
+      </div>
+      <div>
+        <span id="user-email" style="font-size: 12px; opacity: 0.6; margin-right: 12px;"></span>
+        <button onclick="logout()" style="background:none; border:none; color:#e74c3c; cursor:pointer;">ログアウト</button>
+      </div>
+    </header>
+
+    <!-- Event Tabs -->
+    <div class="event-tabs" id="event-tabs">
+      <!-- Injected via JS -->
+    </div>
+
+    <!-- POS View -->
+    <section id="pos-view" class="view-section active">
+      <div class="product-grid" id="pos-grid"></div>
+      <div class="cart-sidebar">
+        <div class="cart-header">🛒 カート</div>
+        <div class="cart-items" id="cart-items"></div>
+        <div class="cart-footer">
+          <div class="cart-total">
+            <span>合計</span>
+            <span id="cart-total-price">¥0</span>
+          </div>
+          <div class="checkout-btns">
+            <button class="btn-cash" onclick="checkout('cash')">現金</button>
+            <button class="btn-paypay" onclick="checkout('paypay')">PayPay</button>
+            <button class="btn-credit" onclick="checkout('credit')">クレジット</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Dashboard View -->
+    <section id="dashboard-view" class="view-section">
+      <div class="scroll-container">
+        <h2>📊 ダッシュボード (<span id="dash-event-name"></span>)</h2>
+        <div style="margin-top: 20px; background: var(--panel-bg); padding: 20px; border-radius: 12px;">
+          <h3>イベント総売上</h3>
+          <div id="dash-total" style="font-size: 36px; font-weight: bold; color: var(--accent); margin: 10px 0;">¥0</div>
+          <div style="display: flex; gap: 20px; color: rgba(255,255,255,0.7);">
+            <div>現金: <span id="dash-cash">¥0</span></div>
+            <div>PayPay: <span id="dash-paypay">¥0</span></div>
+            <div>クレジット: <span id="dash-credit">¥0</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Settings View -->
+    <section id="settings-view" class="view-section">
+      <div class="scroll-container">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+          <h2>📦 在庫・価格設定 (<span id="settings-event-name"></span>)</h2>
+          <button class="btn btn-primary" onclick="saveSettings()">変更を保存</button>
+        </div>
+        <div id="settings-list"></div>
+      </div>
+    </section>
+  </div>
+
+  <script src="data.js"></script>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+    import { getFirestore, doc, onSnapshot, setDoc, updateDoc, arrayUnion } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+    import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyCkDJBvJPxipgkXXXilGlJuEP7_cSv9FEY",
+      authDomain: "moai-catalog.firebaseapp.com",
+      projectId: "moai-catalog",
+      storageBucket: "moai-catalog.firebasestorage.app",
+      messagingSenderId: "421468245254",
+      appId: "1:421468245254:web:c49e0846d2015820d8a287"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const auth = getAuth(app);
+    const provider = new GoogleAuthProvider();
+
+    // App State
+    let currentEventKey = DEFAULT_EVENT;
+    let inventoryData = {};
+    let cart = {}; // { productId: qty }
+    let unsubInventory = null;
+    let unsubSales = null;
+
+    // Build Event Tabs
+    const tabsContainer = document.getElementById('event-tabs');
+    Object.keys(EVENTS).forEach(key => {
+      const btn = document.createElement('div');
+      btn.className = `event-tab ${key === currentEventKey ? 'active' : ''}`;
+      btn.textContent = EVENTS[key].label;
+      btn.onclick = () => {
+        document.querySelectorAll('.event-tab').forEach(el => el.classList.remove('active'));
+        btn.classList.add('active');
+        currentEventKey = key;
+        cart = {}; // Clear cart when switching events
+        updateCartUI();
+        listenToEventData();
+      };
+      tabsContainer.appendChild(btn);
+    });
+
+    // Navigation
+    window.switchSysTab = (tabId) => {
+      document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.sys-tab-btn').forEach(el => el.classList.remove('active'));
+      document.getElementById(`${tabId}-view`).classList.add('active');
+      document.querySelector(`.sys-tab-btn[onclick="switchSysTab('${tabId}')"]`).classList.add('active');
+    };
+
+    // Auth
+    document.getElementById('login-btn').addEventListener('click', () => signInWithPopup(auth, provider));
+    window.logout = () => signOut(auth);
+
+    onAuthStateChanged(auth, user => {
+      if (user) {
+        document.getElementById('login-screen').style.display = 'none';
+        document.getElementById('app-container').style.display = 'flex';
+        document.getElementById('user-email').textContent = user.email;
+        listenToEventData();
+      } else {
+        document.getElementById('login-screen').style.display = 'flex';
+        document.getElementById('app-container').style.display = 'none';
+      }
+    });
+
+    function listenToEventData() {
+      const evLabel = EVENTS[currentEventKey].label;
+      document.getElementById('dash-event-name').textContent = evLabel;
+      document.getElementById('settings-event-name').textContent = evLabel;
+
+      if (unsubInventory) unsubInventory();
+      if (unsubSales) unsubSales();
+
+      // Listen to specific event's inventory (settings/inventory_kurima)
+      unsubInventory = onSnapshot(doc(db, "settings", "inventory_" + currentEventKey), (docSnap) => {
+        if (docSnap.exists()) {
+          inventoryData = docSnap.data();
+        } else {
+          inventoryData = {};
+        }
+        renderPOS();
+        renderSettings();
+      });
+
+      // Listen to specific event's sales (settings/sales_kurima)
+      unsubSales = onSnapshot(doc(db, "settings", "sales_" + currentEventKey), (docSnap) => {
+        let total = 0, cash = 0, paypay = 0, credit = 0;
+        if (docSnap.exists()) {
+          const records = docSnap.data().records || [];
+          records.forEach(r => {
+            total += r.totalAmount;
+            if (r.paymentMethod === 'cash') cash += r.totalAmount;
+            if (r.paymentMethod === 'paypay') paypay += r.totalAmount;
+            if (r.paymentMethod === 'credit') credit += r.totalAmount;
+          });
+        }
+        document.getElementById('dash-total').textContent = `¥${total.toLocaleString()}`;
+        document.getElementById('dash-cash').textContent = `¥${cash.toLocaleString()}`;
+        document.getElementById('dash-paypay').textContent = `¥${paypay.toLocaleString()}`;
+        document.getElementById('dash-credit').textContent = `¥${credit.toLocaleString()}`;
+      });
+    }
+
+    function renderSettings() {
+      const list = document.getElementById('settings-list');
+      list.innerHTML = '';
+      const products = EVENTS[currentEventKey].products || [];
+      
+      products.forEach(p => {
+        const inv = inventoryData[p.id] || { price: 0, initial: 0, current: 0 };
+        list.innerHTML += `
+          <div class="settings-row">
+            <img src="${p.image}" alt="">
+            <div class="settings-info">
+              <div class="settings-name">${p.name.replace(/\n/g, ' ')}</div>
+              <div style="font-size:12px; color:rgba(255,255,255,0.5);">現在庫: ${inv.current}</div>
+            </div>
+            <div class="settings-inputs">
+              <div><span style="font-size:10px;display:block;">価格(¥)</span><input type="number" id="price-${p.id}" value="${inv.price}"></div>
+              <div><span style="font-size:10px;display:block;">初期在庫(個)</span><input type="number" id="initial-${p.id}" value="${inv.initial}"></div>
+            </div>
+          </div>
+        `;
+      });
+    }
+
+    window.saveSettings = async () => {
+      if (!auth.currentUser) return;
+      const products = EVENTS[currentEventKey].products || [];
+      let newInventory = { ...inventoryData };
+      
+      products.forEach(p => {
+        const price = parseInt(document.getElementById(`price-${p.id}`).value) || 0;
+        const initial = parseInt(document.getElementById(`initial-${p.id}`).value) || 0;
+        const oldInv = newInventory[p.id] || {};
+        
+        let current = oldInv.current !== undefined ? oldInv.current : initial;
+        newInventory[p.id] = { price, initial, current };
+      });
+
+      try {
+        await setDoc(doc(db, "settings", "inventory_" + currentEventKey), newInventory);
+        
+        // Also update stock badges to initial state if it's new setup
+        let newStockStatus = {};
+        products.forEach(p => {
+            const inv = newInventory[p.id];
+            const ratio = inv.current / (inv.initial || 1);
+            if (inv.current <= 0) newStockStatus[p.id] = 'soldout';
+            else if (ratio <= 0.3) newStockStatus[p.id] = 'few';
+            else newStockStatus[p.id] = 'onsale';
+        });
+        await setDoc(doc(db, "settings", "stock"), newStockStatus, { merge: true });
+
+        alert("保存しました！");
+      } catch (e) {
+        console.error(e);
+        alert("保存に失敗しました。");
+      }
+    };
+
+    function renderPOS() {
+      const grid = document.getElementById('pos-grid');
+      grid.innerHTML = '';
+      const products = EVENTS[currentEventKey].products || [];
+      
+      products.forEach(p => {
+        const inv = inventoryData[p.id] || { price: 0, current: 0 };
+        const price = inv.price;
+        const stock = inv.current;
+        
+        grid.innerHTML += `
+          <div class="pos-item" onclick="addToCart('${p.id}')">
+            <img src="${p.image}" alt="">
+            <div class="pos-item-name">${p.name.replace(/\n/g, '<br>')}</div>
+            <div class="pos-item-price">¥${price}</div>
+            <div class="pos-item-stock">残: ${stock}</div>
+          </div>
+        `;
+      });
+      updateCartUI();
+    }
+
+    window.addToCart = (id) => {
+      if (!cart[id]) cart[id] = 0;
+      const stock = (inventoryData[id] && inventoryData[id].current) || 0;
+      if (cart[id] < stock) {
+        cart[id]++;
+        updateCartUI();
+      } else {
+        alert("在庫が足りません！");
+      }
+    };
+
+    window.updateCartQty = (id, delta) => {
+      cart[id] += delta;
+      if (cart[id] <= 0) delete cart[id];
+      updateCartUI();
+    };
+
+    function updateCartUI() {
+      const container = document.getElementById('cart-items');
+      container.innerHTML = '';
+      let total = 0;
+      const products = EVENTS[currentEventKey].products || [];
+      
+      Object.keys(cart).forEach(id => {
+        const qty = cart[id];
+        const p = products.find(x => x.id === id);
+        const inv = inventoryData[id] || { price: 0 };
+        const price = inv.price * qty;
+        total += price;
+        
+        container.innerHTML += `
+          <div class="cart-item">
+            <div class="cart-item-info">
+              <div class="cart-item-name">${p.name.replace(/\n/g, ' ')}</div>
+              <div style="color:var(--accent);">¥${inv.price}</div>
+            </div>
+            <div class="cart-item-controls">
+              <button class="qty-btn" onclick="updateCartQty('${id}', -1)">-</button>
+              <span>${qty}</span>
+              <button class="qty-btn" onclick="updateCartQty('${id}', 1)">+</button>
+            </div>
+          </div>
+        `;
+      });
+      
+      document.getElementById('cart-total-price').textContent = `¥${total}`;
+    }
+
+    window.checkout = async (method) => {
+      if (!auth.currentUser) return;
+      if (Object.keys(cart).length === 0) return alert("カートが空です");
+
+      const products = EVENTS[currentEventKey].products || [];
+      let totalAmount = 0;
+      const items = [];
+      let newInventory = { ...inventoryData };
+      let newStockStatus = {}; // Update settings/stock for catalog.html badges
+
+      for (const id of Object.keys(cart)) {
+        const qty = cart[id];
+        const inv = newInventory[id];
+        if (!inv || inv.current < qty) {
+          return alert("在庫エラーが発生しました。リロードしてください。");
+        }
+        const p = products.find(x => x.id === id);
+        items.push({ id, name: p.name.replace(/\n/g, ' '), qty, price: inv.price });
+        totalAmount += inv.price * qty;
+        
+        inv.current -= qty;
+
+        const ratio = inv.current / (inv.initial || 1);
+        if (inv.current <= 0) {
+          newStockStatus[id] = 'soldout';
+        } else if (ratio <= 0.3) {
+          newStockStatus[id] = 'few';
+        } else {
+          newStockStatus[id] = 'onsale';
+        }
+      }
+
+      const saleRecord = {
+        timestamp: new Date().toISOString(), // Use ISO string since ServerTimestamp inside arrays is not supported in Firebase directly
+        items,
+        totalAmount,
+        paymentMethod: method
+      };
+
+      try {
+        // 1. Add to sales (safe path settings/sales_eventId)
+        const salesDocRef = doc(db, "settings", "sales_" + currentEventKey);
+        try {
+          await updateDoc(salesDocRef, { records: arrayUnion(saleRecord) });
+        } catch(e) {
+          await setDoc(salesDocRef, { records: [saleRecord] });
+        }
+        
+        // 2. Update inventory (safe path settings/inventory_eventId)
+        await setDoc(doc(db, "settings", "inventory_" + currentEventKey), newInventory);
+        
+        // 3. Update stock badges (safe path settings/stock)
+        await setDoc(doc(db, "settings", "stock"), newStockStatus, { merge: true });
+
+        alert("決済完了しました！");
+        cart = {};
+        updateCartUI();
+      } catch(e) {
+        console.error(e);
+        alert("エラーが発生しました。");
+      }
+    };
+  </script>
+</body>
+</html>
