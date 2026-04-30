@@ -581,8 +581,33 @@
       
       products.forEach(p => {
         const inv = inventoryData[p.id] || { price: 0, initial: 0, current: 0 };
-        const isRecommend = badgesData[p.id] === 'recommend' || badgesData[p.id] === 'super';
+        
+        // Badge cycling styles
+        const badgeValue = badgesData[p.id] || 'none';
+        let badgeLabel = 'なし';
+        let badgeStyle = 'background:rgba(255,255,255,0.05); color:rgba(255,255,255,0.3); border-color:transparent;';
+        if (badgeValue === 'recommend') {
+            badgeLabel = '👍 おすすめ';
+            badgeStyle = 'background:rgba(52,152,219,0.15); color:#3498db; border-color:#3498db;';
+        } else if (badgeValue === 'super') {
+            badgeLabel = '👑 超おすすめ';
+            badgeStyle = 'background:rgba(241,196,15,0.15); color:#f1c40f; border-color:#f1c40f;';
+        }
+
+        // Stock cycling styles
         const manualStatus = stockData[p.id] || 'none';
+        let stockLabel = 'なし';
+        let stockStyle = 'background:rgba(255,255,255,0.05); color:rgba(255,255,255,0.3); border-color:transparent;';
+        if (manualStatus === 'onsale') {
+            stockLabel = '販売中';
+            stockStyle = 'background:rgba(46,204,113,0.15); color:#2ecc71; border-color:#2ecc71;';
+        } else if (manualStatus === 'few') {
+            stockLabel = '残りわずか';
+            stockStyle = 'background:rgba(230,126,34,0.15); color:#e67e22; border-color:#e67e22;';
+        } else if (manualStatus === 'soldout') {
+            stockLabel = '売り切れ';
+            stockStyle = 'background:rgba(231,76,60,0.15); color:#e74c3c; border-color:#e74c3c;';
+        }
 
         list.innerHTML += `
           <div class="settings-row" style="flex-direction:column; align-items:stretch;">
@@ -609,26 +634,22 @@
               <button onclick="resetProductInventory('${p.id}')" style="padding:6px 12px; border:1px solid var(--danger); border-radius:4px; background:none; color:var(--danger); font-size:11px; cursor:pointer;">リセット</button>
             </div>
 
-            <div style="display:flex; gap:15px; align-items:center; margin-top:8px; padding-top:8px; border-top:1px solid var(--border);">
-              <div style="display:flex; align-items:center; gap:5px;">
-                <span style="font-size:12px; opacity:0.6;">ピックアップ:</span>
-                <select onchange="updateRecommendStatus('${p.id}', this.value)" style="font-size:11px; padding:2px; background:var(--bg); color:var(--text); border:1px solid var(--border); border-radius:4px;">
-                  <option value="none" ${badgesData[p.id] === 'none' || !badgesData[p.id] ? 'selected' : ''}>なし</option>
-                  <option value="recommend" ${badgesData[p.id] === 'recommend' ? 'selected' : ''}>👍 おすすめ</option>
-                  <option value="super" ${badgesData[p.id] === 'super' ? 'selected' : ''}>👑 超おすすめ</option>
-                </select>
+            <div style="display:flex; gap:10px; align-items:center; margin-top:8px; padding-top:8px; border-top:1px solid var(--border);">
+              <div style="display:flex; flex-direction:column; gap:2px;">
+                <span style="font-size:10px; opacity:0.5;">ピックアップ:</span>
+                <button onclick="cycleRecommendStatus('${p.id}')" style="font-size:11px; padding:4px 8px; border-radius:4px; border:1px solid var(--border); cursor:pointer; min-width:80px; ${badgeStyle}">
+                  ${badgeLabel}
+                </button>
               </div>
-              <div style="display:flex; align-items:center; gap:5px;">
-                <span style="font-size:12px; opacity:0.6;">手動在庫:</span>
-                <select onchange="updateManualStock('${p.id}', this.value)" style="font-size:11px; padding:2px; background:var(--bg); color:var(--text); border:1px solid var(--border); border-radius:4px;">
-                  <option value="none" ${manualStatus === 'none' ? 'selected' : ''}>なし</option>
-                  <option value="onsale" ${manualStatus === 'onsale' ? 'selected' : ''}>販売中</option>
-                  <option value="few" ${manualStatus === 'few' ? 'selected' : ''}>残りわずか</option>
-                  <option value="soldout" ${manualStatus === 'soldout' ? 'selected' : ''}>売り切れ</option>
-                </select>
+              <div style="display:flex; flex-direction:column; gap:2px;">
+                <span style="font-size:10px; opacity:0.5;">手動在庫:</span>
+                <button onclick="cycleManualStock('${p.id}')" style="font-size:11px; padding:4px 8px; border-radius:4px; border:1px solid var(--border); cursor:pointer; min-width:80px; ${stockStyle}">
+                  ${stockLabel}
+                </button>
               </div>
-              <button onclick="openEditModal('${p.id}', 'desc')" style="font-size:11px; padding:4px 8px; background:#34495e; color:white; border:none; border-radius:4px; cursor:pointer;">✏️ 説明文</button>
-              <button onclick="openEditModal('${p.id}', 'announce')" style="font-size:11px; padding:4px 8px; background:#2980b9; color:white; border:none; border-radius:4px; cursor:pointer;">📢 お知らせ</button>
+              <div style="flex:1;"></div>
+              <button onclick="openEditModal('${p.id}', 'desc')" style="font-size:11px; padding:6px 10px; background:#34495e; color:white; border:none; border-radius:4px; cursor:pointer;">✏️ 説明</button>
+              <button onclick="openEditModal('${p.id}', 'announce')" style="font-size:11px; padding:6px 10px; background:#2980b9; color:white; border:none; border-radius:4px; cursor:pointer;">📢 告知</button>
             </div>
           </div>
         `;
@@ -675,17 +696,28 @@
       } catch(e) { console.error(e); alert("保存に失敗しました。"); }
     };
 
-    window.updateRecommendStatus = async (pId, value) => {
+    window.cycleRecommendStatus = async (pId) => {
       if (!auth.currentUser) return;
+      const current = badgesData[pId] || 'none';
+      let next = 'none';
+      if (current === 'none') next = 'recommend';
+      else if (current === 'recommend') next = 'super';
+      else next = 'none';
       try {
-        await setDoc(doc(db, "settings", "badges"), { [pId]: value }, { merge: true });
+        await setDoc(doc(db, "settings", "badges"), { [pId]: next }, { merge: true });
       } catch(e) { console.error(e); }
     };
 
-    window.updateManualStock = async (pId, status) => {
+    window.cycleManualStock = async (pId) => {
       if (!auth.currentUser) return;
+      const current = stockData[pId] || 'none';
+      let next = 'none';
+      if (current === 'none') next = 'onsale';
+      else if (current === 'onsale') next = 'few';
+      else if (current === 'few') next = 'soldout';
+      else next = 'none';
       try {
-        await setDoc(doc(db, "settings", "stock"), { [pId]: status }, { merge: true });
+        await setDoc(doc(db, "settings", "stock"), { [pId]: next }, { merge: true });
       } catch(e) { console.error(e); }
     };
 
