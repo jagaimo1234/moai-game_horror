@@ -659,6 +659,8 @@
     });
 
     function updateAllStock() {
+      const displayStock = stockData._displayStock !== false; // true by default
+
       Object.keys(EVENTS).forEach(ev => {
         EVENTS[ev].products.forEach(p => {
           const id = p.id;
@@ -667,6 +669,12 @@
           const els = [document.getElementById(`stock-${id}`), document.getElementById(`stock-large-${id}`)];
           els.forEach(el => {
             if (!el) return;
+            
+            if (!displayStock) {
+              el.style.display = 'none';
+              return;
+            }
+
             if (status === 'onsale') {
               el.className = 'badge badge-onsale';
               el.textContent = '✅ 販売中';

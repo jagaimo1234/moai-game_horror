@@ -264,6 +264,11 @@
         <div id="dash-history" style="display: flex; flex-direction: column; gap: 10px;">
           <!-- History items injected via JS -->
         </div>
+
+        <h3 style="margin-top: 30px; margin-bottom: 12px;">📦 在庫変更履歴</h3>
+        <div id="dash-inventory-log" style="display: flex; flex-direction: column; gap: 10px;">
+          <!-- Inventory log items injected via JS -->
+        </div>
       </div>
     </section>
 
@@ -272,9 +277,12 @@
       <div class="scroll-container">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
           <h2>📦 在庫・価格設定 (<span id="settings-event-name"></span>)</h2>
-          <div style="display: flex; gap: 10px;">
-            <button class="btn" style="background:#444; color:white; font-size:12px;" onclick="copyInitialToCurrent()">搬入数を現在庫にセット</button>
-            <button class="btn btn-primary" onclick="saveSettings()">変更を保存</button>
+          <div style="display: flex; gap: 15px; align-items: center;">
+            <label style="font-size:12px; display:flex; align-items:center; gap:6px; background:rgba(255,255,255,0.1); padding:8px 12px; border-radius:8px; cursor:pointer;">
+              <input type="checkbox" id="global-stock-toggle" onchange="toggleGlobalStockDisplay(this.checked)">
+              お品書きへの在庫表示
+            </label>
+            <button class="btn btn-primary" onclick="savePrices()">価格を保存</button>
           </div>
         </div>
         <div id="settings-list"></div>
@@ -357,6 +365,49 @@
 
       if (unsubInventory) unsubInventory();
       if (unsubSales) unsubSales();
+
+      // Listen to stock for global toggle
+      onSnapshot(doc(db, "settings", "stock"), (docSnap) => {
+        if (docSnap.exists()) {
+          const sd = docSnap.data();
+          const toggleEl = document.getElementById('global-stock-toggle');
+          if (toggleEl) toggleEl.checked = sd._displayStock !== false;
+        }
+      });
+
+      // Listen to specific event's inventory logs (settings/inventory_log_kurima)
+      onSnapshot(doc(db, "settings", "inventory_log_" + currentEventKey), (docSnap) => {
+        const logContainer = document.getElementById('dash-inventory-log');
+        logContainer.innerHTML = '';
+        if (docSnap.exists()) {
+          const records = docSnap.data().records || [];
+          const sortedRecords = [...records].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+          
+          sortedRecords.forEach(r => {
+            const timeStr = new Date(r.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+            const qtyStr = r.qty > 0 ? `+${r.qty}` : `${r.qty}`;
+            const color = r.qty > 0 ? 'var(--success)' : 'var(--danger)';
+            
+            logContainer.innerHTML += `
+              <div class="history-card">
+                <div class="history-main">
+                  <div class="history-time">${timeStr}</div>
+                  <div class="history-items">${r.productName}</div>
+                  <div class="history-tags">
+                    <span class="history-tag" style="background:rgba(255,255,255,0.2);">${r.reason}</span>
+                  </div>
+                </div>
+                <div>
+                  <div class="history-amount" style="color:${color}; font-size:20px;">${qtyStr}個</div>
+                </div>
+              </div>
+            `;
+          });
+          if (sortedRecords.length === 0) logContainer.innerHTML = '<div style="color:rgba(255,255,255,0.5);">履歴がありません</div>';
+        } else {
+          logContainer.innerHTML = '<div style="color:rgba(255,255,255,0.5);">履歴がありません</div>';
+        }
+      });
 
       // Listen to specific event's inventory (settings/inventory_kurima)
       unsubInventory = onSnapshot(doc(db, "settings", "inventory_" + currentEventKey), (docSnap) => {
@@ -481,58 +532,112 @@
       products.forEach(p => {
         const inv = inventoryData[p.id] || { price: 0, initial: 0, current: 0 };
         list.innerHTML += `
-          <div class="settings-row">
-            <img src="${p.image}" alt="">
-            <div class="settings-info">
-              <div class="settings-name">${p.name.replace(/\n/g, ' ')}</div>
+          <div class="settings-row" style="flex-direction:column; align-items:stretch;">
+            <div style="display:flex; gap:12px; align-items:center;">
+              <img src="${p.image}" alt="">
+              <div class="settings-info">
+                <div class="settings-name">${p.name.replace(/\n/g, ' ')}</div>
+                <div style="font-size:14px; font-weight:bold; margin-top:4px; color:var(--accent);">搬入総数: ${inv.initial} / 現在庫: ${inv.current}</div>
+              </div>
+              <div><span style="font-size:10px;display:block;">価格(¥)</span><input type="number" id="price-${p.id}" value="${inv.price}" style="width:70px;"></div>
             </div>
-            <div class="settings-inputs">
-              <div><span style="font-size:10px;display:block;">価格(¥)</span><input type="number" id="price-${p.id}" value="${inv.price}" style="width:65px;"></div>
-              <div><span style="font-size:10px;display:block;">搬入数</span><input type="number" id="initial-${p.id}" value="${inv.initial}" style="width:65px;"></div>
-              <div><span style="font-size:10px;display:block;">現在庫</span><input type="number" id="current-${p.id}" value="${inv.current}" style="width:65px;"></div>
+            
+            <div style="display:flex; gap:6px; align-items:center; background:rgba(0,0,0,0.3); padding:8px; border-radius:6px; margin-top:10px;">
+              <span style="font-size:12px; color:rgba(255,255,255,0.7);">在庫調整:</span>
+              <input type="number" id="adj-qty-${p.id}" placeholder="+ / -" style="width:70px; padding:6px; border-radius:4px; border:1px solid var(--border); background:var(--bg); color:var(--text);">
+              <select id="adj-reason-${p.id}" style="padding:6px; border-radius:4px; border:1px solid var(--border); background:var(--bg); color:var(--text); flex:1;">
+                <option value="初期搬入">初期搬入</option>
+                <option value="追加制作">追加制作</option>
+                <option value="在庫発見">在庫発見</option>
+                <option value="不良品破棄">不良品破棄(-)</option>
+                <option value="その他">その他</option>
+              </select>
+              <button onclick="applyStockAdjustment('${p.id}')" style="padding:6px 12px; border:none; border-radius:4px; background:var(--success); color:white; font-weight:bold; cursor:pointer;">適用</button>
             </div>
           </div>
         `;
       });
     }
 
-    window.copyInitialToCurrent = () => {
-      const products = EVENTS[currentEventKey].products || [];
-      products.forEach(p => {
-        const initialVal = document.getElementById(`initial-${p.id}`).value;
-        document.getElementById(`current-${p.id}`).value = initialVal;
-      });
-      alert("搬入数を現在庫の入力欄にコピーしました。\n※この後「変更を保存」を押して確定してください。");
+    window.toggleGlobalStockDisplay = async (checked) => {
+      if (!auth.currentUser) return;
+      try {
+        await setDoc(doc(db, "settings", "stock"), { _displayStock: checked }, { merge: true });
+      } catch(e) {
+        console.error(e);
+      }
     };
 
-    window.saveSettings = async () => {
+    window.applyStockAdjustment = async (pId) => {
+      if (!auth.currentUser) return;
+      const qty = parseInt(document.getElementById(`adj-qty-${pId}`).value);
+      if (!qty || qty === 0) return alert("増減数を入力してください");
+      
+      const reason = document.getElementById(`adj-reason-${pId}`).value;
+      const oldInv = inventoryData[pId] || { price: 0, initial: 0, current: 0 };
+      
+      const newInitial = (oldInv.initial || 0) + qty;
+      const newCurrent = (oldInv.current || 0) + qty;
+      const newInventory = { ...inventoryData };
+      
+      newInventory[pId] = { price: oldInv.price, initial: newInitial, current: newCurrent };
+      
+      // Stock log entry
+      const products = EVENTS[currentEventKey].products || [];
+      const pName = products.find(x => x.id === pId)?.name || pId;
+      const logRecord = {
+        timestamp: new Date().toISOString(),
+        type: 'adjust',
+        productId: pId,
+        productName: pName.replace(/\n/g, ' '),
+        qty: qty,
+        reason: reason
+      };
+
+      try {
+        // 1. Update inventory
+        await setDoc(doc(db, "settings", "inventory_" + currentEventKey), newInventory);
+        
+        // 2. Append to log array
+        const logDocRef = doc(db, "settings", "inventory_log_" + currentEventKey);
+        try {
+          await updateDoc(logDocRef, { records: arrayUnion(logRecord) });
+        } catch(e) {
+          await setDoc(logDocRef, { records: [logRecord] });
+        }
+        
+        // 3. Update global stock badge
+        let newStockStatus = {};
+        const ratio = newCurrent / (newInitial || 1);
+        if (newCurrent <= 0) newStockStatus[pId] = 'soldout';
+        else if (ratio <= 0.3) newStockStatus[pId] = 'few';
+        else newStockStatus[pId] = 'onsale';
+        await setDoc(doc(db, "settings", "stock"), newStockStatus, { merge: true });
+
+        alert(`在庫を調整しました（${qty > 0 ? '+'+qty : qty}個）`);
+        
+        // Clear input
+        document.getElementById(`adj-qty-${pId}`).value = '';
+      } catch(e) {
+        console.error(e);
+        alert("エラーが発生しました。");
+      }
+    };
+
+    window.savePrices = async () => {
       if (!auth.currentUser) return;
       const products = EVENTS[currentEventKey].products || [];
       let newInventory = { ...inventoryData };
       
       products.forEach(p => {
         const price = parseInt(document.getElementById(`price-${p.id}`).value) || 0;
-        const initial = parseInt(document.getElementById(`initial-${p.id}`).value) || 0;
-        const current = parseInt(document.getElementById(`current-${p.id}`).value) || 0;
-        
-        newInventory[p.id] = { price, initial, current };
+        const oldInv = newInventory[p.id] || { initial: 0, current: 0 };
+        newInventory[p.id] = { price, initial: oldInv.initial, current: oldInv.current };
       });
 
       try {
         await setDoc(doc(db, "settings", "inventory_" + currentEventKey), newInventory);
-        
-        // Also update stock badges to initial state if it's new setup
-        let newStockStatus = {};
-        products.forEach(p => {
-            const inv = newInventory[p.id];
-            const ratio = inv.current / (inv.initial || 1);
-            if (inv.current <= 0) newStockStatus[p.id] = 'soldout';
-            else if (ratio <= 0.3) newStockStatus[p.id] = 'few';
-            else newStockStatus[p.id] = 'onsale';
-        });
-        await setDoc(doc(db, "settings", "stock"), newStockStatus, { merge: true });
-
-        alert("保存しました！");
+        alert("価格を保存しました！");
       } catch (e) {
         console.error(e);
         alert("保存に失敗しました。");
