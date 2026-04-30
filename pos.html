@@ -251,6 +251,13 @@
               データがありません
             </div>
           </div>
+          <div style="background: var(--panel-bg); padding: 20px; border-radius: 12px;">
+            <h3>作品別 販売数</h3>
+            <div id="dash-product-sales" style="font-size: 14px; line-height: 1.8; color: rgba(255,255,255,0.8); margin-top: 10px; max-height: 200px; overflow-y: auto;">
+              <!-- Injected via JS -->
+              データがありません
+            </div>
+          </div>
         </div>
         
         <h3 style="margin-top: 30px; margin-bottom: 12px;">🕒 購入履歴タイムライン</h3>
@@ -363,6 +370,7 @@
       unsubSales = onSnapshot(doc(db, "settings", "sales_" + currentEventKey), (docSnap) => {
         let total = 0, cash = 0, paypay = 0, credit = 0;
         let reasons = {};
+        let productSales = {};
         const historyContainer = document.getElementById('dash-history');
         historyContainer.innerHTML = '';
         
@@ -382,6 +390,13 @@
             // Reasons summary
             if (r.customer && r.customer.reason) {
               reasons[r.customer.reason] = (reasons[r.customer.reason] || 0) + 1;
+            }
+            
+            // Product sales aggregation
+            if (r.items) {
+              r.items.forEach(item => {
+                productSales[item.name] = (productSales[item.name] || 0) + item.qty;
+              });
             }
             
             // Build history card
@@ -436,6 +451,21 @@
           summaryDiv.innerHTML = summaryHtml;
         } else {
           summaryDiv.innerHTML = 'データがありません';
+        }
+        
+        // Render Product Sales
+        const prodSalesDiv = document.getElementById('dash-product-sales');
+        let prodSalesHtml = '';
+        if (Object.keys(productSales).length > 0) {
+          Object.entries(productSales).sort((a,b)=>b[1]-a[1]).forEach(([name, qty]) => {
+            prodSalesHtml += `<div style="display:flex; justify-content:space-between; border-bottom:1px solid var(--border); padding:4px 0;">
+              <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:70%;">${name}</span> 
+              <span style="font-weight:bold; color:var(--accent);">${qty}個</span>
+            </div>`;
+          });
+          prodSalesDiv.innerHTML = prodSalesHtml;
+        } else {
+          prodSalesDiv.innerHTML = 'データがありません';
         }
       });
     }
