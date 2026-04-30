@@ -426,12 +426,15 @@
           const badgeLargeHtml = `<div class="badge" id="badge-large-${p.id}" style="display:none;"></div>`;
           const stockLargeHtml = `<div class="badge" id="stock-large-${p.id}" style="display:none;"></div>`;
 
+          const firstMedia = (p.images && p.images.length > 0) ? p.images[0] : p.image;
+          const firstIsVid = firstMedia.toLowerCase().endsWith('.mp4') || firstMedia.toLowerCase().endsWith('.mov');
+
           track.innerHTML += `
             <div class="carousel-slide">
               <div class="product-card-large">
                 <div style="position:relative;">
-                  <img class="main-product-img" id="main-img-${i}" src="${p.image}" alt="${p.name.replace(/\n/g,' ')}">
-                  <video class="main-product-img" id="main-video-${i}" style="display:none; width:100%; height:auto; aspect-ratio:1/1; object-fit:cover;" loop muted playsinline controls></video>
+                  <img class="main-product-img" id="main-img-${i}" src="${firstIsVid ? '' : firstMedia}" alt="${p.name.replace(/\n/g,' ')}" style="display: ${firstIsVid ? 'none' : 'block'};">
+                  <video class="main-product-img" id="main-video-${i}" src="${firstIsVid ? firstMedia : ''}" style="display: ${firstIsVid ? 'block' : 'none'}; width:100%; height:auto; aspect-ratio:1/1; object-fit:cover;" loop muted playsinline controls></video>
                 </div>
                 ${thumbHtml}
                 <div class="product-info-large">
@@ -485,6 +488,7 @@
         if (vid) {
           vid.style.display = 'block';
           vid.src = url;
+          vid.load();
           vid.play().catch(e => console.warn("Video play blocked:", e));
         }
       } else {
