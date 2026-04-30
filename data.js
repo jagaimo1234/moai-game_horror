@@ -23,7 +23,7 @@ const EVENTS = {
       {
         image: 'images/kurima/moai_robo_mk2_gray.jpg',
         images: [
-          'images/kurima/moai_robo_mk2/AQPdrFQDuoxgGlcdm7i4irYeNCUuZsS6m0XHydup6l3ZnFHDMv0uWMsTpp5iOlOBLDrg-uTclRGyNoU3NR_Pmv2smD39VeJnaz8dM70.mp4',
+          'images/kurima/moai_robo_mk2/movie.mp4',
           'images/kurima/moai_robo_mk2_gray.jpg',
           'images/kurima/moai_robo_mk2/hat_01.png',
           'images/kurima/moai_robo_mk2/hat_02.png',
