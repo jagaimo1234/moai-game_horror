@@ -808,7 +808,7 @@
     window.resetEventData = async () => {
       if (!auth.currentUser) return;
       if (!confirm(`本当に「${EVENTS[currentEventKey].label}」の売上記録と在庫変更履歴をすべてリセット（削除）しますか？\n※テスト入力の消去用です。`)) return;
-      if (!confirm("最終確認です。削除したデータは復元できません。\n※現在庫もすべてゼロにリセットされます（価格設定は残ります）。よろしいですか？")) return;
+      if (!confirm("最終確認です。削除したデータは復元できません。\n※「搬入総数」と「現在庫」もすべてゼロにリセットされます（価格設定は残ります）。よろしいですか？")) return;
 
       try {
         // Clear sales
