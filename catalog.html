@@ -411,10 +411,16 @@
           const extraImgs = p.images && p.images.length > 1 ? p.images : null;
           const thumbHtml = extraImgs ? `
             <div class="thumb-strip" id="thumbs-${i}">
-              ${extraImgs.map((img, j) => `
-                <div class="thumb-item ${j===0?'active':''}" onclick="setMainImg(${i},'${img}',this)">
-                  <img src="${img}" loading="lazy" alt="">
-                </div>`).join('')}
+              ${extraImgs.map((url, j) => {
+                const isVid = url.toLowerCase().endsWith('.mp4') || url.toLowerCase().endsWith('.mov');
+                return `
+                  <div class="thumb-item ${j===0?'active':''}" onclick="setMainImg(${i},'${url}',this)">
+                    ${isVid ? 
+                      '<div style="width:100%; height:100%; display:flex; align-items:center; justify-content:center; background:#111; color:var(--accent); font-size:10px; font-weight:bold; border-radius:4px;">MOVIE</div>' :
+                      `<img src="${url}" loading="lazy" alt="">`
+                    }
+                  </div>`;
+              }).join('')}
             </div>` : '';
           
           const badgeLargeHtml = `<div class="badge" id="badge-large-${p.id}" style="display:none;"></div>`;
