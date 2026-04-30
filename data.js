@@ -66,11 +66,19 @@ const EVENTS = {
       },
       {
         image: 'images/kurima/moai_robo_yogurt_lover.jpg',
+        images: [
+          'images/kurima/moai_robo_yogurt_lover/movie.mp4',
+          'images/kurima/moai_robo_yogurt_lover.jpg',
+        ],
         name:  'MOAI ROBO\n-Yogurt Lover-',
         desc:  '初代モアイロボ。1/144スケール。ヨーグルトを持った愛らしいフィギュア。'
       },
       {
         image: 'images/kurima/moai_robo_strawmilk.jpg',
+        images: [
+          'images/kurima/moai_robo_strawmilk/movie.mp4',
+          'images/kurima/moai_robo_strawmilk.jpg',
+        ],
         name:  'MOAI ROBO\n-Strawmilk Lover-',
         desc:  'いちごミルクが大好きなモアイロボ。1/144スケール。'
       },
