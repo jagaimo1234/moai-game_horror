@@ -423,16 +423,11 @@
           
           const badgeLargeHtml = `<div class="badge" id="badge-large-${p.id}" style="display:none;"></div>`;
           const stockLargeHtml = `<div class="badge" id="stock-large-${p.id}" style="display:none;"></div>`;
-          const adminBtnHtml = `
-            <button class="admin-edit-btn" onclick="event.stopPropagation(); toggleBadge('${p.id}')">👍 おすすめ切替</button>
-            <button class="admin-edit-btn" style="top:52px;" onclick="event.stopPropagation(); toggleStock('${p.id}')">📦 在庫切替</button>
-          `;
 
           track.innerHTML += `
             <div class="carousel-slide">
               <div class="product-card-large">
                 <div style="position:relative;">
-                  ${adminBtnHtml}
                   <img class="main-product-img" id="main-img-${i}" src="${p.image}" alt="${p.name.replace(/\n/g,' ')}">
                   <video class="main-product-img" id="main-video-${i}" style="display:none; width:100%; height:auto; aspect-ratio:1/1; object-fit:cover;" loop muted playsinline controls></video>
                 </div>
@@ -456,10 +451,7 @@
                     <div class="announce-text" id="announce-text-${p.id}"></div>
                   </div>
 
-                  <div style="display:flex; gap:8px; margin-top:12px;">
-                    <button class="admin-edit-desc-btn" onclick="openDescModal('${p.id}')">✏️ 説明文を編集</button>
-                    <button class="admin-edit-desc-btn" style="border-color:rgba(0,210,255,0.3);color:#00d2ff;" onclick="openAnnounceModal('${p.id}')">📢 お知らせを編集</button>
-                  </div>
+
                 </div>
               </div>
             </div>`;
@@ -695,29 +687,7 @@
       });
     }
 
-    // Toggle Stock Status for Admin
-    window.toggleStock = async (productId) => {
-      if (!auth.currentUser) return;
-      const current = stockData[productId] || 'none';
-      let next = 'none';
-      if (current === 'none') next = 'onsale';
-      else if (current === 'onsale') next = 'few';
-      else if (current === 'few') next = 'soldout';
-      else next = 'none';
 
-      const prev = stockData[productId];
-      stockData[productId] = next;
-      updateAllStock(); // optimistic update
-
-      try {
-        await setDoc(doc(db, "settings", "stock"), stockData);
-      } catch (e) {
-        console.error("Firestore write error:", e);
-        alert("在庫の更新に失敗しました。ルールの設定を確認してください。");
-        stockData[productId] = prev;
-        updateAllStock();
-      }
-    };
 
     // Listen to descriptions
     onSnapshot(doc(db, "settings", "descriptions"), (docSnap) => {
@@ -785,29 +755,7 @@
       });
     }
 
-    // Toggle Badge Function for Admin
-    window.toggleBadge = async (productId) => {
-      if (!auth.currentUser) return;
-      const current = badgesData[productId] || 'none';
-      let next = 'none';
-      if (current === 'none') next = 'recommend';
-      else if (current === 'recommend') next = 'super';
-      else next = 'none';
-      
-      const prev = badgesData[productId];
-      badgesData[productId] = next;
-      updateAllBadges(); // optimistic update
-      
-      try {
-        await setDoc(doc(db, "settings", "badges"), badgesData);
-      } catch (e) {
-        console.error("Firestore write error:", e);
-        alert("データベースへの保存に失敗しました（" + e.message + "）。\nFirebaseのルール設定（allow write...）が正しく行われているか、または設定したGmailアドレスと現在ログインしているアカウントが一致しているか確認してください。");
-        // Rollback
-        badgesData[productId] = prev;
-        updateAllBadges();
-      }
-    };
+
 
     // Open Description Edit Modal
     window.openDescModal = (productId) => {

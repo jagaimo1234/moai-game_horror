@@ -278,6 +278,19 @@
       </div>
     </section>
 
+    <!-- Admin Edit Modal -->
+    <div id="edit-modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.8); z-index:2000; align-items:center; justify-content:center; padding:20px;">
+      <div style="background:var(--panel-bg); width:100%; max-width:500px; border-radius:12px; padding:20px; border:1px solid var(--border);">
+        <h3 id="edit-modal-title" style="margin-bottom:15px;">編集</h3>
+        <input type="hidden" id="edit-modal-type">
+        <textarea id="edit-textarea" style="width:100%; height:150px; background:var(--bg); color:var(--text); border:1px solid var(--border); border-radius:8px; padding:10px; margin-bottom:15px;"></textarea>
+        <div style="display:flex; justify-content:flex-end; gap:10px;">
+          <button class="btn" style="background:#444; color:white;" onclick="closeEditModal()">キャンセル</button>
+          <button class="btn btn-primary" onclick="saveEditModal()">保存する</button>
+        </div>
+      </div>
+    </div>
+
     <!-- Settings View -->
     <section id="settings-view" class="view-section">
       <div class="scroll-container">
@@ -320,7 +333,12 @@
     // App State
     let currentEventKey = DEFAULT_EVENT;
     let inventoryData = {};
+    let stockData = {};
+    let badgesData = {};
+    let descriptionsData = {};
+    let announcementsData = {};
     let cart = {}; // { productId: qty }
+    let currentEditingProductId = null;
     let unsubInventory = null;
     let unsubSales = null;
 
@@ -373,12 +391,37 @@
       if (unsubInventory) unsubInventory();
       if (unsubSales) unsubSales();
 
-      // Listen to stock for global toggle
+      // Listen to stock for global toggle and manual status
       onSnapshot(doc(db, "settings", "stock"), (docSnap) => {
         if (docSnap.exists()) {
-          const sd = docSnap.data();
+          stockData = docSnap.data();
           const toggleEl = document.getElementById('global-stock-toggle');
-          if (toggleEl) toggleEl.checked = sd._displayStock !== false;
+          if (toggleEl) toggleEl.checked = stockData._displayStock !== false;
+          renderSettings(); // Re-render to update dropdowns
+        }
+      });
+
+      // Listen to badges for Recommend status
+      onSnapshot(doc(db, "settings", "badges"), (docSnap) => {
+        if (docSnap.exists()) {
+          badgesData = docSnap.data();
+          renderSettings();
+        }
+      });
+
+      // Listen to descriptions
+      onSnapshot(doc(db, "settings", "descriptions"), (docSnap) => {
+        if (docSnap.exists()) {
+          descriptionsData = docSnap.data();
+          renderSettings();
+        }
+      });
+
+      // Listen to announcements
+      onSnapshot(doc(db, "settings", "announcements"), (docSnap) => {
+        if (docSnap.exists()) {
+          announcementsData = docSnap.data();
+          renderSettings();
         }
       });
 
@@ -538,6 +581,9 @@
       
       products.forEach(p => {
         const inv = inventoryData[p.id] || { price: 0, initial: 0, current: 0 };
+        const isRecommend = badgesData[p.id] === 'recommend' || badgesData[p.id] === 'super';
+        const manualStatus = stockData[p.id] || 'none';
+
         list.innerHTML += `
           <div class="settings-row" style="flex-direction:column; align-items:stretch;">
             <div style="display:flex; gap:12px; align-items:center;">
@@ -562,11 +608,83 @@
               <button onclick="applyStockAdjustment('${p.id}')" style="padding:6px 12px; border:none; border-radius:4px; background:var(--success); color:white; font-weight:bold; cursor:pointer;">適用</button>
               <button onclick="resetProductInventory('${p.id}')" style="padding:6px 12px; border:1px solid var(--danger); border-radius:4px; background:none; color:var(--danger); font-size:11px; cursor:pointer;">リセット</button>
             </div>
+
+            <div style="display:flex; gap:15px; align-items:center; margin-top:8px; padding-top:8px; border-top:1px solid var(--border);">
+              <label style="font-size:12px; display:flex; align-items:center; gap:5px; cursor:pointer;">
+                <input type="checkbox" ${isRecommend ? 'checked' : ''} onchange="updateRecommendStatus('${p.id}', this.checked)">
+                🌟 おすすめ
+              </label>
+              <div style="display:flex; align-items:center; gap:5px;">
+                <span style="font-size:12px; opacity:0.6;">手動在庫:</span>
+                <select onchange="updateManualStock('${p.id}', this.value)" style="font-size:11px; padding:2px; background:var(--bg); color:var(--text); border:1px solid var(--border); border-radius:4px;">
+                  <option value="none" ${manualStatus === 'none' ? 'selected' : ''}>なし</option>
+                  <option value="onsale" ${manualStatus === 'onsale' ? 'selected' : ''}>販売中</option>
+                  <option value="few" ${manualStatus === 'few' ? 'selected' : ''}>残りわずか</option>
+                  <option value="soldout" ${manualStatus === 'soldout' ? 'selected' : ''}>売り切れ</option>
+                </select>
+              </div>
+              <button onclick="openEditModal('${p.id}', 'desc')" style="font-size:11px; padding:4px 8px; background:#34495e; color:white; border:none; border-radius:4px; cursor:pointer;">✏️ 説明文</button>
+              <button onclick="openEditModal('${p.id}', 'announce')" style="font-size:11px; padding:4px 8px; background:#2980b9; color:white; border:none; border-radius:4px; cursor:pointer;">📢 お知らせ</button>
             </div>
           </div>
         `;
       });
     }
+
+    // Edit Modals Logic
+    window.openEditModal = (pId, type) => {
+      currentEditingProductId = pId;
+      const products = EVENTS[currentEventKey].products || [];
+      const p = products.find(x => x.id === pId);
+      
+      let currentVal = '';
+      if (type === 'desc') {
+        currentVal = descriptionsData[pId] !== undefined ? descriptionsData[pId] : (p?.desc || '');
+        document.getElementById('edit-modal-title').textContent = '作品説明の編集';
+      } else {
+        currentVal = announcementsData[pId] || '';
+        document.getElementById('edit-modal-title').textContent = 'お知らせの編集';
+      }
+      
+      document.getElementById('edit-textarea').value = currentVal;
+      document.getElementById('edit-modal-type').value = type;
+      document.getElementById('edit-modal').style.display = 'flex';
+    };
+
+    window.closeEditModal = () => {
+      document.getElementById('edit-modal').style.display = 'none';
+    };
+
+    window.saveEditModal = async () => {
+      const type = document.getElementById('edit-modal-type').value;
+      const newVal = document.getElementById('edit-textarea').value;
+      const pId = currentEditingProductId;
+      
+      try {
+        if (type === 'desc') {
+          await setDoc(doc(db, "settings", "descriptions"), { [pId]: newVal }, { merge: true });
+        } else {
+          await setDoc(doc(db, "settings", "announcements"), { [pId]: newVal }, { merge: true });
+        }
+        closeEditModal();
+        alert("保存しました。");
+      } catch(e) { console.error(e); alert("保存に失敗しました。"); }
+    };
+
+    window.updateRecommendStatus = async (pId, checked) => {
+      if (!auth.currentUser) return;
+      const next = checked ? 'recommend' : 'none';
+      try {
+        await setDoc(doc(db, "settings", "badges"), { [pId]: next }, { merge: true });
+      } catch(e) { console.error(e); }
+    };
+
+    window.updateManualStock = async (pId, status) => {
+      if (!auth.currentUser) return;
+      try {
+        await setDoc(doc(db, "settings", "stock"), { [pId]: status }, { merge: true });
+      } catch(e) { console.error(e); }
+    };
 
     window.toggleGlobalStockDisplay = async (checked) => {
       if (!auth.currentUser) return;
