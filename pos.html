@@ -555,8 +555,10 @@
             <textarea id="new-topic-desc" class="form-input" rows="3" placeholder="例：〇〇をイメージした愛らしいモアイペン立て。スマホをかざすと..."></textarea>
           </div>
           <div class="form-group" style="margin-top:10px;">
-            <label>紐付け作品 ID (任意 - 例：keychain など)</label>
-            <input type="text" id="new-topic-product-id" class="form-input" placeholder="入力すると「作品詳細を見る」ボタンを自動生成します">
+            <label>紐付け作品 (任意)</label>
+            <select id="new-topic-product-id" class="form-select">
+              <option value="">-- 紐付けなし --</option>
+            </select>
           </div>
           <div class="form-group" style="margin-top:10px;">
             <label>体験版等のURL (任意)</label>
@@ -828,8 +830,12 @@
           renderAll();
         });
         onSnapshot(doc(db, "settings", "topics_master"), (snap) => {
-          if (snap.exists()) window.topicsMasterData = snap.data();
-          else window.topicsMasterData = {};
+          if (snap.exists() && Object.keys(snap.data()).length > 0) {
+            window.topicsMasterData = snap.data();
+          } else {
+            window.topicsMasterData = {};
+            if (window.initializeTopicsData) window.initializeTopicsData();
+          }
           renderAll();
         });
         onSnapshot(doc(db, "settings", "event_topics"), (snap) => {
@@ -2528,6 +2534,18 @@
     };
 
     window.renderTopics = function() {
+      const prodSelect = document.getElementById('new-topic-product-id');
+      if (prodSelect) {
+        const currentVal = prodSelect.value;
+        const allMaster = window.getFullMasterProducts(window.customProductsData);
+        let optionsHtml = '<option value="">-- 紐付けなし --</option>';
+        allMaster.forEach(p => {
+          optionsHtml += `<option value="${p.id}">${p.name.replace(/\n/g, ' ')}</option>`;
+        });
+        prodSelect.innerHTML = optionsHtml;
+        prodSelect.value = currentVal;
+      }
+
       const list = document.getElementById('topics-selection-list');
       if (!list) return;
       list.innerHTML = '';
@@ -2662,6 +2680,64 @@
       } catch(e) {
         console.error(e);
         alert("削除に失敗しました：" + e.message);
+      }
+    };
+
+    window.initializeTopicsData = async function() {
+      const defaultMaster = {
+        "builtin_mini_osuwari": {
+          title: "ミニおすわりモアイのキーホルダーが登場！！",
+          desc: "ちょこんとお座りする愛らしいミニモアイ。どこへでも一緒に連れて行けます。",
+          icon: "🆕",
+          productId: "mini_osuwari_keychain",
+          isBuiltin: true,
+          createdAt: Date.now()
+        },
+        "builtin_yogurtrun": {
+          title: "ヨーグルトランEX メジャーアップデート実施！",
+          desc: "モアイロボMk-IIが参戦し難易度が爆上がり！スマホをかざして遊べるNFC対応キーホルダー。",
+          icon: "⚡",
+          productId: "keychain",
+          demoUrl: "https://moai-demo-game.vercel.app/",
+          isBuiltin: true,
+          createdAt: Date.now()
+        },
+        "builtin_gold_moai": {
+          title: "ゴールドモアイロボ登場！！",
+          desc: "黄金に輝く特別なモアイロボ。秘密のアクセスキーで限定特典も解放できる！",
+          icon: "🆕",
+          productId: "moai_robo_mk2_gold",
+          isBuiltin: true,
+          createdAt: Date.now()
+        },
+        "builtin_stand": {
+          title: "モアイロボMark2専用スタンド登場！",
+          desc: "空中浮遊、ジャンプ、撃墜シーンまで再現できる可変式ディスプレイスタンド。",
+          icon: "🆕",
+          productId: "moai_robo_stand",
+          isBuiltin: true,
+          createdAt: Date.now()
+        },
+        "builtin_custom_parts": {
+          title: "おすわりモアイカスタムパーツ登場！",
+          desc: "Mk-IIに装着できる、レトロ可愛いおすわりモアイのカスタム追加パーツ。",
+          icon: "🆕",
+          isBuiltin: true,
+          createdAt: Date.now()
+        }
+      };
+
+      const defaultEventTopics = {
+        "hmj": Object.keys(defaultMaster)
+      };
+
+      try {
+        console.log("Initializing default topics in Firestore...");
+        await setDoc(doc(db, "settings", "topics_master"), defaultMaster);
+        await setDoc(doc(db, "settings", "event_topics"), defaultEventTopics);
+        console.log("Default topics successfully initialized.");
+      } catch (e) {
+        console.error("Failed to initialize default topics:", e);
       }
     };
 

@@ -184,6 +184,116 @@
     .admin-mode .admin-edit-btn { display: block; }
     .admin-mode .admin-edit-desc-btn { display: inline-block; }
 
+    /* Dynamic Topics Styling */
+    .topics-container {
+      margin: 15px auto 25px;
+      max-width: 600px;
+      padding: 24px 20px;
+      background: linear-gradient(145deg, #141420, #101017);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 20px;
+      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
+    }
+    .topics-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 20px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      padding-bottom: 10px;
+    }
+    .topics-icon {
+      font-size: 20px;
+    }
+    .topics-title {
+      font-size: 16px;
+      font-weight: 900;
+      color: #00d2ff;
+      letter-spacing: 2px;
+      background: linear-gradient(90deg, #00d2ff, #00d2ff);
+      -webkit-background-clip: text;
+      background-clip: text;
+    }
+    .topics-body {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .topic-item {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 14px;
+      padding: 16px;
+      display: flex;
+      gap: 14px;
+      align-items: flex-start;
+      transition: all 0.2s;
+    }
+    .topic-item:hover {
+      background: rgba(255, 255, 255, 0.05);
+      border-color: rgba(255, 255, 255, 0.08);
+      transform: translateY(-2px);
+    }
+    .topic-bullet {
+      font-size: 20px;
+      flex-shrink: 0;
+    }
+    .topic-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+    .topic-headline {
+      font-size: 14px;
+      font-weight: bold;
+      color: #fff;
+      margin-bottom: 6px;
+      line-height: 1.4;
+    }
+    .topic-sub {
+      font-size: 12px;
+      color: rgba(255, 255, 255, 0.6);
+      line-height: 1.6;
+    }
+    .btn-topic-demo {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(45deg, #ff007f, #ffcc00);
+      color: #000;
+      text-decoration: none;
+      font-size: 11px;
+      font-weight: 900;
+      padding: 8px 14px;
+      border-radius: 20px;
+      border: none;
+      cursor: pointer;
+      box-shadow: 0 4px 15px rgba(255, 0, 127, 0.3);
+      transition: all 0.25s;
+    }
+    .btn-topic-demo:hover {
+      transform: scale(1.04);
+      box-shadow: 0 6px 20px rgba(255, 0, 127, 0.5);
+    }
+    .btn-topic-detail {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: transparent;
+      border: 1.5px solid #00d2ff;
+      color: #00d2ff;
+      font-size: 11px;
+      font-weight: bold;
+      padding: 7px 14px;
+      border-radius: 20px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-topic-detail:hover {
+      background: rgba(0, 210, 255, 0.1);
+      transform: scale(1.02);
+    }
+
     /* Announcement Box */
     .product-announcement {
       background: rgba(0, 210, 255, 0.05);
