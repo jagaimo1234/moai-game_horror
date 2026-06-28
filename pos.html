@@ -2578,13 +2578,23 @@
           ? '' 
           : `<button onclick="event.stopPropagation(); deleteTopicMaster('${id}')" style="background:rgba(231,76,60,0.2); border:1px solid #e74c3c; color:#e74c3c; font-size:11px; padding:4px 8px; border-radius:4px; cursor:pointer; font-weight:bold;">🗑️ 削除</button>`;
 
+        const aiToggleBtn = topic.isBuiltin
+          ? ''
+          : `<button onclick="event.stopPropagation(); toggleTopicAiEdit('${id}')" 
+                     style="background:${topic.needsAiEdit ? 'rgba(0,210,255,0.15)' : 'rgba(255,255,255,0.05)'}; 
+                            border:1px solid ${topic.needsAiEdit ? 'var(--accent)' : 'rgba(255,255,255,0.2)'}; 
+                            color:${topic.needsAiEdit ? 'var(--accent)' : 'rgba(255,255,255,0.6)'}; 
+                            font-size:11px; padding:4px 8px; border-radius:4px; cursor:pointer; font-weight:bold; transition: 0.2s;">
+               🤖 AI編集: ${topic.needsAiEdit ? 'ON' : 'OFF'}
+             </button>`;
+
         const aiBadge = topic.needsAiEdit 
           ? `<span style="font-size:10px; background:linear-gradient(45deg, #e67e22, #9b59b6); color:white; padding:2px 6px; border-radius:4px; font-weight:bold; margin-left:6px; box-shadow: 0 1px 3px rgba(0,0,0,0.2);">🤖 AI編集希望</span>` 
           : '';
 
         list.innerHTML += `
           <div style="background:rgba(0,0,0,0.2); border:1px solid ${isChecked ? 'var(--accent)' : 'var(--border)'}; border-radius:8px; padding:12px; display:flex; align-items:flex-start; justify-content:space-between; gap:10px; cursor:pointer;" onclick="toggleTopicSelection('${id}')">
-            <div style="display:flex; align-items:flex-start; gap:10px;">
+            <div style="display:flex; align-items:flex-start; gap:10px; flex:1;">
               <input type="checkbox" id="chk-topic-${id}" ${isChecked ? 'checked' : ''} style="width:20px; height:20px; accent-color:var(--accent); margin-top:2px;" onclick="event.stopPropagation(); toggleTopicSelection('${id}')">
               <div>
                 <div style="font-weight:bold; font-size:14px; margin-bottom:4px; display:flex; align-items:center; flex-wrap:wrap; gap:4px;">
@@ -2593,8 +2603,9 @@
                 <div style="font-size:12px; opacity:0.7; line-height:1.4;">${topic.desc.replace(/\n/g, '<br>')}</div>
               </div>
             </div>
-            <div style="display:flex; align-items:center; gap:8px;">
+            <div style="display:flex; align-items:center; gap:8px; flex-shrink:0;">
               ${topic.isBuiltin ? '<span style="font-size:10px; background:rgba(255,255,255,0.1); padding:2px 6px; border-radius:4px; opacity:0.6;">システム組み込み</span>' : ''}
+              ${aiToggleBtn}
               ${deleteBtn}
             </div>
           </div>
@@ -2612,6 +2623,23 @@
       }
       window.eventTopicsData[currentEventKey] = eventTopics;
       renderTopics();
+    };
+
+    window.toggleTopicAiEdit = async function(id) {
+      if (!auth.currentUser) return;
+      const updatedMaster = { ...window.topicsMasterData };
+      if (!updatedMaster[id]) return;
+      
+      // Toggle needsAiEdit status
+      updatedMaster[id].needsAiEdit = !updatedMaster[id].needsAiEdit;
+
+      try {
+        await setDoc(doc(db, "settings", "topics_master"), updatedMaster);
+        // renderTopics is automatically triggered via onSnapshot listener
+      } catch(e) {
+        console.error(e);
+        alert("AI編集状態の変更に失敗しました：" + e.message);
+      }
     };
 
     window.saveEventTopics = async function() {
