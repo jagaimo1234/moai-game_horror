@@ -836,6 +836,10 @@
         onSnapshot(doc(db, "settings", "topics_master"), (snap) => {
           if (snap.exists() && Object.keys(snap.data()).length > 0) {
             window.topicsMasterData = snap.data();
+            // クレンジング：古い構造（buttonTextの欠落）を検知して自動で上書き初期化
+            if (window.topicsMasterData["builtin_yogurtrun"] && !window.topicsMasterData["builtin_yogurtrun"].buttonText) {
+              if (window.initializeTopicsData) window.initializeTopicsData();
+            }
           } else {
             window.topicsMasterData = {};
             if (window.initializeTopicsData) window.initializeTopicsData();
@@ -2706,6 +2710,7 @@
           icon: "⚡",
           productId: "keychain",
           demoUrl: "https://moai-demo-game.vercel.app/",
+          buttonText: "🎮 WEB体験版をプレイ！ →",
           isBuiltin: true,
           createdAt: Date.now()
         },
