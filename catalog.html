@@ -1175,19 +1175,24 @@
     let badgesData = {};
     let descriptionsData = {};
     let announcementsData = {};
-    let topicsData = {};
+    window.topicsMasterData = {};
+    window.eventTopicsData = {};
     let currentEditingProductId = null;
 
-    // Listen to topics
-    onSnapshot(doc(db, "settings", "topics"), (docSnap) => {
-      if (docSnap.exists()) {
-        topicsData = docSnap.data();
-      } else {
-        topicsData = {};
-      }
+    // Listen to topics master list
+    onSnapshot(doc(db, "settings", "topics_master"), (docSnap) => {
+      window.topicsMasterData = docSnap.exists() ? docSnap.data() : {};
       if (window.renderHero) window.renderHero();
     }, (error) => {
-      console.error("Firestore topics read error:", error);
+      console.error("Firestore topics_master read error:", error);
+    });
+
+    // Listen to event specific topic mapping
+    onSnapshot(doc(db, "settings", "event_topics"), (docSnap) => {
+      window.eventTopicsData = docSnap.exists() ? docSnap.data() : {};
+      if (window.renderHero) window.renderHero();
+    }, (error) => {
+      console.error("Firestore event_topics read error:", error);
     });
 
     // Listen to hidden products
@@ -1443,7 +1448,6 @@
       }
     });
 
-    // ===== Hero Announcements (Topics) Render & Edit =====
     window.renderHero = function() {
       const allEvents = window.getAllEvents(window.eventConfigData);
       const eventData = allEvents[currentEventKey];
@@ -1455,41 +1459,59 @@
         return;
       }
 
-      // 1. Get custom topics HTML or fallback to static heroHtml from data.js
-      let heroHtml = topicsData[currentEventKey];
-      if (heroHtml === undefined) {
-        heroHtml = eventData.heroHtml || '';
-      }
-
-      // 2. Set innerHTML
-      container.innerHTML = heroHtml;
-
-      // 3. Add an "Edit Hero HTML" button if in admin-mode!
-      if (document.body.classList.contains('admin-mode') && auth.currentUser) {
-        const editBtn = document.createElement('button');
-        editBtn.className = 'admin-edit-hero-btn';
-        editBtn.style.cssText = `
-          position: absolute;
-          top: 10px;
-          right: 10px;
-          background: rgba(0, 0, 0, 0.8);
-          color: #00d2ff;
-          border: 1px solid #00d2ff;
-          padding: 6px 12px;
-          border-radius: 6px;
-          cursor: pointer;
-          font-size: 12px;
-          font-weight: bold;
-          z-index: 100;
-          transition: 0.2s;
+      // Check if event specific topics are registered in Firestore
+      const eventTopicIds = window.eventTopicsData[currentEventKey];
+      if (Array.isArray(eventTopicIds) && eventTopicIds.length > 0) {
+        // Build dynamic HTML from topics_master
+        let topicsHtml = `
+          <div class="topics-container">
+            <div class="topics-header">
+              <span class="topics-icon">🔥</span>
+              <span class="topics-title">HOT TOPICS & NEWS</span>
+            </div>
+            <div class="topics-body">
         `;
-        editBtn.innerHTML = '📋 トピックス編集';
-        editBtn.onclick = (e) => {
-          e.stopPropagation();
-          window.openHeroEditor();
-        };
-        container.style.position = 'relative';
-        container.appendChild(editBtn);
+
+        eventTopicIds.forEach(id => {
+          const topic = window.topicsMasterData[id];
+          if (!topic) return;
+
+          let buttonsHtml = '';
+          if (topic.demoUrl) {
+            buttonsHtml += `
+              <a href="${topic.demoUrl}" target="_blank" rel="noopener noreferrer" class="btn-topic-demo">
+                🎮 WEB体験版をプレイ！ →
+              </a>
+            `;
+          }
+          if (topic.productId) {
+            buttonsHtml += `
+              <button onclick="window.openProductById('${topic.productId}')" class="btn-topic-detail">
+                作品詳細を見る 🔍
+              </button>
+            `;
+          }
+
+          topicsHtml += `
+            <div class="topic-item">
+              <div class="topic-bullet">${topic.icon || '🆕'}</div>
+              <div class="topic-content">
+                <div class="topic-headline">${topic.title}</div>
+                <div class="topic-sub">${topic.desc.replace(/\n/g, '<br>')}</div>
+                ${buttonsHtml ? `<div style="margin-top: 8px; display: flex; gap: 8px; flex-wrap: wrap;">${buttonsHtml}</div>` : ''}
+              </div>
+            </div>
+          `;
+        });
+
+        topicsHtml += `
+            </div>
+          </div>
+        `;
+        container.innerHTML = topicsHtml;
+      } else {
+        // Fallback to static heroHtml from data.js
+        container.innerHTML = eventData.heroHtml || '';
       }
     };
 

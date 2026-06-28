@@ -150,6 +150,7 @@
         <button class="sys-tab-btn active" onclick="switchSysTab('pos')">レジ (POS)</button>
         <button class="sys-tab-btn" onclick="switchSysTab('dashboard')">ダッシュボード</button>
         <button class="sys-tab-btn" onclick="switchSysTab('stats')">📊 統計</button>
+        <button class="sys-tab-btn" onclick="switchSysTab('topics')">🔥 トピックス</button>
         <button class="sys-tab-btn" onclick="switchSysTab('settings')">📦 在庫設定</button>
         <button class="sys-tab-btn" onclick="switchSysTab('simulation')">🎯 シミュ</button>
         <button class="sys-tab-btn" onclick="switchSysTab('price-settings')">💴 金額設定</button>
@@ -519,6 +520,53 @@
       </div>
     </section>
 
+    <!-- Topics View -->
+    <section id="topics-view" class="view-section">
+      <div class="scroll-container" style="padding-bottom: 50px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px;">
+          <h2>🔥 トピックス設定 (<span id="topics-event-name"></span>)</h2>
+          <button class="btn btn-primary" onclick="saveEventTopics()" style="font-size: 14px; padding: 8px 20px;">トピックス表示設定を保存</button>
+        </div>
+
+        <!-- Topics selection / listing -->
+        <div style="background:var(--panel-bg); padding:20px; border-radius:12px; border:1px solid var(--border); margin-bottom:24px;">
+          <h3 style="font-size:16px; margin-bottom:12px; color:var(--accent);">📌 表示するトピックスを選択</h3>
+          <p style="font-size:12px; opacity:0.6; margin-bottom:15px;">現在のイベントでカタログの「HOT TOPICS & NEWS」に表示する項目にチェックを入れます。</p>
+          <div id="topics-selection-list" style="display:flex; flex-direction:column; gap:12px;">
+            <!-- Injected via JS -->
+          </div>
+        </div>
+
+        <!-- Add Custom Topic Form -->
+        <div style="background:var(--panel-bg); padding:20px; border-radius:12px; border:1px solid var(--border);">
+          <h3 style="font-size:16px; margin-bottom:15px; color:var(--accent);">🆕 トピックスの新規追加（仕様宣言）</h3>
+          <p style="font-size:12px; opacity:0.6; margin-bottom:15px;">※WEB体験版プレイボタンなどの高機能なパーツは、仕様（テキスト）を追加後にAIに実装を依頼してください。</p>
+          
+          <div class="form-group">
+            <label>アイコン (絵文字など 1文字)</label>
+            <input type="text" id="new-topic-icon" class="form-input" placeholder="🆕" value="🆕" style="max-width:80px; text-align:center;">
+          </div>
+          <div class="form-group">
+            <label>タイトル (トピックスの見出し)</label>
+            <input type="text" id="new-topic-title" class="form-input" placeholder="例：〇〇モアイペン立てが登場！！">
+          </div>
+          <div class="form-group">
+            <label>説明文 (トピックスの本文)</label>
+            <textarea id="new-topic-desc" class="form-input" rows="3" placeholder="例：〇〇をイメージした愛らしいモアイペン立て。スマホをかざすと..."></textarea>
+          </div>
+          <div class="form-group" style="margin-top:10px;">
+            <label>紐付け作品 ID (任意 - 例：keychain など)</label>
+            <input type="text" id="new-topic-product-id" class="form-input" placeholder="入力すると「作品詳細を見る」ボタンを自動生成します">
+          </div>
+          <div class="form-group" style="margin-top:10px;">
+            <label>体験版等のURL (任意)</label>
+            <input type="text" id="new-topic-demo-url" class="form-input" placeholder="入力すると「WEB体験版をプレイ！」ボタンを自動生成します">
+          </div>
+          <button class="btn" style="background:var(--success); color:white; font-weight:bold; width:100%; margin-top:15px;" onclick="addNewTopicMaster()">✨ トピックスを追加</button>
+        </div>
+      </div>
+    </section>
+
     <!-- Settings View -->
     <section id="settings-view" class="view-section">
       <div class="scroll-container">
@@ -645,6 +693,9 @@
     window.customProductsData = {};
     window.eventProductsData = {}; // { eventKey: [ids] }
     window.eventConfigData = {};   // { eventKey: { visible: bool } }
+    window.topicsMasterData = {};  // { id: { title, desc, icon, isBuiltin, builtinType } }
+    window.eventTopicsData = {};   // { eventKey: [ids] }
+    let announcementsData = {};    // announcementsData
     window.printSelection = [];    // Temporary selection for printing
     window.DEV_STATUSES = [
       { label: "💭 発掘中", desc: "アイデア・構想段階" },
@@ -738,6 +789,9 @@
       if (tabId === 'simulation' && window.renderSimulation) {
         window.renderSimulation();
       }
+      if (tabId === 'topics' && window.renderTopics) {
+        window.renderTopics();
+      }
     };
 
     // Auth
@@ -768,8 +822,19 @@
           updateVisibilityUI();
           renderAll();
         });
+        window.customProductsData = {}; // Restore customProductsData definition
         onSnapshot(doc(db, "settings", "custom_products"), (snap) => {
           if (snap.exists()) window.customProductsData = snap.data();
+          renderAll();
+        });
+        onSnapshot(doc(db, "settings", "topics_master"), (snap) => {
+          if (snap.exists()) window.topicsMasterData = snap.data();
+          else window.topicsMasterData = {};
+          renderAll();
+        });
+        onSnapshot(doc(db, "settings", "event_topics"), (snap) => {
+          if (snap.exists()) window.eventTopicsData = snap.data();
+          else window.eventTopicsData = {};
           renderAll();
         });
 
@@ -786,6 +851,7 @@
       if(window.renderPriceSettings) window.renderPriceSettings();
       renderSelection();
       if(window.renderSimulation) window.renderSimulation();
+      if(window.renderTopics) window.renderTopics();
     }
 
     function updateVisibilityUI() {
@@ -839,11 +905,15 @@
       const priceEvName = document.getElementById('price-settings-event-name');
       if(priceEvName) priceEvName.textContent = evLabel;
       document.getElementById('selection-event-name').textContent = evLabel + " - 出品作品の選択";
+      const topicsEvName = document.getElementById('topics-event-name');
+      if (topicsEvName) topicsEvName.textContent = evLabel;
+      if (window.renderTopics) window.renderTopics();
       
       updateVisibilityUI();
 
       if (unsubInventory) unsubInventory();
       if (unsubSales) unsubSales();
+      if (unsubInventory) unsubInventory(); // Keep structure
       if (unsubSimulation) unsubSimulation();
 
       unsubSimulation = onSnapshot(doc(db, "settings", "simulation_" + currentEventKey), (docSnap) => {
@@ -2454,6 +2524,144 @@
       } catch(e) {
         console.error(e);
         alert("保存に失敗しました。");
+      }
+    };
+
+    window.renderTopics = function() {
+      const list = document.getElementById('topics-selection-list');
+      if (!list) return;
+      list.innerHTML = '';
+
+      const eventTopics = window.eventTopicsData[currentEventKey] || [];
+      const masterKeys = Object.keys(window.topicsMasterData);
+
+      if (masterKeys.length === 0) {
+        list.innerHTML = '<div style="color:rgba(255,255,255,0.4); text-align:center; padding:20px;">登録されているトピックスがありません。新規追加してください。</div>';
+        return;
+      }
+
+      masterKeys.forEach(id => {
+        const topic = window.topicsMasterData[id];
+        const isChecked = eventTopics.includes(id);
+
+        const deleteBtn = topic.isBuiltin 
+          ? '' 
+          : `<button onclick="event.stopPropagation(); deleteTopicMaster('${id}')" style="background:rgba(231,76,60,0.2); border:1px solid #e74c3c; color:#e74c3c; font-size:11px; padding:4px 8px; border-radius:4px; cursor:pointer; font-weight:bold;">🗑️ 削除</button>`;
+
+        list.innerHTML += `
+          <div style="background:rgba(0,0,0,0.2); border:1px solid ${isChecked ? 'var(--accent)' : 'var(--border)'}; border-radius:8px; padding:12px; display:flex; align-items:flex-start; justify-content:space-between; gap:10px; cursor:pointer;" onclick="toggleTopicSelection('${id}')">
+            <div style="display:flex; align-items:flex-start; gap:10px;">
+              <input type="checkbox" id="chk-topic-${id}" ${isChecked ? 'checked' : ''} style="width:20px; height:20px; accent-color:var(--accent); margin-top:2px;" onclick="event.stopPropagation(); toggleTopicSelection('${id}')">
+              <div>
+                <div style="font-weight:bold; font-size:14px; margin-bottom:4px;">
+                  <span style="margin-right:6px;">${topic.icon || '🆕'}</span>${topic.title}
+                </div>
+                <div style="font-size:12px; opacity:0.7; line-height:1.4;">${topic.desc.replace(/\n/g, '<br>')}</div>
+              </div>
+            </div>
+            <div style="display:flex; align-items:center; gap:8px;">
+              ${topic.isBuiltin ? '<span style="font-size:10px; background:rgba(255,255,255,0.1); padding:2px 6px; border-radius:4px; opacity:0.6;">システム組み込み</span>' : ''}
+              ${deleteBtn}
+            </div>
+          </div>
+        `;
+      });
+    };
+
+    window.toggleTopicSelection = function(id) {
+      let eventTopics = window.eventTopicsData[currentEventKey] ? [...window.eventTopicsData[currentEventKey]] : [];
+      const idx = eventTopics.indexOf(id);
+      if (idx === -1) {
+        eventTopics.push(id);
+      } else {
+        eventTopics.splice(idx, 1);
+      }
+      window.eventTopicsData[currentEventKey] = eventTopics;
+      renderTopics();
+    };
+
+    window.saveEventTopics = async function() {
+      if (!auth.currentUser) return;
+      try {
+        await setDoc(doc(db, "settings", "event_topics"), window.eventTopicsData);
+        alert("トピックス表示設定を保存しました！");
+      } catch(e) {
+        console.error(e);
+        alert("保存に失敗しました：" + e.message);
+      }
+    };
+
+    window.addNewTopicMaster = async function() {
+      if (!auth.currentUser) return;
+      const icon = document.getElementById('new-topic-icon').value.trim() || '🆕';
+      const title = document.getElementById('new-topic-title').value.trim();
+      const desc = document.getElementById('new-topic-desc').value.trim();
+      const productId = document.getElementById('new-topic-product-id').value.trim();
+      const demoUrl = document.getElementById('new-topic-demo-url').value.trim();
+
+      if (!title || !desc) {
+        alert("タイトルと説明文を入力してください。");
+        return;
+      }
+
+      const id = "custom_" + Date.now();
+      const updatedMaster = { ...window.topicsMasterData };
+      updatedMaster[id] = {
+        title,
+        desc,
+        icon,
+        productId: productId || null,
+        demoUrl: demoUrl || null,
+        isBuiltin: false,
+        createdAt: Date.now()
+      };
+
+      try {
+        await setDoc(doc(db, "settings", "topics_master"), updatedMaster);
+        
+        // Auto-check for current event
+        let eventTopics = window.eventTopicsData[currentEventKey] ? [...window.eventTopicsData[currentEventKey]] : [];
+        if (!eventTopics.includes(id)) {
+          eventTopics.push(id);
+          window.eventTopicsData[currentEventKey] = eventTopics;
+          await setDoc(doc(db, "settings", "event_topics"), window.eventTopicsData);
+        }
+
+        // Reset inputs
+        document.getElementById('new-topic-title').value = '';
+        document.getElementById('new-topic-desc').value = '';
+        document.getElementById('new-topic-icon').value = '🆕';
+        document.getElementById('new-topic-product-id').value = '';
+        document.getElementById('new-topic-demo-url').value = '';
+
+        alert("トピックスを追加しました！");
+      } catch(e) {
+        console.error(e);
+        alert("トピックスの追加に失敗しました：" + e.message);
+      }
+    };
+
+    window.deleteTopicMaster = async function(id) {
+      if (!auth.currentUser) return;
+      if (!confirm("本当にこのトピックスを削除しますか？\n（すべてのイベントの表示設定からも削除されます）")) return;
+
+      const updatedMaster = { ...window.topicsMasterData };
+      delete updatedMaster[id];
+
+      const updatedEventTopics = { ...window.eventTopicsData };
+      Object.keys(updatedEventTopics).forEach(key => {
+        if (Array.isArray(updatedEventTopics[key])) {
+          updatedEventTopics[key] = updatedEventTopics[key].filter(x => x !== id);
+        }
+      });
+
+      try {
+        await setDoc(doc(db, "settings", "topics_master"), updatedMaster);
+        await setDoc(doc(db, "settings", "event_topics"), updatedEventTopics);
+        alert("削除しました。");
+      } catch(e) {
+        console.error(e);
+        alert("削除に失敗しました：" + e.message);
       }
     };
 
