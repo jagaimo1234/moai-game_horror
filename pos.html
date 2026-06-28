@@ -562,7 +562,11 @@
           </div>
           <div class="form-group" style="margin-top:10px;">
             <label>体験版等のURL (任意)</label>
-            <input type="text" id="new-topic-demo-url" class="form-input" placeholder="入力すると「WEB体験版をプレイ！」ボタンを自動生成します">
+            <input type="text" id="new-topic-demo-url" class="form-input" placeholder="入力すると体験版ボタンを自動生成します">
+          </div>
+          <div class="form-group" style="margin-top:10px;">
+            <label>体験版ボタンの文言 (任意 - デフォルト：🎮 WEB体験版をプレイ！ →)</label>
+            <input type="text" id="new-topic-button-text" class="form-input" placeholder="例：🎮 WEB体験版をプレイ！ →">
           </div>
           <button class="btn" style="background:var(--success); color:white; font-weight:bold; width:100%; margin-top:15px;" onclick="addNewTopicMaster()">✨ トピックスを追加</button>
         </div>
@@ -2616,6 +2620,7 @@
       const desc = document.getElementById('new-topic-desc').value.trim();
       const productId = document.getElementById('new-topic-product-id').value.trim();
       const demoUrl = document.getElementById('new-topic-demo-url').value.trim();
+      const buttonText = document.getElementById('new-topic-button-text').value.trim();
 
       if (!title || !desc) {
         alert("タイトルと説明文を入力してください。");
@@ -2630,6 +2635,7 @@
         icon,
         productId: productId || null,
         demoUrl: demoUrl || null,
+        buttonText: buttonText || null,
         isBuiltin: false,
         createdAt: Date.now()
       };
@@ -2651,6 +2657,7 @@
         document.getElementById('new-topic-icon').value = '🆕';
         document.getElementById('new-topic-product-id').value = '';
         document.getElementById('new-topic-demo-url').value = '';
+        document.getElementById('new-topic-button-text').value = '';
 
         alert("トピックスを追加しました！");
       } catch(e) {

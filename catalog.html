@@ -1601,9 +1601,10 @@
 
           let buttonsHtml = '';
           if (topic.demoUrl) {
+            const label = topic.buttonText || '🎮 WEB体験版をプレイ！ →';
             buttonsHtml += `
               <a href="${topic.demoUrl}" target="_blank" rel="noopener noreferrer" class="btn-topic-demo">
-                🎮 WEB体験版をプレイ！ →
+                ${label}
               </a>
             `;
           }
