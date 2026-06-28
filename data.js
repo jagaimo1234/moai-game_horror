@@ -191,6 +191,19 @@ const MASTER_PRODUCTS = [
     desc:  'しがないマッチョ。パワーッ!!!'
   },
   {
+    image: 'images/kurima/nukayorokobi_moai_pen.jpg',
+    images: [
+      'images/kurima/nukayorokobi_moai_pen.jpg',
+      'images/kurima/nukayorokobi_moai_pen/nukayorokobi_01.png',
+      'images/kurima/nukayorokobi_moai_pen/nukayorokobi_02.png',
+      'images/kurima/nukayorokobi_moai_pen/nukayorokobi_03.png',
+      'images/kurima/nukayorokobi_moai_pen/nukayorokobi_04.png',
+      'images/kurima/nukayorokobi_moai_pen/nukayorokobi_05.jpg',
+    ],
+    name:  'ぬか喜び\nモアイペン立て',
+    desc:  '作者のクリスマスの悲劇を再現。ゲームカートリッジ付き。スマホをかざすと遊べます。'
+  },
+  {
     image: 'images/kurima/positive_moai_pen.jpg',
     images: [
       'images/kurima/positive_moai_pen.jpg',
