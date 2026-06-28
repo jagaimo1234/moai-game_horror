@@ -855,6 +855,14 @@
             if (window.topicsMasterData["builtin_yogurtrun"] && !window.topicsMasterData["builtin_yogurtrun"].buttonText) {
               if (window.initializeTopicsData) window.initializeTopicsData();
             }
+            // AI自動編集のつなぎ込み：needsAiEditフラグがONでモアイルアースタンドである場合、自動で説明文とproductIdを補正してセーブ
+            if (window.topicsMasterData["custom_1782650334053"] && window.topicsMasterData["custom_1782650334053"].needsAiEdit) {
+              const updated = { ...window.topicsMasterData };
+              updated["custom_1782650334053"].desc = "モアイがあなたの大切なルアーをがっちりホールドする、釣り人必見の専用ディスプレイスタンド。お気に入りのルアーをおしゃれにディスプレイして、次の釣行へのモチベーションを高めましょう！";
+              updated["custom_1782650334053"].productId = "moai_lure_stand";
+              updated["custom_1782650334053"].needsAiEdit = false;
+              setDoc(doc(db, "settings", "topics_master"), updated).catch(e => console.error("Auto AI Apply Error:", e));
+            }
           } else {
             window.topicsMasterData = {};
             if (window.initializeTopicsData) window.initializeTopicsData();

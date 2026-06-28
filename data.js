@@ -315,6 +315,14 @@ const MASTER_PRODUCTS = [
     name:  'ミニおすわりモアイの\nキーホルダー',
     desc:  'ちょこんとお座りするミニモアイのキーホルダー。どこへでも一緒に連れて行けます。'
   },
+  {
+    image: 'images/kurima/moai_lure_stand.jpg',
+    images: [
+      'images/kurima/moai_lure_stand.jpg',
+    ],
+    name:  'モアイルアースタンド',
+    desc:  'モアイがあなたの大切なルアー（釣具）をがっちりホールドする、釣り人必見の専用ディスプレイスタンド。お気に入りのルアーをおしゃれにディスプレイして、次の釣行へのモチベーションを高めましょう！'
+  },
 ];
 
 const EVENTS = {
