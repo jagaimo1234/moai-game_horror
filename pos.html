@@ -568,6 +568,10 @@
             <label>体験版ボタンの文言 (任意 - デフォルト：🎮 WEB体験版をプレイ！ →)</label>
             <input type="text" id="new-topic-button-text" class="form-input" placeholder="例：🎮 WEB体験版をプレイ！ →">
           </div>
+          <div class="form-group" style="margin-top:15px; display:flex; align-items:center; gap:8px; background:rgba(0,210,255,0.05); padding:10px; border-radius:8px; border:1px solid rgba(0,210,255,0.2); cursor:pointer;" onclick="document.getElementById('new-topic-needs-ai').click(); event.stopPropagation();">
+            <input type="checkbox" id="new-topic-needs-ai" style="width:20px; height:20px; accent-color:var(--accent); cursor:pointer;" onclick="event.stopPropagation();">
+            <label style="margin:0; cursor:pointer; font-weight:bold; color:var(--accent);">🤖 AI編集を希望 (指示後に体裁を整えてもらう)</label>
+          </div>
           <button class="btn" style="background:var(--success); color:white; font-weight:bold; width:100%; margin-top:15px;" onclick="addNewTopicMaster()">✨ トピックスを追加</button>
         </div>
       </div>
@@ -2574,13 +2578,17 @@
           ? '' 
           : `<button onclick="event.stopPropagation(); deleteTopicMaster('${id}')" style="background:rgba(231,76,60,0.2); border:1px solid #e74c3c; color:#e74c3c; font-size:11px; padding:4px 8px; border-radius:4px; cursor:pointer; font-weight:bold;">🗑️ 削除</button>`;
 
+        const aiBadge = topic.needsAiEdit 
+          ? `<span style="font-size:10px; background:linear-gradient(45deg, #e67e22, #9b59b6); color:white; padding:2px 6px; border-radius:4px; font-weight:bold; margin-left:6px; box-shadow: 0 1px 3px rgba(0,0,0,0.2);">🤖 AI編集希望</span>` 
+          : '';
+
         list.innerHTML += `
           <div style="background:rgba(0,0,0,0.2); border:1px solid ${isChecked ? 'var(--accent)' : 'var(--border)'}; border-radius:8px; padding:12px; display:flex; align-items:flex-start; justify-content:space-between; gap:10px; cursor:pointer;" onclick="toggleTopicSelection('${id}')">
             <div style="display:flex; align-items:flex-start; gap:10px;">
               <input type="checkbox" id="chk-topic-${id}" ${isChecked ? 'checked' : ''} style="width:20px; height:20px; accent-color:var(--accent); margin-top:2px;" onclick="event.stopPropagation(); toggleTopicSelection('${id}')">
               <div>
-                <div style="font-weight:bold; font-size:14px; margin-bottom:4px;">
-                  <span style="margin-right:6px;">${topic.icon || '🆕'}</span>${topic.title}
+                <div style="font-weight:bold; font-size:14px; margin-bottom:4px; display:flex; align-items:center; flex-wrap:wrap; gap:4px;">
+                  <span>${topic.icon || '🆕'}</span>${topic.title} ${aiBadge}
                 </div>
                 <div style="font-size:12px; opacity:0.7; line-height:1.4;">${topic.desc.replace(/\n/g, '<br>')}</div>
               </div>
@@ -2625,6 +2633,7 @@
       const productId = document.getElementById('new-topic-product-id').value.trim();
       const demoUrl = document.getElementById('new-topic-demo-url').value.trim();
       const buttonText = document.getElementById('new-topic-button-text').value.trim();
+      const needsAiEdit = document.getElementById('new-topic-needs-ai').checked;
 
       if (!title || !desc) {
         alert("タイトルと説明文を入力してください。");
@@ -2640,6 +2649,7 @@
         productId: productId || null,
         demoUrl: demoUrl || null,
         buttonText: buttonText || null,
+        needsAiEdit: needsAiEdit,
         isBuiltin: false,
         createdAt: Date.now()
       };
@@ -2662,6 +2672,7 @@
         document.getElementById('new-topic-product-id').value = '';
         document.getElementById('new-topic-demo-url').value = '';
         document.getElementById('new-topic-button-text').value = '';
+        document.getElementById('new-topic-needs-ai').checked = false;
 
         alert("トピックスを追加しました！");
       } catch(e) {
