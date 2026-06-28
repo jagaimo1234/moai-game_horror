@@ -573,6 +573,17 @@
             <label style="margin:0; cursor:pointer; font-weight:bold; color:var(--accent);">🤖 AI編集を希望 (指示後に体裁を整えてもらう)</label>
           </div>
           <button class="btn" style="background:var(--success); color:white; font-weight:bold; width:100%; margin-top:15px;" onclick="addNewTopicMaster()">✨ トピックスを追加</button>
+          
+          <!-- AI Instruction Copier Template -->
+          <div style="margin-top:20px; padding:15px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); border-radius:8px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+              <span style="font-size:12px; font-weight:bold; color:var(--accent);">📋 AI(Antigravity)への指示文テンプレート</span>
+              <button onclick="copyAiInstruction()" id="btn-copy-instruction" style="background:var(--accent); border:none; color:black; font-size:11px; padding:4px 8px; font-weight:bold; border-radius:4px; cursor:pointer; transition:0.2s;">
+                コピペ用テキストをコピー
+              </button>
+            </div>
+            <textarea id="ai-instruction-template" readonly style="width:100%; background:rgba(0,0,0,0.3); border:1px solid var(--border); border-radius:6px; color:rgba(255,255,255,0.7); font-size:11px; padding:8px; resize:none; font-family:monospace; line-height:1.4;" rows="3">トピックス設定で「AI編集希望」にチェックした項目のUI作り込みをお願いします。具体的には、対象トピックスに対して適切なリンク、作品詳細、Web体験版の表示やスタイルの最適化をお願いします。</textarea>
+          </div>
         </div>
       </div>
     </section>
@@ -2790,6 +2801,25 @@
       } catch (e) {
         console.error("Failed to initialize default topics:", e);
       }
+    };
+
+    window.copyAiInstruction = function() {
+      const text = document.getElementById('ai-instruction-template').value;
+      navigator.clipboard.writeText(text).then(() => {
+        const btn = document.getElementById('btn-copy-instruction');
+        if (btn) {
+          const originalText = btn.textContent;
+          btn.textContent = '✅ コピー完了！';
+          btn.style.background = '#2ecc71';
+          setTimeout(() => {
+            btn.textContent = originalText;
+            btn.style.background = 'var(--accent)';
+          }, 1500);
+        }
+      }).catch(err => {
+        console.error("Failed to copy text: ", err);
+        alert("コピーに失敗しました。直接選択してコピーしてください。");
+      });
     };
 
     window.renderPriceSettings = function() {
