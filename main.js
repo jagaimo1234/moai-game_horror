@@ -4156,6 +4156,11 @@ function finishGame(won) {
           📍 待ってる場所: HMJブース【J-80】<br>Kanazawa Moataro
         </div>
 
+        <div style="margin-top: 15px; font-size: 13px; color: #ffbc69; font-weight: bold; line-height: 1.5; background: rgba(0,0,0,0.4); padding: 10px; border-radius: 8px;">
+          🌐 イベントに来られない方へ<br>
+          <span style="font-size: 11px; color: #fff; font-weight: normal;">後日オンラインでオープンする「闇の取引所」を<br>楽しみにお待ちください！</span>
+        </div>
+
         <div style="margin-top: 18px; font-size: 11px; color: rgba(255,255,255,0.5); line-height: 1.5; text-align: left; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.15);">
           ※他クーポンとの併用はできません。<br>
           ※本クーポンのご利用には、お会計時にこの画面のスクリーンショット提示が必要です。<br>
