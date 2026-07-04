@@ -32,6 +32,7 @@ const VOICE_FILES = {
   darkQuestion: './dark_question.mp3',
   darkYes: './dark_yes.mp3',
   darkNo: './dark_no.mp3',
+  darkEasterEgg: './dark_easter_egg.mp3',
   rivalEncounter: './voice/rival_encounter.m4a',
 };
 const STAGES = [
@@ -3668,7 +3669,7 @@ function triggerNukaEasterEgg(moaiSprite) {
   
   const dialog = document.getElementById('dark-market-dialog');
   if (dialog) dialog.style.display = 'block';
-  playRecordedVoice('./192ed553-d0d5-4d84-87f4-072a37034758.mp3');
+  playRecordedVoice(VOICE_FILES.darkEasterEgg);
   blip(440, 0.12, 0.12, 'sine');
 }
 
