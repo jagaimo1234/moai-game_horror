@@ -3087,19 +3087,40 @@ function createDarkMarketBoothStructure(x, z) {
 
   // Place miniature dark Moais on the table!
   const miniMoaiTex = textureLoader.load('./moai_shot.png');
-  const miniMoaiMat = new THREE.MeshStandardMaterial({
-    map: miniMoaiTex,
-    color: 0x5a3a7b, 
-    transparent: true,
-    roughness: 0.8
+  const tints = [0x5a3a7b, 0x4a2a6b, 0xd4af37, 0x556b2f, 0x2e8b57, 0x8b0000]; // Purple, Dark Purple, Gold, Dark Green, Green, Dark Red
+
+  // Create two dense rows of miniature Moais (front row and back row)
+  const frontRowX = [-4.0, -3.0, -2.0, -1.0, 0, 1.0, 2.0, 3.0, 4.0];
+  const backRowX = [-3.5, -2.5, -1.5, -0.5, 0.5, 1.5, 2.5, 3.5];
+
+  // Front row (closer, lower)
+  frontRowX.forEach((offsetX, idx) => {
+    const color = tints[idx % tints.length];
+    const mat = new THREE.MeshStandardMaterial({
+      map: miniMoaiTex,
+      color: color,
+      transparent: true,
+      roughness: 0.8
+    });
+    const miniMesh = new THREE.Mesh(new THREE.PlaneGeometry(1.0, 1.5), mat);
+    miniMesh.position.set(x + offsetX, 2.2, z + 2.4);
+    miniMesh.rotation.y = Math.PI;
+    world.add(miniMesh);
+    props.push(miniMesh);
   });
-  
-  // Create 4 miniature Moais lined up on the table counter
-  const moaiOffsets = [-3.0, -1.0, 1.0, 3.0];
-  moaiOffsets.forEach((offsetX) => {
-    const miniMesh = new THREE.Mesh(new THREE.PlaneGeometry(1.0, 1.5), miniMoaiMat);
-    miniMesh.position.set(x + offsetX, 2.2, z + 2.2);
-    miniMesh.rotation.y = Math.PI; // Face forward
+
+  // Back row (further, slightly raised)
+  backRowX.forEach((offsetX, idx) => {
+    const color = tints[(idx + 3) % tints.length];
+    const mat = new THREE.MeshStandardMaterial({
+      map: miniMoaiTex,
+      color: color,
+      transparent: true,
+      roughness: 0.8
+    });
+    const miniMesh = new THREE.Mesh(new THREE.PlaneGeometry(1.0, 1.5), mat);
+    miniMesh.position.set(x + offsetX, 2.4, z + 1.2);
+    miniMesh.rotation.y = Math.PI;
     world.add(miniMesh);
     props.push(miniMesh);
   });
