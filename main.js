@@ -82,7 +82,7 @@ const STAGES = [
   {
     name: 'STAGE 4: HMJ MARCHE HALL',
     mission: '会場ブースのヨーグルトを集めろ',
-    seals: 7,
+    seals: 1,
     start: [0, 0, -58],
     gate: [0, 0, 61],
     initialAuthors: 5,
