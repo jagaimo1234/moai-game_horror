@@ -187,6 +187,11 @@ let chosenMoaiType = 1;
 let tempSelectedMoaiType = 1;
 let moataroInvincibleTimer = 0;
 let moataroClerkSafeTimer = 0;
+let darkMarketNpc = null;
+let inDarkMarketZone = false;
+let darkMarketPointLight = null;
+let darkMarketBgmInterval = null;
+let darkMarketBgmSeq = 0;
 let hudUpdateTimer = 0;
 let speechPrimed = false;
 let cachedJapaneseVoice = null;
@@ -732,6 +737,7 @@ function createWorld() {
     addMarketStageStructures();
   }
   createEscapeGate();
+  createDarkMarket();
 
   const propCount = currentStage === 2 ? 30 : currentStage === 3 ? 42 : currentStage === 4 ? (IS_MOBILE_DEVICE ? 6 : 18) : 95;
   for (let i = 0; i < propCount; i++) {
@@ -1816,15 +1822,46 @@ function addSafetyZone(x, z, radius) {
   world.add(post);
 }
 
+function createExitSignTexture() {
+  const canvas = document.createElement('canvas');
+  canvas.width = 256;
+  canvas.height = 128;
+  const ctx = canvas.getContext('2d');
+  
+  ctx.fillStyle = '#00a850';
+  ctx.fillRect(0, 0, 256, 128);
+  
+  ctx.strokeStyle = '#ffffff';
+  ctx.lineWidth = 6;
+  ctx.strokeRect(8, 8, 240, 112);
+  
+  ctx.fillStyle = '#ffffff';
+  ctx.font = 'bold 36px sans-serif';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText('EXIT 🏃 出口', 128, 64);
+  
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.colorSpace = THREE.SRGBColorSpace;
+  return texture;
+}
+
 function createEscapeGate() {
   escapeGate.position.fromArray(getStageConfig().gate);
   escapeGate.position.y = getGroundHeight(escapeGate.position.x, escapeGate.position.z);
 
-  const pillarMat = new THREE.MeshStandardMaterial({ color: 0x323d42, roughness: 0.78, metalness: 0.12 });
+  // EXIT colors: Green (#00b050) frame
+  const pillarMat = new THREE.MeshStandardMaterial({
+    color: 0x009944,
+    roughness: 0.5,
+    metalness: 0.1,
+    emissive: 0x003311,
+    emissiveIntensity: 0.3
+  });
   const glowMat = new THREE.MeshStandardMaterial({
-    color: 0x77f4ff,
-    emissive: 0x1edcff,
-    emissiveIntensity: 0.35,
+    color: 0xff3333,
+    emissive: 0xff0000,
+    emissiveIntensity: 0.55,
     roughness: 0.22,
   });
 
@@ -1851,6 +1888,28 @@ function createEscapeGate() {
   marker.rotation.x = Math.PI / 2;
   marker.position.y = 0.15;
   escapeGate.add(marker);
+
+  // "EXIT 🏃 出口" Sign Billboard
+  const signTex = createExitSignTexture();
+  const signMat = new THREE.MeshBasicMaterial({ map: signTex, transparent: true, side: THREE.DoubleSide });
+  const signMesh = new THREE.Mesh(new THREE.PlaneGeometry(5.2, 2.6), signMat);
+  signMesh.position.set(0, 9.2, 0.1);
+  escapeGate.add(signMesh);
+
+  // Volumetric Red light pillar guide beacon
+  const beaconGeo = new THREE.CylinderGeometry(0.8, 1.8, 48, 16, 1, true);
+  const beaconMat = new THREE.MeshBasicMaterial({
+    color: 0xff1111,
+    transparent: true,
+    opacity: 0.38,
+    blending: THREE.AdditiveBlending,
+    side: THREE.DoubleSide,
+    depthWrite: false
+  });
+  const beacon = new THREE.Mesh(beaconGeo, beaconMat);
+  beacon.position.set(0, 24, 0);
+  beacon.userData.beacon = true;
+  escapeGate.add(beacon);
 }
 
 function addLandmark(x, z, color, type) {
@@ -2435,7 +2494,8 @@ function updateBlueHelper(dt) {
 function movePlayer(dt) {
   const confirmOpen = hud.confirmDialog && hud.confirmDialog.style.display === 'flex';
   const rivalOpen = hud.rivalDialog && hud.rivalDialog.style.display === 'block';
-  if (confirmOpen || rivalOpen) {
+  const darkMarketOpen = document.getElementById('dark-market-dialog') && document.getElementById('dark-market-dialog').style.display === 'block';
+  if (confirmOpen || rivalOpen || darkMarketOpen) {
     playerVelocity.set(0, 0, 0);
     return;
   }
@@ -2979,10 +3039,223 @@ function checkStarterMoaiHover() {
       hitMoai.userData.label.visible = true;
       hitMoai.scale.set(1.5, 1.5, 1);
       document.body.style.cursor = 'pointer';
+      return true;
     }
-  } else {
-    document.body.style.cursor = 'default';
   }
+  return false;
+}
+
+function createDarkMarket() {
+  if (currentStage !== 4) return;
+  
+  const npcGroup = new THREE.Group();
+  npcGroup.position.set(-50, 0, -46);
+  
+  const tableMat = new THREE.MeshStandardMaterial({ color: 0x1a120b, roughness: 0.9 });
+  const table = new THREE.Mesh(new THREE.BoxGeometry(4, 1.8, 2.5), tableMat);
+  table.position.y = 0.9;
+  table.castShadow = true;
+  table.receiveShadow = true;
+  npcGroup.add(table);
+  
+  const moaiTexture = textureLoader.load('./moai_shot.png');
+  const moaiMat = new THREE.MeshStandardMaterial({
+    map: moaiTexture,
+    color: 0x4a2a6b, 
+    transparent: true,
+    roughness: 0.8,
+  });
+  const shadyMoai = new THREE.Mesh(new THREE.PlaneGeometry(2.4, 3.6), moaiMat);
+  shadyMoai.position.set(0, 3.2, 0);
+  shadyMoai.userData.isDarkMarketMerchant = true; 
+  npcGroup.add(shadyMoai);
+  
+  const signTex = createDarkSignTexture();
+  const signMat = new THREE.MeshBasicMaterial({ map: signTex, transparent: true, side: THREE.DoubleSide });
+  const signMesh = new THREE.Mesh(new THREE.PlaneGeometry(3.5, 1.25), signMat);
+  signMesh.position.set(0, 5.4, 0);
+  npcGroup.add(signMesh);
+  
+  darkMarketPointLight = new THREE.PointLight(0xa020f0, 0, 18);
+  darkMarketPointLight.position.set(0, 4.5, 0);
+  npcGroup.add(darkMarketPointLight);
+  
+  world.add(npcGroup);
+  darkMarketNpc = npcGroup;
+}
+
+function createDarkSignTexture() {
+  const canvas = document.createElement('canvas');
+  canvas.width = 128;
+  canvas.height = 64;
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = '#0a0518';
+  ctx.fillRect(0, 0, 128, 64);
+  ctx.strokeStyle = '#a020f0';
+  ctx.lineWidth = 4;
+  ctx.strokeRect(4, 4, 120, 56);
+  
+  ctx.fillStyle = '#ff77ff';
+  ctx.font = 'bold 16px sans-serif';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText('闇の取引所', 64, 32);
+  
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.colorSpace = THREE.SRGBColorSpace;
+  return texture;
+}
+
+function updateDarkMarketZone(dt) {
+  if (currentStage !== 4 || !darkMarketNpc) return;
+  
+  const dist = moai.position.distanceTo(darkMarketNpc.position);
+  const inZone = dist < 16;
+  
+  if (inZone !== inDarkMarketZone) {
+    inDarkMarketZone = inZone;
+    if (inDarkMarketZone) {
+      startDarkMarketBgm();
+    } else {
+      stopDarkMarketBgm();
+    }
+  }
+  
+  if (ambientLight && dirLight && darkMarketPointLight) {
+    const targetAmbient = inDarkMarketZone ? 0.08 : 0.65;
+    const targetDir = inDarkMarketZone ? 0.08 : 0.8;
+    const targetPoint = inDarkMarketZone ? 5.5 : 0;
+    
+    ambientLight.intensity = THREE.MathUtils.lerp(ambientLight.intensity, targetAmbient, dt * 3.5);
+    dirLight.intensity = THREE.MathUtils.lerp(dirLight.intensity, targetDir, dt * 3.5);
+    darkMarketPointLight.intensity = THREE.MathUtils.lerp(darkMarketPointLight.intensity, targetPoint, dt * 3.5);
+  }
+  
+  const shadyMoai = darkMarketNpc.children.find(child => child.userData.isDarkMarketMerchant);
+  if (shadyMoai) {
+    shadyMoai.lookAt(camera.position.x, shadyMoai.parent.position.y + 3.2, camera.position.z);
+  }
+}
+
+function startDarkMarketBgm() {
+  if (bgmGain) {
+    bgmGain.gain.setTargetAtTime(0.002, audioCtx.currentTime, 0.4);
+  }
+  if (darkMarketBgmInterval) clearInterval(darkMarketBgmInterval);
+  
+  const notes = [
+    147, 0, 165, 175, 0, 196, 175, 165,
+    147, 131, 0, 147, 165, 0, 131, 110
+  ];
+  
+  darkMarketBgmInterval = setInterval(() => {
+    if (!inDarkMarketZone) return;
+    const note = notes[darkMarketBgmSeq % notes.length];
+    darkMarketBgmSeq++;
+    
+    if (note > 0) {
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      
+      osc.type = 'square';
+      osc.frequency.setValueAtTime(note * 1.5, audioCtx.currentTime);
+      
+      gain.gain.setValueAtTime(0.02, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.22);
+      
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      
+      osc.start();
+      osc.stop(audioCtx.currentTime + 0.24);
+    }
+  }, 180);
+}
+
+function stopDarkMarketBgm() {
+  if (darkMarketBgmInterval) {
+    clearInterval(darkMarketBgmInterval);
+    darkMarketBgmInterval = null;
+  }
+  if (bgmGain) {
+    bgmGain.gain.setTargetAtTime(0.085, audioCtx.currentTime, 0.4);
+  }
+}
+
+function checkDarkMarketClick() {
+  if (currentStage !== 4 || !darkMarketNpc) return;
+  raycaster.setFromCamera(mouse, camera);
+  const intersects = raycaster.intersectObjects(darkMarketNpc.children);
+  if (intersects.length > 0) {
+    showDarkMarketDialog();
+  }
+}
+
+function checkDarkMarketHover() {
+  if (currentStage !== 4 || !darkMarketNpc) return;
+  raycaster.setFromCamera(mouse, camera);
+  const intersects = raycaster.intersectObjects(darkMarketNpc.children);
+  if (intersects.length > 0) {
+    document.body.style.cursor = 'pointer';
+    return true;
+  }
+  return false;
+}
+
+function showDarkMarketDialog() {
+  gamePaused = true;
+  stopMobileMove();
+  keys.forward = false;
+  keys.backward = false;
+  keys.left = false;
+  keys.right = false;
+  keys.fire = false;
+  
+  const textEl = document.getElementById('dark-market-text');
+  const yesBtn = document.getElementById('btn-dark-yes');
+  const noBtn = document.getElementById('btn-dark-no');
+  const closeBtn = document.getElementById('btn-dark-close');
+  
+  if (textEl) {
+    textEl.textContent = '……フフフ、ここを見つけたか。\nお前、今週末のリアルHMJ（東京ビッグサイト）には来られそうか？';
+  }
+  if (yesBtn) yesBtn.style.display = 'inline-block';
+  if (noBtn) noBtn.style.display = 'inline-block';
+  if (closeBtn) closeBtn.style.display = 'none';
+  
+  const dialog = document.getElementById('dark-market-dialog');
+  if (dialog) dialog.style.display = 'block';
+  blip(440, 0.12, 0.12, 'sine');
+}
+
+function handleDarkMarketResponse(answer) {
+  const textEl = document.getElementById('dark-market-text');
+  const yesBtn = document.getElementById('btn-dark-yes');
+  const noBtn = document.getElementById('btn-dark-no');
+  const closeBtn = document.getElementById('btn-dark-close');
+  
+  if (answer === 'yes') {
+    if (textEl) {
+      textEl.textContent = 'そうか！それは素晴らしい！ならリアル会場（ブース：J-80）で待っているぞ。\nお前の選んだモアイを、ぜひ直接手にとって連れて帰ってやってくれ！';
+    }
+    blip(880, 0.14, 0.12, 'sine');
+  } else {
+    if (textEl) {
+      textEl.textContent = 'そうか……来られないか。寂しいことだ。\n……だが、がっかりするな。ならばイベントが終わったら、またここへ来るとよい。\nこのゲームを遊んでくれたお前だけの、特別な取引（お楽しみ）を用意しておこう……フフフ。';
+    }
+    blip(580, 0.14, 0.12, 'sine');
+  }
+  
+  if (yesBtn) yesBtn.style.display = 'none';
+  if (noBtn) noBtn.style.display = 'none';
+  if (closeBtn) closeBtn.style.display = 'inline-block';
+}
+
+function closeDarkMarketDialog() {
+  const dialog = document.getElementById('dark-market-dialog');
+  if (dialog) dialog.style.display = 'none';
+  gamePaused = false;
+  blip(330, 0.1, 0.1, 'sine');
 }
 
 function checkStarterMoaiClick() {
@@ -3275,6 +3548,14 @@ function updatePickups(dt) {
     portal.material.opacity = escapeOpen ? 0.92 : 0.32;
     portal.material.transparent = true;
   }
+  
+  const beacon = escapeGate.children.find((child) => child.userData.beacon);
+  if (beacon && beacon.material) {
+    const baseOpacity = escapeOpen ? 0.48 : 0.15;
+    beacon.material.opacity = baseOpacity + Math.sin(performance.now() * 0.005) * 0.1;
+    beacon.rotation.y += 0.008;
+  }
+  
   escapeGate.rotation.y = Math.sin(performance.now() * 0.001) * 0.08;
 
   if (escapeOpen && moai.position.distanceTo(escapeGate.position) < 4.7) {
@@ -3472,6 +3753,11 @@ function resetGame(stage = 4) {
   moataroSpeechTimer = 0;
   moataroPromptDismissed = false;
   moataroMoaiPurchased = false;
+  inDarkMarketZone = false;
+  stopDarkMarketBgm();
+  darkMarketNpc = null;
+  const darkMarketDialog = document.getElementById('dark-market-dialog');
+  if (darkMarketDialog) darkMarketDialog.style.display = 'none';
   moataroInvincibleTimer = 0;
   moataroClerkSafeTimer = 0;
   yogurtTimeVoiceCooldown = 0;
@@ -3529,6 +3815,7 @@ function animate() {
     updatePickups(dt);
     updateTeleportRings(dt);
     updateContactEffects(dt);
+    updateDarkMarketZone(dt);
     if (currentStage === 4 && !moataroMoaiPurchased && guideArrow) {
       guideArrow.visible = true;
       guideArrow.position.copy(moai.position).add(new THREE.Vector3(0, 3.8 + Math.sin(performance.now() * 0.0055) * 0.25, 0));
@@ -3585,8 +3872,12 @@ window.addEventListener('pointermove', (event) => {
   mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
   mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
   
+  let hovered = false;
   if (moataroServiceActive && !moataroMoaiPurchased) {
-    checkStarterMoaiHover();
+    hovered = checkStarterMoaiHover();
+  }
+  if (!hovered) {
+    checkDarkMarketHover();
   }
 });
 
@@ -3598,6 +3889,7 @@ window.addEventListener('pointerdown', (event) => {
   if (moataroServiceActive && !moataroMoaiPurchased) {
     checkStarterMoaiClick();
   }
+  checkDarkMarketClick();
 });
 
 function isTouchUiTarget(event) {
@@ -3778,6 +4070,31 @@ if (hud.rivalDialog) {
     event.preventDefault();
     event.stopPropagation();
     startRivalChase();
+  });
+}
+
+const btnDarkYes = document.getElementById('btn-dark-yes');
+if (btnDarkYes) {
+  btnDarkYes.addEventListener('pointerdown', (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    handleDarkMarketResponse('yes');
+  });
+}
+const btnDarkNo = document.getElementById('btn-dark-no');
+if (btnDarkNo) {
+  btnDarkNo.addEventListener('pointerdown', (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    handleDarkMarketResponse('no');
+  });
+}
+const btnDarkClose = document.getElementById('btn-dark-close');
+if (btnDarkClose) {
+  btnDarkClose.addEventListener('pointerdown', (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    closeDarkMarketDialog();
   });
 }
 
