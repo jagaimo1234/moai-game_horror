@@ -1049,7 +1049,7 @@ function addMarketStageStructures() {
 }
 
 function addRegularCustomers() {
-  const customerFiles = ['./custmer1.png', './custmer2.png', './custmer3.png'];
+  const customerFiles = ['./custmer1.png', './custmer2.png', './custmer3.png', './running_moai.png'];
   const materials = customerFiles.map((file) => {
     const texture = textureLoader.load(file);
     texture.colorSpace = THREE.SRGBColorSpace;
@@ -1079,6 +1079,7 @@ function addRegularCustomers() {
     [6, 26, 2.88, 2],
     [46, 45, 3.04, 0],
     [58, -3, 2.94, 1],
+    [58, -3, 2.94, 1],
     [-9, -57, 2.92, 0],
     [16, -58, 3.02, 2],
     [-44, -47, 2.86, 1],
@@ -1096,7 +1097,8 @@ function addRegularCustomers() {
   ];
   const activeSpots = IS_MOBILE_DEVICE ? spots.slice(0, 12) : spots;
   activeSpots.forEach(([x, z, scale, materialIndex], index) => {
-    const customer = new THREE.Sprite(materials[materialIndex].clone());
+    const matIdx = index % materials.length; // Distributes 0, 1, 2, 3 (running_moai) evenly
+    const customer = new THREE.Sprite(materials[matIdx].clone());
     customer.position.set(x, scale * 0.46 + Math.sin(index * 0.8) * 0.04, z);
     customer.scale.set(scale, scale, 1);
     customer.userData.faceCamera = true;
