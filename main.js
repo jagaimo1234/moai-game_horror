@@ -32,7 +32,7 @@ const VOICE_FILES = {
   darkQuestion: './dark_question.mp3',
   darkYes: './dark_yes.mp3',
   darkNo: './dark_no.mp3',
-  rivalEncounter: './voice/hello.m4a',
+  rivalEncounter: './voice/rival_encounter.m4a',
 };
 const STAGES = [
   {
