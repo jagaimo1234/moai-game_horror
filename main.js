@@ -2684,6 +2684,8 @@ function updateMoataroClerk(enemy, dt) {
   if (enemy.userData.yogurtIcon) enemy.userData.yogurtIcon.visible = false;
   if (enemy.userData.yogurtLabel) enemy.userData.yogurtLabel.visible = false;
   if (enemy.userData.serviceLabel) enemy.userData.serviceLabel.visible = true;
+  if (enemy.userData.downLabel) enemy.userData.downLabel.visible = false;
+  enemy.userData.downTimer = 0;
   
   let target;
   if (moataroServiceActive && !moataroMoaiPurchased) {
