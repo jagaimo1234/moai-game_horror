@@ -3392,15 +3392,12 @@ function finishGame(won) {
   let couponHtml = '';
   if (won && currentStage === 4) {
     let moaiName = 'おすわりモアイペン立て';
-    let couponCode = 'OSUWARI300';
     let moaiImg = './moai_shot.png';
     if (chosenMoaiType === 2) {
       moaiName = 'まちょいモアイルアースタンド';
-      couponCode = 'LURE300';
       moaiImg = './moai_lure.png';
     } else if (chosenMoaiType === 3) {
       moaiName = 'まちょいモアイメガネスタンド';
-      couponCode = 'GLASSES300';
       moaiImg = './moai_glasses.png';
     }
 
@@ -3409,7 +3406,7 @@ function finishGame(won) {
         <h3 style="color: #ffbc69; margin: 0 0 8px 0; font-size: 17px; font-weight: 900; letter-spacing: 1px;">🎁 クーポン獲得！ 🎁</h3>
         <p style="margin: 0 0 12px 0; font-size: 13px; color: #fff6cf; font-weight: bold; line-height: 1.45;">おめでとうございます！あなたが選んだ<br><span style="color:#ffd700; font-size:14px;">「${moaiName}」</span>の割引特典です！</p>
         
-        <div style="display: flex; align-items: center; justify-content: center; gap: 15px; margin: 10px 0 16px;">
+        <div style="display: flex; align-items: center; justify-content: center; gap: 15px; margin: 10px 0 14px;">
           <img src="${moaiImg}" alt="moai" style="width: 80px; height: 95px; object-fit: contain; filter: drop-shadow(0 6px 12px rgba(0,0,0,0.55)); background: rgba(255,255,255,0.06); padding: 6px; border-radius: 8px; border: 1.5px solid rgba(255,255,255,0.12);">
           <div style="text-align: left;">
             <div style="font-size: 16px; font-weight: 900; color: #77f4ff; margin-bottom: 2px;">特典：300円引き</div>
@@ -3417,8 +3414,8 @@ function finishGame(won) {
           </div>
         </div>
 
-        <div style="background: #ffbc69; color: #101a20; font-size: 21px; font-weight: 900; padding: 10px; border-radius: 6px; letter-spacing: 2px; display: inline-block; min-width: 240px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); font-family: monospace;">
-          コード: ${couponCode}
+        <div style="background: rgba(255, 215, 0, 0.12); color: #ffd700; border: 2.2px solid #ffd700; font-size: 15px; font-weight: 900; padding: 12px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); font-family: 'DotGothic16', sans-serif; line-height: 1.5; display: inline-block; width: 100%; box-sizing: border-box; text-shadow: 0 1px 4px rgba(0,0,0,0.8);">
+          📍 HMJブース: J-80<br>Kanazawa Moataroブースで待っているよ！
         </div>
         
         <div style="margin-top: 14px; font-size: 12px; color: #ff5555; font-weight: 900; letter-spacing: 0.5px; animation: pulse 1s infinite alternate;">
