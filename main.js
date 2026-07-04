@@ -241,6 +241,8 @@ let guideArrow = null;
 const starterMoais = [];
 let hasDarkMarketCard = false;
 let nukaFollower = null;
+let darkMarketDialogContext = 'hmj_question';
+let pendingNukaSprite = null;
 const raycaster = new THREE.Raycaster();
 const mouse = new THREE.Vector2();
 
@@ -3520,11 +3522,19 @@ function showDarkMarketDialog() {
     }
   }
   
+  darkMarketDialogContext = 'hmj_question';
+  
   if (textEl) {
     textEl.textContent = '……フフフ、ここを見つけたか。\nこの闇の取引所……7月19日（日）15時に開店予定だ。\nお前、今週末のリアルHMJ（東京ビッグサイト）には来られそうか？';
   }
-  if (yesBtn) yesBtn.style.display = 'inline-block';
-  if (noBtn) noBtn.style.display = 'inline-block';
+  if (yesBtn) {
+    yesBtn.style.display = 'inline-block';
+    yesBtn.textContent = 'はい';
+  }
+  if (noBtn) {
+    noBtn.style.display = 'inline-block';
+    noBtn.textContent = 'いいえ';
+  }
   if (closeBtn) closeBtn.style.display = 'none';
   
   const dialog = document.getElementById('dark-market-dialog');
@@ -3539,6 +3549,37 @@ function handleDarkMarketResponse(answer) {
   const noBtn = document.getElementById('btn-dark-no');
   const closeBtn = document.getElementById('btn-dark-close');
   
+  if (darkMarketDialogContext === 'easter_egg') {
+    if (answer === 'yes') {
+      hasDarkMarketCard = true;
+      if (pendingNukaSprite) {
+        if (pendingNukaSprite.parent) pendingNukaSprite.parent.remove(pendingNukaSprite);
+        const idx = starterMoais.indexOf(pendingNukaSprite);
+        if (idx > -1) starterMoais.splice(idx, 1);
+        pendingNukaSprite = null;
+      }
+      
+      const followerTex = textureLoader.load('./nukayorokobi.png');
+      const followerMat = new THREE.SpriteMaterial({ map: followerTex });
+      nukaFollower = new THREE.Sprite(followerMat);
+      nukaFollower.scale.set(1.4, 1.4, 1);
+      nukaFollower.position.copy(moai.position);
+      nukaFollower.position.y += 2.0;
+      world.add(nukaFollower);
+
+      if (textEl) textEl.textContent = '……フフフ、よい判断だ。では健闘を祈る。';
+      blip(880, 0.14, 0.12, 'sine');
+    } else {
+      if (textEl) textEl.textContent = '……ほう。この申し出を断るとはな。\nまあよい……後悔するなよ……フフフ。';
+      blip(580, 0.14, 0.12, 'sine');
+    }
+    
+    if (yesBtn) yesBtn.style.display = 'none';
+    if (noBtn) noBtn.style.display = 'none';
+    if (closeBtn) closeBtn.style.display = 'inline-block';
+    return;
+  }
+
   if (answer === 'yes') {
     if (textEl) {
       textEl.textContent = 'そうか！それは素晴らしい！ならリアル会場（ブース：J-80）で待っているぞ。\nお前の選んだモアイを直接手にとって連れて帰ってやってくれ！\n……なお、この闇の取引所は 7/19（日）15時 に正式オープンするぞ。お楽しみに。';
@@ -3604,21 +3645,8 @@ function triggerNukaEasterEgg(moaiSprite) {
   keys.right = false;
   keys.fire = false;
   
-  hasDarkMarketCard = true;
-
-  if (moaiSprite.parent) {
-    moaiSprite.parent.remove(moaiSprite);
-  }
-  const idx = starterMoais.indexOf(moaiSprite);
-  if (idx > -1) starterMoais.splice(idx, 1);
-  
-  const followerTex = textureLoader.load('./nukayorokobi.png');
-  const followerMat = new THREE.SpriteMaterial({ map: followerTex });
-  nukaFollower = new THREE.Sprite(followerMat);
-  nukaFollower.scale.set(1.4, 1.4, 1);
-  nukaFollower.position.copy(moai.position);
-  nukaFollower.position.y += 2.0;
-  world.add(nukaFollower);
+  darkMarketDialogContext = 'easter_egg';
+  pendingNukaSprite = moaiSprite;
 
   const textEl = document.getElementById('dark-market-text');
   const yesBtn = document.getElementById('btn-dark-yes');
@@ -3628,12 +3656,19 @@ function triggerNukaEasterEgg(moaiSprite) {
   if (textEl) {
     textEl.textContent = 'フフ、おや逃亡中か……。\nそんなお前には、作者には内緒で、この『闇の取引カード』を授けよう。\nこれをもってクリアすると、この作品も割引対象としよう……。\nまぁ、無事にクリアできたらの話だがな……フフフ。';
   }
-  if (yesBtn) yesBtn.style.display = 'none';
-  if (noBtn) noBtn.style.display = 'none';
-  if (closeBtn) closeBtn.style.display = 'inline-block';
+  if (yesBtn) {
+    yesBtn.style.display = 'inline-block';
+    yesBtn.textContent = '受け取る';
+  }
+  if (noBtn) {
+    noBtn.style.display = 'inline-block';
+    noBtn.textContent = 'いらない';
+  }
+  if (closeBtn) closeBtn.style.display = 'none';
   
   const dialog = document.getElementById('dark-market-dialog');
   if (dialog) dialog.style.display = 'block';
+  playRecordedVoice('./192ed553-d0d5-4d84-87f4-072a37034758.mp3');
   blip(440, 0.12, 0.12, 'sine');
 }
 
@@ -4110,9 +4145,6 @@ function finishGame(won) {
             <img src="./nukayorokobi.png" alt="moai" style="width: 80px; height: 95px; object-fit: contain; filter: drop-shadow(0 6px 12px rgba(0,0,0,0.55)); background: rgba(255,255,255,0.06); padding: 6px; border-radius: 8px; border: 1.5px solid rgba(255,255,255,0.12);">
             <div style="text-align: left;">
               <div style="font-size: 16px; font-weight: 900; color: #77f4ff; margin-bottom: 8px;">特典：200円引き</div>
-              <a href="https://moai.booth.pm/items/5863266" target="_blank" style="display: inline-block; padding: 6px 12px; background: linear-gradient(90deg, #ff416c, #ff4b2b); color: #fff; text-decoration: none; font-size: 13px; font-weight: bold; border-radius: 6px; box-shadow: 0 4px 10px rgba(255,75,43,0.4);">
-                ショップで確認する 🛒
-              </a>
             </div>
           </div>
         </div>
