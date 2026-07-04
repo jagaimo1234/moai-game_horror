@@ -2351,6 +2351,20 @@ function loadRecordedVoice(src) {
   return promise;
 }
 
+let currentVoiceNode = null;
+
+function stopCurrentVoice() {
+  if (currentVoiceNode) {
+    try {
+      currentVoiceNode.stop();
+    } catch (_) {}
+    currentVoiceNode = null;
+  }
+  if ('speechSynthesis' in window) {
+    window.speechSynthesis.cancel();
+  }
+}
+
 function playRecordedVoiceBuffer(buffer, { volume = 1 } = {}) {
   if (!buffer) return false;
   try {
@@ -2367,6 +2381,11 @@ function playRecordedVoiceBuffer(buffer, { volume = 1 } = {}) {
     gain.gain.setValueAtTime(volume, now);
     source.connect(gain);
     gain.connect(audioCtx.destination);
+    
+    stopCurrentVoice();
+    currentVoiceNode = source;
+    source.onended = () => { if (currentVoiceNode === source) currentVoiceNode = null; };
+    
     source.start(now);
     return true;
   } catch (_) {
@@ -3052,6 +3071,7 @@ function updateMoataroService(dt) {
   } else if (!active && moataroServiceActive) {
     moataroServiceActive = false;
     moataroPromptDismissed = false;
+    stopCurrentVoice();
     updateMoataroShopDialog();
     if (authors[0]?.userData.serviceLabel) authors[0].userData.serviceLabel.visible = false;
   }
@@ -3524,6 +3544,7 @@ function closeDarkMarketDialog() {
   const dialog = document.getElementById('dark-market-dialog');
   if (dialog) dialog.style.display = 'none';
   gamePaused = false;
+  stopCurrentVoice();
   blip(330, 0.1, 0.1, 'sine');
 }
 
@@ -4454,6 +4475,7 @@ if (hud.rivalDialog) {
   hud.rivalDialog.addEventListener('pointerdown', (event) => {
     event.preventDefault();
     event.stopPropagation();
+    stopCurrentVoice();
     startRivalChase();
   });
 }
@@ -4505,6 +4527,7 @@ if (hud.skipMoai) {
     event.stopPropagation();
     moataroPromptDismissed = true;
     moataroClerkSafeTimer = 4.0;
+    stopCurrentVoice();
     updateMoataroShopDialog();
   });
 }
