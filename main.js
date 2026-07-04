@@ -239,6 +239,8 @@ petMoai.visible = false;
 scene.add(petMoai);
 let guideArrow = null;
 const starterMoais = [];
+let hasDarkMarketCard = false;
+let nukaFollower = null;
 const raycaster = new THREE.Raycaster();
 const mouse = new THREE.Vector2();
 
@@ -3267,6 +3269,18 @@ function createDarkMarketBoothStructure(x, z) {
     world.add(miniMesh);
     props.push(miniMesh);
   });
+
+  // Add nukayorokobi moai to the table for easter egg
+  const nukaTex = textureLoader.load('./nukayorokobi.png');
+  const nukaMat = new THREE.SpriteMaterial({ map: nukaTex });
+  const nukaMoaiSprite = new THREE.Sprite(nukaMat);
+  nukaMoaiSprite.position.set(x + 4.5, 2.2, z + 2.8);
+  nukaMoaiSprite.scale.set(1.4, 1.4, 1);
+  nukaMoaiSprite.userData.moaiType = 4;
+  nukaMoaiSprite.userData.isNukayorokobi = true;
+  world.add(nukaMoaiSprite);
+  props.push(nukaMoaiSprite);
+  starterMoais.push(nukaMoaiSprite);
 }
 
 function createDarkMarket() {
@@ -3490,9 +3504,55 @@ function checkStarterMoaiClick() {
   const intersects = raycaster.intersectObjects(starterMoais);
   if (intersects.length > 0) {
     const hitMoai = intersects[0].object;
-    showMoaiConfirmation(hitMoai.userData.moaiType);
+    if (hitMoai.userData.moaiType === 4 && moataroMoaiPurchased) {
+      triggerNukaEasterEgg(hitMoai);
+    } else {
+      showMoaiConfirmation(hitMoai.userData.moaiType);
+    }
     document.body.style.cursor = 'default';
   }
+}
+
+function triggerNukaEasterEgg(moaiSprite) {
+  gamePaused = true;
+  stopMobileMove();
+  keys.forward = false;
+  keys.backward = false;
+  keys.left = false;
+  keys.right = false;
+  keys.fire = false;
+  
+  hasDarkMarketCard = true;
+
+  if (moaiSprite.parent) {
+    moaiSprite.parent.remove(moaiSprite);
+  }
+  const idx = starterMoais.indexOf(moaiSprite);
+  if (idx > -1) starterMoais.splice(idx, 1);
+  
+  const followerTex = textureLoader.load('./nukayorokobi.png');
+  const followerMat = new THREE.SpriteMaterial({ map: followerTex });
+  nukaFollower = new THREE.Sprite(followerMat);
+  nukaFollower.scale.set(1.4, 1.4, 1);
+  nukaFollower.position.copy(moai.position);
+  nukaFollower.position.y += 2.0;
+  world.add(nukaFollower);
+
+  const textEl = document.getElementById('dark-market-text');
+  const yesBtn = document.getElementById('btn-dark-yes');
+  const noBtn = document.getElementById('btn-dark-no');
+  const closeBtn = document.getElementById('btn-dark-close');
+  
+  if (textEl) {
+    textEl.textContent = 'フフ、おや逃亡中か……。\nそんなお前には、作者には内緒で、この『闇の取引カード』を授けよう。\nこれをもってクリアすると、この作品も割引対象としよう……。\nまぁ、無事にクリアできたらの話だがな……フフフ。';
+  }
+  if (yesBtn) yesBtn.style.display = 'none';
+  if (noBtn) noBtn.style.display = 'none';
+  if (closeBtn) closeBtn.style.display = 'inline-block';
+  
+  const dialog = document.getElementById('dark-market-dialog');
+  if (dialog) dialog.style.display = 'block';
+  blip(440, 0.12, 0.12, 'sine');
 }
 
 function showMoaiConfirmation(type) {
@@ -3526,6 +3586,13 @@ function showMoaiConfirmation(type) {
     type2 = '💪 パワー';
     category = 'メガネスタンド';
     desc = 'メガネを　ささえるためだけに\nからだを　きたえつづけた。\nきんにくを　ほめられると\nちょっとだけ　うれしそうだ。';
+  } else if (type === 4) {
+    name = 'ぬかよろこびモアイペン立て';
+    imgSrc = './nukayorokobi.png';
+    no = 'No. 404';
+    type2 = '💧 がっかり';
+    category = 'ペンたて';
+    desc = 'ペンを　さしてもらえると\nおもって　きたいしたのに、\nそのまま　スルーされてしまった。\nぬかよろこび　したときの\nかなしそうな　かおを　している。';
   }
   
   if (hud.confirmTitle) hud.confirmTitle.textContent = name;
@@ -3584,6 +3651,7 @@ function showMoataroThanks() {
 function updatePetMoai(dt) {
   if (!moataroMoaiPurchased) {
     petMoai.visible = false;
+    if (nukaFollower) nukaFollower.visible = false;
     return;
   }
   petMoai.visible = true;
@@ -3593,6 +3661,13 @@ function updatePetMoai(dt) {
   petMoai.children.forEach((child) => {
     if (child.userData.faceCamera && !child.isSprite) child.lookAt(camera.position);
   });
+
+  if (nukaFollower) {
+    nukaFollower.visible = true;
+    const behind2 = moai.position.clone().add(new THREE.Vector3(Math.sin(cameraYaw - 0.4) * 3.6, 0, Math.cos(cameraYaw - 0.4) * 3.6));
+    behind2.y = getGroundHeight(behind2.x, behind2.z) + 1.2;
+    nukaFollower.position.lerp(behind2, 1 - Math.pow(0.001, dt));
+  }
 }
 
 function spawnAuthorContactEffect(enemy, color) {
@@ -3927,13 +4002,33 @@ function finishGame(won) {
         </div>
         
         <div style="margin-top: 14px; font-size: 12px; color: #ff5555; font-weight: 900; letter-spacing: 0.5px; animation: pulse 1s infinite alternate;">
-          📸 この画面をスクリーンショットして保存してください！
+          📸 この画面をスクリーンショットして保存してください！          </div>
         </div>
       </div>
     `;
+
+    if (hasDarkMarketCard) {
+      couponHtml += `
+        <div style="background: linear-gradient(135deg, #1e2d38, #0b151b); border: 3px dashed #d28cff; border-radius: 12px; padding: 18px; margin: 15px auto 20px; max-width: 440px; box-shadow: 0 12px 32px rgba(0,0,0,0.6); text-align: center; box-sizing: border-box;">
+          <h3 style="color: #d28cff; margin: 0 0 8px 0; font-size: 17px; font-weight: 900; letter-spacing: 1px;">💳 闇の取引カード特典 💳</h3>
+          <p style="margin: 0 0 12px 0; font-size: 13px; color: #fff6cf; font-weight: bold; line-height: 1.45;">特別な取引が成立しました！<br><span style="color:#ffd700; font-size:14px;">「ぬかよろこびモアイペン立て」</span>の割引特典です！</p>
+          
+          <div style="display: flex; align-items: center; justify-content: center; gap: 15px; margin: 10px 0 14px;">
+            <img src="./nukayorokobi.png" alt="moai" style="width: 80px; height: 95px; object-fit: contain; filter: drop-shadow(0 6px 12px rgba(0,0,0,0.55)); background: rgba(255,255,255,0.06); padding: 6px; border-radius: 8px; border: 1.5px solid rgba(255,255,255,0.12);">
+            <div style="text-align: left;">
+              <div style="font-size: 16px; font-weight: 900; color: #77f4ff; margin-bottom: 2px;">特典：200円引き</div>
+              <div style="font-size: 12px; font-weight: bold; color: #ffbc69; margin-bottom: 5px;">キーワード: <span>NUKAYOROKOBI</span></div>
+              <a href="https://moai.booth.pm/items/5863266" target="_blank" style="display: inline-block; padding: 6px 12px; background: linear-gradient(90deg, #ff416c, #ff4b2b); color: #fff; text-decoration: none; font-size: 13px; font-weight: bold; border-radius: 6px; box-shadow: 0 4px 10px rgba(255,75,43,0.4);">
+                ショップで確認する 🛒
+              </a>
+            </div>
+          </div>
+        </div>
+      `;
+    }
   }
 
-  hud.start.style.display = 'flex';
+  const container = document.getElementById('game-clear');
   hud.start.style.opacity = '1';
   hud.start.innerHTML = `
     <div class="start-card open-world-card">
