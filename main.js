@@ -340,6 +340,15 @@ const bgmThemes = [
   },
 ];
 
+const pokemonRivalTheme = {
+  bass: [110, 55, 110, 55, 130.81, 65.41, 146.83, 73.42, 164.81, 82.41, 164.81, 82.41, 196.00, 98.00, 220.00, 110.00],
+  lead: [440, 523.25, 587.33, 659.25, 783.99, 659.25, 783.99, 880.00, 1046.50, 880.00, 783.99, 659.25, 587.33, 523.25, 493.88, 440.00],
+  harmony: [220, 261.63, 293.66, 329.63, 392.00, 329.63, 392.00, 440.00, 523.25, 440.00, 392.00, 329.63, 293.66, 261.63, 246.94, 220.00],
+  drumEvery: 2,
+  baseInterval: 105, // Super fast tempo for high tension!
+  leadType: 'square', // Classic NES/Gameboy square wave
+};
+
 if ('speechSynthesis' in window) {
   window.speechSynthesis.onvoiceschanged = () => {
     cachedJapaneseVoice = null;
@@ -2361,7 +2370,10 @@ function scheduleBgmStep() {
   const menu = bgmMode === 'menu';
   const danger = menu ? 0 : THREE.MathUtils.clamp((34 - distance) / 34, 0, 1);
   const swarm = !menu && finalSwarmActive ? 1 : 0;
-  const theme = menu ? bgmThemes[0] : (bgmThemes[currentStage - 1] || bgmThemes[0]);
+  let theme = menu ? bgmThemes[0] : (bgmThemes[currentStage - 1] || bgmThemes[0]);
+  if (currentStage === 4 && moataroPromptDismissed && !victory && !gameOver) {
+    theme = pokemonRivalTheme;
+  }
   const interval = menu ? 310 : Math.max(96, theme.baseInterval - danger * 64 - swarm * 52 - teleportAlertTimer * 5);
   const master = menu ? 0.055 : 0.085 + danger * 0.07 + swarm * 0.045 + (currentStage === 2 ? 0.018 : 0);
 
@@ -2381,7 +2393,8 @@ function scheduleBgmStep() {
     return;
   }
 
-  playBgmTone(bass, 0.18, 0.2, currentStage === 2 ? 'square' : 'sawtooth', -8);
+  const bassType = (theme === pokemonRivalTheme) ? 'triangle' : (currentStage === 2 ? 'square' : 'sawtooth');
+  playBgmTone(bass, 0.18, 0.2, bassType, -8);
 
   if (bgmStep % 2 === 0) {
     playBgmTone(bass * 2, 0.055, 0.055 + danger * 0.03, 'square', 5);
