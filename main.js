@@ -8,7 +8,7 @@ const AUTHOR_SPEED = 8.1;
 const SHOT_SPEED = 28;
 const SEALS_REQUIRED = 7;
 const INITIAL_AUTHOR_COUNT = 3;
-const FINAL_AUTHOR_COUNT = 7;
+const FINAL_AUTHOR_COUNT = 5;
 const MOATARO_SERVICE = {
   center: new THREE.Vector3(27, 0, 43),
   radius: 6.6,
@@ -2668,11 +2668,11 @@ function isInMoataroServiceZone() {
 }
 
 function isMoataroClerk(enemy, index) {
-  return moataroServiceActive && currentStage === 4 && index === 0 && enemy.userData.ai?.active;
+  return currentStage === 4 && index === 0 && enemy.userData.ai?.active && (moataroServiceActive || moataroClerkSafeTimer > 0 || moataroMoaiPurchased);
 }
 
 function isMoataroSafeAuthor(enemy, index) {
-  return currentStage === 4 && index === 0 && enemy.userData.ai?.active && (moataroServiceActive || moataroClerkSafeTimer > 0);
+  return currentStage === 4 && index === 0 && enemy.userData.ai?.active && (moataroServiceActive || moataroClerkSafeTimer > 0 || moataroMoaiPurchased);
 }
 
 function updateMoataroClerk(enemy, dt) {
@@ -4088,30 +4088,10 @@ function finishGame(won) {
         </div>
         
         <div style="margin-top: 14px; font-size: 12px; color: #ff5555; font-weight: 900; letter-spacing: 0.5px; animation: pulse 1s infinite alternate;">
-          📸 この画面をスクリーンショットして保存してください！          </div>
+          📸 この画面をスクリーンショットして保存してください！
         </div>
       </div>
     `;
-
-    if (hasDarkMarketCard) {
-      couponHtml += `
-        <div style="background: linear-gradient(135deg, #1e2d38, #0b151b); border: 3px dashed #d28cff; border-radius: 12px; padding: 18px; margin: 15px auto 20px; max-width: 440px; box-shadow: 0 12px 32px rgba(0,0,0,0.6); text-align: center; box-sizing: border-box;">
-          <h3 style="color: #d28cff; margin: 0 0 8px 0; font-size: 17px; font-weight: 900; letter-spacing: 1px;">💳 闇の取引カード特典 💳</h3>
-          <p style="margin: 0 0 12px 0; font-size: 13px; color: #fff6cf; font-weight: bold; line-height: 1.45;">特別な取引が成立しました！<br><span style="color:#ffd700; font-size:14px;">「ぬかよろこびモアイペン立て」</span>の割引特典です！</p>
-          
-          <div style="display: flex; align-items: center; justify-content: center; gap: 15px; margin: 10px 0 14px;">
-            <img src="./nukayorokobi.png" alt="moai" style="width: 80px; height: 95px; object-fit: contain; filter: drop-shadow(0 6px 12px rgba(0,0,0,0.55)); background: rgba(255,255,255,0.06); padding: 6px; border-radius: 8px; border: 1.5px solid rgba(255,255,255,0.12);">
-            <div style="text-align: left;">
-              <div style="font-size: 16px; font-weight: 900; color: #77f4ff; margin-bottom: 2px;">特典：200円引き</div>
-              <div style="font-size: 12px; font-weight: bold; color: #ffbc69; margin-bottom: 5px;">キーワード: <span>NUKAYOROKOBI</span></div>
-              <a href="https://moai.booth.pm/items/5863266" target="_blank" style="display: inline-block; padding: 6px 12px; background: linear-gradient(90deg, #ff416c, #ff4b2b); color: #fff; text-decoration: none; font-size: 13px; font-weight: bold; border-radius: 6px; box-shadow: 0 4px 10px rgba(255,75,43,0.4);">
-                ショップで確認する 🛒
-              </a>
-            </div>
-          </div>
-        </div>
-      `;
-    }
   }
 
   const container = document.getElementById('game-clear');
