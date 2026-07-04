@@ -3258,8 +3258,8 @@ function createDarkMarketBoothStructure(x, z) {
   const miniMoaiTex = textureLoader.load('./moai_shot.png');
   const tints = [0x5a3a7b, 0x4a2a6b, 0xd4af37, 0x556b2f, 0x2e8b57, 0x8b0000]; // Purple, Dark Purple, Gold, Dark Green, Green, Dark Red
 
-  // Create two dense rows of miniature Moais (front row and back row)
-  const frontRowX = [-4.0, -3.0, -2.0, -1.0, 0, 1.0, 2.0, 3.0, 4.0];
+  // Create two dense rows of miniature Moais (front row and back row), leaving a gap in the center for Nukayorokobi
+  const frontRowX = [-4.0, -3.0, -2.0, -1.0, 1.0, 2.0, 3.0, 4.0];
   const backRowX = [-3.5, -2.5, -1.5, -0.5, 0.5, 1.5, 2.5, 3.5];
 
   // Front row (closer, lower)
@@ -3302,8 +3302,11 @@ function createDarkMarketBoothStructure(x, z) {
   const nukaTex = textureLoader.load('./nukayorokobi.png');
   const nukaMat = new THREE.SpriteMaterial({ map: nukaTex });
   const nukaMoaiSprite = new THREE.Sprite(nukaMat);
-  nukaMoaiSprite.position.set(x, 2.6, z + 1.2);
-  nukaMoaiSprite.scale.set(1.9, 1.9, 1);
+  nukaMoaiSprite.position.set(x, 2.12, z + 2.4); // Same z as front row mini moais
+  nukaMoaiSprite.scale.set(1.15, 1.15, 1);
+  nukaMoaiSprite.userData.faceCamera = true;
+  nukaMoaiSprite.userData.slowBob = 3.6; // Give it a bob offset
+  nukaMoaiSprite.userData.baseY = 2.12;
   nukaMoaiSprite.userData.moaiType = 4;
   nukaMoaiSprite.userData.isNukayorokobi = true;
   world.add(nukaMoaiSprite);
@@ -3311,7 +3314,7 @@ function createDarkMarketBoothStructure(x, z) {
   starterMoais.push(nukaMoaiSprite);
 
   const nukaLabel = createTextSprite('ぬかよろこびモアイ', '#ffbc69', 20);
-  nukaLabel.position.set(x + 4.5, 3.8, z + 2.8);
+  nukaLabel.position.set(x, 2.85, z + 2.4);
   nukaLabel.visible = false;
   world.add(nukaLabel);
   props.push(nukaLabel);
