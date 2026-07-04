@@ -3227,8 +3227,8 @@ function createDarkMarketBoothStructure(x, z) {
   const signTex = createDarkSignTexture();
   const signMat = new THREE.MeshBasicMaterial({ map: signTex, transparent: true, side: THREE.DoubleSide });
   const signMesh = new THREE.Mesh(new THREE.PlaneGeometry(8.5, 2.2), signMat);
-  signMesh.position.set(x, 2.4, z + 3.28);
-  signMesh.rotation.y = Math.PI; // Face the correct way (front of the booth)
+  signMesh.position.set(x, 4.2, z - 3.28);
+  signMesh.rotation.y = 0; // Face front (opposite side of the booth)
   world.add(signMesh);
   props.push(signMesh);
 
