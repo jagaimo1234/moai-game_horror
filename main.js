@@ -1180,12 +1180,13 @@ function addRunningMoais() {
     map: texture,
     transparent: true,
     depthWrite: false,
+    alphaTest: 0.1
   });
 
-  // 5 running moais with random starting positions and directions
-  const count = 5;
+  // 12 running moais with random starting positions and directions
+  const count = 12;
   for (let i = 0; i < count; i++) {
-    const sprite = new THREE.Sprite(material.clone());
+    const sprite = new THREE.Sprite(material);
     const startX = THREE.MathUtils.randFloatSpread(110);
     const startZ = THREE.MathUtils.randFloatSpread(110);
     const scale = 3.2 + Math.random() * 0.6;
