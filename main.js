@@ -2681,13 +2681,20 @@ function updateMoataroClerk(enemy, dt) {
   if (enemy.userData.yogurtIcon) enemy.userData.yogurtIcon.visible = false;
   if (enemy.userData.yogurtLabel) enemy.userData.yogurtLabel.visible = false;
   if (enemy.userData.serviceLabel) enemy.userData.serviceLabel.visible = true;
-  const boothToPlayer = moai.position.clone().sub(MOATARO_SERVICE.center).setY(0);
-  if (boothToPlayer.lengthSq() < 0.01) boothToPlayer.set(0, 0, -1);
-  const target = moai.position.clone().add(boothToPlayer.normalize().multiplyScalar(2.2));
+  
+  let target;
+  if (moataroServiceActive && !moataroMoaiPurchased) {
+    const boothToPlayer = moai.position.clone().sub(MOATARO_SERVICE.center).setY(0);
+    if (boothToPlayer.lengthSq() < 0.01) boothToPlayer.set(0, 0, -1);
+    target = moai.position.clone().add(boothToPlayer.normalize().multiplyScalar(2.2));
+  } else {
+    target = MOATARO_SERVICE.center.clone();
+  }
+  
   target.y = getGroundHeight(target.x, target.z);
-  const toPlayer = target.sub(enemy.position);
-  if (toPlayer.lengthSq() > 0.22) {
-    enemy.position.addScaledVector(toPlayer.normalize(), 34 * dt);
+  const toTarget = target.sub(enemy.position);
+  if (toTarget.lengthSq() > 0.22) {
+    enemy.position.addScaledVector(toTarget.normalize(), 20 * dt);
   }
   enemy.lookAt(moai.position.x, enemy.position.y, moai.position.z);
 }
