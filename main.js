@@ -1900,7 +1900,7 @@ function createEscapeGate() {
   const signTex = createExitSignTexture();
   const signMat = new THREE.MeshBasicMaterial({ map: signTex, transparent: true, side: THREE.DoubleSide });
   const signMesh = new THREE.Mesh(new THREE.PlaneGeometry(5.2, 2.6), signMat);
-  signMesh.position.set(0, 9.2, 0.1);
+  signMesh.position.set(0, 7.5, 0.65); // Placed directly on the front face of the top beam to avoid ceiling collision
   escapeGate.add(signMesh);
 
   // Volumetric Red light pillar guide beacon
@@ -3068,6 +3068,7 @@ function createDarkMarketBoothStructure(x, z) {
   const signMat = new THREE.MeshBasicMaterial({ map: signTex, transparent: true, side: THREE.DoubleSide });
   const signMesh = new THREE.Mesh(new THREE.PlaneGeometry(8.5, 2.2), signMat);
   signMesh.position.set(x, 2.4, z + 3.28);
+  signMesh.rotation.y = Math.PI; // Face the correct way (front of the booth)
   world.add(signMesh);
   props.push(signMesh);
 
@@ -3099,6 +3100,8 @@ function createDarkMarketBoothStructure(x, z) {
     const mat = new THREE.MeshStandardMaterial({
       map: miniMoaiTex,
       color: color,
+      emissive: color,
+      emissiveIntensity: 0.55, // Strong glow in the dark
       transparent: true,
       roughness: 0.8
     });
@@ -3115,6 +3118,8 @@ function createDarkMarketBoothStructure(x, z) {
     const mat = new THREE.MeshStandardMaterial({
       map: miniMoaiTex,
       color: color,
+      emissive: color,
+      emissiveIntensity: 0.55, // Strong glow in the dark
       transparent: true,
       roughness: 0.8
     });
@@ -3135,7 +3140,9 @@ function createDarkMarket() {
   const moaiTexture = textureLoader.load('./moai_shot.png');
   const moaiMat = new THREE.MeshStandardMaterial({
     map: moaiTexture,
-    color: 0x4a2a6b, 
+    color: 0x5a3a7b, 
+    emissive: 0x4a2a6b,
+    emissiveIntensity: 0.45, // Add glow to shady merchant so he is visible
     transparent: true,
     roughness: 0.8,
   });
@@ -3182,7 +3189,7 @@ function updateDarkMarketZone(dt) {
   if (currentStage !== 4 || !darkMarketNpc) return;
   
   const dist = moai.position.distanceTo(darkMarketNpc.position);
-  const inZone = dist < 16;
+  const inZone = dist < 12.0; // Narrowed from 16 to 12
   
   if (inZone !== inDarkMarketZone) {
     inDarkMarketZone = inZone;
@@ -3208,8 +3215,8 @@ function updateDarkMarketZone(dt) {
     shadyMoai.lookAt(camera.position.x, shadyMoai.parent.position.y + 3.2, camera.position.z);
   }
 
-  // Auto-dialogue trigger on approach
-  const autoTriggerDist = 8.5;
+  // Auto-dialogue trigger on approach (narrowed from 8.5 to 6.0)
+  const autoTriggerDist = 6.0;
   if (dist < autoTriggerDist && !darkMarketDialogueShown) {
     darkMarketDialogueShown = true;
     showDarkMarketDialog();
