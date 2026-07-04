@@ -4099,6 +4099,25 @@ function finishGame(won) {
         </div>
       </div>
     `;
+
+    if (hasDarkMarketCard) {
+      couponHtml += `
+        <div style="background: linear-gradient(135deg, #1e2d38, #0b151b); border: 3px dashed #d28cff; border-radius: 12px; padding: 18px; margin: 15px auto 20px; max-width: 440px; box-shadow: 0 12px 32px rgba(0,0,0,0.6); text-align: center; box-sizing: border-box;">
+          <h3 style="color: #d28cff; margin: 0 0 8px 0; font-size: 17px; font-weight: 900; letter-spacing: 1px;">💳 闇の取引カード特典 💳</h3>
+          <p style="margin: 0 0 12px 0; font-size: 13px; color: #fff6cf; font-weight: bold; line-height: 1.45;">特別な取引が成立しました！<br><span style="color:#ffd700; font-size:14px;">「ぬかよろこびモアイペン立て」</span>の割引特典です！</p>
+          
+          <div style="display: flex; align-items: center; justify-content: center; gap: 15px; margin: 10px 0 14px;">
+            <img src="./nukayorokobi.png" alt="moai" style="width: 80px; height: 95px; object-fit: contain; filter: drop-shadow(0 6px 12px rgba(0,0,0,0.55)); background: rgba(255,255,255,0.06); padding: 6px; border-radius: 8px; border: 1.5px solid rgba(255,255,255,0.12);">
+            <div style="text-align: left;">
+              <div style="font-size: 16px; font-weight: 900; color: #77f4ff; margin-bottom: 8px;">特典：200円引き</div>
+              <a href="https://moai.booth.pm/items/5863266" target="_blank" style="display: inline-block; padding: 6px 12px; background: linear-gradient(90deg, #ff416c, #ff4b2b); color: #fff; text-decoration: none; font-size: 13px; font-weight: bold; border-radius: 6px; box-shadow: 0 4px 10px rgba(255,75,43,0.4);">
+                ショップで確認する 🛒
+              </a>
+            </div>
+          </div>
+        </div>
+      `;
+    }
   }
 
   const container = document.getElementById('game-clear');
