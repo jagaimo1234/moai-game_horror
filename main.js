@@ -663,7 +663,7 @@ function getSealsRequired() {
 }
 
 function canOpenEscapeGate() {
-  return crystals >= getSealsRequired() && (currentStage !== 4 || stolenYogurts > 0);
+  return crystals >= getSealsRequired();
 }
 
 function getGroundHeight(x, z) {
