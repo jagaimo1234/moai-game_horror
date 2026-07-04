@@ -32,6 +32,7 @@ const VOICE_FILES = {
   darkQuestion: './dark_question.mp3',
   darkYes: './dark_yes.mp3',
   darkNo: './dark_no.mp3',
+  rivalEncounter: './voice/hello.m4a',
 };
 const STAGES = [
   {
@@ -3083,6 +3084,9 @@ function updatePetMoaiTexture() {
 }
 
 function playRivalEncounterSound() {
+  if (VOICE_FILES.rivalEncounter && !playRecordedVoice(VOICE_FILES.rivalEncounter)) {
+    // Fallback if no voice
+  }
   const tones = [220, 330, 440, 660, 880, 660, 440, 330, 220];
   tones.forEach((freq, idx) => {
     setTimeout(() => {
