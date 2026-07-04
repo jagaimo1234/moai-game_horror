@@ -3461,10 +3461,23 @@ function showDarkMarketDialog() {
   const noBtn = document.getElementById('btn-dark-no');
   const closeBtn = document.getElementById('btn-dark-close');
 
-  if (moataroMoaiPurchased && !hasDarkMarketCard) {
-    const nukaSprite = starterMoais.find(m => m.userData.isNukayorokobi);
-    if (nukaSprite) {
-      triggerNukaEasterEgg(nukaSprite);
+  if (moataroMoaiPurchased) {
+    if (!hasDarkMarketCard) {
+      const nukaSprite = starterMoais.find(m => m.userData.isNukayorokobi);
+      if (nukaSprite) {
+        triggerNukaEasterEgg(nukaSprite);
+        return;
+      }
+    } else {
+      if (textEl) {
+        textEl.textContent = '無事にクリアできたらの話だがな……フフフ。';
+      }
+      if (yesBtn) yesBtn.style.display = 'none';
+      if (noBtn) noBtn.style.display = 'none';
+      if (closeBtn) closeBtn.style.display = 'inline-block';
+      const dialog = document.getElementById('dark-market-dialog');
+      if (dialog) dialog.style.display = 'block';
+      blip(440, 0.12, 0.12, 'sine');
       return;
     }
   }
@@ -3519,11 +3532,7 @@ function checkStarterMoaiClick() {
   const intersects = raycaster.intersectObjects(starterMoais);
   if (intersects.length > 0) {
     const hitMoai = intersects[0].object;
-    if (hitMoai.userData.moaiType === 4 && moataroMoaiPurchased) {
-      triggerNukaEasterEgg(hitMoai);
-    } else {
-      showMoaiConfirmation(hitMoai.userData.moaiType);
-    }
+    showMoaiConfirmation(hitMoai.userData.moaiType);
     document.body.style.cursor = 'default';
     return true;
   }
