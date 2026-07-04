@@ -350,6 +350,46 @@ const pokemonRivalTheme = {
   leadType: 'square', // Classic NES/Gameboy square wave
 };
 
+// マルシェ風BGM: アコーディオン的な明るいフレンチ・ワルツ
+const marcheBgmTheme = {
+  // Gメジャーのトニックコードパターン (G-C-D)
+  bass: [
+    98, 0, 0,
+    130.81, 0, 0,
+    146.83, 0, 0,
+    130.81, 0, 0,
+    98,  0, 0,
+    98,  0, 0,
+    146.83, 0, 0,
+    110, 0, 0,
+  ],
+  // メロディー: 明るく跳ねるサルト + ド 障りないスキップ感
+  lead: [
+    392, 440, 493.88, 523.25,
+    587.33, 523.25, 493.88, 0,
+    440, 493.88, 523.25, 587.33,
+    659.25, 587.33, 523.25, 0,
+    493.88, 523.25, 587.33, 659.25,
+    783.99, 659.25, 587.33, 523.25,
+    493.88, 440, 392, 440,
+    493.88, 0, 392, 0,
+  ],
+  // ワルツ・ハーモニー: アコーディオンの和音
+  harmony: [
+    196, 246.94, 293.66,
+    261.63, 329.63, 392,
+    293.66, 369.99, 440,
+    261.63, 329.63, 392,
+    196, 246.94, 293.66,
+    196, 246.94, 293.66,
+    293.66, 369.99, 440,
+    220, 277.18, 329.63,
+  ],
+  drumEvery: 6,
+  baseInterval: 210, // ワルツテンポ (3拍子)
+  leadType: 'triangle',
+};
+
 if ('speechSynthesis' in window) {
   window.speechSynthesis.onvoiceschanged = () => {
     cachedJapaneseVoice = null;
@@ -2407,11 +2447,20 @@ function scheduleBgmStep() {
   const lead = theme.lead[bgmStep % theme.lead.length];
   const harmony = theme.harmony[bgmStep % theme.harmony.length];
   if (menu) {
-    playBgmTone(harmony, 0.34, 0.04, 'triangle', -6);
-    if (bgmStep % 2 === 0) playBgmTone(bass * 2, 0.18, 0.035, 'sine');
-    if (lead && bgmStep % 4 === 1) playBgmTone(lead, 0.11, 0.032, 'triangle');
+    const mStep = bgmStep % marcheBgmTheme.bass.length;
+    const mBass    = marcheBgmTheme.bass[mStep];
+    const mLead    = marcheBgmTheme.lead[bgmStep % marcheBgmTheme.lead.length];
+    const mHarmony = marcheBgmTheme.harmony[bgmStep % marcheBgmTheme.harmony.length];
+
+    // ワルツ拍子: 1拍目にベース、全拍にハーモニー
+    if (mBass)    playBgmTone(mBass,    0.22, 0.35, 'triangle', -8);
+    if (mHarmony) playBgmTone(mHarmony, 0.16, 0.28, 'triangle', -4);
+    // メロディーは偶数拍に軽く踊る
+    if (mLead && bgmStep % 2 === 0) playBgmTone(mLead, 0.10, 0.18, 'triangle', 5);
+    // アクセントパーカッション：弱いウィンドチャイム風
+    if (bgmStep % marcheBgmTheme.drumEvery === 0) playBgmNoise(0.012, 0.06, 3500);
     bgmStep++;
-    bgmTimer = setTimeout(scheduleBgmStep, interval);
+    bgmTimer = setTimeout(scheduleBgmStep, marcheBgmTheme.baseInterval);
     return;
   }
 
