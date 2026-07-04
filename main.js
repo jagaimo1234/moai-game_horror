@@ -29,6 +29,9 @@ const VOICE_FILES = {
   yogurtStolen: './voice/myyogrut.m4a',
   bad: './voice/mazui.m4a',
   yogurtTime: './voice/kanpai.m4a',
+  darkQuestion: './dark_question.mp3',
+  darkYes: './dark_yes.mp3',
+  darkNo: './dark_no.mp3',
 };
 const STAGES = [
   {
@@ -3442,6 +3445,7 @@ function showDarkMarketDialog() {
   
   const dialog = document.getElementById('dark-market-dialog');
   if (dialog) dialog.style.display = 'block';
+  playRecordedVoice(VOICE_FILES.darkQuestion);
   blip(440, 0.12, 0.12, 'sine');
 }
 
@@ -3456,11 +3460,13 @@ function handleDarkMarketResponse(answer) {
       textEl.textContent = 'そうか！それは素晴らしい！ならリアル会場（ブース：J-80）で待っているぞ。\nお前の選んだモアイを直接手にとって連れて帰ってやってくれ！\n……なお、この闇の取引所は 7/19（日）15時 に正式オープンするぞ。お楽しみに。';
     }
     blip(880, 0.14, 0.12, 'sine');
+    playRecordedVoice(VOICE_FILES.darkYes);
   } else {
     if (textEl) {
       textEl.textContent = 'そうか……来られないか。寂しいことだ。\n……だが、がっかりするな。\nこの闇の取引所は 7月19日（日）15時 に正式オープンする予定だ。\nその日になったら、またここへ来るとよい。\nこのゲームを遊んでくれたお前だけの、特別な取引を用意しておこう……フフフ。';
     }
     blip(580, 0.14, 0.12, 'sine');
+    playRecordedVoice(VOICE_FILES.darkNo);
   }
   
   if (yesBtn) yesBtn.style.display = 'none';
