@@ -193,6 +193,7 @@ let inDarkMarketZone = false;
 let darkMarketPointLight = null;
 let darkMarketBgmInterval = null;
 let darkMarketBgmSeq = 0;
+let darkMarketDialogueShown = false;
 let hudUpdateTimer = 0;
 let speechPrimed = false;
 let cachedJapaneseVoice = null;
@@ -1231,6 +1232,11 @@ function addMarketHallShell() {
 
 function addBooth(x, z, color, row, col) {
   const isMoataroBooth = row === 4 && col === 4;
+  const isDarkMarketBooth = row === 4 && col === 0;
+  if (isDarkMarketBooth) {
+    createDarkMarketBoothStructure(x, z);
+    return;
+  }
   const boothColor = isMoataroBooth ? 0x77f4ff : color;
   const accent = [0xffc857, 0xff7aa8, 0x77f4ff, 0x9dffbf][(row * 2 + col) % 4];
   const table = new THREE.Mesh(
@@ -3025,39 +3031,85 @@ function buyMoataroMoai(type = 1) {
   }
 }
 
-function checkStarterMoaiHover() {
-  raycaster.setFromCamera(mouse, camera);
-  const intersects = raycaster.intersectObjects(starterMoais);
-  
-  starterMoais.forEach((m) => {
-    if (m.userData.label) m.userData.label.visible = false;
-    m.scale.set(1.15, 1.15, 1);
+function createDarkMarketBoothStructure(x, z) {
+  // A large dark wooden table
+  const table = new THREE.Mesh(
+    new THREE.BoxGeometry(10.8, 1.4, 6.2),
+    new THREE.MeshStandardMaterial({ color: 0x140c06, roughness: 0.95 })
+  );
+  table.position.set(x, 0.7, z);
+  table.castShadow = true;
+  table.receiveShadow = true;
+  world.add(table);
+  props.push(table);
+  addBoxCollider(x, z, 11.2, 6.8);
+
+  // Black cloth covering the front and sides
+  const cloth = new THREE.Mesh(
+    new THREE.BoxGeometry(11.2, 0.22, 6.6),
+    new THREE.MeshStandardMaterial({ color: 0x221133, emissive: 0x110022, emissiveIntensity: 0.15, roughness: 0.85 })
+  );
+  cloth.position.set(x, 1.45, z);
+  cloth.castShadow = true;
+  world.add(cloth);
+  props.push(cloth);
+
+  const frontDrape = new THREE.Mesh(
+    new THREE.BoxGeometry(11.4, 1.3, 0.22),
+    new THREE.MeshStandardMaterial({ color: 0x221133, emissive: 0x110022, emissiveIntensity: 0.12, roughness: 0.9 })
+  );
+  frontDrape.position.set(x, 0.75, z + 3.18);
+  frontDrape.castShadow = true;
+  world.add(frontDrape);
+  props.push(frontDrape);
+
+  // Dark Market custom signboard "闇の取引所 ~SECRET DEALER~"
+  const signTex = createDarkSignTexture();
+  const signMat = new THREE.MeshBasicMaterial({ map: signTex, transparent: true, side: THREE.DoubleSide });
+  const signMesh = new THREE.Mesh(new THREE.PlaneGeometry(8.5, 2.2), signMat);
+  signMesh.position.set(x, 2.4, z + 3.28);
+  world.add(signMesh);
+  props.push(signMesh);
+
+  // Purple glow lantern spotlights (placed on the table sides)
+  const leftLantern = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.3, 0.3, 1.2, 8),
+    new THREE.MeshStandardMaterial({ color: 0xa020f0, emissive: 0xa020f0, emissiveIntensity: 1.5, transparent: true, opacity: 0.88 })
+  );
+  leftLantern.position.set(x - 4.2, 2.1, z + 2.0);
+  world.add(leftLantern);
+  props.push(leftLantern);
+
+  const rightLantern = leftLantern.clone();
+  rightLantern.position.x = x + 4.2;
+  world.add(rightLantern);
+  props.push(rightLantern);
+
+  // Place miniature dark Moais on the table!
+  const miniMoaiTex = textureLoader.load('./moai_shot.png');
+  const miniMoaiMat = new THREE.MeshStandardMaterial({
+    map: miniMoaiTex,
+    color: 0x5a3a7b, 
+    transparent: true,
+    roughness: 0.8
   });
   
-  if (intersects.length > 0) {
-    const hitMoai = intersects[0].object;
-    if (hitMoai.userData.label) {
-      hitMoai.userData.label.visible = true;
-      hitMoai.scale.set(1.5, 1.5, 1);
-      document.body.style.cursor = 'pointer';
-      return true;
-    }
-  }
-  return false;
+  // Create 4 miniature Moais lined up on the table counter
+  const moaiOffsets = [-3.0, -1.0, 1.0, 3.0];
+  moaiOffsets.forEach((offsetX) => {
+    const miniMesh = new THREE.Mesh(new THREE.PlaneGeometry(1.0, 1.5), miniMoaiMat);
+    miniMesh.position.set(x + offsetX, 2.2, z + 2.2);
+    miniMesh.rotation.y = Math.PI; // Face forward
+    world.add(miniMesh);
+    props.push(miniMesh);
+  });
 }
 
 function createDarkMarket() {
   if (currentStage !== 4) return;
   
   const npcGroup = new THREE.Group();
-  npcGroup.position.set(-50, 0, -46);
-  
-  const tableMat = new THREE.MeshStandardMaterial({ color: 0x1a120b, roughness: 0.9 });
-  const table = new THREE.Mesh(new THREE.BoxGeometry(4, 1.8, 2.5), tableMat);
-  table.position.y = 0.9;
-  table.castShadow = true;
-  table.receiveShadow = true;
-  npcGroup.add(table);
+  npcGroup.position.set(-45, 0, 36);
   
   const moaiTexture = textureLoader.load('./moai_shot.png');
   const moaiMat = new THREE.MeshStandardMaterial({
@@ -3066,19 +3118,13 @@ function createDarkMarket() {
     transparent: true,
     roughness: 0.8,
   });
-  const shadyMoai = new THREE.Mesh(new THREE.PlaneGeometry(2.4, 3.6), moaiMat);
-  shadyMoai.position.set(0, 3.2, 0);
+  const shadyMoai = new THREE.Mesh(new THREE.PlaneGeometry(2.8, 4.2), moaiMat);
+  shadyMoai.position.set(0, 3.2, 0); 
   shadyMoai.userData.isDarkMarketMerchant = true; 
   npcGroup.add(shadyMoai);
   
-  const signTex = createDarkSignTexture();
-  const signMat = new THREE.MeshBasicMaterial({ map: signTex, transparent: true, side: THREE.DoubleSide });
-  const signMesh = new THREE.Mesh(new THREE.PlaneGeometry(3.5, 1.25), signMat);
-  signMesh.position.set(0, 5.4, 0);
-  npcGroup.add(signMesh);
-  
-  darkMarketPointLight = new THREE.PointLight(0xa020f0, 0, 18);
-  darkMarketPointLight.position.set(0, 4.5, 0);
+  darkMarketPointLight = new THREE.PointLight(0xa020f0, 0, 22);
+  darkMarketPointLight.position.set(0, 4.5, 1.5);
   npcGroup.add(darkMarketPointLight);
   
   world.add(npcGroup);
@@ -3087,20 +3133,24 @@ function createDarkMarket() {
 
 function createDarkSignTexture() {
   const canvas = document.createElement('canvas');
-  canvas.width = 128;
-  canvas.height = 64;
+  canvas.width = 256;
+  canvas.height = 128;
   const ctx = canvas.getContext('2d');
   ctx.fillStyle = '#0a0518';
-  ctx.fillRect(0, 0, 128, 64);
+  ctx.fillRect(0, 0, 256, 128);
   ctx.strokeStyle = '#a020f0';
-  ctx.lineWidth = 4;
-  ctx.strokeRect(4, 4, 120, 56);
+  ctx.lineWidth = 5;
+  ctx.strokeRect(8, 8, 240, 112);
   
-  ctx.fillStyle = '#ff77ff';
-  ctx.font = 'bold 16px sans-serif';
+  ctx.fillStyle = '#ffffff';
+  ctx.font = 'bold 24px sans-serif';
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
-  ctx.fillText('闇の取引所', 64, 32);
+  ctx.fillText('闇の取引所', 128, 46);
+  
+  ctx.fillStyle = '#ff77ff';
+  ctx.font = '14px sans-serif';
+  ctx.fillText('~SECRET DEALER~', 128, 85);
   
   const texture = new THREE.CanvasTexture(canvas);
   texture.colorSpace = THREE.SRGBColorSpace;
@@ -3135,6 +3185,13 @@ function updateDarkMarketZone(dt) {
   const shadyMoai = darkMarketNpc.children.find(child => child.userData.isDarkMarketMerchant);
   if (shadyMoai) {
     shadyMoai.lookAt(camera.position.x, shadyMoai.parent.position.y + 3.2, camera.position.z);
+  }
+
+  // Auto-dialogue trigger on approach
+  const autoTriggerDist = 8.5;
+  if (dist < autoTriggerDist && !darkMarketDialogueShown) {
+    darkMarketDialogueShown = true;
+    showDarkMarketDialog();
   }
 }
 
@@ -3757,6 +3814,7 @@ function resetGame(stage = 4) {
   inDarkMarketZone = false;
   stopDarkMarketBgm();
   darkMarketNpc = null;
+  darkMarketDialogueShown = false;
   const darkMarketDialog = document.getElementById('dark-market-dialog');
   if (darkMarketDialog) darkMarketDialog.style.display = 'none';
   moataroInvincibleTimer = 0;
