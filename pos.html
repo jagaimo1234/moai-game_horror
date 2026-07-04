@@ -150,6 +150,7 @@
         <button class="sys-tab-btn active" onclick="switchSysTab('pos')">レジ (POS)</button>
         <button class="sys-tab-btn" onclick="switchSysTab('dashboard')">ダッシュボード</button>
         <button class="sys-tab-btn" onclick="switchSysTab('stats')">📊 統計</button>
+        <button class="sys-tab-btn" onclick="switchSysTab('topics')">🔥 トピックス</button>
         <button class="sys-tab-btn" onclick="switchSysTab('settings')">📦 在庫設定</button>
         <button class="sys-tab-btn" onclick="switchSysTab('simulation')">🎯 シミュ</button>
         <button class="sys-tab-btn" onclick="switchSysTab('price-settings')">💴 金額設定</button>
@@ -519,6 +520,74 @@
       </div>
     </section>
 
+    <!-- Topics View -->
+    <section id="topics-view" class="view-section">
+      <div class="scroll-container" style="padding-bottom: 50px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px;">
+          <h2>🔥 トピックス設定 (<span id="topics-event-name"></span>)</h2>
+          <button class="btn btn-primary" onclick="saveEventTopics()" style="font-size: 14px; padding: 8px 20px;">トピックス表示設定を保存</button>
+        </div>
+
+        <!-- Topics selection / listing -->
+        <div style="background:var(--panel-bg); padding:20px; border-radius:12px; border:1px solid var(--border); margin-bottom:24px;">
+          <h3 style="font-size:16px; margin-bottom:12px; color:var(--accent);">📌 表示するトピックスを選択</h3>
+          <p style="font-size:12px; opacity:0.6; margin-bottom:15px;">現在のイベントでカタログの「HOT TOPICS & NEWS」に表示する項目にチェックを入れます。</p>
+          <div id="topics-selection-list" style="display:flex; flex-direction:column; gap:12px;">
+            <!-- Injected via JS -->
+          </div>
+        </div>
+
+        <!-- Add Custom Topic Form -->
+        <div style="background:var(--panel-bg); padding:20px; border-radius:12px; border:1px solid var(--border);">
+          <h3 style="font-size:16px; margin-bottom:15px; color:var(--accent);">🆕 トピックスの新規追加（仕様宣言）</h3>
+          <p style="font-size:12px; opacity:0.6; margin-bottom:15px;">※WEB体験版プレイボタンなどの高機能なパーツは、仕様（テキスト）を追加後にAIに実装を依頼してください。</p>
+          
+          <div class="form-group">
+            <label>アイコン (絵文字など 1文字)</label>
+            <input type="text" id="new-topic-icon" class="form-input" placeholder="🆕" value="🆕" style="max-width:80px; text-align:center;">
+          </div>
+          <div class="form-group">
+            <label>タイトル (トピックスの見出し)</label>
+            <input type="text" id="new-topic-title" class="form-input" placeholder="例：〇〇モアイペン立てが登場！！">
+          </div>
+          <div class="form-group">
+            <label>説明文 (トピックスの本文)</label>
+            <textarea id="new-topic-desc" class="form-input" rows="3" placeholder="例：〇〇をイメージした愛らしいモアイペン立て。スマホをかざすと..."></textarea>
+          </div>
+          <div class="form-group" style="margin-top:10px;">
+            <label>紐付け作品 (任意)</label>
+            <select id="new-topic-product-id" class="form-select">
+              <option value="">-- 紐付けなし --</option>
+            </select>
+          </div>
+          <div class="form-group" style="margin-top:10px;">
+            <label>体験版等のURL (任意)</label>
+            <input type="text" id="new-topic-demo-url" class="form-input" placeholder="入力すると体験版ボタンを自動生成します">
+          </div>
+          <div class="form-group" style="margin-top:10px;">
+            <label>体験版ボタンの文言 (任意 - デフォルト：🎮 WEB体験版をプレイ！ →)</label>
+            <input type="text" id="new-topic-button-text" class="form-input" placeholder="例：🎮 WEB体験版をプレイ！ →">
+          </div>
+          <div class="form-group" style="margin-top:15px; display:flex; align-items:center; gap:8px; background:rgba(0,210,255,0.05); padding:10px; border-radius:8px; border:1px solid rgba(0,210,255,0.2); cursor:pointer;" onclick="document.getElementById('new-topic-needs-ai').click(); event.stopPropagation();">
+            <input type="checkbox" id="new-topic-needs-ai" style="width:20px; height:20px; accent-color:var(--accent); cursor:pointer;" onclick="event.stopPropagation();">
+            <label style="margin:0; cursor:pointer; font-weight:bold; color:var(--accent);">🤖 AI編集を希望 (指示後に体裁を整えてもらう)</label>
+          </div>
+          <button class="btn" style="background:var(--success); color:white; font-weight:bold; width:100%; margin-top:15px;" onclick="addNewTopicMaster()">✨ トピックスを追加</button>
+          
+          <!-- AI Instruction Copier Template -->
+          <div style="margin-top:20px; padding:15px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); border-radius:8px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+              <span style="font-size:12px; font-weight:bold; color:var(--accent);">📋 AI(Antigravity)への指示文テンプレート</span>
+              <button onclick="copyAiInstruction()" id="btn-copy-instruction" style="background:var(--accent); border:none; color:black; font-size:11px; padding:4px 8px; font-weight:bold; border-radius:4px; cursor:pointer; transition:0.2s;">
+                コピペ用テキストをコピー
+              </button>
+            </div>
+            <textarea id="ai-instruction-template" readonly style="width:100%; background:rgba(0,0,0,0.3); border:1px solid var(--border); border-radius:6px; color:rgba(255,255,255,0.7); font-size:11px; padding:8px; resize:none; font-family:monospace; line-height:1.4;" rows="3">トピックス設定で「AI編集希望」にチェックした項目のUI作り込みをお願いします。具体的には、対象トピックスに対して適切なリンク、作品詳細、Web体験版の表示やスタイルの最適化をお願いします。</textarea>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <!-- Settings View -->
     <section id="settings-view" class="view-section">
       <div class="scroll-container">
@@ -605,7 +674,7 @@
     </section>
   </div>
 
-  <script src="data.js?v=20260519_2245"></script>
+  <script src="data.js?v=20260628_2045"></script>
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
     import { getFirestore, doc, onSnapshot, setDoc, updateDoc, arrayUnion, getDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
@@ -645,6 +714,9 @@
     window.customProductsData = {};
     window.eventProductsData = {}; // { eventKey: [ids] }
     window.eventConfigData = {};   // { eventKey: { visible: bool } }
+    window.topicsMasterData = {};  // { id: { title, desc, icon, isBuiltin, builtinType } }
+    window.eventTopicsData = {};   // { eventKey: [ids] }
+    let announcementsData = {};    // announcementsData
     window.printSelection = [];    // Temporary selection for printing
     window.DEV_STATUSES = [
       { label: "💭 発掘中", desc: "アイデア・構想段階" },
@@ -738,6 +810,9 @@
       if (tabId === 'simulation' && window.renderSimulation) {
         window.renderSimulation();
       }
+      if (tabId === 'topics' && window.renderTopics) {
+        window.renderTopics();
+      }
     };
 
     // Auth
@@ -768,8 +843,35 @@
           updateVisibilityUI();
           renderAll();
         });
+        window.customProductsData = {}; // Restore customProductsData definition
         onSnapshot(doc(db, "settings", "custom_products"), (snap) => {
           if (snap.exists()) window.customProductsData = snap.data();
+          renderAll();
+        });
+        onSnapshot(doc(db, "settings", "topics_master"), (snap) => {
+          if (snap.exists() && Object.keys(snap.data()).length > 0) {
+            window.topicsMasterData = snap.data();
+            // クレンジング：古い構造（buttonTextの欠落）を検知して自動で上書き初期化
+            if (window.topicsMasterData["builtin_yogurtrun"] && !window.topicsMasterData["builtin_yogurtrun"].buttonText) {
+              if (window.initializeTopicsData) window.initializeTopicsData();
+            }
+            // AI自動編集のつなぎ込み：needsAiEditフラグがONでモアイルアースタンドである場合、自動で説明文とproductIdを補正してセーブ
+            if (window.topicsMasterData["custom_1782650334053"] && window.topicsMasterData["custom_1782650334053"].needsAiEdit) {
+              const updated = { ...window.topicsMasterData };
+              updated["custom_1782650334053"].desc = "モアイがあなたの大切なルアーをがっちりホールドする、釣り人必見の専用ディスプレイスタンド。お気に入りのルアーをおしゃれにディスプレイして、次の釣行へのモチベーションを高めましょう！";
+              updated["custom_1782650334053"].productId = "moai_lure_stand";
+              updated["custom_1782650334053"].needsAiEdit = false;
+              setDoc(doc(db, "settings", "topics_master"), updated).catch(e => console.error("Auto AI Apply Error:", e));
+            }
+          } else {
+            window.topicsMasterData = {};
+            if (window.initializeTopicsData) window.initializeTopicsData();
+          }
+          renderAll();
+        });
+        onSnapshot(doc(db, "settings", "event_topics"), (snap) => {
+          if (snap.exists()) window.eventTopicsData = snap.data();
+          else window.eventTopicsData = {};
           renderAll();
         });
 
@@ -786,6 +888,7 @@
       if(window.renderPriceSettings) window.renderPriceSettings();
       renderSelection();
       if(window.renderSimulation) window.renderSimulation();
+      if(window.renderTopics) window.renderTopics();
     }
 
     function updateVisibilityUI() {
@@ -839,11 +942,15 @@
       const priceEvName = document.getElementById('price-settings-event-name');
       if(priceEvName) priceEvName.textContent = evLabel;
       document.getElementById('selection-event-name').textContent = evLabel + " - 出品作品の選択";
+      const topicsEvName = document.getElementById('topics-event-name');
+      if (topicsEvName) topicsEvName.textContent = evLabel;
+      if (window.renderTopics) window.renderTopics();
       
       updateVisibilityUI();
 
       if (unsubInventory) unsubInventory();
       if (unsubSales) unsubSales();
+      if (unsubInventory) unsubInventory(); // Keep structure
       if (unsubSimulation) unsubSimulation();
 
       unsubSimulation = onSnapshot(doc(db, "settings", "simulation_" + currentEventKey), (docSnap) => {
@@ -2455,6 +2562,272 @@
         console.error(e);
         alert("保存に失敗しました。");
       }
+    };
+
+    window.renderTopics = function() {
+      const prodSelect = document.getElementById('new-topic-product-id');
+      if (prodSelect) {
+        const currentVal = prodSelect.value;
+        const allMaster = window.getFullMasterProducts(window.customProductsData);
+        let optionsHtml = '<option value="">-- 紐付けなし --</option>';
+        allMaster.forEach(p => {
+          optionsHtml += `<option value="${p.id}">${p.name.replace(/\n/g, ' ')}</option>`;
+        });
+        prodSelect.innerHTML = optionsHtml;
+        prodSelect.value = currentVal;
+      }
+
+      const list = document.getElementById('topics-selection-list');
+      if (!list) return;
+      list.innerHTML = '';
+
+      const eventTopics = window.eventTopicsData[currentEventKey] || [];
+      const masterKeys = Object.keys(window.topicsMasterData);
+
+      if (masterKeys.length === 0) {
+        list.innerHTML = '<div style="color:rgba(255,255,255,0.4); text-align:center; padding:20px;">登録されているトピックスがありません。新規追加してください。</div>';
+        return;
+      }
+
+      masterKeys.forEach(id => {
+        const topic = window.topicsMasterData[id];
+        const isChecked = eventTopics.includes(id);
+
+        const deleteBtn = topic.isBuiltin 
+          ? '' 
+          : `<button onclick="event.stopPropagation(); deleteTopicMaster('${id}')" style="background:rgba(231,76,60,0.2); border:1px solid #e74c3c; color:#e74c3c; font-size:11px; padding:4px 8px; border-radius:4px; cursor:pointer; font-weight:bold;">🗑️ 削除</button>`;
+
+        const aiToggleBtn = topic.isBuiltin
+          ? ''
+          : `<button onclick="event.stopPropagation(); toggleTopicAiEdit('${id}')" 
+                     style="background:${topic.needsAiEdit ? 'rgba(0,210,255,0.15)' : 'rgba(255,255,255,0.05)'}; 
+                            border:1px solid ${topic.needsAiEdit ? 'var(--accent)' : 'rgba(255,255,255,0.2)'}; 
+                            color:${topic.needsAiEdit ? 'var(--accent)' : 'rgba(255,255,255,0.6)'}; 
+                            font-size:11px; padding:4px 8px; border-radius:4px; cursor:pointer; font-weight:bold; transition: 0.2s;">
+               🤖 AI編集: ${topic.needsAiEdit ? 'ON' : 'OFF'}
+             </button>`;
+
+        const aiBadge = topic.needsAiEdit 
+          ? `<span style="font-size:10px; background:linear-gradient(45deg, #e67e22, #9b59b6); color:white; padding:2px 6px; border-radius:4px; font-weight:bold; margin-left:6px; box-shadow: 0 1px 3px rgba(0,0,0,0.2);">🤖 AI編集希望</span>` 
+          : '';
+
+        list.innerHTML += `
+          <div style="background:rgba(0,0,0,0.2); border:1px solid ${isChecked ? 'var(--accent)' : 'var(--border)'}; border-radius:8px; padding:12px; display:flex; align-items:flex-start; justify-content:space-between; gap:10px; cursor:pointer;" onclick="toggleTopicSelection('${id}')">
+            <div style="display:flex; align-items:flex-start; gap:10px; flex:1;">
+              <input type="checkbox" id="chk-topic-${id}" ${isChecked ? 'checked' : ''} style="width:20px; height:20px; accent-color:var(--accent); margin-top:2px;" onclick="event.stopPropagation(); toggleTopicSelection('${id}')">
+              <div>
+                <div style="font-weight:bold; font-size:14px; margin-bottom:4px; display:flex; align-items:center; flex-wrap:wrap; gap:4px;">
+                  <span>${topic.icon || '🆕'}</span>${topic.title} ${aiBadge}
+                </div>
+                <div style="font-size:12px; opacity:0.7; line-height:1.4;">${topic.desc.replace(/\n/g, '<br>')}</div>
+              </div>
+            </div>
+            <div style="display:flex; align-items:center; gap:8px; flex-shrink:0;">
+              ${topic.isBuiltin ? '<span style="font-size:10px; background:rgba(255,255,255,0.1); padding:2px 6px; border-radius:4px; opacity:0.6;">システム組み込み</span>' : ''}
+              ${aiToggleBtn}
+              ${deleteBtn}
+            </div>
+          </div>
+        `;
+      });
+    };
+
+    window.toggleTopicSelection = function(id) {
+      let eventTopics = window.eventTopicsData[currentEventKey] ? [...window.eventTopicsData[currentEventKey]] : [];
+      const idx = eventTopics.indexOf(id);
+      if (idx === -1) {
+        eventTopics.push(id);
+      } else {
+        eventTopics.splice(idx, 1);
+      }
+      window.eventTopicsData[currentEventKey] = eventTopics;
+      renderTopics();
+    };
+
+    window.toggleTopicAiEdit = async function(id) {
+      if (!auth.currentUser) return;
+      const updatedMaster = { ...window.topicsMasterData };
+      if (!updatedMaster[id]) return;
+      
+      // Toggle needsAiEdit status
+      updatedMaster[id].needsAiEdit = !updatedMaster[id].needsAiEdit;
+
+      try {
+        await setDoc(doc(db, "settings", "topics_master"), updatedMaster);
+        // renderTopics is automatically triggered via onSnapshot listener
+      } catch(e) {
+        console.error(e);
+        alert("AI編集状態の変更に失敗しました：" + e.message);
+      }
+    };
+
+    window.saveEventTopics = async function() {
+      if (!auth.currentUser) return;
+      try {
+        await setDoc(doc(db, "settings", "event_topics"), window.eventTopicsData);
+        alert("トピックス表示設定を保存しました！");
+      } catch(e) {
+        console.error(e);
+        alert("保存に失敗しました：" + e.message);
+      }
+    };
+
+    window.addNewTopicMaster = async function() {
+      if (!auth.currentUser) return;
+      const icon = document.getElementById('new-topic-icon').value.trim() || '🆕';
+      const title = document.getElementById('new-topic-title').value.trim();
+      const desc = document.getElementById('new-topic-desc').value.trim();
+      const productId = document.getElementById('new-topic-product-id').value.trim();
+      const demoUrl = document.getElementById('new-topic-demo-url').value.trim();
+      const buttonText = document.getElementById('new-topic-button-text').value.trim();
+      const needsAiEdit = document.getElementById('new-topic-needs-ai').checked;
+
+      if (!title || !desc) {
+        alert("タイトルと説明文を入力してください。");
+        return;
+      }
+
+      const id = "custom_" + Date.now();
+      const updatedMaster = { ...window.topicsMasterData };
+      updatedMaster[id] = {
+        title,
+        desc,
+        icon,
+        productId: productId || null,
+        demoUrl: demoUrl || null,
+        buttonText: buttonText || null,
+        needsAiEdit: needsAiEdit,
+        isBuiltin: false,
+        createdAt: Date.now()
+      };
+
+      try {
+        await setDoc(doc(db, "settings", "topics_master"), updatedMaster);
+        
+        // Auto-check for current event
+        let eventTopics = window.eventTopicsData[currentEventKey] ? [...window.eventTopicsData[currentEventKey]] : [];
+        if (!eventTopics.includes(id)) {
+          eventTopics.push(id);
+          window.eventTopicsData[currentEventKey] = eventTopics;
+          await setDoc(doc(db, "settings", "event_topics"), window.eventTopicsData);
+        }
+
+        // Reset inputs
+        document.getElementById('new-topic-title').value = '';
+        document.getElementById('new-topic-desc').value = '';
+        document.getElementById('new-topic-icon').value = '🆕';
+        document.getElementById('new-topic-product-id').value = '';
+        document.getElementById('new-topic-demo-url').value = '';
+        document.getElementById('new-topic-button-text').value = '';
+        document.getElementById('new-topic-needs-ai').checked = false;
+
+        alert("トピックスを追加しました！");
+      } catch(e) {
+        console.error(e);
+        alert("トピックスの追加に失敗しました：" + e.message);
+      }
+    };
+
+    window.deleteTopicMaster = async function(id) {
+      if (!auth.currentUser) return;
+      if (!confirm("本当にこのトピックスを削除しますか？\n（すべてのイベントの表示設定からも削除されます）")) return;
+
+      const updatedMaster = { ...window.topicsMasterData };
+      delete updatedMaster[id];
+
+      const updatedEventTopics = { ...window.eventTopicsData };
+      Object.keys(updatedEventTopics).forEach(key => {
+        if (Array.isArray(updatedEventTopics[key])) {
+          updatedEventTopics[key] = updatedEventTopics[key].filter(x => x !== id);
+        }
+      });
+
+      try {
+        await setDoc(doc(db, "settings", "topics_master"), updatedMaster);
+        await setDoc(doc(db, "settings", "event_topics"), updatedEventTopics);
+        alert("削除しました。");
+      } catch(e) {
+        console.error(e);
+        alert("削除に失敗しました：" + e.message);
+      }
+    };
+
+    window.initializeTopicsData = async function() {
+      const defaultMaster = {
+        "builtin_mini_osuwari": {
+          title: "ミニおすわりモアイのキーホルダーが登場！！",
+          desc: "ちょこんとお座りする愛らしいミニモアイ。どこへでも一緒に連れて行けます。",
+          icon: "🆕",
+          productId: "mini_osuwari_keychain",
+          isBuiltin: true,
+          createdAt: Date.now()
+        },
+        "builtin_yogurtrun": {
+          title: "ヨーグルトランEX メジャーアップデート実施！",
+          desc: "モアイロボMk-IIが参戦し難易度が爆上がり！スマホをかざして遊べるNFC対応キーホルダー。",
+          icon: "⚡",
+          productId: "keychain",
+          demoUrl: "https://moai-demo-game.vercel.app/",
+          buttonText: "🎮 WEB体験版をプレイ！ →",
+          isBuiltin: true,
+          createdAt: Date.now()
+        },
+        "builtin_gold_moai": {
+          title: "ゴールドモアイロボ登場！！",
+          desc: "黄金に輝く特別なモアイロボ。秘密のアクセスキーで限定特典も解放できる！",
+          icon: "🆕",
+          productId: "moai_robo_mk2_gold",
+          isBuiltin: true,
+          createdAt: Date.now()
+        },
+        "builtin_stand": {
+          title: "モアイロボMark2専用スタンド登場！",
+          desc: "空中浮遊、ジャンプ、撃墜シーンまで再現できる可変式ディスプレイスタンド。",
+          icon: "🆕",
+          productId: "moai_robo_stand",
+          isBuiltin: true,
+          createdAt: Date.now()
+        },
+        "builtin_custom_parts": {
+          title: "おすわりモアイカスタムパーツ登場！",
+          desc: "Mk-IIに装着できる、レトロ可愛いおすわりモアイのカスタム追加パーツ。",
+          icon: "🆕",
+          isBuiltin: true,
+          createdAt: Date.now()
+        }
+      };
+
+      const defaultEventTopics = {
+        "hmj": Object.keys(defaultMaster)
+      };
+
+      try {
+        console.log("Initializing default topics in Firestore...");
+        await setDoc(doc(db, "settings", "topics_master"), defaultMaster);
+        await setDoc(doc(db, "settings", "event_topics"), defaultEventTopics);
+        console.log("Default topics successfully initialized.");
+      } catch (e) {
+        console.error("Failed to initialize default topics:", e);
+      }
+    };
+
+    window.copyAiInstruction = function() {
+      const text = document.getElementById('ai-instruction-template').value;
+      navigator.clipboard.writeText(text).then(() => {
+        const btn = document.getElementById('btn-copy-instruction');
+        if (btn) {
+          const originalText = btn.textContent;
+          btn.textContent = '✅ コピー完了！';
+          btn.style.background = '#2ecc71';
+          setTimeout(() => {
+            btn.textContent = originalText;
+            btn.style.background = 'var(--accent)';
+          }, 1500);
+        }
+      }).catch(err => {
+        console.error("Failed to copy text: ", err);
+        alert("コピーに失敗しました。直接選択してコピーしてください。");
+      });
     };
 
     window.renderPriceSettings = function() {

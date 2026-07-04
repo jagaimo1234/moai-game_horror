@@ -191,6 +191,19 @@ const MASTER_PRODUCTS = [
     desc:  'しがないマッチョ。パワーッ!!!'
   },
   {
+    image: 'images/kurima/nukayorokobi_moai_pen.jpg',
+    images: [
+      'images/kurima/nukayorokobi_moai_pen.jpg',
+      'images/kurima/nukayorokobi_moai_pen/nukayorokobi_01.png',
+      'images/kurima/nukayorokobi_moai_pen/nukayorokobi_02.png',
+      'images/kurima/nukayorokobi_moai_pen/nukayorokobi_03.png',
+      'images/kurima/nukayorokobi_moai_pen/nukayorokobi_04.png',
+      'images/kurima/nukayorokobi_moai_pen/nukayorokobi_05.jpg',
+    ],
+    name:  'ぬか喜び\nモアイペン立て',
+    desc:  '作者のクリスマスの悲劇を再現。ゲームカートリッジ付き。スマホをかざすと遊べます。'
+  },
+  {
     image: 'images/kurima/positive_moai_pen.jpg',
     images: [
       'images/kurima/positive_moai_pen.jpg',
@@ -301,6 +314,14 @@ const MASTER_PRODUCTS = [
     ],
     name:  'ミニおすわりモアイの\nキーホルダー',
     desc:  'ちょこんとお座りするミニモアイのキーホルダー。どこへでも一緒に連れて行けます。'
+  },
+  {
+    image: 'images/kurima/moai_lure_stand.jpg',
+    images: [
+      'images/kurima/moai_lure_stand.jpg',
+    ],
+    name:  'モアイルアースタンド',
+    desc:  'モアイがあなたの大切なルアー（釣具）をがっちりホールドする、釣り人必見の専用ディスプレイスタンド。お気に入りのルアーをおしゃれにディスプレイして、次の釣行へのモチベーションを高めましょう！'
   },
 ];
 
