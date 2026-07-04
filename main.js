@@ -3592,7 +3592,7 @@ function showMoaiConfirmation(type) {
     no = 'No. 404';
     type2 = '💧 がっかり';
     category = 'ペンたて';
-    desc = 'ペンを　さしてもらえると\nおもって　きたいしたのに、\nそのまま　スルーされてしまった。\nぬかよろこび　したときの\nかなしそうな　かおを　している。';
+    desc = 'クリスマス、「ぜったい PSP！」\nと さけんでいたが、\n箱をあけると\nスーパーロボットたいせんと\nこうりゃくぼんだった。';
   }
   
   if (hud.confirmTitle) hud.confirmTitle.textContent = name;
