@@ -3274,13 +3274,20 @@ function createDarkMarketBoothStructure(x, z) {
   const nukaTex = textureLoader.load('./nukayorokobi.png');
   const nukaMat = new THREE.SpriteMaterial({ map: nukaTex });
   const nukaMoaiSprite = new THREE.Sprite(nukaMat);
-  nukaMoaiSprite.position.set(x + 4.5, 2.2, z + 2.8);
-  nukaMoaiSprite.scale.set(1.4, 1.4, 1);
+  nukaMoaiSprite.position.set(x + 4.5, 2.6, z + 2.8);
+  nukaMoaiSprite.scale.set(1.9, 1.9, 1);
   nukaMoaiSprite.userData.moaiType = 4;
   nukaMoaiSprite.userData.isNukayorokobi = true;
   world.add(nukaMoaiSprite);
   props.push(nukaMoaiSprite);
   starterMoais.push(nukaMoaiSprite);
+
+  const nukaLabel = createTextSprite('ぬかよろこびモアイ', '#ffbc69', 20);
+  nukaLabel.position.set(x + 4.5, 3.8, z + 2.8);
+  nukaLabel.visible = false;
+  world.add(nukaLabel);
+  props.push(nukaLabel);
+  nukaMoaiSprite.userData.label = nukaLabel;
 }
 
 function createDarkMarket() {
@@ -3453,6 +3460,14 @@ function showDarkMarketDialog() {
   const yesBtn = document.getElementById('btn-dark-yes');
   const noBtn = document.getElementById('btn-dark-no');
   const closeBtn = document.getElementById('btn-dark-close');
+
+  if (moataroMoaiPurchased && !hasDarkMarketCard) {
+    const nukaSprite = starterMoais.find(m => m.userData.isNukayorokobi);
+    if (nukaSprite) {
+      triggerNukaEasterEgg(nukaSprite);
+      return;
+    }
+  }
   
   if (textEl) {
     textEl.textContent = '……フフフ、ここを見つけたか。\nこの闇の取引所……7月19日（日）15時に開店予定だ。\nお前、今週末のリアルHMJ（東京ビッグサイト）には来られそうか？';
@@ -3510,7 +3525,26 @@ function checkStarterMoaiClick() {
       showMoaiConfirmation(hitMoai.userData.moaiType);
     }
     document.body.style.cursor = 'default';
+    return true;
   }
+  return false;
+}
+
+function checkStarterMoaiHover() {
+  raycaster.setFromCamera(mouse, camera);
+  const intersects = raycaster.intersectObjects(starterMoais);
+  
+  starterMoais.forEach(m => {
+    if (m.userData.label) m.userData.label.visible = false;
+  });
+
+  if (intersects.length > 0) {
+    document.body.style.cursor = 'pointer';
+    const hitMoai = intersects[0].object;
+    if (hitMoai.userData.label) hitMoai.userData.label.visible = true;
+    return true;
+  }
+  return false;
 }
 
 function triggerNukaEasterEgg(moaiSprite) {
@@ -4206,10 +4240,7 @@ window.addEventListener('pointermove', (event) => {
   mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
   mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
   
-  let hovered = false;
-  if (moataroServiceActive && !moataroMoaiPurchased) {
-    hovered = checkStarterMoaiHover();
-  }
+  let hovered = checkStarterMoaiHover();
   if (!hovered) {
     checkDarkMarketHover();
   }
@@ -4220,10 +4251,10 @@ window.addEventListener('pointerdown', (event) => {
   mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
   mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
   
-  if (moataroServiceActive && !moataroMoaiPurchased) {
-    checkStarterMoaiClick();
+  const clickedStarter = checkStarterMoaiClick();
+  if (!clickedStarter) {
+    checkDarkMarketClick();
   }
-  checkDarkMarketClick();
 });
 
 function isTouchUiTarget(event) {
