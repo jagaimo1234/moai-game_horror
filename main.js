@@ -125,7 +125,8 @@ sun.shadow.camera.right = 55;
 sun.shadow.camera.top = 55;
 sun.shadow.camera.bottom = -55;
 scene.add(sun);
-scene.add(new THREE.HemisphereLight(0xbfeaff, 0x486c44, 1.7));
+const hemiLight = new THREE.HemisphereLight(0xbfeaff, 0x486c44, 1.7);
+scene.add(hemiLight);
 
 const world = new THREE.Group();
 scene.add(world);
@@ -3121,13 +3122,13 @@ function updateDarkMarketZone(dt) {
     }
   }
   
-  if (ambientLight && dirLight && darkMarketPointLight) {
-    const targetAmbient = inDarkMarketZone ? 0.08 : 0.65;
-    const targetDir = inDarkMarketZone ? 0.08 : 0.8;
+  if (sun && hemiLight && darkMarketPointLight) {
+    const targetSun = inDarkMarketZone ? 0.08 : 2.4;
+    const targetHemi = inDarkMarketZone ? 0.12 : 1.7;
     const targetPoint = inDarkMarketZone ? 5.5 : 0;
     
-    ambientLight.intensity = THREE.MathUtils.lerp(ambientLight.intensity, targetAmbient, dt * 3.5);
-    dirLight.intensity = THREE.MathUtils.lerp(dirLight.intensity, targetDir, dt * 3.5);
+    sun.intensity = THREE.MathUtils.lerp(sun.intensity, targetSun, dt * 3.5);
+    hemiLight.intensity = THREE.MathUtils.lerp(hemiLight.intensity, targetHemi, dt * 3.5);
     darkMarketPointLight.intensity = THREE.MathUtils.lerp(darkMarketPointLight.intensity, targetPoint, dt * 3.5);
   }
   
