@@ -1765,8 +1765,9 @@ function resolveRegularCustomerCollisions(entity, radius, onHit) {
 }
 
 function placeStageCrystals() {
+  if (currentStage === 4) return; // Spawned dynamically after purchase instead
   const required = getSealsRequired();
-  const pickupCount = currentStage === 4 ? 4 : required;
+  const pickupCount = required;
   for (let i = 0; i < pickupCount; i++) {
     if (currentStage === 3) {
       const spots = [
@@ -1777,17 +1778,6 @@ function placeStageCrystals() {
         [38, 24],
         [-20, 36],
         [0, 52],
-      ];
-      const [x, z] = spots[i % spots.length];
-      addCrystal(x, z);
-      continue;
-    }
-    if (currentStage === 4) {
-      const spots = [
-        [-54, -26],
-        [-18, -36],
-        [34, -34],
-        [54, -2],
       ];
       const [x, z] = spots[i % spots.length];
       addCrystal(x, z);
@@ -2993,8 +2983,23 @@ function playRivalEncounterSound() {
   });
 }
 
+function spawnStage4ChaseCrystals() {
+  const spots = [
+    [-54, -26],
+    [-18, -36],
+    [34, -34],
+    [54, -2],
+  ];
+  spots.forEach(([x, z]) => {
+    addCrystal(x, z);
+  });
+}
+
 function startRivalChase() {
   if (hud.rivalDialog) hud.rivalDialog.style.display = 'none';
+  if (currentStage === 4) {
+    spawnStage4ChaseCrystals();
+  }
 
   // Reset other authors to their fixed default spots and change their texture to attacker.png (dynamic mode change!)
   authors.forEach((enemy, index) => {
@@ -3841,8 +3846,8 @@ function resetGame(stage = 4) {
   authorHealth = 140;
   energy = 100;
   currentStage = THREE.MathUtils.clamp(Number(stage) || 1, 1, STAGES.length);
-  crystals = currentStage === 4 ? 2 : 0;
-  totalSeals = currentStage === 4 ? 2 : 0;
+  crystals = 0;
+  totalSeals = 0;
   stolenYogurts = 0;
   escapeOpen = false;
   finalSwarmActive = false;
