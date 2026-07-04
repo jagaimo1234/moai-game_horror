@@ -112,6 +112,10 @@ document.body.appendChild(renderer.domElement);
 
 const clock = new THREE.Clock();
 const textureLoader = new THREE.TextureLoader();
+const userTexture = textureLoader.load('./user.png');
+userTexture.colorSpace = THREE.SRGBColorSpace;
+const attackerTexture = textureLoader.load('./attacker.png');
+attackerTexture.colorSpace = THREE.SRGBColorSpace;
 const gltfLoader = new GLTFLoader();
 
 const sun = new THREE.DirectionalLight(0xffffff, 2.4);
@@ -496,9 +500,8 @@ function loadMoaiModel() {
 }
 
 function createAuthor() {
-  const texture = textureLoader.load('./user.png');
   const spriteMat = new THREE.MeshStandardMaterial({
-    map: texture,
+    map: userTexture,
     transparent: true,
     side: THREE.DoubleSide,
     roughness: 0.55,
@@ -519,16 +522,13 @@ function createAuthor() {
   ring.position.y = 0.12;
   author.add(ring);
 
-  const attackerTexture = textureLoader.load('./attacker.png');
-  attackerTexture.colorSpace = THREE.SRGBColorSpace;
-
   authors.push(author);
   for (let i = 1; i < FINAL_AUTHOR_COUNT; i++) {
     const clone = author.clone(true);
     const clonedSprite = clone.children[0];
     if (clonedSprite && clonedSprite.material) {
       clonedSprite.material = clonedSprite.material.clone();
-      clonedSprite.material.map = attackerTexture;
+      clonedSprite.material.map = userTexture; // Start as user.png
       clonedSprite.material.needsUpdate = true;
     }
     scene.add(clone);
@@ -2981,9 +2981,15 @@ function playRivalEncounterSound() {
 function startRivalChase() {
   if (hud.rivalDialog) hud.rivalDialog.style.display = 'none';
 
-  // Reset other authors to their fixed default spots so they don't start the chase from weird positions
+  // Reset other authors to their fixed default spots and change their texture to attacker.png (dynamic mode change!)
   authors.forEach((enemy, index) => {
     if (index > 0) {
+      const sprite = enemy.children[0];
+      if (sprite && sprite.material) {
+        sprite.material.map = attackerTexture;
+        sprite.material.needsUpdate = true;
+      }
+
       const starts = [
         [-52, -6],
         [52, -20],
@@ -3839,6 +3845,16 @@ function resetGame(stage = 4) {
   moataroSpeechTimer = 0;
   moataroPromptDismissed = false;
   moataroMoaiPurchased = false;
+
+  // Restore every author sprite texture to user.png on game start/restart
+  authors.forEach((enemy) => {
+    const sprite = enemy.children[0];
+    if (sprite && sprite.material) {
+      sprite.material.map = userTexture;
+      sprite.material.needsUpdate = true;
+    }
+  });
+
   inDarkMarketZone = false;
   stopDarkMarketBgm();
   darkMarketNpc = null;
