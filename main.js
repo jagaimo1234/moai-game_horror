@@ -229,6 +229,7 @@ const obstacleColliders = [];
 const contactEffects = [];
 const celeryCustomers = [];
 const regularCustomers = [];
+const runningMoais = [];
 const petMoai = new THREE.Group();
 petMoai.visible = false;
 scene.add(petMoai);
@@ -695,6 +696,7 @@ function createWorld() {
   contactEffects.length = 0;
   celeryCustomers.length = 0;
   regularCustomers.length = 0;
+  runningMoais.length = 0;
   scene.background = new THREE.Color(config.sky);
   scene.fog = new THREE.Fog(config.sky, config.fogNear, config.fogFar);
 
@@ -1055,10 +1057,11 @@ function addMarketStageStructures() {
   addMarketCounter(54, -48, 12, 5, 0x32424c);
   addCeleryCustomers();
   addRegularCustomers();
+  addRunningMoais();
 }
 
 function addRegularCustomers() {
-  const customerFiles = ['./custmer1.png', './custmer2.png', './custmer3.png', './running_moai.png'];
+  const customerFiles = ['./custmer1.png', './custmer2.png', './custmer3.png'];
   const materials = customerFiles.map((file) => {
     const texture = textureLoader.load(file);
     texture.colorSpace = THREE.SRGBColorSpace;
@@ -1121,6 +1124,35 @@ function addRegularCustomers() {
     props.push(customer);
     regularCustomers.push(customer);
   });
+}
+
+function addRunningMoais() {
+  const texture = textureLoader.load('./running_moai.png');
+  texture.colorSpace = THREE.SRGBColorSpace;
+  texture.flipY = true;
+  const material = new THREE.SpriteMaterial({
+    map: texture,
+    transparent: true,
+    depthWrite: false,
+  });
+
+  // 5 running moais with random starting positions and directions
+  const count = 5;
+  for (let i = 0; i < count; i++) {
+    const sprite = new THREE.Sprite(material.clone());
+    const startX = THREE.MathUtils.randFloatSpread(110);
+    const startZ = THREE.MathUtils.randFloatSpread(110);
+    const scale = 3.2 + Math.random() * 0.6;
+    sprite.position.set(startX, scale * 0.46, startZ);
+    sprite.scale.set(scale, scale, 1);
+    sprite.userData.type = 'runningMoai';
+    sprite.userData.baseY = sprite.position.y;
+    sprite.userData.angle = Math.random() * Math.PI * 2;  // random dash direction
+    sprite.userData.speed = 14 + Math.random() * 8;       // 14-22 units/sec (爆速)
+    sprite.userData.phase = i * 1.57;
+    world.add(sprite);
+    runningMoais.push(sprite);
+  }
 }
 
 function addCeleryCustomers() {
@@ -2832,6 +2864,30 @@ function updateRegularCustomers(dt) {
   });
 }
 
+function updateRunningMoais(dt) {
+  if (currentStage !== 4 || !runningMoais.length) return;
+  const time = performance.now() * 0.001;
+  const BOUND = WORLD_SIZE - 4;
+  runningMoais.forEach((moai) => {
+    // Move in a straight line at high speed
+    moai.position.x += Math.cos(moai.userData.angle) * moai.userData.speed * dt;
+    moai.position.z += Math.sin(moai.userData.angle) * moai.userData.speed * dt;
+
+    // Bounce off walls (reflect angle)
+    if (moai.position.x > BOUND || moai.position.x < -BOUND) {
+      moai.userData.angle = Math.PI - moai.userData.angle;
+      moai.position.x = THREE.MathUtils.clamp(moai.position.x, -BOUND, BOUND);
+    }
+    if (moai.position.z > BOUND || moai.position.z < -BOUND) {
+      moai.userData.angle = -moai.userData.angle;
+      moai.position.z = THREE.MathUtils.clamp(moai.position.z, -BOUND, BOUND);
+    }
+
+    // Subtle vertical bob for life
+    moai.position.y = moai.userData.baseY + Math.abs(Math.sin(time * 8 + moai.userData.phase)) * 0.18;
+  });
+}
+
 function updateCeleryCustomers(dt) {
   if (currentStage !== 4 || !celeryCustomers.length) return;
   const time = performance.now() * 0.001;
@@ -3932,6 +3988,7 @@ function animate() {
     updateBlueHelper(dt);
     updateAuthors(dt);
     updateRegularCustomers(dt);
+    updateRunningMoais(dt);
     updateCeleryCustomers(dt);
     updateMoataroService(dt);
     updateShots(dt);
