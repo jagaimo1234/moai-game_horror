@@ -1975,12 +1975,18 @@ function createEscapeGate() {
   marker.position.y = 0.15;
   escapeGate.add(marker);
 
-  // "EXIT 🏃 出口" Sign Billboard
+  // "EXIT 🏃 出口" Sign Billboard (Front)
   const signTex = createExitSignTexture();
   const signMat = new THREE.MeshBasicMaterial({ map: signTex, transparent: true, side: THREE.DoubleSide });
   const signMesh = new THREE.Mesh(new THREE.PlaneGeometry(5.2, 2.6), signMat);
   signMesh.position.set(0, 7.5, 0.65); // Placed directly on the front face of the top beam to avoid ceiling collision
   escapeGate.add(signMesh);
+
+  // "EXIT 🏃 出口" Sign Billboard (Back)
+  const signMeshBack = signMesh.clone();
+  signMeshBack.position.set(0, 7.5, -0.65);
+  signMeshBack.rotation.y = Math.PI;
+  escapeGate.add(signMeshBack);
 
   // Volumetric Red light pillar guide beacon
   const beaconGeo = new THREE.CylinderGeometry(0.8, 1.8, 48, 16, 1, true);
