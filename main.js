@@ -3274,7 +3274,7 @@ function createDarkMarketBoothStructure(x, z) {
   const nukaTex = textureLoader.load('./nukayorokobi.png');
   const nukaMat = new THREE.SpriteMaterial({ map: nukaTex });
   const nukaMoaiSprite = new THREE.Sprite(nukaMat);
-  nukaMoaiSprite.position.set(x + 4.5, 2.6, z + 2.8);
+  nukaMoaiSprite.position.set(x, 2.6, z + 1.2);
   nukaMoaiSprite.scale.set(1.9, 1.9, 1);
   nukaMoaiSprite.userData.moaiType = 4;
   nukaMoaiSprite.userData.isNukayorokobi = true;
@@ -3645,6 +3645,17 @@ function showMoaiConfirmation(type) {
   if (hud.confirmType2) hud.confirmType2.textContent = type2;
   if (hud.confirmCategory) hud.confirmCategory.textContent = category;
   if (hud.confirmDesc) hud.confirmDesc.textContent = desc;
+
+  const msg = document.querySelector('.confirm-message');
+  if (type === 4) {
+    if (hud.confirmYes) hud.confirmYes.style.display = 'none';
+    if (hud.confirmNo) hud.confirmNo.textContent = 'とじる';
+    if (msg) msg.style.display = 'none';
+  } else {
+    if (hud.confirmYes) hud.confirmYes.style.display = 'inline-block';
+    if (hud.confirmNo) hud.confirmNo.textContent = 'いいえ';
+    if (msg) msg.style.display = 'block';
+  }
   
   if (hud.confirmDialog) {
     hud.confirmDialog.style.display = 'flex';
