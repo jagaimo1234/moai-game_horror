@@ -3329,7 +3329,7 @@ function showDarkMarketDialog() {
   const closeBtn = document.getElementById('btn-dark-close');
   
   if (textEl) {
-    textEl.textContent = '……フフフ、ここを見つけたか。\nお前、今週末のリアルHMJ（東京ビッグサイト）には来られそうか？';
+    textEl.textContent = '……フフフ、ここを見つけたか。\nこの闇の取引所……7月18日（金）15時に開店予定だ。\nお前、今週末のリアルHMJ（東京ビッグサイト）には来られそうか？';
   }
   if (yesBtn) yesBtn.style.display = 'inline-block';
   if (noBtn) noBtn.style.display = 'inline-block';
@@ -3348,12 +3348,12 @@ function handleDarkMarketResponse(answer) {
   
   if (answer === 'yes') {
     if (textEl) {
-      textEl.textContent = 'そうか！それは素晴らしい！ならリアル会場（ブース：J-80）で待っているぞ。\nお前の選んだモアイを、ぜひ直接手にとって連れて帰ってやってくれ！';
+      textEl.textContent = 'そうか！それは素晴らしい！ならリアル会場（ブース：J-80）で待っているぞ。\nお前の選んだモアイを直接手にとって連れて帰ってやってくれ！\n……なお、この闇の取引所は 7/18（金）15時 に正式オープンするぞ。お楽しみに。';
     }
     blip(880, 0.14, 0.12, 'sine');
   } else {
     if (textEl) {
-      textEl.textContent = 'そうか……来られないか。寂しいことだ。\n……だが、がっかりするな。ならばイベントが終わったら、またここへ来るとよい。\nこのゲームを遊んでくれたお前だけの、特別な取引（お楽しみ）を用意しておこう……フフフ。';
+      textEl.textContent = 'そうか……来られないか。寂しいことだ。\n……だが、がっかりするな。\nこの闇の取引所は 7月18日（金）15時 に正式オープンする予定だ。\nその日になったら、またここへ来るとよい。\nこのゲームを遊んでくれたお前だけの、特別な取引を用意しておこう……フフフ。';
     }
     blip(580, 0.14, 0.12, 'sine');
   }
