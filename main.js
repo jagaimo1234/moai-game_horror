@@ -3274,7 +3274,7 @@ function createDarkMarketBoothStructure(x, z) {
     });
     const miniMesh = new THREE.Mesh(new THREE.PlaneGeometry(1.0, 1.5), mat);
     miniMesh.position.set(x + offsetX, 2.2, z + 2.4);
-    miniMesh.rotation.y = Math.PI;
+    miniMesh.rotation.y = 0;
     world.add(miniMesh);
     props.push(miniMesh);
   });
@@ -3292,7 +3292,7 @@ function createDarkMarketBoothStructure(x, z) {
     });
     const miniMesh = new THREE.Mesh(new THREE.PlaneGeometry(1.0, 1.5), mat);
     miniMesh.position.set(x + offsetX, 2.4, z + 1.2);
-    miniMesh.rotation.y = Math.PI;
+    miniMesh.rotation.y = 0;
     world.add(miniMesh);
     props.push(miniMesh);
   });
