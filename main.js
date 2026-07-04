@@ -3044,6 +3044,7 @@ function playCeleryDisgustVoice() {
 }
 
 function speakMoataroLine() {
+  if (moataroMoaiPurchased) return;
   primeSpeech();
   const line = MOATARO_LINE_VOICES[Math.floor(Math.random() * MOATARO_LINE_VOICES.length)];
   moataroServiceLine = line.text;
@@ -4111,6 +4112,7 @@ function finishGame(won) {
   }
 
   const container = document.getElementById('game-clear');
+  hud.start.style.display = 'flex';
   hud.start.style.opacity = '1';
   hud.start.innerHTML = `
     <div class="start-card open-world-card">
