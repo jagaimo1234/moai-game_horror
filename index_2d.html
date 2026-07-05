@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>MOAI YOGURT AVOID [V1]</title>
+    <link rel="manifest" href="manifest.json">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700&family=DotGothic16&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --glass-bg: rgba(255, 255, 255, 0.1);
+            --glass-border: rgba(255, 255, 255, 0.2);
+            --accent-color: #00d2ff;
+        }
+
+        body {
+            margin: 0;
+            overflow: hidden;
+            background: #000;
+            touch-action: none;
+            font-family: 'Outfit', sans-serif;
+            color: #fff;
+        }
+
+        #ui-container {
+            position: absolute;
+            top: env(safe-area-inset-top, 20px);
+            left: 20px;
+            right: 20px;
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        #ui-text {
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
+            padding: 10px 20px;
+            border-radius: 15px;
+            font-size: 14px;
+            display: inline-block;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        #score-container {
+            position: absolute;
+            top: env(safe-area-inset-top, 20px);
+            right: 20px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
+            padding: 8px 15px;
+            border-radius: 12px;
+            z-index: 10;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            text-align: right;
+            line-height: 1.2;
+        }
+
+        .score-label {
+            font-size: 10px;
+            opacity: 0.7;
+            text-transform: uppercase;
+            display: block;
+        }
+
+        .score-val {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--accent-color);
+            display: block;
+        }
+
+        .best-label {
+            font-size: 10px;
+            opacity: 0.7;
+            margin-top: 4px;
+            display: block;
+            color: #FFD700;
+        }
+
+        .best-val {
+            font-size: 14px;
+            font-weight: 700;
+            color: #FFD700;
+            display: block;
+        }
+
+        #controls {
+            position: absolute;
+            bottom: env(safe-area-inset-bottom, 40px);
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            padding: 0 30px;
+            box-sizing: border-box;
+            pointer-events: none;
+        }
+
+        .btn-joystick {
+            width: 90px;
+            height: 90px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(15px);
+            border: 2px solid var(--glass-border);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 36px;
+            pointer-events: auto;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+            user-select: none;
+        }
+
+        .btn-joystick:active {
+            transform: scale(0.85);
+            background: rgba(255, 255, 255, 0.2);
+            border-color: var(--accent-color);
+        }
+
+        #fullscreen-btn {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
+            padding: 8px 15px;
+            border-radius: 10px;
+            font-size: 12px;
+            pointer-events: auto;
+            cursor: pointer;
+            z-index: 20;
+        }
+
+        #start-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at center, rgba(30, 30, 30, 0.9) 0%, rgba(0, 0, 0, 1) 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            cursor: pointer;
+            transition: opacity 0.5s ease;
+        }
+
+        .start-card {
+            text-align: center;
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            padding: 40px;
+            border-radius: 30px;
+            box-shadow: 0 10px 50px rgba(0, 0, 0, 0.8);
+        }
+
+        h1 {
+            font-size: 32px;
+            margin-bottom: 10px;
+            letter-spacing: 2px;
+            background: linear-gradient(90deg, #fff, var(--accent-color));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .tap-msg {
+            font-size: 18px;
+            opacity: 0.8;
+            margin-bottom: 20px;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 0.4; }
+            50% { opacity: 1; }
+            100% { opacity: 0.4; }
+        }
+
+        /* ===== ランキングモーダル ===== */
+        #ranking-modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.85);
+            z-index: 200;
+            justify-content: center;
+            align-items: center;
+        }
+        #ranking-modal.active { display: flex; }
+        .ranking-box {
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            border: 2px solid rgba(255,215,0,0.5);
+            border-radius: 20px;
+            padding: 30px 24px;
+            width: 90%;
+            max-width: 420px;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 0 40px rgba(255,215,0,0.2);
+        }
+        .ranking-title {
+            font-family: 'Outfit', sans-serif;
+            font-size: 24px;
+            font-weight: bold;
+            color: #FFD700;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .ranking-row {
+            display: flex;
+            align-items: center;
+            padding: 10px 8px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            font-family: 'Outfit', sans-serif;
+            color: #fff;
+        }
+        .ranking-row .rank { width: 36px; font-weight: bold; color: #FFD700; }
+        .ranking-row .rname { flex: 1; }
+        .ranking-row .rscore { font-weight: bold; color: #00d2ff; }
+        .ranking-close {
+            margin-top: 20px;
+            width: 100%;
+            padding: 12px;
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.3);
+            color: #fff;
+            border-radius: 12px;
+            font-size: 16px;
+            cursor: pointer;
+            font-family: 'Outfit', sans-serif;
+        }
+
+        /* 名前入力オーバーレイ */
+        #name-input-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.85);
+            z-index: 300;
+            justify-content: center;
+            align-items: center;
+        }
+        #name-input-overlay.active { display: flex; }
+        .name-input-box {
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            border: 2px solid rgba(0,210,255,0.5);
+            border-radius: 20px;
+            padding: 30px 24px;
+            width: 90%;
+            max-width: 380px;
+            text-align: center;
+            box-shadow: 0 0 40px rgba(0,210,255,0.2);
+        }
+        .name-input-box h2 {
+            font-family: 'Outfit', sans-serif;
+            color: #fff;
+            font-size: 20px;
+            margin-bottom: 8px;
+        }
+        .name-input-box .score-display {
+            font-family: 'DotGothic16', sans-serif;
+            color: #FFD700;
+            font-size: 32px;
+            margin-bottom: 16px;
+        }
+        .name-input-box input {
+            width: 100%;
+            padding: 12px;
+            border-radius: 10px;
+            border: 1px solid rgba(255,255,255,0.3);
+            background: rgba(255,255,255,0.1);
+            color: #fff;
+            font-size: 18px;
+            font-family: 'Outfit', sans-serif;
+            text-align: center;
+            box-sizing: border-box;
+            margin-bottom: 16px;
+        }
+        .name-input-box button {
+            width: 100%;
+            padding: 12px;
+            border-radius: 12px;
+            border: none;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            font-family: 'Outfit', sans-serif;
+        }
+        .btn-submit { background: #00d2ff; color: #000; margin-bottom: 10px; }
+        .btn-skip { background: rgba(255,255,255,0.1); color: #fff; border: 1px solid rgba(255,255,255,0.3) !important; }
+
+        /* Retro Game Over UI Styles */
+        .retro-container {
+            position: relative;
+            max-width: 600px; /* Adjust based on image aspect ratio if needed, keeping it responsive */
+            width: 100%;
+            margin: 0 auto;
+        }
+
+        .retro-bg {
+            width: 100%;
+            height: auto;
+            display: block; /* Remove bottom space */
+        }
+
+        .retro-score {
+            position: absolute;
+            font-family: 'DotGothic16', sans-serif;
+            color: #ff4a4a; /* Red color matching the reference */
+            background-color: #2b2b2b; /* Match the dark gray background of the score box */
+            padding: 0 10px; /* Expand the background width to cover "233" */
+            font-size: 4.5vw; /* Slightly larger */
+            top: 38.2%; /* Moved up for the new layout */
+            left: 56.5%; /* Keeping same left */
+            transform: translate(-50%, -50%);
+            z-index: 10;
+        }
+        
+        /* Media query roughly for the max-width to cap font size */
+        @media (min-width: 600px) {
+            .retro-score {
+                font-size: 26px; /* Capped font size */
+                top: 43.5%; /* Fine-tuned for desktop */
+            }
+        }
+
+        .retro-btn {
+            position: absolute;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            z-index: 10;
+            outline: none;
+            -webkit-tap-highlight-color: transparent; /* Remove blue highlight on mobile */
+            color: transparent; /* Hide text if any is added for accessibility */
+        }
+
+        
+        /* Approximate hitboxes based on the image proportions */
+        .btn-retry {
+            top: 53.5%;
+            left: 14%;
+            width: 72%;
+            height: 9.5%;
+        }
+
+        .btn-follow {
+            top: 65%;
+            left: 11%;
+            width: 78%;
+            height: 9.5%;
+        }
+
+        .btn-x {
+            top: 75.5%;
+            left: 29.5%;
+            width: 15%;
+            height: 12.5%;
+        }
+
+        .btn-insta {
+            top: 75.5%;
+            left: 54%;
+            width: 15%;
+            height: 12.5%;
+        }
+
+        .btn-revenge-back {
+            display: none;
+            position: absolute;
+            top: 140px;
+            right: 20px;
+            background: linear-gradient(135deg, #00d2ff, #0084ff);
+            color: white;
+            border: none;
+            padding: 10px 22px;
+            border-radius: 25px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0, 180, 255, 0.4);
+            z-index: 99;
+            pointer-events: auto;
+            transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            font-family: 'Outfit', 'DotGothic16', sans-serif;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-revenge-back:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 180, 255, 0.6);
+        }
+
+        .btn-revenge-back:active {
+            transform: translateY(1px) scale(0.95);
+            box-shadow: 0 2px 8px rgba(0, 180, 255, 0.3);
+        }
+
+    </style>
+</head>
+
+<body>
+    <div id="ui-container">
+        <div id="ui-text">← → MOVE / AVOID ENEMIES</div>
+    </div>
+    <div id="score-container">
+        <span class="score-label">Score</span>
+        <span id="current-score-val" class="score-val">0</span>
+        <span class="best-label">Today's Best</span>
+        <span id="today-best-val" class="best-val">0</span>
+    </div>
+
+    <!-- 💥 スッキリしたボタン（スタートに戻る） -->
+    <button id="revenge-back-btn" class="btn-revenge-back" onclick="event.stopPropagation(); window.stopRevengeMode()">
+        ✨ スッキリした！ (戻る)
+    </button>
+
+    <div id="start-screen" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 100; cursor: pointer; display: flex; flex-direction: column; align-items: center; overflow: hidden;">
+        <div style="position: relative; width: 100%; max-width: 550px;">
+            <img src="title_bg.png" style="width: 100%; height: auto; display: block;" alt="襲いかかる作者(私)を避けろゲーム">
+            
+            <!-- ▼▼▼ イベント情報の更新はここを書き換えてください ▼▼▼ -->
+            <div style="position: absolute; top: 32%; width: 100%; display: flex; flex-direction: column; align-items: center; gap: 12px; z-index: 101;">
+                
+                <!-- イベント名・ブース名 -->
+                <div style="text-align: center; color: #fff; font-family: 'Outfit', sans-serif; font-weight: bold; text-shadow: 0px 2px 5px rgba(0,0,0,1);">
+                    <div style="font-size: clamp(16px, 4.5vw, 22px); margin-bottom: 4px;">HMJ（ハンドメイドインジャパン）</div>
+                    <div style="font-size: clamp(14px, 4vw, 18px); margin-bottom: 4px;">日程: 7月11日(土)・12日(日)</div>
+                    <div style="font-size: clamp(14px, 4vw, 18px); margin-bottom: 4px;">会場: 東京ビッグサイト</div>
+                    <div style="font-size: clamp(14px, 4vw, 18px);">ブースNo: 後日発表！ (Kanazawa Moataro)</div>
+                </div>
+                
+                <!-- MAPボタン & お品書きボタン（横並び） -->
+                <div style="display: flex; gap: 10px; flex-wrap: wrap; justify-content: center;">
+                    <button onclick="event.stopPropagation(); window.open('https://hmj-fes.jp/', '_blank')" style="
+                        background: rgba(0,0,0,0.5); border: 2px solid rgba(255,255,255,0.6); color: #fff; 
+                        padding: clamp(6px, 1.5vw, 8px) clamp(12px, 3vw, 18px); border-radius: 20px; 
+                        font-size: clamp(12px, 3.5vw, 16px); font-weight: bold;
+                        display: flex; align-items: center; gap: 6px; cursor: pointer; 
+                        backdrop-filter: blur(4px); box-shadow: 0 4px 6px rgba(0,0,0,0.5);
+                    ">
+                        HMJ公式サイト 🌐
+                    </button>
+                    <button onclick="event.stopPropagation(); location.href='catalog.html?v=20260526_1'" style="
+                        background: rgba(0,210,255,0.15); border: 2px solid rgba(0,210,255,0.6); color: #00d2ff; 
+                        padding: clamp(6px, 1.5vw, 8px) clamp(12px, 3vw, 18px); border-radius: 20px; 
+                        font-size: clamp(12px, 3.5vw, 16px); font-weight: bold;
+                        display: flex; align-items: center; gap: 6px; cursor: pointer; 
+                        backdrop-filter: blur(4px); box-shadow: 0 4px 12px rgba(0,210,255,0.2);
+                    ">
+                        📋 お品書き
+                    </button>
+                    <button onclick="event.stopPropagation(); location.href='index.html'" style="
+                        background: rgba(46,204,113,0.15); border: 2px solid rgba(46,204,113,0.6); color: #2ecc71; 
+                        padding: clamp(6px, 1.5vw, 8px) clamp(12px, 3vw, 18px); border-radius: 20px; 
+                        font-size: clamp(12px, 3.5vw, 16px); font-weight: bold;
+                        display: flex; align-items: center; gap: 6px; cursor: pointer; 
+                        backdrop-filter: blur(4px); box-shadow: 0 4px 12px rgba(46,204,113,0.2);
+                    ">
+                        🎮 3D版へ切り替え
+                    </button>
+                </div>
+
+            </div>
+            <!-- ▲▲▲ イベント情報 ここまで ▲▲▲ -->
+
+            <!-- Tap to Start -->
+            <p class="tap-msg" style="
+                position: absolute; top: 60%; width: 100%; text-align: center; margin: 0;
+                font-family: 'Outfit', sans-serif; font-size: clamp(22px, 6vw, 28px); font-weight: bold; color: #fff; 
+                text-shadow: 0 0 15px rgba(255,255,255,0.8), 0 0 5px #000; z-index: 101;
+            ">TAP TO START</p>
+
+            <!-- Sound recommendation -->
+            <p style="
+                position: absolute; top: 68%; width: 100%; text-align: center; margin: 0;
+                font-family: 'Outfit', sans-serif; font-size: clamp(12px, 3.5vw, 16px); font-weight: bold;
+                color: #FFD700; text-shadow: 0 0 8px rgba(255,215,0,0.8), 0 0 3px #000;
+                z-index: 101; letter-spacing: 0.5px;
+            ">🔊 ミュート解除するとBGMがでます</p>
+
+            <!-- Global High Score Display -->
+            <div id="global-best-container" style="
+                position: absolute; top: 74%; width: 100%; text-align: center;
+                font-family: 'DotGothic16', sans-serif; color: #FFD700;
+                z-index: 101; background: rgba(0,0,0,0.3); padding: 5px 0; 
+                border-top: 1px solid rgba(255,215,0,0.2); border-bottom: 1px solid rgba(255,215,0,0.2);
+            ">
+                <div style="margin-bottom: 2px;">
+                    👑 <span style="font-size: 12px; opacity: 0.8;">歴代最高:</span> <span id="global-high-score-val" style="font-size: 18px;">---</span>
+                </div>
+                <div>
+                    🌟 <span style="font-size: 12px; opacity: 0.8;">本日のベスト:</span> <span id="start-today-best-val" style="font-size: 18px;">0</span>
+                </div>
+            </div>
+
+            <!-- Ranking Button (現在オフ) -->
+            <!-- <button onclick="event.stopPropagation(); window.showRanking()" style="
+                position: absolute; top: 76%; left: 50%; transform: translateX(-50%);
+                background: rgba(255,215,0,0.15); border: 2px solid rgba(255,215,0,0.7); color: #FFD700;
+                padding: clamp(6px,1.5vw,8px) clamp(16px,5vw,28px); border-radius: 20px;
+                font-size: clamp(14px,4vw,18px); font-weight: bold;
+                cursor: pointer; backdrop-filter: blur(4px); white-space: nowrap;
+                z-index: 101; box-shadow: 0 0 12px rgba(255,215,0,0.3);
+            ">👑 RANKING</button> -->
+        </div>
+    </div>
+
+    <!-- 名前入力オーバーレイ -->
+    <div id="name-input-overlay">
+        <div class="name-input-box">
+            <h2 id="name-input-title">NEW RECORD!</h2>
+            <div id="final-score-display" class="score-display">0</div>
+            <input type="text" id="nickname-input" placeholder="なまえを入力..." maxlength="10">
+            <button id="btn-submit-name" class="btn-submit">記録を刻む</button>
+            <button id="btn-skip-name" class="btn-skip">スキップ</button>
+        </div>
+    </div>
+
+    <div id="fullscreen-btn">FULLSCREEN</div>
+
+    <div id="controls">
+        <div id="btn-left" class="btn-joystick">←</div>
+        <div id="btn-right" class="btn-joystick">→</div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script type="module">
+      import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js';
+      import { getDatabase, ref, push, runTransaction, serverTimestamp, onValue, set } from 'https://www.gstatic.com/firebasejs/10.11.0/firebase-database.js';
+
+      const firebaseConfig = {
+        apiKey: "AIzaSyA8V8kmjfQ0FEE4bq3R4sBC94yLHbWfd-I",
+        authDomain: "moai-horror-game-ranking.firebaseapp.com",
+        databaseURL: "https://moai-horror-game-ranking-default-rtdb.firebaseio.com",
+        projectId: "moai-horror-game-ranking",
+        storageBucket: "moai-horror-game-ranking.firebasestorage.app",
+        messagingSenderId: "889857597584",
+        appId: "1:889857597584:web:5775e2b9753ddc83527815"
+      };
+
+      const app = initializeApp(firebaseConfig);
+      const db = getDatabase(app);
+
+      // 歴代最高記録を保存（名前付き）
+      window.saveGlobalHighScore = async function(newScore, name) {
+        try {
+          const scoreRef = ref(db, 'global_stats/high_score');
+          await runTransaction(scoreRef, (current) => {
+            const currentScore = (current && typeof current === 'object') ? current.score : (current || 0);
+            if (!current || newScore > currentScore) {
+              return { score: newScore, name: name || "ななし" };
+            }
+            return; // キャンセル（更新しない）
+          });
+          return true;
+        } catch(e) {
+          console.error(e);
+          return false;
+        }
+      };
+
+      // 本日のグローバルベスト（当日1位）を保存
+      window.saveTodayHighScore = async function(newScore, name) {
+        const date = getTodayStr();
+        const todayBestRef = ref(db, `stats/${date}/highScore`);
+        try {
+          await runTransaction(todayBestRef, (current) => {
+            if (!current || newScore > (current.score || 0)) {
+              return { score: newScore, name: name || "ななし" };
+            }
+            return; 
+          });
+        } catch(e) {
+          console.error("Today Best Update Error:", e);
+        }
+      };
+
+      // 名前入力画面を表示する関数
+      window.showNameInput = function(score, isGlobal, isToday) {
+        const overlay = document.getElementById('name-input-overlay');
+        const scoreDisp = document.getElementById('final-score-display');
+        const title = document.getElementById('name-input-title');
+        
+        if (overlay && scoreDisp) {
+          scoreDisp.textContent = score;
+          title.textContent = isGlobal ? "🏆 歴代最高記録更新！" : "🌟 本日のベスト更新！";
+          overlay.classList.add('active');
+          
+          // 送信ボタンのイベント
+          const submitBtn = document.getElementById('btn-submit-name');
+          const input = document.getElementById('nickname-input');
+          
+          submitBtn.onclick = () => {
+            const name = input.value.trim() || "ななし";
+            if (isGlobal) window.saveGlobalHighScore(score, name);
+            if (isToday) window.saveTodayHighScore(score, name);
+            overlay.classList.remove('active');
+          };
+          
+          document.getElementById('btn-skip-name').onclick = () => {
+            overlay.classList.remove('active');
+          };
+        }
+      };
+
+      // 外部から参照できるように初期化
+      window.todayGlobalBestScore = 0;
+      window.globalHighScore = 0;
+
+      // --- 統計収集機能 ---
+
+      
+      const getTodayStr = () => {
+        const d = new Date();
+        return `${d.getFullYear()}-${(d.getMonth()+1).toString().padStart(2,'0')}-${d.getDate().toString().padStart(2,'0')}`;
+      };
+
+      // アクセス数をカウントアップ
+      window.logAccess = async function() {
+        const date = getTodayStr();
+        const accessRef = ref(db, `stats/${date}/accessCount`);
+        runTransaction(accessRef, (current) => (current || 0) + 1);
+      };
+
+      // プレイ人数をカウントアップ
+      window.logPlayerStart = async function() {
+        const date = getTodayStr();
+        const playerRef = ref(db, `stats/${date}/playerCount`);
+        runTransaction(playerRef, (current) => (current || 0) + 1);
+      };
+
+      // スコアを履歴として保存
+      window.logScore = async function(score) {
+        const date = getTodayStr();
+        const scoresRef = ref(db, `stats/${date}/scores`);
+        push(scoresRef, { score, time: Date.now() });
+      };
+
+      // ページ読み込み時にアクセスを記録
+      window.logAccess();
+
+
+      
+      // 歴代最高記録の監視
+      const highScoreRef = ref(db, 'global_stats/high_score');
+      onValue(highScoreRef, (snapshot) => {
+        const data = snapshot.val() || { score: 0, name: "---" };
+        // data がオブジェクトでない（旧データの）場合は互換性を保つ
+        const scoreVal = typeof data === 'object' ? data.score : data;
+        const nameVal = typeof data === 'object' ? data.name : "---";
+        
+        window.globalHighScore = scoreVal;
+        const display = document.getElementById('global-high-score-val');
+        if (display) display.innerHTML = `${scoreVal} <span style="font-size:12px; color:rgba(255,255,255,0.7); ml-1">(${nameVal})</span>`;
+      });
+
+      // 本日のベスト記録の監視
+      const date = getTodayStr();
+      const todayBestRef = ref(db, `stats/${date}/highScore`);
+      onValue(todayBestRef, (snapshot) => {
+        const data = snapshot.val() || { score: 0, name: "---" };
+        const scoreVal = typeof data === 'object' ? data.score : data;
+        const nameVal = typeof data === 'object' ? data.name : "---";
+        
+        window.todayGlobalBestScore = scoreVal;
+        
+        // 即座に全要素を更新
+        const display = document.getElementById('today-best-val');
+        const startDisplay = document.getElementById('start-today-best-val');
+        if (display) display.innerHTML = `${scoreVal} <span style="font-size:10px; color:rgba(255,255,255,0.7);">(${nameVal})</span>`;
+        if (startDisplay) startDisplay.innerHTML = `${scoreVal} <span style="font-size:12px; color:rgba(255,255,255,0.7);">(${nameVal})</span>`;
+
+        // main_2d.js側の関数があれば呼び出す
+        if (window.updateBestDisplay) window.updateBestDisplay();
+      });
+    </script>
+
+    <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+      }
+    }
+    </script>
+    <script type="module" src="./main_2d.js?v=20260526_1"></script>
+</body>
+
+</html>
