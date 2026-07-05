@@ -2,6 +2,14 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
+  <script>
+    window.addEventListener('error', function(e) {
+      alert("⚠️ JSエラーが発生しました:\n" + e.message + "\nファイル: " + e.filename + "\n行番号: " + e.lineno);
+    });
+    window.addEventListener('unhandledrejection', function(e) {
+      alert("⚠️ 非同期処理エラーが発生しました:\n" + e.reason);
+    });
+  </script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Kanazawa Moataro POS System</title>
   <style>
