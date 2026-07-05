@@ -331,6 +331,7 @@ const MASTER_PRODUCTS = [
       'images/kurima/machoi_moai_lure_stand/IMG_0858_studio.png',
       'images/kurima/machoi_moai_lure_stand/IMG_0861_studio.png',
       'images/kurima/machoi_moai_lure_stand/IMG_08248_studio.png',
+      'images/kurima/machoi_moai_lure_stand/IMG_08245558_studio.png',
     ],
     name:  'まちょいモアイルアースタンド',
     desc:  'モアイがあなたの大切なルアー（釣具）をがっちりホールドする、釣り人必見の専用ディスプレイスタンド。お気に入りのルアーをおしゃれにディスプレイして、次の釣行へのモチベーションを高めましょう！'
