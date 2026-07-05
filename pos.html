@@ -390,6 +390,14 @@
           <input type="text" id="dev-product-name" class="form-input" style="margin-top:4px;" placeholder="まだ秘密の新作...">
         </div>
         
+        <div style="margin-bottom:20px;">
+          <label style="font-size:12px; opacity:0.7;">本登録作品と紐付ける (マージ)</label>
+          <select id="dev-product-link-master" class="form-input" style="margin-top:4px; width:100%; background:rgba(0,0,0,0.5); color:white; border:1px solid rgba(255,255,255,0.2); padding:8px; border-radius:6px;">
+            <!-- Generated dynamically -->
+          </select>
+          <p style="font-size:10px; opacity:0.6; margin-top:4px; color:gold;">※本登録されたデータと紐付けると、仮登録の時に入力した金額やシミュレーション数を引き継いだまま、正式な画像と詳細が表示されます。</p>
+        </div>
+        
         <!-- ステータススライダー -->
         <div style="margin-bottom:24px; background:rgba(255,255,255,0.05); padding:15px; border-radius:8px; border:1px solid rgba(255,255,255,0.1);">
           <label style="display:block; font-size:12px; opacity:0.6; margin-bottom:12px;">現在のステータス</label>
@@ -2141,18 +2149,30 @@
     };
 
     window.openDevProductModal = (id = null) => {
+      // 本登録リンクのプルダウンを生成
+      const select = document.getElementById('dev-product-link-master');
+      select.innerHTML = '<option value="">-- 紐付けない (新規開発作品) --</option>';
+      MASTER_PRODUCTS.forEach(m => {
+        const option = document.createElement('option');
+        option.value = m.id || (m.image ? m.image.split('/').pop().split('.')[0] : '');
+        option.textContent = m.name.replace(/\n/g, ' ');
+        select.appendChild(option);
+      });
+
       if (id) {
         // Edit mode
         const p = window.customProductsData[id];
         document.getElementById('dev-product-name').value = p.name;
         document.getElementById('dev-product-status').value = p.status || 0;
         updateDevStatusLabel(p.status || 0);
+        select.value = p.productId || '';
         window.currentEditingDevId = id;
       } else {
         // New mode
         document.getElementById('dev-product-name').value = '';
         document.getElementById('dev-product-status').value = 0;
         updateDevStatusLabel(0);
+        select.value = '';
         window.currentEditingDevId = null;
       }
       document.getElementById('dev-product-modal').style.display = 'flex';
@@ -2163,10 +2183,11 @@
       const name = document.getElementById('dev-product-name').value.trim();
       const statusInput = document.getElementById('dev-product-status');
       const status = parseInt(statusInput.value);
+      const linkMaster = document.getElementById('dev-product-link-master').value;
       if (!name) { alert("仮名称を入力してください"); return; }
       
       try {
-        console.log("Saving dev product...", { id: window.currentEditingDevId, name, status });
+        console.log("Saving dev product...", { id: window.currentEditingDevId, name, status, productId: linkMaster });
         const newData = { ...window.customProductsData };
         const id = window.currentEditingDevId || ("dev_" + Date.now());
         
@@ -2175,6 +2196,7 @@
           name: name, 
           status: status,
           isDev: true, 
+          productId: linkMaster || null,
           updatedAt: Date.now() 
         };
         if (!window.currentEditingDevId) newData[id].createdAt = Date.now();
@@ -2257,7 +2279,7 @@
 
       const count = prompt("A4用紙1枚につき各作品を何枚並べますか？\n(例: 2, 6, 12, 20, 24)", "12") || "12";
       
-      const allMaster = [...MASTER_PRODUCTS, ...Object.values(window.customProductsData)];
+      const allMaster = window.getFullMasterProducts(window.customProductsData);
       const selectedProducts = allMaster.filter(p => printSelection.includes(p.id));
       const imgUrls = selectedProducts.map(p => encodeURIComponent(p.image));
 

@@ -316,11 +316,23 @@ const MASTER_PRODUCTS = [
     desc:  'ちょこんとお座りするミニモアイのキーホルダー。どこへでも一緒に連れて行けます。'
   },
   {
-    image: 'images/kurima/moai_lure_stand.jpg',
+    id: 'moai_lure_stand',
+    image: 'images/kurima/machoi_moai_lure_stand.jpg',
     images: [
-      'images/kurima/moai_lure_stand.jpg',
+      'images/kurima/machoi_moai_lure_stand.jpg',
+      'images/kurima/machoi_moai_lure_stand/IMG_0841_studio.png',
+      'images/kurima/machoi_moai_lure_stand/IMG_0843_studio.png',
+      'images/kurima/machoi_moai_lure_stand/IMG_0844_studio.png',
+      'images/kurima/machoi_moai_lure_stand/IMG_0845_studio.png',
+      'images/kurima/machoi_moai_lure_stand/IMG_0846_studio.png',
+      'images/kurima/machoi_moai_lure_stand/IMG_0851_studio.png',
+      'images/kurima/machoi_moai_lure_stand/IMG_0852_studio.png',
+      'images/kurima/machoi_moai_lure_stand/IMG_0853_studio.png',
+      'images/kurima/machoi_moai_lure_stand/IMG_0858_studio.png',
+      'images/kurima/machoi_moai_lure_stand/IMG_0861_studio.png',
+      'images/kurima/machoi_moai_lure_stand/IMG_08248_studio.png',
     ],
-    name:  'モアイルアースタンド',
+    name:  'まちょいモアイルアースタンド',
     desc:  'モアイがあなたの大切なルアー（釣具）をがっちりホールドする、釣り人必見の専用ディスプレイスタンド。お気に入りのルアーをおしゃれにディスプレイして、次の釣行へのモチベーションを高めましょう！'
   },
 ];
@@ -482,9 +494,14 @@ window.getFullMasterProducts = function(customProductsData) {
   if (customProductsData) {
     Object.keys(customProductsData).forEach(key => {
       const p = customProductsData[key];
-      // 名前が既存のMASTER_PRODUCTSと重複しているかチェック（トリム、改行削除、全角半角正規化などは適宜）
       const normalize = (s) => s ? s.replace(/\s+/g, '').replace(/\n/g, '') : '';
-      const masterItem = list.find(m => normalize(m.name) === normalize(p.name));
+      const masterItem = list.find(m => {
+        // 先に明示的なIDやproductIdでの一致を確認し、なければ名前での一致を確認
+        const idMatches = (p.productId && m.id === p.productId) || (m.id === key);
+        const nameMatches = (normalize(m.name) === normalize(p.name)) || 
+                            (m.id === 'moai_lure_stand' && normalize(p.name) === 'モアイルアースタンド');
+        return idMatches || nameMatches;
+      });
       
       if (masterItem) {
         // 重要：FirestoreのID（dev_xxxなど）をマスターデータに引き継ぐ
