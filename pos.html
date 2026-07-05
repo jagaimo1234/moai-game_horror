@@ -155,6 +155,7 @@
         <button class="sys-tab-btn" onclick="switchSysTab('simulation')">🎯 シミュ</button>
         <button class="sys-tab-btn" onclick="switchSysTab('price-settings')">💴 金額設定</button>
         <button class="sys-tab-btn" onclick="switchSysTab('selection')">✅ 出品選択</button>
+        <button class="sys-tab-btn" onclick="switchSysTab('exhibition')">⛺ 出店計画</button>
       </div>
       <div>
         <span id="user-email" style="font-size: 12px; opacity: 0.6; margin-right: 12px;"></span>
@@ -411,6 +412,49 @@
         <div style="display:flex; justify-content:flex-end; gap:10px;">
           <button class="btn" style="background:#444; color:white;" onclick="document.getElementById('dev-product-modal').style.display='none'">やめる</button>
           <button class="btn btn-primary" id="dev-product-save-btn" style="background:linear-gradient(45deg, #f1c40f, #f39c12); color:#000; font-weight:bold;">更新する！</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Exhibition Edit Modal -->
+    <div id="exhibition-modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.8); z-index:2000; align-items:center; justify-content:center; padding:20px;">
+      <div style="background:var(--panel-bg); width:100%; max-width:450px; border-radius:12px; padding:20px; border:1px solid var(--accent); max-height:90vh; overflow-y:auto;">
+        <h3 id="exhibition-modal-title" style="margin-bottom:15px; color:var(--accent);">⛺ 出店計画の編集</h3>
+        <input type="hidden" id="exhibition-id">
+        <div style="margin-bottom:12px;">
+          <label style="font-size:12px; opacity:0.7;">イベント名</label>
+          <input type="text" id="exhibition-name" class="form-input" style="margin-top:4px;" placeholder="例: 名古屋クリマ">
+        </div>
+        <div style="margin-bottom:12px; display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+          <div>
+            <label style="font-size:12px; opacity:0.7;">開催日</label>
+            <input type="date" id="exhibition-date" class="form-input" style="margin-top:4px;">
+          </div>
+          <div>
+            <label style="font-size:12px; opacity:0.7;">応募締切日</label>
+            <input type="date" id="exhibition-deadline" class="form-input" style="margin-top:4px;">
+          </div>
+        </div>
+        <div style="margin-bottom:12px;">
+          <label style="font-size:12px; opacity:0.7;">開催場所</label>
+          <input type="text" id="exhibition-location" class="form-input" style="margin-top:4px;" placeholder="例: 東京ビッグサイト">
+        </div>
+        <div style="margin-bottom:12px;">
+          <label style="font-size:12px; opacity:0.7;">ステータス</label>
+          <select id="exhibition-status" class="form-select" style="margin-top:4px; width:100%;">
+            <option value="considering">💭 検討中</option>
+            <option value="scheduled">確定 ⛺ 出店予定</option>
+            <option value="completed">終了 🎉 出店済み</option>
+            <option value="canceled">🔕 不参加・見送り</option>
+          </select>
+        </div>
+        <div style="margin-bottom:20px;">
+          <label style="font-size:12px; opacity:0.7;">出店料・経費メモ (自由記入)</label>
+          <textarea id="exhibition-booth-memo" class="form-input" style="margin-top:4px; height:80px; resize:vertical; background:rgba(0,0,0,0.5); color:white; border:1px solid rgba(255,255,255,0.1); padding:8px; border-radius:6px; width:100%; box-sizing:border-box;" placeholder="例: 出店料20000円、往復交通費15000円。"></textarea>
+        </div>
+        <div style="display:flex; justify-content:flex-end; gap:10px;">
+          <button class="btn" style="background:#444; color:white;" onclick="document.getElementById('exhibition-modal').style.display='none'">キャンセル</button>
+          <button class="btn btn-primary" id="exhibition-save-btn">保存する</button>
         </div>
       </div>
     </div>
@@ -680,6 +724,35 @@
         </div>
       </div>
     </section>
+
+    <!-- Exhibition View -->
+    <section id="exhibition-view" class="view-section">
+      <div class="scroll-container" style="padding:20px; box-sizing:border-box; width:100%;">
+        <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:2px solid var(--accent); padding-bottom:12px; margin-bottom:24px;">
+          <h2 style="margin:0; display:flex; align-items:center; gap:10px;">⛺ 出店計画・マスター</h2>
+          <button class="btn btn-primary" onclick="openExhibitionModal()" style="font-weight:bold;">＋ 新しい出店計画を追加</button>
+        </div>
+
+        <!-- AI出店自動クローラー・推薦設定 -->
+        <div style="background:var(--panel-bg); padding:20px; border-radius:12px; margin-bottom:24px; border:1px solid gold;">
+          <h3 style="font-size:16px; margin:0 0 8px 0; color:gold; display:flex; align-items:center; gap:8px;">
+            🤖 AI出店自動クローラー・推薦設定
+          </h3>
+          <p style="font-size:12px; opacity:0.8; margin:0 0 12px 0;">
+            あなたの興味（地域、ジャンル、出店目標など）をメモに入力しておくと、AI（Antigravity）が定期的にウェブを調査し、候補となるイベントを自動でリストに追加します。
+          </p>
+          <div style="display:flex; gap:12px; align-items:stretch;">
+            <textarea id="exhibition-crawler-idea" class="form-input" style="flex:1; height:60px; min-height:60px; resize:vertical; background:rgba(0,0,0,0.3); color:white; border:1px solid rgba(255,255,255,0.1); padding:8px; border-radius:6px; font-size:13px;" placeholder="例: 2026年秋冬に愛知県か東京都で実施される、ハンドメイドやクラフト系のマルシェイベントを自動で探してほしい。"></textarea>
+            <button class="btn" onclick="saveExhibitionCrawlerIdea()" style="background:linear-gradient(45deg, #f1c40f, #f39c12); color:#000; font-weight:bold; font-size:13px; width:140px;">AI設定を保存</button>
+          </div>
+        </div>
+
+        <!-- 一覧リスト -->
+        <div id="exhibition-list" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(320px, 1fr)); gap:16px;">
+          <!-- JSで動的に追加 -->
+        </div>
+      </div>
+    </section>
   </div>
 
   <script src="data.js?v=20260705_1412"></script>
@@ -744,6 +817,11 @@
     let unsubSimulation = null;
     let hiddenProductsData = {};
     let salesRecordsCache = []; // 購入履歴のキャッシュ（修正・削除用）
+    
+    window.exhibitionPlansData = {};
+    window.exhibitionCrawlerData = {};
+    window.exhibitionSalesCache = {};
+    const exhibitionSalesListeners = {};
     
     let currentSimulationData = { activePatternId: "default", patterns: { "default": { name: "基本パターン", target: 150000, simQty: {}, prepQty: {} } } };
     let currentPatternId = "default";
@@ -821,6 +899,9 @@
       if (tabId === 'topics' && window.renderTopics) {
         window.renderTopics();
       }
+      if (tabId === 'exhibition' && window.renderExhibitions) {
+        window.renderExhibitions();
+      }
     };
 
     // Auth
@@ -883,6 +964,25 @@
           renderAll();
         });
 
+        // Exhibition plans listener
+        onSnapshot(doc(db, "settings", "exhibition_plans"), (snap) => {
+          if (snap.exists()) window.exhibitionPlansData = snap.data();
+          else window.exhibitionPlansData = {};
+          syncAllExhibitionSales();
+          renderAll();
+        });
+
+        // Exhibition crawler settings listener
+        onSnapshot(doc(db, "settings", "exhibition_crawler"), (snap) => {
+          if (snap.exists()) {
+            window.exhibitionCrawlerData = snap.data();
+            const textarea = document.getElementById('exhibition-crawler-idea');
+            if (textarea && document.activeElement !== textarea) {
+              textarea.value = window.exhibitionCrawlerData.idea || "";
+            }
+          }
+        });
+
         listenToEventData();
       } else {
         document.getElementById('login-screen').style.display = 'flex';
@@ -897,6 +997,7 @@
       renderSelection();
       if(window.renderSimulation) window.renderSimulation();
       if(window.renderTopics) window.renderTopics();
+      if(window.renderExhibitions) window.renderExhibitions();
     }
 
     function updateVisibilityUI() {
@@ -2886,6 +2987,303 @@
         });
         copySelect.innerHTML = optionsHtml;
       }
+    };
+
+    // Load and sync exhibition sales
+    function syncExhibitionSales(eventId) {
+      if (exhibitionSalesListeners[eventId]) return;
+      
+      const docRef = doc(db, "settings", "sales_" + eventId);
+      exhibitionSalesListeners[eventId] = onSnapshot(docRef, (snap) => {
+        let total = 0;
+        let qty = 0;
+        if (snap.exists() && snap.data().records) {
+          snap.data().records.forEach(r => {
+            total += r.total || 0;
+            if (r.items) {
+              r.items.forEach(it => {
+                qty += it.qty || 0;
+              });
+            }
+          });
+        }
+        window.exhibitionSalesCache[eventId] = { totalSales: total, totalQty: qty };
+        if (typeof window.renderExhibitions === 'function') window.renderExhibitions();
+      }, (err) => {
+        console.error("Sales sync error for " + eventId, err);
+      });
+    }
+
+    function syncAllExhibitionSales() {
+      const allEvents = window.getAllEvents ? window.getAllEvents(eventConfigData) : {};
+      const keys = new Set([
+        ...Object.keys(allEvents),
+        ...Object.keys(window.exhibitionPlansData || {})
+      ]);
+      keys.forEach(k => {
+        if (k) syncExhibitionSales(k);
+      });
+    }
+
+    // Modal Control
+    window.openExhibitionModal = (id = null) => {
+      if (id) {
+        // Edit mode
+        const p = window.exhibitionPlansData[id] || {};
+        document.getElementById('exhibition-modal-title').textContent = "⛺ 出店計画の編集";
+        document.getElementById('exhibition-id').value = id;
+        document.getElementById('exhibition-name').value = p.name || '';
+        document.getElementById('exhibition-date').value = p.date || '';
+        document.getElementById('exhibition-deadline').value = p.deadline || '';
+        document.getElementById('exhibition-location').value = p.location || '';
+        document.getElementById('exhibition-status').value = p.status || 'considering';
+        document.getElementById('exhibition-booth-memo').value = p.boothMemo || '';
+      } else {
+        // New mode
+        document.getElementById('exhibition-modal-title').textContent = "＋ 新しい出店計画を追加";
+        document.getElementById('exhibition-id').value = '';
+        document.getElementById('exhibition-name').value = '';
+        document.getElementById('exhibition-date').value = '';
+        document.getElementById('exhibition-deadline').value = '';
+        document.getElementById('exhibition-location').value = '';
+        document.getElementById('exhibition-status').value = 'considering';
+        document.getElementById('exhibition-booth-memo').value = '';
+      }
+      document.getElementById('exhibition-modal').style.display = 'flex';
+    };
+
+    // Save plans
+    document.getElementById('exhibition-save-btn').addEventListener('click', async () => {
+      if (!auth.currentUser) return;
+      const id = document.getElementById('exhibition-id').value.trim() || ("ex_" + Date.now());
+      const name = document.getElementById('exhibition-name').value.trim();
+      const date = document.getElementById('exhibition-date').value;
+      const deadline = document.getElementById('exhibition-deadline').value;
+      const location = document.getElementById('exhibition-location').value.trim();
+      const status = document.getElementById('exhibition-status').value;
+      const boothMemo = document.getElementById('exhibition-booth-memo').value.trim();
+
+      if (!name) return alert("イベント名を入力してください。");
+
+      try {
+        const updatedPlans = { ...window.exhibitionPlansData };
+        updatedPlans[id] = {
+          name,
+          date,
+          deadline,
+          location,
+          status,
+          boothMemo,
+          isBuiltin: updatedPlans[id]?.isBuiltin || false,
+          updatedAt: Date.now()
+        };
+
+        await setDoc(doc(db, "settings", "exhibition_plans"), updatedPlans);
+        document.getElementById('exhibition-modal').style.display = 'none';
+        alert("出店計画を保存しました！");
+      } catch (e) {
+        console.error("Save Exhibition Error:", e);
+        alert("保存に失敗しました: " + e.message);
+      }
+    });
+
+    // Delete custom plans
+    window.deleteExhibition = async (id) => {
+      if (!auth.currentUser) return;
+      if (!confirm("この出店計画を削除しますか？")) return;
+
+      try {
+        const updatedPlans = { ...window.exhibitionPlansData };
+        delete updatedPlans[id];
+        await setDoc(doc(db, "settings", "exhibition_plans"), updatedPlans);
+        alert("出店計画を削除しました。");
+      } catch (e) {
+        console.error("Delete Exhibition Error:", e);
+        alert("削除に失敗しました: " + e.message);
+      }
+    };
+
+    // Inline status update
+    window.updateExhibitionStatus = async (id, status) => {
+      if (!auth.currentUser) return;
+      try {
+        const updatedPlans = { ...window.exhibitionPlansData };
+        if (updatedPlans[id]) {
+          updatedPlans[id].status = status;
+          await setDoc(doc(db, "settings", "exhibition_plans"), updatedPlans);
+        } else {
+          // If built-in is not in user config yet, initialize and update
+          const allEvents = window.getAllEvents ? window.getAllEvents(eventConfigData) : {};
+          if (allEvents[id]) {
+            updatedPlans[id] = {
+              name: allEvents[id].label,
+              date: allEvents[id].date || '',
+              deadline: allEvents[id].deadline || '',
+              location: allEvents[id].location || '',
+              status: status,
+              boothMemo: '',
+              isBuiltin: true,
+              updatedAt: Date.now()
+            };
+            await setDoc(doc(db, "settings", "exhibition_plans"), updatedPlans);
+          }
+        }
+      } catch (e) {
+        console.error("Update status error:", e);
+      }
+    };
+
+    // Save Crawler interest memo
+    window.saveExhibitionCrawlerIdea = async () => {
+      if (!auth.currentUser) return;
+      const idea = document.getElementById('exhibition-crawler-idea').value.trim();
+      try {
+        await setDoc(doc(db, "settings", "exhibition_crawler"), {
+          idea: idea,
+          updatedAt: Date.now()
+        });
+        alert("AI自動クローラーの設定を保存しました！\nこの内容に沿って、AIがイベントの自動調査を行います。");
+      } catch (e) {
+        console.error("Save Crawler Error:", e);
+        alert("設定の保存に失敗しました: " + e.message);
+      }
+    };
+
+    // Render Exhibition Plans
+    window.renderExhibitions = () => {
+      const list = document.getElementById('exhibition-list');
+      if (!list) return;
+      list.innerHTML = '';
+
+      // Merge builtin events from config
+      const allEvents = window.getAllEvents ? window.getAllEvents(eventConfigData) : {};
+      const mergedPlans = {};
+
+      // Initialize defaults for built-ins if they don't exist in plans
+      Object.keys(allEvents).forEach(key => {
+        const ev = allEvents[key];
+        mergedPlans[key] = {
+          name: ev.label,
+          date: ev.date || '',
+          deadline: ev.deadline || '',
+          location: ev.location || '',
+          status: 'considering',
+          boothMemo: '',
+          isBuiltin: true
+        };
+      });
+
+      // Override with user's configurations
+      Object.keys(window.exhibitionPlansData || {}).forEach(key => {
+        mergedPlans[key] = {
+          ...mergedPlans[key],
+          ...window.exhibitionPlansData[key]
+        };
+      });
+
+      // Sort by date (descending, latest or closest first)
+      const sortedKeys = Object.keys(mergedPlans).sort((a, b) => {
+        if (!mergedPlans[a].date) return 1;
+        if (!mergedPlans[b].date) return -1;
+        const dateA = new Date(mergedPlans[a].date);
+        const dateB = new Date(mergedPlans[b].date);
+        return dateA - dateB;
+      });
+
+      if (sortedKeys.length === 0) {
+        list.innerHTML = '<div style="grid-column:1/-1; text-align:center; opacity:0.5; padding:40px;">出店計画が登録されていません。「新しい出店計画を追加」から作成できます。</div>';
+        return;
+      }
+
+      sortedKeys.forEach(key => {
+        const plan = mergedPlans[key];
+        const sales = window.exhibitionSalesCache[key] || { totalSales: 0, totalQty: 0 };
+        const isBuiltin = plan.isBuiltin;
+        const isAiRecommended = plan.isAiRecommended;
+
+        // Status Badge Style
+        let badgeColor = '#95a5a6';
+        let badgeText = '💭 検討中';
+        if (plan.status === 'scheduled') { badgeColor = 'var(--accent)'; badgeText = '⛺ 出店予定'; }
+        else if (plan.status === 'completed') { badgeColor = '#2ecc71'; badgeText = '🎉 出店済み'; }
+        else if (plan.status === 'canceled') { badgeColor = '#e74c3c'; badgeText = '🔕 不参加・見送り'; }
+
+        // Deadline Highlight
+        let deadlineHtml = '未定';
+        if (plan.deadline) {
+          const dlDate = new Date(plan.deadline);
+          const today = new Date();
+          const isClose = (dlDate - today) > 0 && (dlDate - today) < (7 * 24 * 60 * 60 * 1000); // within 7 days
+          const isPassed = (dlDate - today) < 0;
+          
+          if (isClose) {
+            deadlineHtml = `<span style="color:#e74c3c; font-weight:bold;">⚠️ ${plan.deadline} (締切間近)</span>`;
+          } else if (isPassed) {
+            deadlineHtml = `<span style="opacity:0.5;">${plan.deadline} (終了)</span>`;
+          } else {
+            deadlineHtml = plan.deadline;
+          }
+        }
+
+        // AI Recommendation Label
+        const aiLabel = isAiRecommended ? `<span style="background:linear-gradient(45deg, #f1c40f, #f39c12); color:#000; font-size:10px; padding:2px 6px; border-radius:4px; font-weight:bold; margin-left:8px;">✨ AI提案</span>` : '';
+
+        // Render card
+        list.innerHTML += `
+          <div style="background:var(--panel-bg); border:1px solid ${plan.status === 'scheduled' ? 'var(--accent)' : 'rgba(255,255,255,0.1)'}; border-radius:12px; padding:16px; position:relative; box-shadow:0 4px 6px rgba(0,0,0,0.15); display:flex; flex-direction:column; justify-content:space-between; min-height: 250px;">
+            <div>
+              <!-- Status Badge & Menu -->
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                <span style="background:${badgeColor}; color:${plan.status === 'scheduled' ? '#000' : '#fff'}; font-size:11px; padding:4px 8px; border-radius:6px; font-weight:bold;">
+                  ${badgeText}
+                </span>
+                <div style="display:flex; gap:6px;">
+                  <button class="btn" style="background:rgba(255,255,255,0.05); padding:4px 8px; font-size:11px; color:#fff;" onclick="openExhibitionModal('${key}')">編集</button>
+                  ${!isBuiltin ? `<button class="btn" style="background:rgba(231,76,60,0.2); padding:4px 8px; font-size:11px; color:var(--danger);" onclick="deleteExhibition('${key}')">削除</button>` : ''}
+                </div>
+              </div>
+
+              <!-- Event Details -->
+              <h4 style="margin:0 0 10px 0; font-size:16px; color:#fff; display:flex; align-items:center;">
+                ${plan.name} ${aiLabel}
+              </h4>
+              
+              <div style="font-size:12px; line-height:1.6; opacity:0.8; margin-bottom:15px; background:rgba(0,0,0,0.2); padding:10px; border-radius:6px;">
+                <div>📅 <strong>開催日</strong>: ${plan.date || '未定'}</div>
+                <div>⏰ <strong>応募締切</strong>: ${deadlineHtml}</div>
+                <div>📍 <strong>場所</strong>: ${plan.location || '未定'}</div>
+              </div>
+            </div>
+
+            <div>
+              <!-- Sales Summary -->
+              <div style="border-top:1px solid rgba(255,255,255,0.08); padding-top:12px; margin-bottom:12px;">
+                <span style="font-size:11px; opacity:0.5; display:block; margin-bottom:4px;">📊 売上実績（リアルタイム）</span>
+                <div style="font-size:15px; font-weight:bold; color:var(--accent);">
+                  ¥${sales.totalSales.toLocaleString()} <span style="font-size:12px; font-weight:normal; opacity:0.8;">(${sales.totalQty}点)</span>
+                </div>
+              </div>
+
+              <!-- Booth Memo -->
+              <div style="border-top:1px solid rgba(255,255,255,0.08); padding-top:12px;">
+                <span style="font-size:11px; opacity:0.5; display:block; margin-bottom:4px;">📝 出店料・経費・メモ</span>
+                <div style="font-size:12px; color:rgba(255,255,255,0.7); max-height:60px; overflow-y:auto; white-space:pre-wrap; background:rgba(0,0,0,0.1); padding:6px; border-radius:4px; border:1px solid rgba(255,255,255,0.05); min-height:36px;">${plan.boothMemo || '<span style="opacity:0.4;">メモがありません</span>'}</div>
+              </div>
+
+              <!-- Change Status Inline -->
+              <div style="margin-top:12px; display:flex; align-items:center; gap:8px; border-top:1px solid rgba(255,255,255,0.08); padding-top:12px;">
+                <span style="font-size:11px; opacity:0.5;">状況変更:</span>
+                <select onchange="updateExhibitionStatus('${key}', this.value)" style="background:rgba(0,0,0,0.5); color:white; border:1px solid rgba(255,255,255,0.2); font-size:11px; padding:3px 6px; border-radius:4px; cursor:pointer;">
+                  <option value="considering" ${plan.status === 'considering' ? 'selected' : ''}>💭 検討中</option>
+                  <option value="scheduled" ${plan.status === 'scheduled' ? 'selected' : ''}>⛺ 出店予定</option>
+                  <option value="completed" ${plan.status === 'completed' ? 'selected' : ''}>🎉 出店済み</option>
+                  <option value="canceled" ${plan.status === 'canceled' ? 'selected' : ''}>🔕 不参加</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        `;
+      });
     };
   </script>
 
