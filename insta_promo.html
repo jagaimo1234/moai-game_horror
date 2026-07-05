@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>まちょいモアイルアースタンド - Instagramプロモーションツール</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700;900&family=Noto+Sans+JP:wght@400;700;900&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #050508;
+      --panel-bg: rgba(20, 20, 30, 0.6);
+      --accent: linear-gradient(45deg, #00d2ff, #00b8e6);
+      --text: #ffffff;
+      --gold: #f1c40f;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Outfit', 'Noto Sans JP', sans-serif;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      overflow: hidden;
+    }
+
+    /* Outer Wrapper */
+    .container {
+      display: flex;
+      flex-direction: row;
+      gap: 30px;
+      align-items: center;
+      max-width: 1200px;
+      padding: 20px;
+    }
+
+    /* Left Control Panel */
+    .controls-panel {
+      background: var(--panel-bg);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 16px;
+      padding: 24px;
+      width: 320px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+    }
+
+    .controls-panel h1 {
+      font-size: 20px;
+      font-weight: 900;
+      color: #00d2ff;
+      border-bottom: 2px solid rgba(0, 210, 255, 0.2);
+      padding-bottom: 8px;
+    }
+
+    .instructions {
+      font-size: 12px;
+      line-height: 1.6;
+      opacity: 0.8;
+      background: rgba(0, 0, 0, 0.2);
+      padding: 12px;
+      border-radius: 8px;
+      border-left: 3px solid #00d2ff;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .form-group label {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      opacity: 0.6;
+    }
+
+    .btn {
+      background: linear-gradient(45deg, #00d2ff, #0088cc);
+      border: none;
+      color: #000;
+      font-weight: bold;
+      padding: 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: all 0.2s;
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 210, 255, 0.4);
+    }
+
+    /* Right Preview Window (Reel Aspect Ratio) */
+    .preview-window {
+      width: 360px;
+      height: 640px;
+      border-radius: 24px;
+      overflow: hidden;
+      position: relative;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
+      border: 4px solid rgba(255, 255, 255, 0.1);
+      background: #000;
+    }
+
+    /* Reels Overlay Mockup */
+    .reels-overlay {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 100;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 20px;
+      background: linear-gradient(to bottom, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0) 20%, rgba(0,0,0,0) 80%, rgba(0,0,0,0.6) 100%);
+    }
+
+    .reels-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      color: rgba(255, 255, 255, 0.8);
+      font-size: 14px;
+      font-weight: bold;
+    }
+
+    .reels-right-buttons {
+      position: absolute;
+      right: 12px;
+      bottom: 80px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+      color: white;
+    }
+
+    .reels-icon-btn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .reels-icon-circle {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.15);
+      border: 1px solid rgba(255,255,255,0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+    }
+
+    .reels-icon-btn span {
+      font-size: 10px;
+      opacity: 0.8;
+    }
+
+    .reels-bottom-info {
+      width: 75%;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+    }
+
+    .profile-tag {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .profile-pic {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: var(--accent);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      color: black;
+      font-size: 10px;
+    }
+
+    .profile-name {
+      font-weight: bold;
+      font-size: 12px;
+    }
+
+    /* Slideshow Engine */
+    .slides-container {
+      position: absolute;
+      inset: 0;
+      z-index: 10;
+    }
+
+    .slide {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      transition: opacity 1s ease-in-out;
+      overflow: hidden;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .slide.active {
+      opacity: 1;
+    }
+
+    /* Slide Background Image with Ken Burns effect */
+    .slide-bg {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transform: scale(1.05);
+      transition: transform 3.5s linear;
+    }
+
+    .slide.active .slide-bg {
+      transform: scale(1.15) translate(1%, -1%);
+    }
+
+    /* Slide Text Overlay */
+    .text-overlay {
+      position: absolute;
+      left: 20px;
+      right: 20px;
+      bottom: 120px;
+      z-index: 50;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: all 0.8s cubic-bezier(0.1, 1, 0.1, 1);
+    }
+
+    .slide.active .text-overlay {
+      opacity: 1;
+      transform: translateY(0);
+      transition-delay: 0.4s;
+    }
+
+    .promo-category {
+      color: var(--gold);
+      font-size: 11px;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.6);
+    }
+
+    .promo-title {
+      font-size: 20px;
+      font-weight: 900;
+      color: #fff;
+      line-height: 1.3;
+      text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8);
+      background: rgba(0, 0, 0, 0.4);
+      padding: 8px 12px;
+      border-radius: 6px;
+      border-left: 4px solid var(--gold);
+      backdrop-filter: blur(4px);
+    }
+
+    /* ProgressBar */
+    .progress-bar-container {
+      position: absolute;
+      top: 40px;
+      left: 20px;
+      right: 20px;
+      display: flex;
+      gap: 4px;
+      z-index: 110;
+    }
+
+    .progress-track {
+      flex: 1;
+      height: 2.5px;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: #fff;
+      width: 0%;
+    }
+
+    .progress-track.active .progress-fill {
+      width: 100%;
+      transition: width 3.5s linear;
+    }
+
+    .progress-track.completed .progress-fill {
+      width: 100%;
+    }
+
+    @media (max-width: 768px) {
+      .container {
+        flex-direction: column;
+        padding: 10px;
+      }
+      .controls-panel {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    
+    <!-- Left Controls Panel -->
+    <div class="controls-panel">
+      <h1>🎬 インスタプロモ動画</h1>
+      <p class="instructions">
+        右側のプレビューはInstagramリールの9:16比率です。<br>
+        PCやスマホの「画面録画（スクリーンレコード）」機能を使ってこのエリアを録画し、インスタ投稿時にお好みの音楽（BGM）を乗せてください。
+      </p>
+
+      <div class="form-group">
+        <label>表示スピード（秒 / スライド）</label>
+        <select id="slide-duration-select" onchange="updateDuration(this.value)" style="background:#111; color:white; padding:8px; border-radius:6px; border:1px solid rgba(255,255,255,0.15);">
+          <option value="3000">3秒 (速め)</option>
+          <option value="3500" selected>3.5秒 (おすすめ)</option>
+          <option value="4500">4.5秒 (ゆったり)</option>
+        </select>
+      </div>
+
+      <div style="display:flex; gap:10px;">
+        <button class="btn" style="flex:1;" onclick="restartSlideshow()">最初から再生</button>
+      </div>
+      
+      <p style="font-size:10px; opacity:0.5; text-align:center;">
+        まちょいモアイルアースタンド公式プロモーションツール
+      </p>
+    </div>
+
+    <!-- Right Preview Window -->
+    <div class="preview-window">
+      
+      <!-- Progress Bar (Stories style) -->
+      <div class="progress-bar-container" id="progress-container">
+        <!-- Generated dynamically -->
+      </div>
+
+      <!-- Reels Overlay (Instagram UI) -->
+      <div class="reels-overlay">
+        <div class="reels-top">
+          <span>Reels</span>
+          <span style="font-size:16px;">📷</span>
+        </div>
+
+        <div class="reels-right-buttons">
+          <div class="reels-icon-btn">
+            <div class="reels-icon-circle">❤️</div>
+            <span>いいね</span>
+          </div>
+          <div class="reels-icon-btn">
+            <div class="reels-icon-circle">💬</div>
+            <span>コメント</span>
+          </div>
+          <div class="reels-icon-btn">
+            <div class="reels-icon-circle">✈️</div>
+            <span>シェア</span>
+          </div>
+          <div class="reels-icon-circle" style="border: 2px solid #fff; overflow:hidden;">🗿</div>
+        </div>
+
+        <div class="reels-bottom-info">
+          <div class="profile-tag">
+            <div class="profile-pic">🗿</div>
+            <span class="profile-name">studio_moai</span>
+            <span style="background:rgba(255,255,255,0.2); font-size:9px; padding:2px 6px; border-radius:4px;">フォローする</span>
+          </div>
+          <p style="font-size:11px; opacity:0.9;">
+            まちょいモアイルアースタンド、ついに登場！🎣 お気に入りのルアーをお洒落に飾ろう。
+          </p>
+        </div>
+      </div>
+
+      <!-- Slides Wrapper -->
+      <div class="slides-container" id="slides-wrapper">
+        <!-- Generated dynamically -->
+      </div>
+
+    </div>
+
+  </div>
+
+  <script>
+    const images = [
+      { src: "images/kurima/machoi_moai_lure_stand/IMG_08245558_studio.png", title: "まちょいモアイルアースタンド登場" },
+      { src: "images/kurima/machoi_moai_lure_stand/IMG_08248_studio.png", title: "モアイがあなたの大切なルアーをしっかり保持" },
+      { src: "images/kurima/machoi_moai_lure_stand/IMG_0841_studio.png", title: "釣り部屋を最高のお洒落空間へ" },
+      { src: "images/kurima/machoi_moai_lure_stand/IMG_0843_studio.png", title: "細部まで美しく作り込まれた精巧な造形" },
+      { src: "images/kurima/machoi_moai_lure_stand/IMG_0844_studio.png", title: "お気に入りのルアーをディスプレイ" },
+      { src: "images/kurima/machoi_moai_lure_stand/IMG_0845_studio.png", title: "次の釣行のモチベーションを高める" },
+      { src: "images/kurima/machoi_moai_lure_stand/IMG_0846_studio.png", title: "コレクションがもっと魅力的になる" },
+      { src: "images/kurima/machoi_moai_lure_stand/IMG_0851_studio.png", title: "スタジオモアイが贈る、珠玉のアイテム" },
+      { src: "images/kurima/machoi_moai_lure_stand/IMG_0852_studio.png", title: "インテリアとしても最高の存在感" },
+      { src: "images/kurima/machoi_moai_lure_stand/IMG_0853_studio.png", title: "様々なルアーに対応する設計" },
+      { src: "images/kurima/machoi_moai_lure_stand/IMG_0858_studio.png", title: "アングラーのための特別デザイン" },
+      { src: "images/kurima/machoi_moai_lure_stand/IMG_0861_studio.png", title: "公式ストアにて予約受付開始！" }
+    ];
+
+    let currentSlide = 0;
+    let slideInterval = null;
+    let slideDuration = 3500; // ms
+
+    function initSlideshow() {
+      const slidesWrapper = document.getElementById('slides-wrapper');
+      const progressContainer = document.getElementById('progress-container');
+      
+      slidesWrapper.innerHTML = '';
+      progressContainer.innerHTML = '';
+
+      images.forEach((img, index) => {
+        // Create Slide
+        const slide = document.createElement('div');
+        slide.className = `slide ${index === 0 ? 'active' : ''}`;
+        slide.innerHTML = `
+          <img class="slide-bg" src="${img.src}" alt="">
+          <div class="text-overlay">
+            <span class="promo-category">Studio Moai Art</span>
+            <h2 class="promo-title">${img.title}</h2>
+          </div>
+        `;
+        slidesWrapper.appendChild(slide);
+
+        // Create Progress Track
+        const track = document.createElement('div');
+        track.className = `progress-track ${index === 0 ? 'active' : ''}`;
+        track.id = `track-${index}`;
+        track.innerHTML = `<div class="progress-fill" id="fill-${index}"></div>`;
+        progressContainer.appendChild(track);
+      });
+
+      startTimer();
+    }
+
+    function startTimer() {
+      if (slideInterval) clearInterval(slideInterval);
+      
+      updateProgressBar();
+
+      slideInterval = setInterval(() => {
+        nextSlide();
+      }, slideDuration);
+    }
+
+    function nextSlide() {
+      const tracks = document.querySelectorAll('.progress-track');
+      tracks[currentSlide].classList.remove('active');
+      tracks[currentSlide].classList.add('completed');
+
+      const slides = document.querySelectorAll('.slide');
+      slides[currentSlide].classList.remove('active');
+
+      currentSlide = (currentSlide + 1) % images.length;
+
+      // If wrapped around, reset all progress lines
+      if (currentSlide === 0) {
+        tracks.forEach(t => t.className = 'progress-track');
+      }
+
+      slides[currentSlide].classList.add('active');
+      tracks[currentSlide].classList.add('active');
+
+      updateProgressBar();
+    }
+
+    function updateProgressBar() {
+      const fills = document.querySelectorAll('.progress-fill');
+      fills.forEach((fill, index) => {
+        if (index === currentSlide) {
+          fill.style.transition = `width ${slideDuration}ms linear`;
+          setTimeout(() => fill.style.width = '100%', 20);
+        } else if (index < currentSlide) {
+          fill.style.transition = 'none';
+          fill.style.width = '100%';
+        } else {
+          fill.style.transition = 'none';
+          fill.style.width = '0%';
+        }
+      });
+    }
+
+    function restartSlideshow() {
+      currentSlide = 0;
+      const tracks = document.querySelectorAll('.progress-track');
+      tracks.forEach(t => t.className = 'progress-track');
+      tracks[0].classList.add('active');
+
+      const slides = document.querySelectorAll('.slide');
+      slides.forEach(s => s.classList.remove('active'));
+      slides[0].classList.add('active');
+
+      initSlideshow();
+    }
+
+    function updateDuration(duration) {
+      slideDuration = parseInt(duration);
+      restartSlideshow();
+    }
+
+    // Initialize
+    window.onload = initSlideshow;
+  </script>
+</body>
+</html>
