@@ -755,6 +755,7 @@
               <button class="btn region-filter-btn" id="btn-filter-kanto" onclick="setExhibitionRegionFilter('kanto')" style="padding:4px 10px; font-size:12px; background:rgba(255,255,255,0.05); color:#fff;">関東 (東京・神奈川など)</button>
               <button class="btn region-filter-btn" id="btn-filter-tokai" onclick="setExhibitionRegionFilter('tokai')" style="padding:4px 10px; font-size:12px; background:rgba(255,255,255,0.05); color:#fff;">東海 (愛知など)</button>
               <button class="btn region-filter-btn" id="btn-filter-kansai" onclick="setExhibitionRegionFilter('kansai')" style="padding:4px 10px; font-size:12px; background:rgba(255,255,255,0.05); color:#fff;">関西</button>
+              <button class="btn region-filter-btn" id="btn-filter-hokuriku" onclick="setExhibitionRegionFilter('hokuriku')" style="padding:4px 10px; font-size:12px; background:rgba(255,255,255,0.05); color:#fff;">北陸 (石川・富山など)</button>
               <button class="btn region-filter-btn" id="btn-filter-other" onclick="setExhibitionRegionFilter('other')" style="padding:4px 10px; font-size:12px; background:rgba(255,255,255,0.05); color:#fff;">その他</button>
             </div>
           </div>
@@ -3258,6 +3259,46 @@
         "boothMemo": "非常に人気の高いクラフトマルシェの定番スポット。",
         "isBuiltin": false,
         "isAiRecommended": true
+      },
+      "kanazawa_hm_marche_2026": {
+        "name": "金沢ハンドメイドマルシェ2026",
+        "date": "2026-10-03",
+        "deadline": "2026-08-31",
+        "location": "石川県産業展示館 3号館",
+        "status": "considering",
+        "boothMemo": "北陸最大級のハンドメイドの祭典。秋の金沢遠征候補に。",
+        "isBuiltin": false,
+        "isAiRecommended": true
+      },
+      "kobe_hm_marche_2026": {
+        "name": "神戸ハンドメイドマルシェ2026",
+        "date": "2026-10-17",
+        "deadline": "2026-08-31",
+        "location": "神戸ファッションマート",
+        "status": "considering",
+        "boothMemo": "神戸で開催される人気のハンドメイドマルシェ。関西開拓の足がかりに。",
+        "isBuiltin": false,
+        "isAiRecommended": true
+      },
+      "handmade_expo_tenshiba": {
+        "name": "ハンドメイドEXPO in てんしば",
+        "date": "定期開催",
+        "deadline": "都度募集",
+        "location": "大阪・天王寺公園エントランスエリアてんしば",
+        "status": "considering",
+        "boothMemo": "大阪の超高立地スポット『てんしば』で開催される野外イベント。",
+        "isBuiltin": false,
+        "isAiRecommended": true
+      },
+      "lohas_park_kansai": {
+        "name": "ロハスパーク（関西各所）",
+        "date": "週末中心に定期開催",
+        "deadline": "都度募集",
+        "location": "大阪・兵庫・京都の各主要公園",
+        "status": "considering",
+        "boothMemo": "ファミリー層が多く訪れる関西屈指の大型野外マルシェ。",
+        "isBuiltin": false,
+        "isAiRecommended": true
       }
     };
 
@@ -3312,6 +3353,8 @@
         return 'tokai';
       } else if (text.includes('大阪') || text.includes('osaka') || text.includes('関西') || text.includes('京都') || text.includes('神戸') || text.includes('兵庫') || text.includes('インテックス')) {
         return 'kansai';
+      } else if (text.includes('石川') || text.includes('金沢') || text.includes('kanazawa') || text.includes('富山') || text.includes('福井') || text.includes('北陸')) {
+        return 'hokuriku';
       }
       return 'other';
     }
@@ -3441,6 +3484,7 @@
           if (reg === 'kanto') { regBadgeColor = '#3498db'; regBadgeText = '📍 関東'; }
           else if (reg === 'tokai') { regBadgeColor = '#2ecc71'; regBadgeText = '📍 東海'; }
           else if (reg === 'kansai') { regBadgeColor = '#e67e22'; regBadgeText = '📍 関西'; }
+          else if (reg === 'hokuriku') { regBadgeColor = '#9b59b6'; regBadgeText = '📍 北陸'; }
 
           let badgeColor = '#95a5a6';
           let badgeText = '検討中';
@@ -3516,6 +3560,7 @@
             if (reg === 'kanto') { regBadgeColor = '#3498db'; regBadgeText = '📍 関東'; }
             else if (reg === 'tokai') { regBadgeColor = '#2ecc71'; regBadgeText = '📍 東海'; }
             else if (reg === 'kansai') { regBadgeColor = '#e67e22'; regBadgeText = '📍 関西'; }
+            else if (reg === 'hokuriku') { regBadgeColor = '#9b59b6'; regBadgeText = '📍 北陸'; }
 
             let deadlineHtml = '未定';
             if (plan.deadline) {
