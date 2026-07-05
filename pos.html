@@ -3149,6 +3149,49 @@
       }
     };
 
+    window.AI_RECOMMENDED_EVENTS = {
+      "tokyo_hm_marche_2026_autumn": {
+        "name": "東京ハンドメイドマルシェ2026秋",
+        "date": "2026-09-05",
+        "deadline": "2026-07-31",
+        "location": "東京ドームシティ プリズムホール",
+        "status": "considering",
+        "boothMemo": "関東最大級のハンドメイドイベントの一つ。",
+        "isBuiltin": false,
+        "isAiRecommended": true
+      },
+      "yokohama_hm_marche_2026_autumn": {
+        "name": "ヨコハマハンドメイドマルシェ2026秋",
+        "date": "2026-11-21",
+        "deadline": "2026-09-30",
+        "location": "パシフィコ横浜 展示ホールA・B・C",
+        "status": "considering",
+        "boothMemo": "パシフィコ横浜で開催される超大型マルシェイベント。",
+        "isBuiltin": false,
+        "isAiRecommended": true
+      },
+      "aozora_koten_tezukuri": {
+        "name": "青空個展てづくり市",
+        "date": "定期開催",
+        "deadline": "都度募集",
+        "location": "都内各所 (池袋・中野・渋谷など)",
+        "status": "considering",
+        "boothMemo": "都内各地で高頻度で開催されるクラフト市。",
+        "isBuiltin": false,
+        "isAiRecommended": true
+      },
+      "zoshigaya_tezuri": {
+        "name": "雑司ヶ谷手創り市",
+        "date": "定期開催 (月1回)",
+        "deadline": "前月募集",
+        "location": "雑司ヶ谷 鬼子母神堂",
+        "status": "considering",
+        "boothMemo": "非常に人気の高いクラフトマルシェの定番スポット。",
+        "isBuiltin": false,
+        "isAiRecommended": true
+      }
+    };
+
     // Render Exhibition Plans
     window.renderExhibitions = () => {
       const list = document.getElementById('exhibition-list');
@@ -3170,6 +3213,13 @@
           status: 'considering',
           boothMemo: '',
           isBuiltin: true
+        };
+      });
+
+      // Merge AI recommended events (if they are not overridden by Firestore plans)
+      Object.keys(window.AI_RECOMMENDED_EVENTS || {}).forEach(key => {
+        mergedPlans[key] = {
+          ...window.AI_RECOMMENDED_EVENTS[key]
         };
       });
 
