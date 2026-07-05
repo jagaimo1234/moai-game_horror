@@ -459,6 +459,42 @@
       </div>
     </div>
 
+    <!-- Production Plan Edit Modal -->
+    <div id="production-plan-modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.8); z-index:2000; align-items:center; justify-content:center; padding:20px;">
+      <div style="background:var(--panel-bg); width:100%; max-width:450px; border-radius:12px; padding:20px; border:1px solid var(--accent); max-height:90vh; overflow-y:auto;">
+        <h3 id="production-plan-modal-title" style="margin-bottom:15px; color:var(--accent);">🔧 製造計画の登録・編集</h3>
+        <input type="hidden" id="production-plan-id">
+        <div style="margin-bottom:12px;">
+          <label style="font-size:12px; opacity:0.7;">対象作品</label>
+          <select id="production-product-select" class="form-select" style="margin-top:4px; width:100%;">
+            <!-- Dynamically populated -->
+          </select>
+        </div>
+        <div style="margin-bottom:12px; display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+          <div>
+            <label style="font-size:12px; opacity:0.7;">製造開始日</label>
+            <input type="date" id="production-start-date" class="form-input" style="margin-top:4px;">
+          </div>
+          <div>
+            <label style="font-size:12px; opacity:0.7;">製造完了日（予定）</label>
+            <input type="date" id="production-end-date" class="form-input" style="margin-top:4px;">
+          </div>
+        </div>
+        <div style="margin-bottom:12px;">
+          <label style="font-size:12px; opacity:0.7;">製造目標個数 (点)</label>
+          <input type="number" id="production-target-qty" class="form-input" style="margin-top:4px;" placeholder="例: 10">
+        </div>
+        <div style="margin-bottom:20px;">
+          <label style="font-size:12px; opacity:0.7;">メモ / 製造ノート</label>
+          <textarea id="production-memo" class="form-input" style="margin-top:4px; height:80px; resize:vertical; background:rgba(0,0,0,0.5); color:white; border:1px solid rgba(255,255,255,0.1); padding:8px; border-radius:6px; width:100%; box-sizing:border-box;" placeholder="例: 粘土成形から乾燥、焼き上げまで。"></textarea>
+        </div>
+        <div style="display:flex; justify-content:flex-end; gap:10px;">
+          <button class="btn" style="background:#444; color:white;" onclick="document.getElementById('production-plan-modal').style.display='none'">キャンセル</button>
+          <button class="btn btn-primary" id="production-plan-save-btn">保存する</button>
+        </div>
+      </div>
+    </div>
+
     <!-- Sale Edit Modal -->
     <div id="sale-edit-modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); z-index:3000; align-items:center; justify-content:center; padding:20px;">
       <div style="background:var(--panel-bg); width:100%; max-width:480px; border-radius:12px; padding:20px; border:1px solid var(--border); max-height:90vh; overflow-y:auto;">
@@ -643,7 +679,7 @@
     <!-- Settings View -->
     <section id="settings-view" class="view-section">
       <div class="scroll-container">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
           <h2>📦 在庫設定 (<span id="settings-event-name"></span>)</h2>
           <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap; justify-content: flex-end;">
             <label style="font-size:12px; display:flex; align-items:center; gap:6px; background:rgba(255,255,255,0.1); padding:8px 12px; border-radius:8px; cursor:pointer;">
@@ -653,7 +689,30 @@
             <button class="btn" style="background:var(--danger); color:white; font-size:12px; padding:8px 12px;" onclick="resetAllInventoryData()">全在庫リセット</button>
           </div>
         </div>
+
+        <!-- Sub-tabs for Inventory and Manufacturing -->
+        <div style="display:flex; background:rgba(0,0,0,0.3); border-radius:6px; padding:3px; margin-bottom:20px; width:fit-content;">
+          <button class="btn settings-subtab-btn active" id="btn-settings-subtab-stock" onclick="switchSettingsSubTab('stock')" style="padding:6px 16px; font-size:12px; font-weight:bold; background:var(--accent); color:#000; border-radius:4px;">📋 在庫数一覧</button>
+          <button class="btn settings-subtab-btn" id="btn-settings-subtab-production" onclick="switchSettingsSubTab('production')" style="padding:6px 16px; font-size:12px; color:#fff; background:none; border-radius:4px;">📅 製造計画チャート</button>
+        </div>
+
+        <!-- Normal Inventory List -->
         <div id="settings-list"></div>
+
+        <!-- Production Plan Chart View Container -->
+        <div id="production-chart-panel" style="display:none; flex-direction:column; gap:20px; width:100%;">
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <h3 style="margin:0; font-size:16px; color:var(--accent); display:flex; align-items:center; gap:6px;">🔧 製造タイムチャート (直近30日間)</h3>
+            <button class="btn btn-primary" onclick="openProductionPlanModal()" style="font-weight:bold; font-size:12px;">＋ 製造計画を追加</button>
+          </div>
+          
+          <!-- Gantt chart scrollable container -->
+          <div style="background:var(--panel-bg); border:1px solid rgba(255,255,255,0.08); border-radius:12px; overflow-x:auto; width:100%; box-shadow:0 4px 10px rgba(0,0,0,0.3);">
+            <div id="production-gantt-grid" style="min-width: 900px; display:flex; flex-direction:column; padding:16px; box-sizing:border-box;">
+              <!-- Grid header and lanes will be generated dynamically by JS -->
+            </div>
+          </div>
+        </div>
       </div>
     </section>
 
@@ -892,6 +951,7 @@
     window.exhibitionCrawlerData = {};
     window.exhibitionSalesCache = {};
     const exhibitionSalesListeners = {};
+    window.productionPlansData = {};
     
     let currentSimulationData = { activePatternId: "default", patterns: { "default": { name: "基本パターン", target: 150000, simQty: {}, prepQty: {} } } };
     let currentPatternId = "default";
@@ -1053,6 +1113,13 @@
           }
         });
 
+        // Production plans listener
+        onSnapshot(doc(db, "settings", "production_plans"), (snap) => {
+          if (snap.exists()) window.productionPlansData = snap.data();
+          else window.productionPlansData = {};
+          if (typeof window.renderProductionPlans === 'function') window.renderProductionPlans();
+        });
+
         listenToEventData();
       } else {
         document.getElementById('login-screen').style.display = 'flex';
@@ -1068,6 +1135,7 @@
       if(window.renderSimulation) window.renderSimulation();
       if(window.renderTopics) window.renderTopics();
       if(window.renderExhibitions) window.renderExhibitions();
+      if(window.renderProductionPlans) window.renderProductionPlans();
     }
 
     function updateVisibilityUI() {
@@ -3636,7 +3704,249 @@
             lanes[k].innerHTML = '<div style="opacity:0.3; text-align:center; padding:30px 0; font-size:12px;">イベントがありません</div>';
           }
         });
+    // -------------------------------------------------------------
+    // Manufacturing Production Plan (製造計画) Chart Implementation
+    // -------------------------------------------------------------
+    let currentSettingsSubTab = 'stock'; // stock or production
+
+    window.switchSettingsSubTab = (tab) => {
+      currentSettingsSubTab = tab;
+      
+      // Update subtab button styles
+      document.querySelectorAll('.settings-subtab-btn').forEach(btn => {
+        btn.classList.remove('active');
+        btn.style.background = 'none';
+        btn.style.color = '#fff';
+        btn.style.fontWeight = 'normal';
+      });
+      
+      const activeBtn = document.getElementById('btn-settings-subtab-' + tab);
+      if (activeBtn) {
+        activeBtn.classList.add('active');
+        activeBtn.style.background = 'var(--accent)';
+        activeBtn.style.color = '#000';
+        activeBtn.style.fontWeight = 'bold';
       }
+
+      // Toggle views
+      if (tab === 'stock') {
+        document.getElementById('settings-list').style.display = 'block';
+        document.getElementById('production-chart-panel').style.display = 'none';
+      } else {
+        document.getElementById('settings-list').style.display = 'none';
+        document.getElementById('production-chart-panel').style.display = 'flex';
+        window.renderProductionPlans();
+      }
+    };
+
+    // Open Modal
+    window.openProductionPlanModal = (planId = null) => {
+      // Load products dropdown options
+      const allProducts = window.getFullMasterProducts ? window.getFullMasterProducts() : MASTER_PRODUCTS;
+      const select = document.getElementById('production-product-select');
+      if (select) {
+        select.innerHTML = allProducts.map(p => `<option value="${p.id}">${p.name.replace(/\n/g, ' ')}</option>`).join('');
+      }
+
+      if (planId) {
+        // Edit mode
+        const p = window.productionPlansData[planId] || {};
+        document.getElementById('production-plan-modal-title').textContent = "🔧 製造計画の編集";
+        document.getElementById('production-plan-id').value = planId;
+        document.getElementById('production-product-select').value = p.productId || '';
+        document.getElementById('production-start-date').value = p.startDate || '';
+        document.getElementById('production-end-date').value = p.endDate || '';
+        document.getElementById('production-target-qty').value = p.targetQty || '';
+        document.getElementById('production-memo').value = p.memo || '';
+      } else {
+        // New mode
+        const todayStr = new Date().toISOString().substring(0, 10);
+        const nextWeek = new Date();
+        nextWeek.setDate(nextWeek.getDate() + 7);
+        const nextWeekStr = nextWeek.toISOString().substring(0, 10);
+
+        document.getElementById('production-plan-modal-title').textContent = "🔧 製造計画の登録";
+        document.getElementById('production-plan-id').value = '';
+        document.getElementById('production-start-date').value = todayStr;
+        document.getElementById('production-end-date').value = nextWeekStr;
+        document.getElementById('production-target-qty').value = '10';
+        document.getElementById('production-memo').value = '';
+      }
+      document.getElementById('production-plan-modal').style.display = 'flex';
+    };
+
+    // Save plan
+    document.getElementById('production-plan-save-btn').addEventListener('click', async () => {
+      if (!auth.currentUser) return;
+      const id = document.getElementById('production-plan-id').value.trim() || ("prod_" + Date.now());
+      const productId = document.getElementById('production-product-select').value;
+      const startDate = document.getElementById('production-start-date').value;
+      const endDate = document.getElementById('production-end-date').value;
+      const targetQty = parseInt(document.getElementById('production-target-qty').value) || 0;
+      const memo = document.getElementById('production-memo').value.trim();
+
+      if (!productId) return alert("製品を選択してください。");
+      if (!startDate || !endDate) return alert("開始日と完了予定日を入力してください。");
+
+      try {
+        const updatedPlans = { ...window.productionPlansData };
+        updatedPlans[id] = {
+          productId,
+          startDate,
+          endDate,
+          targetQty,
+          memo,
+          updatedAt: Date.now()
+        };
+
+        await setDoc(doc(db, "settings", "production_plans"), updatedPlans);
+        document.getElementById('production-plan-modal').style.display = 'none';
+        alert("製造計画を保存しました！");
+      } catch (e) {
+        console.error("Save Production Plan Error:", e);
+        alert("保存に失敗しました: " + e.message);
+      }
+    });
+
+    // Delete plan
+    window.deleteProductionPlan = async (id) => {
+      if (!auth.currentUser) return;
+      if (!confirm("この製造計画を削除しますか？")) return;
+
+      try {
+        const updatedPlans = { ...window.productionPlansData };
+        delete updatedPlans[id];
+        await setDoc(doc(db, "settings", "production_plans"), updatedPlans);
+        alert("製造計画を削除しました。");
+      } catch (e) {
+        console.error("Delete Production Plan Error:", e);
+        alert("削除に失敗しました: " + e.message);
+      }
+    };
+
+    // Render Timeline Chart
+    window.renderProductionPlans = () => {
+      const grid = document.getElementById('production-gantt-grid');
+      if (!grid) return;
+      grid.innerHTML = '';
+
+      // Prepare date range: Start from 5 days ago, show 30 days total
+      const totalDays = 30;
+      const days = [];
+      const now = new Date();
+      // Reset to midnight
+      now.setHours(0,0,0,0);
+      
+      const timelineStart = new Date(now);
+      timelineStart.setDate(timelineStart.getDate() - 5);
+
+      for (let i = 0; i < totalDays; i++) {
+        const d = new Date(timelineStart);
+        d.setDate(d.getDate() + i);
+        days.push(d);
+      }
+
+      const timelineStartMs = timelineStart.getTime();
+      const timelineEndMs = timelineStartMs + (totalDays * 24 * 60 * 60 * 1000);
+
+      // Render Grid Header Row
+      let headerCells = `<div style="width:250px; font-weight:bold; font-size:12px; color:rgba(255,255,255,0.5); padding:8px;">作品名 / 進捗</div>`;
+      days.forEach(day => {
+        const isToday = day.getDate() === now.getDate() && day.getMonth() === now.getMonth();
+        const dateStr = (day.getMonth() + 1) + "/" + day.getDate();
+        const dow = ["日", "月", "火", "水", "木", "金", "土"][day.getDay()];
+        headerCells += `
+          <div style="flex:1; text-align:center; min-width:24px; font-size:10px; padding:8px 0; border-left:1px solid rgba(255,255,255,0.05); background:${isToday ? 'rgba(241,196,15,0.1)' : 'transparent'};">
+            <div style="opacity:0.6;">${dateStr}</div>
+            <div style="font-weight:bold; color:${day.getDay() === 0 ? '#e74c3c' : (day.getDay() === 6 ? '#3498db' : 'white')};">${dow}</div>
+          </div>
+        `;
+      });
+
+      const headerRow = `
+        <div style="display:flex; border-bottom:1px solid rgba(255,255,255,0.1); background:rgba(0,0,0,0.2); align-items:stretch;">
+          ${headerCells}
+        </div>
+      `;
+      grid.innerHTML += headerRow;
+
+      const planKeys = Object.keys(window.productionPlansData || {});
+      if (planKeys.length === 0) {
+        grid.innerHTML += `
+          <div style="padding:40px; text-align:center; opacity:0.5; font-size:13px;">製造計画がありません。「＋ 製造計画を追加」から予定を登録しましょう！</div>
+        `;
+        return;
+      }
+
+      const allProducts = window.getFullMasterProducts ? window.getFullMasterProducts() : MASTER_PRODUCTS;
+
+      planKeys.forEach(key => {
+        const plan = window.productionPlansData[key];
+        const prod = allProducts.find(p => p.id === plan.productId) || { name: plan.productId || "不明な作品", image: "" };
+
+        // Position calculation
+        const startMs = new Date(plan.startDate).getTime();
+        const endMs = new Date(plan.endDate).getTime();
+
+        // Calculate left & width percentages relative to timeline start/end
+        let leftPct = ((startMs - timelineStartMs) / (timelineEndMs - timelineStartMs)) * 100;
+        let widthPct = ((endMs - startMs) / (timelineEndMs - timelineStartMs)) * 100;
+
+        // Clip bounds
+        if (leftPct < 0) {
+          widthPct += leftPct;
+          leftPct = 0;
+        }
+        if (leftPct + widthPct > 100) {
+          widthPct = 100 - leftPct;
+        }
+
+        // Render lane
+        const gridLines = days.map(day => {
+          const isToday = day.getDate() === now.getDate() && day.getMonth() === now.getMonth();
+          return `<div style="flex:1; border-left:1px solid rgba(255,255,255,0.03); background:${isToday ? 'rgba(241,196,15,0.03)' : 'transparent'}; min-width:24px;"></div>`;
+        }).join('');
+
+        // Is plan active or ended?
+        const todayMs = now.getTime();
+        const isActive = (todayMs >= startMs && todayMs <= endMs);
+        const isFuture = (todayMs < startMs);
+        const barColor = isFuture ? 'repeating-linear-gradient(45deg, rgba(52, 152, 219, 0.4), rgba(52, 152, 219, 0.4) 10px, rgba(52, 152, 219, 0.6) 10px, rgba(52, 152, 219, 0.6) 20px)' : (isActive ? 'linear-gradient(90deg, var(--accent), #f39c12)' : 'rgba(255,255,255,0.2)');
+
+        grid.innerHTML += `
+          <div style="display:flex; border-bottom:1px solid rgba(255,255,255,0.05); align-items:center; position:relative; min-height:60px;">
+            <!-- Left Info Panel -->
+            <div style="width:250px; display:flex; align-items:center; gap:8px; padding:8px; box-sizing:border-box; background:rgba(0,0,0,0.1); border-right:1px solid rgba(255,255,255,0.05); z-index:10;">
+              ${prod.image ? `<img src="${prod.image}" alt="" style="width:36px; height:36px; border-radius:6px; object-fit:cover;">` : `<div style="width:36px; height:36px; border-radius:6px; background:#444;"></div>`}
+              <div style="flex:1; min-width:0;">
+                <div style="font-weight:bold; font-size:12px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="${prod.name.replace(/\n/g, ' ')}">${prod.name.replace(/\n/g, ' ')}</div>
+                <div style="font-size:10px; opacity:0.6; display:flex; justify-content:space-between; margin-top:3px;">
+                  <span>🎯 目標: <strong>${plan.targetQty}個</strong></span>
+                  <div style="display:flex; gap:6px;">
+                    <span style="color:#fff; cursor:pointer;" onclick="openProductionPlanModal('${key}')">編集</span>
+                    <span style="color:var(--danger); cursor:pointer;" onclick="deleteProductionPlan('${key}')">削除</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Right Timeline Lane -->
+            <div style="flex:1; display:flex; height:100%; align-self:stretch; position:relative;">
+              <!-- Grid columns background -->
+              <div style="position:absolute; inset:0; display:flex; pointer-events:none;">
+                ${gridLines}
+              </div>
+
+              <!-- Production Duration Bar -->
+              ${widthPct > 0 ? `
+                <div style="position:absolute; left:${leftPct}%; width:${widthPct}%; top:50%; transform:translateY(-50%); height:24px; background:${barColor}; border-radius:12px; display:flex; align-items:center; justify-content:center; padding:0 8px; box-sizing:border-box; color:${isActive ? '#000' : '#fff'}; font-weight:bold; font-size:10px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; box-shadow:0 2px 4px rgba(0,0,0,0.2);" title="${plan.memo || ''}">
+                  📦 ${plan.targetQty}個作製 (${plan.startDate.substring(5)}〜${plan.endDate.substring(5)})
+                </div>
+              ` : ''}
+            </div>
+          </div>
+        `;
+      });
     };
   </script>
 
