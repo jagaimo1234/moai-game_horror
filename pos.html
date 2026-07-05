@@ -728,28 +728,97 @@
     <!-- Exhibition View -->
     <section id="exhibition-view" class="view-section">
       <div class="scroll-container" style="padding:20px; box-sizing:border-box; width:100%;">
-        <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:2px solid var(--accent); padding-bottom:12px; margin-bottom:24px;">
-          <h2 style="margin:0; display:flex; align-items:center; gap:10px;">⛺ 出店計画・マスター</h2>
+        <!-- Header -->
+        <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:2px solid var(--accent); padding-bottom:12px; margin-bottom:20px;">
+          <h2 style="margin:0; display:flex; align-items:center; gap:10px;">⛺ 出店計画ダッシュボード</h2>
           <button class="btn btn-primary" onclick="openExhibitionModal()" style="font-weight:bold;">＋ 新しい出店計画を追加</button>
         </div>
 
         <!-- AI出店自動クローラー・推薦設定 -->
-        <div style="background:var(--panel-bg); padding:20px; border-radius:12px; margin-bottom:24px; border:1px solid gold;">
-          <h3 style="font-size:16px; margin:0 0 8px 0; color:gold; display:flex; align-items:center; gap:8px;">
+        <div style="background:var(--panel-bg); padding:16px; border-radius:12px; margin-bottom:20px; border:1px solid gold;">
+          <h3 style="font-size:14px; margin:0 0 6px 0; color:gold; display:flex; align-items:center; gap:8px;">
             🤖 AI出店自動クローラー・推薦設定
           </h3>
-          <p style="font-size:12px; opacity:0.8; margin:0 0 12px 0;">
-            あなたの興味（地域、ジャンル、出店目標など）をメモに入力しておくと、AI（Antigravity）が定期的にウェブを調査し、候補となるイベントを自動でリストに追加します。
-          </p>
           <div style="display:flex; gap:12px; align-items:stretch;">
-            <textarea id="exhibition-crawler-idea" class="form-input" style="flex:1; height:60px; min-height:60px; resize:vertical; background:rgba(0,0,0,0.3); color:white; border:1px solid rgba(255,255,255,0.1); padding:8px; border-radius:6px; font-size:13px;" placeholder="例: 2026年秋冬に愛知県か東京都で実施される、ハンドメイドやクラフト系のマルシェイベントを自動で探してほしい。"></textarea>
-            <button class="btn" onclick="saveExhibitionCrawlerIdea()" style="background:linear-gradient(45deg, #f1c40f, #f39c12); color:#000; font-weight:bold; font-size:13px; width:140px;">AI設定を保存</button>
+            <textarea id="exhibition-crawler-idea" class="form-input" style="flex:1; height:48px; min-height:48px; resize:vertical; background:rgba(0,0,0,0.3); color:white; border:1px solid rgba(255,255,255,0.1); padding:6px; border-radius:6px; font-size:12px;" placeholder="例: 2026年秋冬に関東中心で開催される手作りクラフト市を自動で探してほしい。"></textarea>
+            <button class="btn" onclick="saveExhibitionCrawlerIdea()" style="background:linear-gradient(45deg, #f1c40f, #f39c12); color:#000; font-weight:bold; font-size:12px; width:120px;">AI設定を保存</button>
           </div>
         </div>
 
-        <!-- 一覧リスト -->
-        <div id="exhibition-list" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(320px, 1fr)); gap:16px;">
-          <!-- JSで動的に追加 -->
+        <!-- Summary & Filters Panel -->
+        <div style="background:var(--panel-bg); padding:16px; border-radius:12px; margin-bottom:20px; border:1px solid rgba(255,255,255,0.08); display:flex; flex-direction:column; gap:16px;">
+          <!-- Region Filters -->
+          <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+            <span style="font-size:12px; opacity:0.6; font-weight:bold;">📍 地域別フィルター:</span>
+            <div style="display:flex; gap:6px; flex-wrap:wrap;">
+              <button class="btn region-filter-btn active" id="btn-filter-all" onclick="setExhibitionRegionFilter('all')" style="padding:4px 10px; font-size:12px; background:var(--accent); color:#000; font-weight:bold;">すべて</button>
+              <button class="btn region-filter-btn" id="btn-filter-kanto" onclick="setExhibitionRegionFilter('kanto')" style="padding:4px 10px; font-size:12px; background:rgba(255,255,255,0.05); color:#fff;">関東 (東京・神奈川など)</button>
+              <button class="btn region-filter-btn" id="btn-filter-tokai" onclick="setExhibitionRegionFilter('tokai')" style="padding:4px 10px; font-size:12px; background:rgba(255,255,255,0.05); color:#fff;">東海 (愛知など)</button>
+              <button class="btn region-filter-btn" id="btn-filter-kansai" onclick="setExhibitionRegionFilter('kansai')" style="padding:4px 10px; font-size:12px; background:rgba(255,255,255,0.05); color:#fff;">関西</button>
+              <button class="btn region-filter-btn" id="btn-filter-other" onclick="setExhibitionRegionFilter('other')" style="padding:4px 10px; font-size:12px; background:rgba(255,255,255,0.05); color:#fff;">その他</button>
+            </div>
+          </div>
+
+          <!-- View Mode Tabs -->
+          <div style="display:flex; align-items:center; justify-content:space-between; border-top:1px solid rgba(255,255,255,0.05); padding-top:12px; flex-wrap:wrap; gap:10px;">
+            <div style="display:flex; align-items:center; gap:10px;">
+              <span style="font-size:12px; opacity:0.6; font-weight:bold;">👁️ 表示形式:</span>
+              <div style="display:flex; background:rgba(0,0,0,0.3); border-radius:6px; padding:3px;">
+                <button class="btn view-mode-btn active" id="btn-mode-board" onclick="setExhibitionViewMode('board')" style="padding:4px 12px; font-size:12px; font-weight:bold; background:var(--accent); color:#000; border-radius:4px;">📋 進捗ボード</button>
+                <button class="btn view-mode-btn" id="btn-mode-timeline" onclick="setExhibitionViewMode('timeline')" style="padding:4px 12px; font-size:12px; color:#fff; background:none; border-radius:4px;">📅 タイムライン</button>
+                <button class="btn view-mode-btn" id="btn-mode-chart" onclick="setExhibitionViewMode('chart')" style="padding:4px 12px; font-size:12px; color:#fff; background:none; border-radius:4px;">📊 売上グラフ</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Sales Analytics Chart View Container -->
+        <div id="exhibition-chart-container" style="display:none; background:var(--panel-bg); padding:20px; border-radius:12px; border:1px solid rgba(255,255,255,0.08); margin-bottom:20px;">
+          <h3 style="font-size:16px; margin:0 0 16px 0; color:var(--accent); display:flex; align-items:center; gap:8px;">📊 イベント別売上比較</h3>
+          <div id="exhibition-sales-chart-bars" style="display:flex; flex-direction:column; gap:12px;">
+            <!-- Generated dynamically -->
+          </div>
+        </div>
+
+        <!-- Kanban Board View Container -->
+        <div id="exhibition-board-container" style="display:grid; grid-template-columns:repeat(4, 1fr); gap:16px; align-items:stretch;">
+          <!-- Column: Considering -->
+          <div style="background:rgba(255,255,255,0.02); border-radius:12px; border:1px solid rgba(255,255,255,0.05); padding:12px; display:flex; flex-direction:column; gap:12px; min-height:400px;">
+            <div style="font-weight:bold; font-size:14px; padding-bottom:8px; border-bottom:2px solid #95a5a6; color:#95a5a6; display:flex; justify-content:space-between; align-items:center;">
+              <span>💭 検討中</span>
+              <span id="count-considering" style="background:#95a5a6; color:#000; font-size:11px; padding:2px 6px; border-radius:10px;">0</span>
+            </div>
+            <div id="lane-considering" style="display:flex; flex-direction:column; gap:12px; flex:1;"></div>
+          </div>
+          <!-- Column: Scheduled (Planned) -->
+          <div style="background:rgba(255,255,255,0.02); border-radius:12px; border:1px solid rgba(255,255,255,0.05); padding:12px; display:flex; flex-direction:column; gap:12px; min-height:400px;">
+            <div style="font-weight:bold; font-size:14px; padding-bottom:8px; border-bottom:2px solid var(--accent); color:var(--accent); display:flex; justify-content:space-between; align-items:center;">
+              <span>⛺ 出店予定</span>
+              <span id="count-scheduled" style="background:var(--accent); color:#000; font-size:11px; padding:2px 6px; border-radius:10px;">0</span>
+            </div>
+            <div id="lane-scheduled" style="display:flex; flex-direction:column; gap:12px; flex:1;"></div>
+          </div>
+          <!-- Column: Completed -->
+          <div style="background:rgba(255,255,255,0.02); border-radius:12px; border:1px solid rgba(255,255,255,0.05); padding:12px; display:flex; flex-direction:column; gap:12px; min-height:400px;">
+            <div style="font-weight:bold; font-size:14px; padding-bottom:8px; border-bottom:2px solid #2ecc71; color:#2ecc71; display:flex; justify-content:space-between; align-items:center;">
+              <span>🎉 出店済み</span>
+              <span id="count-completed" style="background:#2ecc71; color:#000; font-size:11px; padding:2px 6px; border-radius:10px;">0</span>
+            </div>
+            <div id="lane-completed" style="display:flex; flex-direction:column; gap:12px; flex:1;"></div>
+          </div>
+          <!-- Column: Canceled -->
+          <div style="background:rgba(255,255,255,0.02); border-radius:12px; border:1px solid rgba(255,255,255,0.05); padding:12px; display:flex; flex-direction:column; gap:12px; min-height:400px;">
+            <div style="font-weight:bold; font-size:14px; padding-bottom:8px; border-bottom:2px solid #e74c3c; color:#e74c3c; display:flex; justify-content:space-between; align-items:center;">
+              <span>🔕 不参加・見送り</span>
+              <span id="count-canceled" style="background:#e74c3c; color:#fff; font-size:11px; padding:2px 6px; border-radius:10px;">0</span>
+            </div>
+            <div id="lane-canceled" style="display:flex; flex-direction:column; gap:12px; flex:1;"></div>
+          </div>
+        </div>
+
+        <!-- Timeline View Container -->
+        <div id="exhibition-timeline-container" style="display:none; flex-direction:column; gap:16px; border-left:3px solid var(--accent); padding-left:20px; margin-left:10px;">
+          <!-- Generated dynamically -->
         </div>
       </div>
     </section>
@@ -3192,11 +3261,72 @@
       }
     };
 
+    // Dashboard state variables
+    let exhibitionRegionFilter = 'all';
+    let exhibitionViewMode = 'board'; // board, timeline, chart
+
+    window.setExhibitionRegionFilter = (region) => {
+      exhibitionRegionFilter = region;
+      document.querySelectorAll('.region-filter-btn').forEach(btn => {
+        btn.classList.remove('active');
+        btn.style.background = 'rgba(255,255,255,0.05)';
+        btn.style.color = '#fff';
+        btn.style.fontWeight = 'normal';
+      });
+      const activeBtn = document.getElementById('btn-filter-' + region);
+      if (activeBtn) {
+        activeBtn.classList.add('active');
+        activeBtn.style.background = 'var(--accent)';
+        activeBtn.style.color = '#000';
+        activeBtn.style.fontWeight = 'bold';
+      }
+      window.renderExhibitions();
+    };
+
+    window.setExhibitionViewMode = (mode) => {
+      exhibitionViewMode = mode;
+      document.querySelectorAll('.view-mode-btn').forEach(btn => {
+        btn.classList.remove('active');
+        btn.style.background = 'none';
+        btn.style.color = '#fff';
+        btn.style.fontWeight = 'normal';
+      });
+      const activeBtn = document.getElementById('btn-mode-' + mode);
+      if (activeBtn) {
+        activeBtn.classList.add('active');
+        activeBtn.style.background = 'var(--accent)';
+        activeBtn.style.color = '#000';
+        activeBtn.style.fontWeight = 'bold';
+      }
+      window.renderExhibitions();
+    };
+
+    // Helper to detect region based on event data
+    function detectEventRegion(plan) {
+      const name = plan.name || '';
+      const loc = plan.location || '';
+      const text = (name + " " + loc).toLowerCase();
+      if (text.includes('東京') || text.includes('tokyo') || text.includes('ヨコハマ') || text.includes('yokohama') || text.includes('横浜') || text.includes('ビッグサイト') || text.includes('幕張') || text.includes('埼玉') || text.includes('千葉') || text.includes('鬼子母神') || text.includes('雑司ヶ谷') || text.includes('神奈川')) {
+        return 'kanto';
+      } else if (text.includes('名古屋') || text.includes('nagoya') || text.includes('クリマ') || text.includes('ポートメッセ') || text.includes('愛知') || text.includes('東海') || text.includes('静岡') || text.includes('岐阜')) {
+        return 'tokai';
+      } else if (text.includes('大阪') || text.includes('osaka') || text.includes('関西') || text.includes('京都') || text.includes('神戸') || text.includes('兵庫') || text.includes('インテックス')) {
+        return 'kansai';
+      }
+      return 'other';
+    }
+
     // Render Exhibition Plans
     window.renderExhibitions = () => {
-      const list = document.getElementById('exhibition-list');
-      if (!list) return;
-      list.innerHTML = '';
+      const boardContainer = document.getElementById('exhibition-board-container');
+      const timelineContainer = document.getElementById('exhibition-timeline-container');
+      const chartContainer = document.getElementById('exhibition-chart-container');
+      if (!boardContainer || !timelineContainer || !chartContainer) return;
+
+      // Hide all by default
+      boardContainer.style.display = 'none';
+      timelineContainer.style.display = 'none';
+      chartContainer.style.display = 'none';
 
       // Merge builtin events from config
       const allEvents = window.getAllEvents ? window.getAllEvents(eventConfigData) : {};
@@ -3231,109 +3361,237 @@
         };
       });
 
-      // Sort by date (descending, latest or closest first)
-      const sortedKeys = Object.keys(mergedPlans).sort((a, b) => {
-        if (!mergedPlans[a].date) return 1;
-        if (!mergedPlans[b].date) return -1;
-        const dateA = new Date(mergedPlans[a].date);
-        const dateB = new Date(mergedPlans[b].date);
-        return dateA - dateB;
+      // Filter by Region
+      const filteredPlans = {};
+      Object.keys(mergedPlans).forEach(key => {
+        const plan = mergedPlans[key];
+        const reg = detectEventRegion(plan);
+        if (exhibitionRegionFilter === 'all' || exhibitionRegionFilter === reg) {
+          filteredPlans[key] = plan;
+        }
       });
 
-      if (sortedKeys.length === 0) {
-        list.innerHTML = '<div style="grid-column:1/-1; text-align:center; opacity:0.5; padding:40px;">出店計画が登録されていません。「新しい出店計画を追加」から作成できます。</div>';
-        return;
+      // Sort keys chronologically
+      const sortedKeys = Object.keys(filteredPlans).sort((a, b) => {
+        if (!filteredPlans[a].date) return 1;
+        if (!filteredPlans[b].date) return -1;
+        return new Date(filteredPlans[a].date) - new Date(filteredPlans[b].date);
+      });
+
+      // RENDER: Chart View
+      if (exhibitionViewMode === 'chart') {
+        chartContainer.style.display = 'block';
+        const chartBars = document.getElementById('exhibition-sales-chart-bars');
+        chartBars.innerHTML = '';
+        
+        // Aggregate sales for chart
+        const salesData = [];
+        Object.keys(filteredPlans).forEach(key => {
+          const plan = filteredPlans[key];
+          const sales = window.exhibitionSalesCache[key] || { totalSales: 0, totalQty: 0 };
+          if (sales.totalSales > 0 || plan.status === 'completed' || plan.status === 'scheduled') {
+            salesData.push({
+              name: plan.name,
+              totalSales: sales.totalSales,
+              totalQty: sales.totalQty,
+              status: plan.status
+            });
+          }
+        });
+
+        if (salesData.length === 0) {
+          chartBars.innerHTML = '<div style="opacity:0.5; padding:20px; text-align:center;">売上データが存在するイベントがありません。</div>';
+        } else {
+          // Find max sales to scale bars
+          const maxSales = Math.max(...salesData.map(d => d.totalSales), 10000);
+          salesData.forEach(d => {
+            const pct = Math.max((d.totalSales / maxSales) * 100, 3); // minimum 3% for visibility
+            chartBars.innerHTML += `
+              <div style="margin-bottom:12px;">
+                <div style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:4px; font-weight:bold;">
+                  <span>${d.name} (${d.totalQty}点)</span>
+                  <span style="color:var(--accent);">¥${d.totalSales.toLocaleString()}</span>
+                </div>
+                <div style="background:rgba(255,255,255,0.05); height:16px; border-radius:8px; overflow:hidden; border:1px solid rgba(255,255,255,0.05);">
+                  <div style="background:linear-gradient(90deg, var(--accent), #f39c12); width:${pct}%; height:100%; border-radius:8px;"></div>
+                </div>
+              </div>
+            `;
+          });
+        }
       }
 
-      sortedKeys.forEach(key => {
-        const plan = mergedPlans[key];
-        const sales = window.exhibitionSalesCache[key] || { totalSales: 0, totalQty: 0 };
-        const isBuiltin = plan.isBuiltin;
-        const isAiRecommended = plan.isAiRecommended;
+      // RENDER: Timeline View
+      else if (exhibitionViewMode === 'timeline') {
+        timelineContainer.style.display = 'flex';
+        timelineContainer.innerHTML = '';
 
-        // Status Badge Style
-        let badgeColor = '#95a5a6';
-        let badgeText = '💭 検討中';
-        if (plan.status === 'scheduled') { badgeColor = 'var(--accent)'; badgeText = '⛺ 出店予定'; }
-        else if (plan.status === 'completed') { badgeColor = '#2ecc71'; badgeText = '🎉 出店済み'; }
-        else if (plan.status === 'canceled') { badgeColor = '#e74c3c'; badgeText = '🔕 不参加・見送り'; }
-
-        // Deadline Highlight
-        let deadlineHtml = '未定';
-        if (plan.deadline) {
-          const dlDate = new Date(plan.deadline);
-          const today = new Date();
-          const isClose = (dlDate - today) > 0 && (dlDate - today) < (7 * 24 * 60 * 60 * 1000); // within 7 days
-          const isPassed = (dlDate - today) < 0;
-          
-          if (isClose) {
-            deadlineHtml = `<span style="color:#e74c3c; font-weight:bold;">⚠️ ${plan.deadline} (締切間近)</span>`;
-          } else if (isPassed) {
-            deadlineHtml = `<span style="opacity:0.5;">${plan.deadline} (終了)</span>`;
-          } else {
-            deadlineHtml = plan.deadline;
-          }
+        if (sortedKeys.length === 0) {
+          timelineContainer.innerHTML = '<div style="opacity:0.5; padding:20px; text-align:center;">イベントがありません。</div>';
+          return;
         }
 
-        // AI Recommendation Label
-        const aiLabel = isAiRecommended ? `<span style="background:linear-gradient(45deg, #f1c40f, #f39c12); color:#000; font-size:10px; padding:2px 6px; border-radius:4px; font-weight:bold; margin-left:8px;">✨ AI提案</span>` : '';
+        sortedKeys.forEach(key => {
+          const plan = filteredPlans[key];
+          const sales = window.exhibitionSalesCache[key] || { totalSales: 0, totalQty: 0 };
+          const reg = detectEventRegion(plan);
+          
+          let regBadgeColor = '#7f8c8d';
+          let regBadgeText = 'その他';
+          if (reg === 'kanto') { regBadgeColor = '#3498db'; regBadgeText = '📍 関東'; }
+          else if (reg === 'tokai') { regBadgeColor = '#2ecc71'; regBadgeText = '📍 東海'; }
+          else if (reg === 'kansai') { regBadgeColor = '#e67e22'; regBadgeText = '📍 関西'; }
 
-        // Render card
-        list.innerHTML += `
-          <div style="background:var(--panel-bg); border:1px solid ${plan.status === 'scheduled' ? 'var(--accent)' : 'rgba(255,255,255,0.1)'}; border-radius:12px; padding:16px; position:relative; box-shadow:0 4px 6px rgba(0,0,0,0.15); display:flex; flex-direction:column; justify-content:space-between; min-height: 250px;">
-            <div>
-              <!-- Status Badge & Menu -->
-              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
-                <span style="background:${badgeColor}; color:${plan.status === 'scheduled' ? '#000' : '#fff'}; font-size:11px; padding:4px 8px; border-radius:6px; font-weight:bold;">
-                  ${badgeText}
-                </span>
-                <div style="display:flex; gap:6px;">
-                  <button class="btn" style="background:rgba(255,255,255,0.05); padding:4px 8px; font-size:11px; color:#fff;" onclick="openExhibitionModal('${key}')">編集</button>
-                  ${!isBuiltin ? `<button class="btn" style="background:rgba(231,76,60,0.2); padding:4px 8px; font-size:11px; color:var(--danger);" onclick="deleteExhibition('${key}')">削除</button>` : ''}
+          let badgeColor = '#95a5a6';
+          let badgeText = '検討中';
+          if (plan.status === 'scheduled') { badgeColor = 'var(--accent)'; badgeText = '出店予定'; }
+          else if (plan.status === 'completed') { badgeColor = '#2ecc71'; badgeText = '出店済み'; }
+          else if (plan.status === 'canceled') { badgeColor = '#e74c3c'; badgeText = '不参加'; }
+
+          let deadlineHtml = '未定';
+          if (plan.deadline) {
+            const dlDate = new Date(plan.deadline);
+            const today = new Date();
+            const diffDays = Math.ceil((dlDate - today) / (1000 * 60 * 60 * 24));
+            if (diffDays > 0 && diffDays <= 7) {
+              deadlineHtml = `<span style="color:#e74c3c; font-weight:bold;">⚠️ 締切: ${plan.deadline} (あと${diffDays}日)</span>`;
+            } else if (diffDays <= 0) {
+              deadlineHtml = `<span style="opacity:0.5;">締切: ${plan.deadline} (終了)</span>`;
+            } else {
+              deadlineHtml = `締切: ${plan.deadline}`;
+            }
+          }
+
+          timelineContainer.innerHTML += `
+            <div style="background:var(--panel-bg); border-radius:12px; padding:15px; border:1px solid rgba(255,255,255,0.05); position:relative;">
+              <div style="position:absolute; left:-26px; top:20px; width:12px; height:12px; border-radius:50%; background:var(--accent); border:3px solid var(--bg);"></div>
+              <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:8px;">
+                <div style="display:flex; align-items:center; gap:8px;">
+                  <span style="font-size:12px; opacity:0.6; font-weight:bold;">📅 ${plan.date || '日程未定'}</span>
+                  <span style="background:${regBadgeColor}; font-size:10px; padding:2px 6px; border-radius:4px; font-weight:bold; color:#000;">${regBadgeText}</span>
+                  ${plan.isAiRecommended ? '<span style="background:linear-gradient(45deg, #f1c40f, #f39c12); color:#000; font-size:9px; padding:2px 4px; border-radius:4px; font-weight:bold;">✨ AI提案</span>' : ''}
                 </div>
+                <span style="background:${badgeColor}; color:${plan.status === 'scheduled' ? '#000' : '#fff'}; font-size:10px; padding:2px 6px; border-radius:4px; font-weight:bold;">${badgeText}</span>
               </div>
-
-              <!-- Event Details -->
-              <h4 style="margin:0 0 10px 0; font-size:16px; color:#fff; display:flex; align-items:center;">
-                ${plan.name} ${aiLabel}
-              </h4>
-              
-              <div style="font-size:12px; line-height:1.6; opacity:0.8; margin-bottom:15px; background:rgba(0,0,0,0.2); padding:10px; border-radius:6px;">
-                <div>📅 <strong>開催日</strong>: ${plan.date || '未定'}</div>
-                <div>⏰ <strong>応募締切</strong>: ${deadlineHtml}</div>
-                <div>📍 <strong>場所</strong>: ${plan.location || '未定'}</div>
+              <h4 style="margin:0 0 8px 0; color:#fff; font-size:15px;">${plan.name}</h4>
+              <div style="font-size:12px; opacity:0.7; display:flex; justify-content:space-between; flex-wrap:wrap; gap:10px;">
+                <span>📍 ${plan.location || '場所未定'}</span>
+                <span>${deadlineHtml}</span>
+                ${sales.totalSales > 0 ? `<span style="color:var(--accent); font-weight:bold;">売上: ¥${sales.totalSales.toLocaleString()} (${sales.totalQty}点)</span>` : ''}
+              </div>
+              <div style="font-size:11px; opacity:0.5; margin-top:8px; border-top:1px solid rgba(255,255,255,0.05); padding-top:6px;">
+                📝 ${plan.boothMemo || 'メモなし'}
               </div>
             </div>
+          `;
+        });
+      }
 
-            <div>
-              <!-- Sales Summary -->
-              <div style="border-top:1px solid rgba(255,255,255,0.08); padding-top:12px; margin-bottom:12px;">
-                <span style="font-size:11px; opacity:0.5; display:block; margin-bottom:4px;">📊 売上実績（リアルタイム）</span>
-                <div style="font-size:15px; font-weight:bold; color:var(--accent);">
-                  ¥${sales.totalSales.toLocaleString()} <span style="font-size:12px; font-weight:normal; opacity:0.8;">(${sales.totalQty}点)</span>
+      // RENDER: Kanban Board View
+      else {
+        boardContainer.style.display = 'grid';
+        
+        // Reset lanes
+        const lanes = {
+          considering: document.getElementById('lane-considering'),
+          scheduled: document.getElementById('lane-scheduled'),
+          completed: document.getElementById('lane-completed'),
+          canceled: document.getElementById('lane-canceled')
+        };
+        Object.keys(lanes).forEach(k => { if (lanes[k]) lanes[k].innerHTML = ''; });
+
+        const counts = { considering: 0, scheduled: 0, completed: 0, canceled: 0 };
+
+        sortedKeys.forEach(key => {
+          const plan = filteredPlans[key];
+          const sales = window.exhibitionSalesCache[key] || { totalSales: 0, totalQty: 0 };
+          const reg = detectEventRegion(plan);
+          const lane = lanes[plan.status || 'considering'];
+
+          if (lane) {
+            counts[plan.status || 'considering']++;
+            
+            let regBadgeColor = '#7f8c8d';
+            let regBadgeText = 'その他';
+            if (reg === 'kanto') { regBadgeColor = '#3498db'; regBadgeText = '📍 関東'; }
+            else if (reg === 'tokai') { regBadgeColor = '#2ecc71'; regBadgeText = '📍 東海'; }
+            else if (reg === 'kansai') { regBadgeColor = '#e67e22'; regBadgeText = '📍 関西'; }
+
+            let deadlineHtml = '未定';
+            if (plan.deadline) {
+              const dlDate = new Date(plan.deadline);
+              const today = new Date();
+              const diffDays = Math.ceil((dlDate - today) / (1000 * 60 * 60 * 24));
+              if (diffDays > 0 && diffDays <= 7) {
+                deadlineHtml = `<span style="color:#e74c3c; font-weight:bold;">⚠️ ${plan.deadline} (${diffDays}日前)</span>`;
+              } else if (diffDays <= 0) {
+                deadlineHtml = `<span style="opacity:0.5;">${plan.deadline} (終了)</span>`;
+              } else {
+                deadlineHtml = plan.deadline;
+              }
+            }
+
+            const isBuiltin = plan.isBuiltin;
+            const isAiRecommended = plan.isAiRecommended;
+            const aiLabel = isAiRecommended ? `<span style="background:linear-gradient(45deg, #f1c40f, #f39c12); color:#000; font-size:9px; padding:1px 4px; border-radius:3px; font-weight:bold; margin-left:4px;">✨ AI提案</span>` : '';
+
+            lane.innerHTML += `
+              <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); border-radius:8px; padding:12px; display:flex; flex-direction:column; justify-content:space-between; gap:10px; transition: all 0.2s;" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='rgba(255,255,255,0.08)'">
+                <div>
+                  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                    <span style="background:${regBadgeColor}; font-size:9px; padding:2px 5px; border-radius:4px; font-weight:bold; color:#000;">${regBadgeText}</span>
+                    <div style="display:flex; gap:4px;">
+                      <button class="btn" style="background:rgba(255,255,255,0.05); padding:2px 5px; font-size:9px; color:#fff;" onclick="openExhibitionModal('${key}')">編集</button>
+                      ${!isBuiltin ? `<button class="btn" style="background:rgba(231,76,60,0.2); padding:2px 5px; font-size:9px; color:var(--danger);" onclick="deleteExhibition('${key}')">削除</button>` : ''}
+                    </div>
+                  </div>
+                  <h5 style="margin:0 0 8px 0; color:#fff; font-size:14px; font-weight:bold; display:flex; align-items:center; flex-wrap:wrap;">
+                    ${plan.name} ${aiLabel}
+                  </h5>
+                  <div style="font-size:11px; opacity:0.7; line-height:1.5;">
+                    <div>📅 <strong>開催</strong>: ${plan.date || '未定'}</div>
+                    <div>⏰ <strong>締切</strong>: ${deadlineHtml}</div>
+                    <div>📍 <strong>場所</strong>: ${plan.location || '未定'}</div>
+                  </div>
+                </div>
+
+                <div style="border-top:1px solid rgba(255,255,255,0.05); padding-top:8px;">
+                  <div style="font-size:10px; opacity:0.5; margin-bottom:2px;">📊 売上実績</div>
+                  <div style="font-size:13px; font-weight:bold; color:var(--accent);">
+                    ¥${sales.totalSales.toLocaleString()} <span style="font-size:10px; font-weight:normal; opacity:0.8;">(${sales.totalQty}点)</span>
+                  </div>
+                  <div style="font-size:10px; color:rgba(255,255,255,0.5); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; margin-top:6px; background:rgba(0,0,0,0.1); padding:4px; border-radius:3px;" title="${plan.boothMemo || ''}">
+                    📝 ${plan.boothMemo || 'メモなし'}
+                  </div>
+                  
+                  <div style="margin-top:8px; display:flex; align-items:center; gap:6px;">
+                    <span style="font-size:10px; opacity:0.5;">ステータス:</span>
+                    <select onchange="updateExhibitionStatus('${key}', this.value)" style="background:rgba(0,0,0,0.5); color:white; border:1px solid rgba(255,255,255,0.2); font-size:10px; padding:2px 4px; border-radius:4px; cursor:pointer; flex:1;">
+                      <option value="considering" ${plan.status === 'considering' ? 'selected' : ''}>💭 検討中</option>
+                      <option value="scheduled" ${plan.status === 'scheduled' ? 'selected' : ''}>⛺ 出店予定</option>
+                      <option value="completed" ${plan.status === 'completed' ? 'selected' : ''}>🎉 出店済み</option>
+                      <option value="canceled" ${plan.status === 'canceled' ? 'selected' : ''}>🔕 不参加</option>
+                    </select>
+                  </div>
                 </div>
               </div>
+            `;
+          }
+        });
 
-              <!-- Booth Memo -->
-              <div style="border-top:1px solid rgba(255,255,255,0.08); padding-top:12px;">
-                <span style="font-size:11px; opacity:0.5; display:block; margin-bottom:4px;">📝 出店料・経費・メモ</span>
-                <div style="font-size:12px; color:rgba(255,255,255,0.7); max-height:60px; overflow-y:auto; white-space:pre-wrap; background:rgba(0,0,0,0.1); padding:6px; border-radius:4px; border:1px solid rgba(255,255,255,0.05); min-height:36px;">${plan.boothMemo || '<span style="opacity:0.4;">メモがありません</span>'}</div>
-              </div>
+        // Set column counts
+        document.getElementById('count-considering').textContent = counts.considering;
+        document.getElementById('count-scheduled').textContent = counts.scheduled;
+        document.getElementById('count-completed').textContent = counts.completed;
+        document.getElementById('count-canceled').textContent = counts.canceled;
 
-              <!-- Change Status Inline -->
-              <div style="margin-top:12px; display:flex; align-items:center; gap:8px; border-top:1px solid rgba(255,255,255,0.08); padding-top:12px;">
-                <span style="font-size:11px; opacity:0.5;">状況変更:</span>
-                <select onchange="updateExhibitionStatus('${key}', this.value)" style="background:rgba(0,0,0,0.5); color:white; border:1px solid rgba(255,255,255,0.2); font-size:11px; padding:3px 6px; border-radius:4px; cursor:pointer;">
-                  <option value="considering" ${plan.status === 'considering' ? 'selected' : ''}>💭 検討中</option>
-                  <option value="scheduled" ${plan.status === 'scheduled' ? 'selected' : ''}>⛺ 出店予定</option>
-                  <option value="completed" ${plan.status === 'completed' ? 'selected' : ''}>🎉 出店済み</option>
-                  <option value="canceled" ${plan.status === 'canceled' ? 'selected' : ''}>🔕 不参加</option>
-                </select>
-              </div>
-            </div>
-          </div>
-        `;
-      });
+        // Render empty lane message if count is 0
+        Object.keys(lanes).forEach(k => {
+          if (counts[k] === 0 && lanes[k]) {
+            lanes[k].innerHTML = '<div style="opacity:0.3; text-align:center; padding:30px 0; font-size:12px;">イベントがありません</div>';
+          }
+        });
+      }
     };
   </script>
 
