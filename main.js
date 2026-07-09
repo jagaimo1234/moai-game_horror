@@ -4154,6 +4154,9 @@ function finishGame(won) {
         
         <div style="margin-top: 15px; font-size: 15px; color: #77f4ff; font-weight: 900; font-family: 'DotGothic16', sans-serif;">
           📍 待ってる場所: HMJブース【J-80】<br>Kanazawa Moataro
+          <div style="margin-top: 8px;">
+            <button type="button" onclick="event.stopPropagation(); window.open('https://hmj-fes.jp/ichiran/40303', '_blank')" style="background: #e67e22; color: white; border: none; font-size: 11px; padding: 6px 12px; border-radius: 20px; font-weight: bold; cursor: pointer; box-shadow: 0 2px 8px rgba(230,126,34,0.4);">HMJ公式お品書きはこちら 🔗</button>
+          </div>
         </div>
 
         <div style="margin-top: 15px; font-size: 13px; color: #ffbc69; font-weight: bold; line-height: 1.5; background: rgba(0,0,0,0.4); padding: 10px; border-radius: 8px;">
@@ -4184,8 +4187,9 @@ function finishGame(won) {
         <span>ヨーグルト ${crystals}</span>
         <span>スタミナ ${Math.max(0, Math.round(energy))}</span>
       </div>
-      <div class="stage-select">
-        <button class="stage-button" type="button" data-stage="4" style="font-size: 16px; padding: 14px 28px; min-width: 180px;">もう一度挑戦<br><span>STAGE 4: HMJ HALL</span></button>
+      <div class="stage-select" style="display: flex; flex-direction: column; align-items: center; gap: 10px; margin-top: 15px; width: 100%;">
+        <button class="stage-button" type="button" data-stage="4" style="font-size: 16px; padding: 14px 28px; min-width: 180px; width: 100%; max-width: 240px; margin: 0;">もう一度挑戦<br><span>STAGE 4: HMJ HALL</span></button>
+        <button type="button" onclick="event.stopPropagation(); window.open('https://hmj-fes.jp/ichiran/40303', '_blank')" style="background: #e67e22; color: white; border: none; padding: 10px 16px; border-radius: 8px; font-size: 13px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 10px rgba(230,126,34,0.3); width: 100%; max-width: 240px;">🎪 HMJ公式お品書き 🔗</button>
       </div>
     </div>
   `;
