@@ -1030,7 +1030,11 @@
                     <div style="color: #77f4ff; font-size: 18px; font-weight: 900; letter-spacing: 1px;">ブース: J-80</div>
                 </div>
                 
-                <button class="event-link-button catalog" type="button" onclick="event.stopPropagation(); location.href='catalog.html?v=20260526_1'" style="width: 100%; margin: -5px 0 15px 0; font-size: 16px; padding: 12px; background: linear-gradient(135deg, #00d2ff, #0088cc); color: #000; font-weight: bold; border-radius: 8px; border: none; cursor: pointer; box-shadow: 0 4px 12px rgba(0,210,255,0.4);">📚 作品お品書きを見る</button>
+                <!-- Main Action Buttons Stacking for Direct Conversion -->
+                <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 18px; width: 100%;">
+                    <button class="stage-button" type="button" data-stage="4" style="font-size: 18px; padding: 14px; background: linear-gradient(135deg, #ffd700, #ff8c00); color: #000; font-weight: bold; border-radius: 8px; border: none; cursor: pointer; box-shadow: 0 4px 12px rgba(255,215,0,0.4); text-align: center; width: 100%;">🎮 ゲームスタート</button>
+                    <button class="event-link-button catalog" type="button" onclick="event.stopPropagation(); location.href='catalog.html?v=20260526_1'" style="width: 100%; font-size: 16px; padding: 12px; background: linear-gradient(135deg, #00d2ff, #0088cc); color: #000; font-weight: bold; border-radius: 8px; border: none; cursor: pointer; box-shadow: 0 4px 12px rgba(0,210,255,0.4); margin: 0;">📚 作品お品書きを見る</button>
+                </div>
 
                 <p class="title-copy">HMJ特別ステージ！ヨーグルトを集め、増殖する作者から逃げ切れ。ブースの間を駆け抜けろ。</p>
                 <div class="game-steps">
@@ -1042,10 +1046,7 @@
                     </ul>
                     <span class="coupon-tag">🎁 脱出成功でブースで使える「限定クーポン」GET！</span>
                 </div>
-                <div class="stage-select">
-                    <button class="stage-button" type="button" data-stage="4" style="font-size: 16px; padding: 14px 28px; min-width: 180px;">ゲームスタート<br><span>STAGE 4: HMJ HALL</span></button>
-                </div>
-                <div class="mission-readout">
+                <div class="mission-readout" style="margin-top: 15px;">
                     <span>左ドラッグ: 移動</span>
                     <span>右ドラッグ: 視点</span>
                     <span>DASH: 走る</span>
