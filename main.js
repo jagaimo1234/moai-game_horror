@@ -4169,6 +4169,12 @@ function finishGame(won) {
           ※本クーポンのご利用には、お会計時にこの画面のスクリーンショット提示が必要です。<br>
           ※有効期限は、HMJイベント開催期間中のみとなります。
         </div>
+
+        <!-- SNS Links inside ED Coupon -->
+        <div style="display: flex; justify-content: center; gap: 20px; margin-top: 18px; border-top: 1px solid rgba(255,255,255,0.15); padding-top: 14px; pointer-events: auto;">
+          <a href="https://www.instagram.com/moataro_k/" target="_blank" onclick="event.stopPropagation();" style="color: #ff007f; text-decoration: none; font-size: 13px; font-weight: bold; display: inline-flex; align-items: center; gap: 4px;">📸 Instagram</a>
+          <a href="https://x.com/kanazawamoataro" target="_blank" onclick="event.stopPropagation();" style="color: #1da1f2; text-decoration: none; font-size: 13px; font-weight: bold; display: inline-flex; align-items: center; gap: 4px;">🐦 X (Twitter)</a>
+        </div>
         
       </div>
     `;
