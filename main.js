@@ -4101,46 +4101,36 @@ function finishGame(won) {
   const title = won ? `${getStageConfig().name} 脱出成功！` : '作者につかまった';
   const body = won
     ? 'ゲートから逃げ切った。好きなステージを選んでもう一度挑戦。'
-    : '足音が近い時は視点を回して進路を作り、SPACE/SHIFTでダッシュ。タップで再挑戦。';
-
-  let couponHtml = '';
-  if (won && currentStage === 4) {
-    let moaiName = 'おすわりモアイペン立て';
-    let moaiImg = './moai_shot.png';
-    if (chosenMoaiType === 2) {
-      moaiName = 'まちょいモアイルアースタンド';
-      moaiImg = './moai_lure.png';
-    } else if (chosenMoaiType === 3) {
-      moaiName = 'まちょいモアイメガネスタンド';
-      moaiImg = './moai_glasses.png';
-    }
-
-    let itemsHtml = `
-      <div style="display: flex; align-items: center; justify-content: flex-start; gap: 15px; margin: 12px 0; padding: 12px; background: rgba(255,255,255,0.08); border-radius: 12px; border-left: 5px solid #ffd700; box-shadow: 0 4px 12px rgba(0,0,0,0.3);">
-        <img src="${moaiImg}" alt="moai" style="width: 70px; height: 70px; object-fit: contain; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.6));">
-        <div style="text-align: left; flex: 1;">
-          <div style="font-size: 11px; color: #ffd700; font-weight: 900; margin-bottom: 2px; letter-spacing: 1px;">CLEAR REWARD</div>
-          <div style="font-size: 15px; font-weight: 900; color: #ffffff; margin-bottom: 4px;">${moaiName}</div>
-          <div style="font-size: 16px; font-weight: 900; color: #ffbc69;">✨ 300円引き</div>
+    : '足音が近い時は視点を回して進�        <div style="background: linear-gradient(90deg, #ff416c, #ff4b2b); color: #fff; font-size: 16px; font-weight: 900; padding: 14px; border-radius: 8px; margin-top: 18px; box-shadow: 0 4px 15px rgba(255,75,43,0.5); text-shadow: 0 1px 3px rgba(0,0,0,0.5); animation: pulse 1.5s infinite alternate;">
+          📸 この画面をスクショして保存！📸<br>
+          <span style="font-size: 13px; display: block; margin-top: 6px; font-weight: bold; opacity: 0.95;">お会計の時に私（作者）に見せてね！</span>
         </div>
-      </div>
-    `;
 
-    if (hasDarkMarketCard) {
-      itemsHtml += `
-        <div style="display: flex; align-items: center; justify-content: flex-start; gap: 15px; margin: 12px 0; padding: 12px; background: rgba(255,255,255,0.08); border-radius: 12px; border-left: 5px solid #d28cff; box-shadow: 0 4px 12px rgba(0,0,0,0.3);">
-          <img src="./nukayorokobi.png" alt="moai" style="width: 70px; height: 70px; object-fit: contain; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.6));">
-          <div style="text-align: left; flex: 1;">
-            <div style="font-size: 11px; color: #d28cff; font-weight: 900; margin-bottom: 2px; letter-spacing: 1px;">DARK MARKET BONUS</div>
-            <div style="font-size: 15px; font-weight: 900; color: #ffffff; margin-bottom: 4px;">ぬかよろこびモアイペン立て</div>
-            <div style="font-size: 16px; font-weight: 900; color: #77f4ff;">✨ 200円引き</div>
+        <!-- SNS Links inside ED Coupon -->
+        <div style="display: flex; justify-content: center; gap: 20px; margin-top: 16px; border-bottom: 1px solid rgba(255,255,255,0.15); padding-bottom: 12px; pointer-events: auto;">
+          <a href="https://www.instagram.com/moataro_k/" target="_blank" onclick="event.stopPropagation();" style="color: #ff007f; text-decoration: none; font-size: 13px; font-weight: bold; display: inline-flex; align-items: center; gap: 4px;">📸 Instagram</a>
+          <a href="https://x.com/kanazawamoataro" target="_blank" onclick="event.stopPropagation();" style="color: #1da1f2; text-decoration: none; font-size: 13px; font-weight: bold; display: inline-flex; align-items: center; gap: 4px;">🐦 X (Twitter)</a>
+        </div>
+        
+        <div style="margin-top: 15px; font-size: 15px; color: #77f4ff; font-weight: 900; font-family: 'DotGothic16', sans-serif;">
+          📍 待ってる場所: HMJブース【J-80】<br>Kanazawa Moataro
+          <div style="margin-top: 8px;">
+            <button type="button" onclick="event.stopPropagation(); window.open('https://hmj-fes.jp/ichiran/40303', '_blank')" style="background: #e67e22; color: white; border: none; font-size: 11px; padding: 6px 12px; border-radius: 20px; font-weight: bold; cursor: pointer; box-shadow: 0 2px 8px rgba(230,126,34,0.4);">HMJ公式お品書きはこちら 🔗</button>
           </div>
         </div>
-      `;
-    }
 
-    couponHtml = `
-      <div style="background: linear-gradient(180deg, #2a1e38 0%, #0b151b 100%); border: 3px solid #ffd700; border-radius: 16px; padding: 20px; margin: 15px auto 25px; max-width: 460px; box-shadow: 0 16px 40px rgba(0,0,0,0.8), inset 0 0 20px rgba(255,215,0,0.1); text-align: center; box-sizing: border-box; position: relative; overflow: hidden;">
+        <div style="margin-top: 15px; font-size: 13px; color: #ffbc69; font-weight: bold; line-height: 1.5; background: rgba(0,0,0,0.4); padding: 10px; border-radius: 8px;">
+          🌐 イベントに来られない方へ<br>
+          <span style="font-size: 11px; color: #fff; font-weight: normal;">後日オンラインでオープンする「闇の取引所」を<br>楽しみにお待ちください！</span>
+        </div>
+
+        <div style="margin-top: 18px; font-size: 11px; color: rgba(255,255,255,0.5); line-height: 1.5; text-align: left; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.15);">
+          ※他クーポンとの併用はできません。<br>
+          ※本クーポンのご利用には、お会計時にこの画面のスクリーンショット提示が必要です。<br>
+          ※有効期限は、HMJイベント開催期間中のみとなります。
+        </div>
+        
+      </div>a(0,0,0,0.8), inset 0 0 20px rgba(255,215,0,0.1); text-align: center; box-sizing: border-box; position: relative; overflow: hidden;">
         
         <h3 style="color: #ffd700; margin: 0 0 10px 0; font-size: 22px; font-weight: 900; letter-spacing: 2px; text-shadow: 0 2px 8px rgba(255,215,0,0.6);">🎉 おめでとう！ 🎉</h3>
         <p style="margin: 0 0 15px 0; font-size: 14px; color: #fff; font-weight: bold; line-height: 1.5;">特別な割引クーポンをゲットしたぞ！<br>これをHMJに持ってきてくれ！</p>
