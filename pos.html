@@ -1566,33 +1566,57 @@
       
       if (hasGender || hasAge || hasReason) {
         if (hasGender) {
-          summaryHtml += `<div style="font-weight:bold; color:var(--accent); font-size:12px; margin-bottom:4px; opacity:0.65;">👤 性別割合</div>`;
+          summaryHtml += `<div style="font-weight:bold; color:var(--accent); font-size:12px; margin-bottom:8px; opacity:0.65; border-bottom:1px dashed rgba(255,255,255,0.1); padding-bottom:2px;">👤 性別割合</div>`;
+          const totalGender = Object.values(genders).reduce((a, b) => a + b, 0);
           Object.entries(genders).sort((a,b)=>b[1]-a[1]).forEach(([gender, count]) => {
+            const pct = totalGender > 0 ? Math.round((count / totalGender) * 100) : 0;
             summaryHtml += `
-              <div style="display:flex; justify-content:space-between; border-bottom:1px solid rgba(255,255,255,0.05); padding:4px 0; font-size:13px;">
-                <span>${gender || '未指定'}</span> <span>${count}件</span>
+              <div style="margin-bottom: 8px;">
+                <div style="display:flex; justify-content:space-between; font-size:12px; margin-bottom: 3px;">
+                  <span>${gender || '未指定'}</span>
+                  <span style="font-weight:bold; color:#00d2ff;">${count}件 (${pct}%)</span>
+                </div>
+                <div style="background:rgba(255,255,255,0.05); height:6px; border-radius:3px; overflow:hidden;">
+                  <div style="background:linear-gradient(90deg, #00d2ff, #0084ff); width:${pct}%; height:100%; border-radius:3px;"></div>
+                </div>
               </div>
             `;
           });
         }
         
         if (hasAge) {
-          summaryHtml += `<div style="font-weight:bold; color:var(--accent); font-size:12px; margin-top:12px; margin-bottom:4px; opacity:0.65;">🎂 年代割合</div>`;
+          summaryHtml += `<div style="font-weight:bold; color:var(--accent); font-size:12px; margin-top:16px; margin-bottom:8px; opacity:0.65; border-bottom:1px dashed rgba(255,255,255,0.1); padding-bottom:2px;">🎂 年代割合</div>`;
+          const totalAge = Object.values(ages).reduce((a, b) => a + b, 0);
           Object.entries(ages).sort((a,b)=>b[1]-a[1]).forEach(([age, count]) => {
+            const pct = totalAge > 0 ? Math.round((count / totalAge) * 100) : 0;
             summaryHtml += `
-              <div style="display:flex; justify-content:space-between; border-bottom:1px solid rgba(255,255,255,0.05); padding:4px 0; font-size:13px;">
-                <span>${age || '未指定'}</span> <span>${count}件</span>
+              <div style="margin-bottom: 8px;">
+                <div style="display:flex; justify-content:space-between; font-size:12px; margin-bottom: 3px;">
+                  <span>${age || '未指定'}</span>
+                  <span style="font-weight:bold; color:#2ecc71;">${count}件 (${pct}%)</span>
+                </div>
+                <div style="background:rgba(255,255,255,0.05); height:6px; border-radius:3px; overflow:hidden;">
+                  <div style="background:linear-gradient(90deg, #2ecc71, #1abc9c); width:${pct}%; height:100%; border-radius:3px;"></div>
+                </div>
               </div>
             `;
           });
         }
         
         if (hasReason) {
-          summaryHtml += `<div style="font-weight:bold; color:var(--accent); font-size:12px; margin-top:12px; margin-bottom:4px; opacity:0.65;">🔍 来店きっかけ</div>`;
+          summaryHtml += `<div style="font-weight:bold; color:var(--accent); font-size:12px; margin-top:16px; margin-bottom:8px; opacity:0.65; border-bottom:1px dashed rgba(255,255,255,0.1); padding-bottom:2px;">🔍 来店きっかけ</div>`;
+          const totalReason = Object.values(reasons).reduce((a, b) => a + b, 0);
           Object.entries(reasons).sort((a,b)=>b[1]-a[1]).forEach(([reason, count]) => {
+            const pct = totalReason > 0 ? Math.round((count / totalReason) * 100) : 0;
             summaryHtml += `
-              <div style="display:flex; justify-content:space-between; border-bottom:1px solid rgba(255,255,255,0.05); padding:4px 0; font-size:13px;">
-                <span>${reason || '未指定'}</span> <span>${count}件</span>
+              <div style="margin-bottom: 8px;">
+                <div style="display:flex; justify-content:space-between; font-size:12px; margin-bottom: 3px;">
+                  <span>${reason || '未指定'}</span>
+                  <span style="font-weight:bold; color:#f1c40f;">${count}件 (${pct}%)</span>
+                </div>
+                <div style="background:rgba(255,255,255,0.05); height:6px; border-radius:3px; overflow:hidden;">
+                  <div style="background:linear-gradient(90deg, #f1c40f, #f39c12); width:${pct}%; height:100%; border-radius:3px;"></div>
+                </div>
               </div>
             `;
           });
