@@ -467,6 +467,10 @@
             <option value="canceled">🔕 不参加・見送り</option>
           </select>
         </div>
+        <div style="margin-bottom:12px;">
+          <label style="font-size:12px; opacity:0.7;">目標売上 (円)</label>
+          <input type="number" id="exhibition-target-sales" class="form-input" style="margin-top:4px;" placeholder="例: 150000">
+        </div>
         <div style="margin-bottom:20px;">
           <label style="font-size:12px; opacity:0.7;">出店料・経費メモ (自由記入)</label>
           <textarea id="exhibition-booth-memo" class="form-input" style="margin-top:4px; height:80px; resize:vertical; background:rgba(0,0,0,0.5); color:white; border:1px solid rgba(255,255,255,0.1); padding:8px; border-radius:6px; width:100%; box-sizing:border-box;" placeholder="例: 出店料20000円、往復交通費15000円。"></textarea>
@@ -804,7 +808,7 @@
     </section>
 
     <!-- Exhibition View -->
-    <section id="exhibition-view" class="view-section">
+<section id="exhibition-view" class="view-section">
       <div class="scroll-container" style="padding:20px; box-sizing:border-box; width:100%;">
         <!-- Header -->
         <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:2px solid var(--accent); padding-bottom:12px; margin-bottom:20px;">
@@ -846,8 +850,17 @@
                 <button class="btn view-mode-btn active" id="btn-mode-board" onclick="setExhibitionViewMode('board')" style="padding:4px 12px; font-size:12px; font-weight:bold; background:var(--accent); color:#000; border-radius:4px;">📋 進捗ボード</button>
                 <button class="btn view-mode-btn" id="btn-mode-timeline" onclick="setExhibitionViewMode('timeline')" style="padding:4px 12px; font-size:12px; color:#fff; background:none; border-radius:4px;">📅 タイムライン</button>
                 <button class="btn view-mode-btn" id="btn-mode-chart" onclick="setExhibitionViewMode('chart')" style="padding:4px 12px; font-size:12px; color:#fff; background:none; border-radius:4px;">📊 売上グラフ</button>
+                <button class="btn view-mode-btn" id="btn-mode-roadmap" onclick="setExhibitionViewMode('roadmap')" style="padding:4px 12px; font-size:12px; color:#fff; background:none; border-radius:4px;">📈 成長ロードマップ</button>
               </div>
             </div>
+          </div>
+        </div>
+
+        <!-- Roadmap View Container -->
+        <div id="exhibition-roadmap-container" style="display:none; background:var(--panel-bg); padding:20px; border-radius:12px; border:1px solid rgba(255,255,255,0.08); margin-bottom:20px;">
+          <h3 style="font-size:16px; margin:0 0 16px 0; color:var(--accent); display:flex; align-items:center; gap:8px;">📈 イベント別 成長ロードマップ</h3>
+          <div id="exhibition-roadmap-content" style="display:flex; flex-direction:column; gap:20px;">
+            <!-- Generated dynamically -->
           </div>
         </div>
 
@@ -2205,9 +2218,135 @@
       const nextLockState = !registerLocked;
       try {
         await setDoc(doc(db, "settings", "lock_" + currentEventKey), { locked: nextLockState });
+        if (nextLockState) {
+          window.triggerTargetDeclaration();
+        }
       } catch(e) {
         console.error("Lock error", e);
         alert("ロック状態の変更に失敗しました。");
+      }
+    };
+
+    let currentActualSales = 0;
+    
+    window.triggerTargetDeclaration = () => {
+      const cache = window.exhibitionSalesCache[currentEventKey] || { totalSales: 0 };
+      currentActualSales = cache.totalSales;
+      
+      document.getElementById('decl-actual-sales').textContent = currentActualSales.toLocaleString();
+      
+      // Populate suggestions
+      document.getElementById('decl-sugg-12').textContent = Math.round(currentActualSales * 1.2).toLocaleString();
+      document.getElementById('decl-sugg-15').textContent = Math.round(currentActualSales * 1.5).toLocaleString();
+      document.getElementById('decl-sugg-20').textContent = Math.round(currentActualSales * 2.0).toLocaleString();
+      
+      // Clear input
+      document.getElementById('decl-target-input').value = Math.round(currentActualSales * 1.5);
+      
+      // Populate next event dropdown
+      const select = document.getElementById('decl-next-event-select');
+      if (select) {
+        select.innerHTML = '';
+        
+        const allEvents = window.getAllEvents ? window.getAllEvents(eventConfigData) : {};
+        const mergedPlans = {};
+        Object.keys(allEvents).forEach(k => {
+          mergedPlans[k] = { name: allEvents[k].label, status: 'considering' };
+        });
+        Object.keys(window.exhibitionPlansData || {}).forEach(k => {
+          mergedPlans[k] = { ...mergedPlans[k], ...window.exhibitionPlansData[k] };
+        });
+        
+        let optionsHtml = '';
+        Object.keys(mergedPlans).forEach(k => {
+          if (k !== currentEventKey && (mergedPlans[k].status === 'scheduled' || mergedPlans[k].status === 'considering')) {
+            optionsHtml += `<option value="${k}">${mergedPlans[k].name}</option>`;
+          }
+        });
+        
+        if (optionsHtml === '') {
+          optionsHtml = `<option value="auto_create">＋ 次回イベントを新規作成して設定</option>`;
+        } else {
+          optionsHtml += `<option value="auto_create">＋ 新しく次回イベントを作成する</option>`;
+        }
+        select.innerHTML = optionsHtml;
+      }
+      
+      document.getElementById('target-declaration-modal').style.display = 'flex';
+    };
+    
+    window.setSuggestedTarget = (ratio) => {
+      document.getElementById('decl-target-input').value = Math.round(currentActualSales * ratio);
+    };
+    
+    window.closeTargetDeclaration = () => {
+      document.getElementById('target-declaration-modal').style.display = 'none';
+    };
+    
+    window.saveTargetDeclaration = async () => {
+      const targetVal = Number(document.getElementById('decl-target-input').value) || 0;
+      if (targetVal <= 0) {
+        alert("目標金額を入力してください。");
+        return;
+      }
+      
+      const select = document.getElementById('decl-next-event-select');
+      let targetEventId = select ? select.value : 'auto_create';
+      
+      try {
+        const updatedPlans = { ...window.exhibitionPlansData };
+        
+        if (targetEventId === 'auto_create') {
+          const nextId = "ex_" + Date.now();
+          const curPlan = updatedPlans[currentEventKey] || {};
+          let nextName = "次回のイベント";
+          if (curPlan.name) {
+            const numMatch = curPlan.name.match(/\d+/);
+            if (numMatch) {
+              const num = parseInt(numMatch[0]);
+              nextName = curPlan.name.replace(num, num + 1);
+            } else {
+              nextName = "次回の" + curPlan.name;
+            }
+          }
+          
+          updatedPlans[nextId] = {
+            name: nextName,
+            date: '',
+            deadline: '',
+            location: curPlan.location || '',
+            status: 'scheduled',
+            boothMemo: '前回のレジロック時に自動作成された目標計画',
+            targetSales: targetVal,
+            updatedAt: Date.now()
+          };
+          targetEventId = nextId;
+        } else {
+          if (!updatedPlans[targetEventId]) {
+            const allEvents = window.getAllEvents(eventConfigData);
+            const ev = allEvents[targetEventId] || {};
+            updatedPlans[targetEventId] = {
+              name: ev.label || targetEventId,
+              date: ev.date || '',
+              location: ev.location || '',
+              status: 'scheduled',
+              boothMemo: ''
+            };
+          }
+          updatedPlans[targetEventId].targetSales = targetVal;
+          updatedPlans[targetEventId].updatedAt = Date.now();
+        }
+        
+        await setDoc(doc(db, "settings", "exhibition_plans"), updatedPlans);
+        alert(`次回のイベント【${updatedPlans[targetEventId].name}】の目標売上を ¥${targetVal.toLocaleString()} に設定しました！次回の出店も頑張りましょう！🚀`);
+        document.getElementById('target-declaration-modal').style.display = 'none';
+        
+        if (typeof window.renderExhibitions === 'function') {
+          window.renderExhibitions();
+        }
+      } catch (e) {
+        console.error("Save target declaration error", e);
+        alert("目標の保存に失敗しました。");
       }
     };
 
@@ -3402,6 +3541,7 @@
         document.getElementById('exhibition-location').value = p.location || '';
         document.getElementById('exhibition-status').value = p.status || 'considering';
         document.getElementById('exhibition-booth-memo').value = p.boothMemo || '';
+        document.getElementById('exhibition-target-sales').value = p.targetSales || '';
       } else {
         // New mode
         document.getElementById('exhibition-modal-title').textContent = "＋ 新しい出店計画を追加";
@@ -3412,6 +3552,7 @@
         document.getElementById('exhibition-location').value = '';
         document.getElementById('exhibition-status').value = 'considering';
         document.getElementById('exhibition-booth-memo').value = '';
+        document.getElementById('exhibition-target-sales').value = '';
       }
       document.getElementById('exhibition-modal').style.display = 'flex';
     };
@@ -3426,6 +3567,7 @@
       const location = document.getElementById('exhibition-location').value.trim();
       const status = document.getElementById('exhibition-status').value;
       const boothMemo = document.getElementById('exhibition-booth-memo').value.trim();
+      const targetSales = Number(document.getElementById('exhibition-target-sales').value) || 0;
 
       if (!name) return alert("イベント名を入力してください。");
 
@@ -3438,6 +3580,7 @@
           location,
           status,
           boothMemo,
+          targetSales,
           isBuiltin: updatedPlans[id]?.isBuiltin || false,
           updatedAt: Date.now()
         };
@@ -3658,12 +3801,14 @@
       const boardContainer = document.getElementById('exhibition-board-container');
       const timelineContainer = document.getElementById('exhibition-timeline-container');
       const chartContainer = document.getElementById('exhibition-chart-container');
-      if (!boardContainer || !timelineContainer || !chartContainer) return;
+      const roadmapContainer = document.getElementById('exhibition-roadmap-container');
+      if (!boardContainer || !timelineContainer || !chartContainer || !roadmapContainer) return;
 
       // Hide all by default
       boardContainer.style.display = 'none';
       timelineContainer.style.display = 'none';
       chartContainer.style.display = 'none';
+      roadmapContainer.style.display = 'none';
 
       // Merge builtin events from config
       const allEvents = window.getAllEvents ? window.getAllEvents(eventConfigData) : {};
@@ -3823,6 +3968,113 @@
             </div>
           `;
         });
+      }
+
+      // RENDER: Roadmap View
+      else if (exhibitionViewMode === 'roadmap') {
+        roadmapContainer.style.display = 'block';
+        const roadmapContent = document.getElementById('exhibition-roadmap-content');
+        roadmapContent.innerHTML = '';
+
+        // Group into Series
+        const seriesData = {
+          design_festa: { name: '⛺ デザインフェスタの軌跡', keys: [] },
+          hmj: { name: '⛺ ハンドメイドインジャパンの軌跡', keys: [] },
+          creators_market: { name: '⛺ 名古屋クリエイターズマーケットの軌跡', keys: [] },
+          kanazawa_marche: { name: '⛺ 金沢マルシェの軌跡', keys: [] },
+          other_events: { name: '⛺ その他・単発イベントの軌跡', keys: [] }
+        };
+
+        sortedKeys.forEach(key => {
+          const plan = filteredPlans[key];
+          const name = (plan.name || '').toLowerCase();
+          
+          if (name.includes('デザインフェスタ') || name.includes('デザフェス') || name.includes('df')) {
+            seriesData.design_festa.keys.push(key);
+          } else if (name.includes('ハンドメイド') || name.includes('hmj')) {
+            seriesData.hmj.keys.push(key);
+          } else if (name.includes('名古屋') || name.includes('クリエ') || name.includes('クリマ')) {
+            seriesData.creators_market.keys.push(key);
+          } else if (name.includes('金沢') || name.includes('kanazawa') || name.includes('マルシェ')) {
+            seriesData.kanazawa_marche.keys.push(key);
+          } else {
+            seriesData.other_events.keys.push(key);
+          }
+        });
+
+        let hasAnySeries = false;
+
+        Object.keys(seriesData).forEach(sKey => {
+          const s = seriesData[sKey];
+          if (s.keys.length === 0) return;
+          hasAnySeries = true;
+
+          let stepsHtml = '';
+          s.keys.forEach((key, idx) => {
+            const plan = filteredPlans[key];
+            const sales = window.exhibitionSalesCache[key] || { totalSales: 0, totalQty: 0 };
+            const target = plan.targetSales || 0;
+            const actual = sales.totalSales || 0;
+            
+            let statusText = '';
+            let statusStyle = 'color: #95a5a6; font-size:11px;';
+            let cardBorder = 'border:1px solid rgba(255,255,255,0.06);';
+            
+            if (plan.status === 'completed') {
+              if (target > 0 && actual >= target) {
+                statusText = ' (達成🎉)';
+                statusStyle = 'color: var(--success); font-size:11px; font-weight:bold;';
+              } else if (target > 0) {
+                statusText = ' (惜しい!)';
+                statusStyle = 'color: #e67e22; font-size:11px; font-weight:bold;';
+              } else {
+                statusText = ' (完了)';
+                statusStyle = 'color: #2ecc71; font-size:11px;';
+              }
+              cardBorder = 'border:1px solid rgba(46,204,113,0.3); background:rgba(46,204,113,0.02);';
+            } else if (plan.status === 'scheduled') {
+              statusText = ' (予定)';
+              statusStyle = 'color: var(--accent); font-size:11px; font-weight:bold;';
+              cardBorder = 'border:1.5px solid var(--accent); background:rgba(0,210,255,0.04); box-shadow:0 0 10px rgba(0,210,255,0.15);';
+            }
+
+            const targetDisplay = target > 0 ? `¥${target.toLocaleString()}` : `未設定`;
+            const actualDisplay = plan.status === 'completed' ? `¥${actual.toLocaleString()}` : `ーーー`;
+
+            const connector = idx < s.keys.length - 1 
+              ? `<div style="flex-shrink:0; display:flex; align-items:center; justify-content:center; padding: 0 15px; color:rgba(255,255,255,0.15); font-size:24px; font-weight:bold;">───</div>` 
+              : '';
+
+            stepsHtml += `
+              <div style="display:flex; align-items:center;">
+                <div style="flex-shrink:0; width:150px; ${cardBorder} border-radius:10px; padding:12px; font-size:12px; position:relative; box-sizing:border-box;">
+                  <div style="font-weight:bold; font-size:13px; color:#fff; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="${plan.name}">${plan.name}</div>
+                  <div style="margin-top:6px; opacity:0.85;">
+                    <div>🎯 目標: <span style="font-weight:bold; color:var(--accent);">${targetDisplay}</span></div>
+                    <div>💰 実績: <span style="font-weight:bold; color:#fff;">${actualDisplay}</span><span style="${statusStyle}">${statusText}</span></div>
+                  </div>
+                  <div style="margin-top:8px; display:flex; gap:4px;">
+                    <button class="btn" onclick="openExhibitionModal('${key}')" style="background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); color:white; font-size:9px; padding:2px 6px; font-weight:bold; border-radius:4px; width:100%;">🎯 目標/詳細</button>
+                  </div>
+                </div>
+                ${connector}
+              </div>
+            `;
+          });
+
+          roadmapContent.innerHTML += `
+            <div style="background:rgba(0,0,0,0.15); border:1px solid rgba(255,255,255,0.05); border-radius:12px; padding:16px;">
+              <h4 style="margin:0 0 14px 0; color:var(--accent); font-size:15px; font-family:'DotGothic16', sans-serif;">${s.name}</h4>
+              <div style="display:flex; overflow-x:auto; padding-bottom:8px; align-items:center;">
+                ${stepsHtml}
+              </div>
+            </div>
+          `;
+        });
+
+        if (!hasAnySeries) {
+          roadmapContent.innerHTML = '<div style="opacity:0.5; padding:20px; text-align:center;">イベント計画が存在しません。</div>';
+        }
       }
 
       // RENDER: Kanban Board View
@@ -4200,6 +4452,40 @@
       <div style="display:flex; gap:10px; margin-top:20px;">
         <button class="btn" style="flex:1; background:none; border:1px solid var(--border); color:white;" onclick="closePrintTileModal()">キャンセル</button>
         <button class="btn btn-primary" style="flex:2;" onclick="generateTiledPrint()">PDF生成・印刷</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Target Declaration Modal -->
+  <div id="target-declaration-modal" class="modal-overlay" style="display:none; justify-content:center; align-items:center; position:fixed; inset:0; background:rgba(0,0,0,0.85); z-index:2000; backdrop-filter:blur(8px);">
+    <div style="background:var(--panel-bg); border:2px solid var(--accent); border-radius:16px; padding:30px; max-width:480px; width:90%; box-shadow:0 20px 50px rgba(0,0,0,0.8); text-align:center; box-sizing:border-box;">
+      <h2 style="color:var(--accent); font-size:24px; margin-top:0; margin-bottom:15px; font-family:'DotGothic16', sans-serif;">🎉 イベントお疲れ様でした！</h2>
+      <p style="font-size:15px; color:#fff; line-height:1.6; margin-bottom:20px;">
+        レジをロック（確定）しました。<br>
+        本イベントの最終売上総額は <strong style="color:var(--accent); font-size:18px;">¥<span id="decl-actual-sales">0</span></strong> です！
+      </p>
+      
+      <div style="background:rgba(0,0,0,0.3); border-radius:10px; padding:15px; margin-bottom:20px; border:1px dashed rgba(255,255,255,0.15);">
+        <label style="display:block; font-size:13px; color:rgba(255,255,255,0.7); margin-bottom:8px; font-weight:bold;">📈 次回の出店での売上目標を宣言しましょう！</label>
+        
+        <div style="margin-bottom:12px; text-align:left;">
+          <label style="font-size:11px; opacity:0.6; display:block; margin-bottom:4px;">🎯 対象とする次回イベント計画</label>
+          <select id="decl-next-event-select" class="form-select" style="width:100%; font-size:12px; background:#000; color:#fff; border:1px solid rgba(255,255,255,0.2); padding:6px; border-radius:4px;">
+            <!-- Options populated dynamically -->
+          </select>
+        </div>
+
+        <div style="display:flex; justify-content:center; gap:8px; margin-bottom:12px; flex-wrap:wrap;">
+          <button type="button" onclick="setSuggestedTarget(1.2)" class="btn" style="background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); font-size:11px; padding:6px 12px; color:#fff;">1.2倍 (¥<span id="decl-sugg-12">0</span>)</button>
+          <button type="button" onclick="setSuggestedTarget(1.5)" class="btn" style="background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); font-size:11px; padding:6px 12px; color:#fff;">1.5倍 (¥<span id="decl-sugg-15">0</span>)</button>
+          <button type="button" onclick="setSuggestedTarget(2.0)" class="btn" style="background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); font-size:11px; padding:6px 12px; color:#fff;">2.0倍 (¥<span id="decl-sugg-20">0</span>)</button>
+        </div>
+        <input type="number" id="decl-target-input" class="form-input" style="font-size:18px; text-align:center; font-weight:bold; letter-spacing:1px; background:#000; border:1px solid var(--accent); color:var(--accent);" placeholder="目標金額を入力...">
+      </div>
+
+      <div style="display:flex; gap:10px;">
+        <button class="btn" onclick="closeTargetDeclaration()" style="flex:1; background:rgba(255,255,255,0.1); color:#fff; border:1px solid rgba(255,255,255,0.1);">閉じる</button>
+        <button class="btn" onclick="saveTargetDeclaration()" style="flex:1.5; background:var(--accent); color:#000; font-weight:bold;">目標を宣言して保存！ 🚀</button>
       </div>
     </div>
   </div>
