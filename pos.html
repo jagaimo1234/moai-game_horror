@@ -3485,8 +3485,11 @@
         let total = 0;
         let qty = 0;
         const daily = {};
+        console.log(`[syncExhibitionSales] eventId: ${eventId}, snap exists: ${snap.exists()}`);
         if (snap.exists() && snap.data().records) {
-          snap.data().records.forEach(r => {
+          const recs = snap.data().records;
+          console.log(`[syncExhibitionSales] eventId: ${eventId}, records count: ${recs.length}`);
+          recs.forEach(r => {
             const amount = r.totalAmount !== undefined ? r.totalAmount : (r.total || 0);
             total += amount;
             let recordQty = 0;
@@ -4033,6 +4036,7 @@
         Object.keys(filteredPlans).forEach(key => {
           const plan = filteredPlans[key];
           const sales = window.exhibitionSalesCache[key] || { totalSales: 0, totalQty: 0, daily: [] };
+          console.log(`[renderExhibitions Chart] key: ${key}, name: ${plan.name}, salesCache:`, sales);
           if (sales.totalSales > 0 || plan.status === 'completed' || plan.status === 'scheduled') {
             salesData.push({
               name: plan.name,
