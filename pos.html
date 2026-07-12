@@ -348,6 +348,22 @@
               <!-- Injected via JS -->
               データがありません
             </div>
+        </div>
+      </div>
+        
+        <!-- Hourly Sales Progression Chart -->
+        <div style="background: var(--panel-bg); padding: 20px; border-radius: 12px; margin-top: 20px; border: 1px solid rgba(255,255,255,0.06);">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+            <h3 style="margin:0;">📈 時間帯別 売上推移 (JST)</h3>
+            <div style="font-size:11px; opacity:0.5; font-weight:bold;">※会計時のタイムスタンプ基準</div>
+          </div>
+          
+          <div id="dash-hourly-chart-container" style="display:flex; align-items:flex-end; justify-content:space-between; height:140px; padding:20px 10px 10px 10px; background:rgba(0,0,0,0.2); border-radius:8px; border:1px solid rgba(255,255,255,0.03); box-sizing:border-box;">
+            <!-- Rendered dynamically -->
+          </div>
+          
+          <div id="dash-hourly-labels-container" style="display:flex; justify-content:space-between; margin-top:8px; padding:0 10px; font-size:10px; color:rgba(255,255,255,0.5); font-weight:bold;">
+            <!-- Rendered dynamically -->
           </div>
         </div>
         
@@ -1613,6 +1629,68 @@
         } else {
           dailyContainer.style.display = 'none';
         }
+      }
+      
+      // Calculate Hourly Sales progression (JST)
+      const hourlySales = {
+        9: 0, 10: 0, 11: 0, 12: 0, 13: 0, 14: 0, 15: 0, 16: 0, 17: 0, 18: 0, 19: 0
+      };
+      
+      sortedRecords.forEach(r => {
+        const amount = r.totalAmount !== undefined ? r.totalAmount : (r.total || 0);
+        if (r.timestamp) {
+          try {
+            const d = new Date(r.timestamp);
+            if (!isNaN(d.getTime())) {
+              const jstOffset = 9 * 60 * 60 * 1000;
+              const jstDate = new Date(d.getTime() + jstOffset);
+              const hr = jstDate.getUTCHours();
+              if (hr >= 9 && hr < 19) {
+                hourlySales[hr] += amount;
+              } else if (hr >= 19 || hr < 9) {
+                hourlySales[19] += amount;
+              }
+            }
+          } catch(e) {}
+        }
+      });
+      
+      const hourlyChartContainer = document.getElementById('dash-hourly-chart-container');
+      const hourlyLabelsContainer = document.getElementById('dash-hourly-labels-container');
+      
+      if (hourlyChartContainer && hourlyLabelsContainer) {
+        hourlyChartContainer.innerHTML = '';
+        hourlyLabelsContainer.innerHTML = '';
+        
+        const hoursKeys = [9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19];
+        const maxHourlySales = Math.max(...hoursKeys.map(k => hourlySales[k]), 1000);
+        
+        hoursKeys.forEach(hr => {
+          const salesVal = hourlySales[hr];
+          const pct = Math.max((salesVal / maxHourlySales) * 100, 2); // minimum height for empty bars
+          const labelText = hr === 19 ? "19h〜" : `${hr}h`;
+          const rangeText = hr === 19 ? "19:00以降" : `${hr}:00-${hr+1}:00`;
+          
+          const barColor = salesVal > 0 ? "linear-gradient(180deg, var(--accent), #0088cc)" : "rgba(255,255,255,0.03)";
+          const barStyle = salesVal > 0 ? `background: ${barColor}; cursor: pointer;` : `background: ${barColor};`;
+          const tooltip = salesVal > 0 ? `title="${rangeText}: ¥${salesVal.toLocaleString()}"` : `title="${rangeText}: 売上なし"`;
+          
+          let valLabel = '';
+          if (salesVal > 0) {
+            valLabel = salesVal >= 1000 ? `¥${(salesVal/1000).toFixed(0)}k` : `¥${salesVal}`;
+          }
+          
+          hourlyChartContainer.innerHTML += `
+            <div style="flex:1; display:flex; flex-direction:column; align-items:center; height:100%; justify-content:flex-end;" ${tooltip}>
+              ${salesVal > 0 ? `<span style="font-size:9px; color:var(--accent); font-weight:bold; margin-bottom:4px; opacity:0.85; white-space:nowrap;">${valLabel}</span>` : ''}
+              <div style="width:55%; max-width:24px; min-width:8px; height:${pct}%; border-radius:4px 4px 0 0; transition: height 0.3s ease-in-out; ${barStyle}"></div>
+            </div>
+          `;
+          
+          hourlyLabelsContainer.innerHTML += `
+            <div style="flex:1; text-align:center;">${labelText}</div>
+          `;
+        });
       }
       
       // Render summary
