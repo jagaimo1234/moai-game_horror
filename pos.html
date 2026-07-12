@@ -964,8 +964,10 @@
     let unsubSelection = null;
     let unsubConfig = null;
     let unsubSimulation = null;
+    let unsubLock = null;
     let hiddenProductsData = {};
     let salesRecordsCache = []; // 購入履歴のキャッシュ（修正・削除用）
+    let lastSalesRecords = [];
     let registerLocked = false;
     let analyticsSortKey = 'qty'; // 'qty' or 'amount'
     
@@ -1221,6 +1223,16 @@
       if (unsubSales) unsubSales();
       if (unsubInventory) unsubInventory(); // Keep structure
       if (unsubSimulation) unsubSimulation();
+      if (unsubLock) unsubLock();
+
+      unsubLock = onSnapshot(doc(db, "settings", "lock_" + currentEventKey), (docSnap) => {
+        if (docSnap.exists()) {
+          registerLocked = docSnap.data().locked === true;
+        } else {
+          registerLocked = false;
+        }
+        if (typeof updateLockUI === 'function') updateLockUI();
+      });
 
       unsubSimulation = onSnapshot(doc(db, "settings", "simulation_" + currentEventKey), (docSnap) => {
         if (docSnap.exists()) {
@@ -1336,180 +1348,197 @@
 
       // Listen to specific event's sales (settings/sales_kurima)
       unsubSales = onSnapshot(doc(db, "settings", "sales_" + currentEventKey), (docSnap) => {
-        let total = 0, cash = 0, paypay = 0, credit = 0;
-        let reasons = {};
-        let productSales = {};
-        const historyContainer = document.getElementById('dash-history');
-        historyContainer.innerHTML = '';
-        
         if (docSnap.exists()) {
-          const records = docSnap.data().records || [];
-          
-          // Sort records by timestamp descending (newest first)
-          const sortedRecords = [...records].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-          salesRecordsCache = sortedRecords; // キャッシュに保存
-          
-          sortedRecords.forEach(r => {
-            // Totals
-            total += r.totalAmount;
-            if (r.paymentMethod === 'cash') cash += r.totalAmount;
-            if (r.paymentMethod === 'paypay') paypay += r.totalAmount;
-            if (r.paymentMethod === 'credit') credit += r.totalAmount;
-            
-            // Reasons summary
-            if (r.customer && r.customer.reason) {
-              reasons[r.customer.reason] = (reasons[r.customer.reason] || 0) + 1;
-            }
-            
-            // Product sales aggregation
-            if (r.items) {
-              r.items.forEach(item => {
-                let pId = item.id;
-                if (!pId) {
-                  const found = window.getFullMasterProducts(window.customProductsData).find(x => x.name.replace(/\n/g, ' ') === item.name);
-                  if (found) pId = found.id;
-                }
-                if (pId) {
-                  productSales[pId] = (productSales[pId] || 0) + item.qty;
-                } else {
-                  productSales[item.name] = (productSales[item.name] || 0) + item.qty;
-                }
-              });
-            }
-            
-            // Build history card
-            const timeStr = new Date(r.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-            let itemsStr = r.items ? r.items.map(i => `${i.name} ×${i.qty}`).join('<br>') : '';
-            let tagsHtml = '';
-            if (r.customer) {
-              if (r.customer.gender) tagsHtml += `<span class="history-tag">${r.customer.gender}</span>`;
-              if (r.customer.age) tagsHtml += `<span class="history-tag">${r.customer.age}</span>`;
-              if (r.customer.reason) tagsHtml += `<span class="history-tag" style="background:rgba(0,210,255,0.2); color:var(--accent);">${r.customer.reason}</span>`;
-            }
-            if (r.memo) tagsHtml += `<span class="history-tag" style="background:rgba(243,156,18,0.2); color:var(--warning);">📝 ${r.memo}</span>`;
-            if (r.discount > 0) tagsHtml += `<span class="history-tag" style="background:rgba(231,76,60,0.2); color:var(--danger);">値引 -¥${r.discount}</span>`;
-
-            let methodStr = r.paymentMethod === 'cash' ? '現金' : r.paymentMethod === 'paypay' ? 'PayPay' : 'クレジット';
-            let methodColor = r.paymentMethod === 'cash' ? 'var(--success)' : r.paymentMethod === 'paypay' ? '#E60012' : 'var(--accent)';
-            const tsEsc = r.timestamp.replace(/'/g, "\\'");
-
-            historyContainer.innerHTML += `
-              <div class="history-card">
-                <div class="history-main">
-                  <div class="history-time">${timeStr}</div>
-                  <div class="history-items">${itemsStr}</div>
-                  <div class="history-tags">${tagsHtml}</div>
-                </div>
-                <div style="display:flex; flex-direction:column; align-items:flex-end; gap:4px;">
-                  <div class="history-amount">¥${r.totalAmount.toLocaleString()}</div>
-                  <div class="history-method" style="color: ${methodColor}; font-weight: bold;">${methodStr}</div>
-                  <div style="display:flex; gap:4px; margin-top:6px;">
-                    <button onclick="editSaleRecord('${tsEsc}')" style="font-size:11px; padding:4px 10px; border-radius:4px; border:1px solid rgba(0,210,255,0.5); background:rgba(0,210,255,0.1); color:#00d2ff; cursor:pointer;">✏️ 修正</button>
-                    <button onclick="deleteSaleRecord('${tsEsc}')" style="font-size:11px; padding:4px 10px; border-radius:4px; border:1px solid rgba(231,76,60,0.5); background:rgba(231,76,60,0.1); color:#e74c3c; cursor:pointer;">🗑️ 削除</button>
-                  </div>
-                </div>
-              </div>
-            `;
-          });
-          
-          if (sortedRecords.length === 0) {
-            historyContainer.innerHTML = '<div style="color:rgba(255,255,255,0.5);">まだ売上がありません</div>';
-          }
-        }
-        
-        document.getElementById('dash-total').textContent = `¥${total.toLocaleString()}`;
-        document.getElementById('dash-cash').textContent = `¥${cash.toLocaleString()}`;
-        document.getElementById('dash-paypay').textContent = `¥${paypay.toLocaleString()}`;
-        document.getElementById('dash-credit').textContent = `¥${credit.toLocaleString()}`;
-        
-        // Render summary
-        const summaryDiv = document.getElementById('dash-summary');
-        let summaryHtml = '';
-        if (Object.keys(reasons).length > 0) {
-          Object.entries(reasons).sort((a,b)=>b[1]-a[1]).forEach(([reason, count]) => {
-            summaryHtml += `<div style="display:flex; justify-content:space-between; border-bottom:1px solid var(--border); padding:4px 0;">
-              <span>${reason}</span> <span>${count}件</span>
-            </div>`;
-          });
-          summaryDiv.innerHTML = summaryHtml;
+          lastSalesRecords = docSnap.data().records || [];
         } else {
-          summaryDiv.innerHTML = 'データがありません';
+          lastSalesRecords = [];
         }
-        
-        // Render Product Sales and Consumption Rates
-        const prodSalesDiv = document.getElementById('dash-product-sales');
-        let prodSalesHtml = '';
-        
-        const activeProducts = getActiveProducts(true);
-        const activePatId = currentSimulationData?.activePatternId || 'default';
-        const prepMap = currentSimulationData?.patterns?.[activePatId]?.prepQty || {};
-        
-        const productsWithData = activeProducts.map(p => {
-          const soldQty = (productSales[p.id] || 0) + (productSales[p.name.replace(/\n/g, ' ')] || 0);
-          const prepQty = prepMap[p.id] || 0;
-          const rate = prepQty > 0 ? Math.round((soldQty / prepQty) * 100) : 0;
-          return { p, soldQty, prepQty, rate };
-        });
-        
-        productsWithData.sort((a, b) => {
-          if (b.soldQty !== a.soldQty) return b.soldQty - a.soldQty;
-          return b.rate - a.rate;
-        });
-
-        const itemsToDisplay = productsWithData.filter(x => x.soldQty > 0 || x.prepQty > 0);
-        
-        if (itemsToDisplay.length > 0) {
-          itemsToDisplay.forEach(({ p, soldQty, prepQty, rate }) => {
-            const cleanName = p.name.replace(/\n/g, ' ');
-            let rateHtml = '';
-            let progressHtml = '';
-            
-            if (prepQty > 0) {
-              let rateColor = 'rgba(255,255,255,0.7)';
-              let barColor = 'var(--accent)';
-              if (rate >= 100) {
-                rateColor = 'var(--success)';
-                barColor = 'var(--success)';
-              } else if (rate >= 50) {
-                rateColor = '#f1c40f';
-                barColor = '#f1c40f';
-              }
-              
-              rateHtml = `<span style="font-weight:bold; color:${rateColor}; font-size:12px; margin-left:8px;">${rate}%</span>`;
-              
-              progressHtml = `
-                <div style="background: rgba(255,255,255,0.05); height: 4px; border-radius: 2px; overflow: hidden; margin-top: 4px; width: 100%;">
-                  <div style="background: ${barColor}; width: ${Math.min(100, rate)}%; height: 100%; border-radius: 2px;"></div>
-                </div>
-              `;
-            } else {
-              rateHtml = `<span style="color:rgba(255,255,255,0.3); font-size:11px; margin-left:8px;">-</span>`;
-            }
-            
-            prodSalesHtml += `
-              <div style="border-bottom: 1px solid rgba(255,255,255,0.05); padding: 8px 0; display: flex; flex-direction: column; align-items: flex-start;">
-                <div style="display: flex; justify-content: space-between; width: 100%; font-size: 13px;">
-                  <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:65%; font-weight: 500;">${cleanName}</span>
-                  <div style="display: flex; align-items: center;">
-                    <span style="font-weight:bold; color:var(--accent);">${soldQty}個<span style="font-weight:normal; color:rgba(255,255,255,0.4); font-size:11px;">/${prepQty || '-'}</span></span>
-                    ${rateHtml}
-                  </div>
-                </div>
-                ${progressHtml}
-              </div>
-            `;
-          });
-          prodSalesDiv.innerHTML = prodSalesHtml;
-        } else {
-          prodSalesDiv.innerHTML = 'データがありません';
-        }
-        
-        if (window.updateAchievementRate) {
-          window.updateAchievementRate(total);
-        }
-        updateStats();
+        window.renderSalesDashboard();
       });
     }
+
+    window.renderSalesDashboard = () => {
+      let total = 0, cash = 0, paypay = 0, credit = 0;
+      let reasons = {};
+      let productSales = {};
+      let productRevenue = {};
+      const historyContainer = document.getElementById('dash-history');
+      if (!historyContainer) return;
+      historyContainer.innerHTML = '';
+      
+      // Sort records by timestamp descending (newest first)
+      const sortedRecords = [...lastSalesRecords].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+      salesRecordsCache = sortedRecords; // キャッシュに保存
+      
+      sortedRecords.forEach(r => {
+        // Totals
+        const amount = r.totalAmount !== undefined ? r.totalAmount : (r.total || 0);
+        total += amount;
+        if (r.paymentMethod === 'cash') cash += amount;
+        if (r.paymentMethod === 'paypay') paypay += amount;
+        if (r.paymentMethod === 'credit') credit += amount;
+        
+        // Reasons summary
+        if (r.customer && r.customer.reason) {
+          reasons[r.customer.reason] = (reasons[r.customer.reason] || 0) + 1;
+        }
+        
+        // Product sales aggregation
+        if (r.items) {
+          r.items.forEach(item => {
+            let pId = item.id;
+            if (!pId) {
+              const found = window.getFullMasterProducts(window.customProductsData).find(x => x.name.replace(/\n/g, ' ') === item.name);
+              if (found) pId = found.id;
+            }
+            const price = item.price || 0;
+            const amt = item.qty * price;
+            if (pId) {
+              productSales[pId] = (productSales[pId] || 0) + item.qty;
+              productRevenue[pId] = (productRevenue[pId] || 0) + amt;
+            } else {
+              productSales[item.name] = (productSales[item.name] || 0) + item.qty;
+              productRevenue[item.name] = (productRevenue[item.name] || 0) + amt;
+            }
+          });
+        }
+        
+        // Build history card
+        const timeStr = new Date(r.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+        let itemsStr = r.items ? r.items.map(i => `${i.name} ×${i.qty}`).join('<br>') : '';
+        let tagsHtml = '';
+        if (r.customer) {
+          if (r.customer.gender) tagsHtml += `<span class="history-tag">${r.customer.gender}</span>`;
+          if (r.customer.age) tagsHtml += `<span class="history-tag">${r.customer.age}</span>`;
+          if (r.customer.reason) tagsHtml += `<span class="history-tag" style="background:rgba(0,210,255,0.2); color:var(--accent);">${r.customer.reason}</span>`;
+        }
+        if (r.memo) tagsHtml += `<span class="history-tag" style="background:rgba(243,156,18,0.2); color:var(--warning);">📝 ${r.memo}</span>`;
+        if (r.discount > 0) tagsHtml += `<span class="history-tag" style="background:rgba(231,76,60,0.2); color:var(--danger);">値引 -¥${r.discount}</span>`;
+
+        let methodStr = r.paymentMethod === 'cash' ? '現金' : r.paymentMethod === 'paypay' ? 'PayPay' : 'クレジット';
+        let methodColor = r.paymentMethod === 'cash' ? 'var(--success)' : r.paymentMethod === 'paypay' ? '#E60012' : 'var(--accent)';
+        const tsEsc = r.timestamp.replace(/'/g, "\\'");
+
+        historyContainer.innerHTML += `
+          <div class="history-card">
+            <div class="history-main">
+              <div class="history-time">${timeStr}</div>
+              <div class="history-items">${itemsStr}</div>
+              <div class="history-tags">${tagsHtml}</div>
+            </div>
+            <div style="display:flex; flex-direction:column; align-items:flex-end; gap:4px;">
+              <div class="history-amount">¥${amount.toLocaleString()}</div>
+              <div class="history-method" style="color: ${methodColor}; font-weight: bold;">${methodStr}</div>
+              <div style="display:flex; gap:4px; margin-top:6px;">
+                <button onclick="editSaleRecord('${tsEsc}')" style="font-size:11px; padding:4px 10px; border-radius:4px; border:1px solid rgba(0,210,255,0.5); background:rgba(0,210,255,0.1); color:#00d2ff; cursor:pointer;">✏️ 修正</button>
+                <button onclick="deleteSaleRecord('${tsEsc}')" style="font-size:11px; padding:4px 10px; border-radius:4px; border:1px solid rgba(231,76,60,0.5); background:rgba(231,76,60,0.1); color:#e74c3c; cursor:pointer;">🗑️ 削除</button>
+              </div>
+            </div>
+          </div>
+        `;
+      });
+      
+      if (sortedRecords.length === 0) {
+        historyContainer.innerHTML = '<div style="color:rgba(255,255,255,0.5);">まだ売上がありません</div>';
+      }
+      
+      document.getElementById('dash-total').textContent = `¥${total.toLocaleString()}`;
+      document.getElementById('dash-cash').textContent = `¥${cash.toLocaleString()}`;
+      document.getElementById('dash-paypay').textContent = `¥${paypay.toLocaleString()}`;
+      document.getElementById('dash-credit').textContent = `¥${credit.toLocaleString()}`;
+      
+      // Render summary
+      const summaryDiv = document.getElementById('dash-summary');
+      let summaryHtml = '';
+      if (Object.keys(reasons).length > 0) {
+        Object.entries(reasons).sort((a,b)=>b[1]-a[1]).forEach(([reason, count]) => {
+          summaryHtml += `<div style="display:flex; justify-content:space-between; border-bottom:1px solid var(--border); padding:4px 0;">
+            <span>${reason}</span> <span>${count}件</span>
+          </div>`;
+        });
+        summaryDiv.innerHTML = summaryHtml;
+      } else {
+        summaryDiv.innerHTML = 'データがありません';
+      }
+      
+      // Render Product Sales and Consumption Rates
+      const prodSalesDiv = document.getElementById('dash-product-sales');
+      let prodSalesHtml = '';
+      
+      const activeProducts = getActiveProducts(true);
+      const activePatId = currentSimulationData?.activePatternId || 'default';
+      const prepMap = currentSimulationData?.patterns?.[activePatId]?.prepQty || {};
+      
+      const productsWithData = activeProducts.map(p => {
+        const soldQty = (productSales[p.id] || 0) + (productSales[p.name.replace(/\n/g, ' ')] || 0);
+        const soldAmt = (productRevenue[p.id] || 0) + (productRevenue[p.name.replace(/\n/g, ' ')] || 0);
+        const prepQty = prepMap[p.id] || 0;
+        const rate = prepQty > 0 ? Math.round((soldQty / prepQty) * 100) : 0;
+        return { p, soldQty, soldAmt, prepQty, rate };
+      });
+      
+      productsWithData.sort((a, b) => {
+        if (analyticsSortKey === 'amount') {
+          if (b.soldAmt !== a.soldAmt) return b.soldAmt - a.soldAmt;
+        }
+        if (b.soldQty !== a.soldQty) return b.soldQty - a.soldQty;
+        return b.rate - a.rate;
+      });
+
+      const itemsToDisplay = productsWithData.filter(x => x.soldQty > 0 || x.prepQty > 0);
+      
+      if (itemsToDisplay.length > 0) {
+        itemsToDisplay.forEach(({ p, soldQty, soldAmt, prepQty, rate }) => {
+          const cleanName = p.name.replace(/\n/g, ' ');
+          let rateHtml = '';
+          let progressHtml = '';
+          
+          if (prepQty > 0) {
+            let rateColor = 'rgba(255,255,255,0.7)';
+            let barColor = 'var(--accent)';
+            if (rate >= 100) {
+              rateColor = 'var(--success)';
+              barColor = 'var(--success)';
+            } else if (rate >= 50) {
+              rateColor = '#f1c40f';
+              barColor = '#f1c40f';
+            }
+            
+            rateHtml = `<span style="font-weight:bold; color:${rateColor}; font-size:12px; margin-left:8px;">${rate}%</span>`;
+            
+            progressHtml = `
+              <div style="background: rgba(255,255,255,0.05); height: 4px; border-radius: 2px; overflow: hidden; margin-top: 4px; width: 100%;">
+                <div style="background: ${barColor}; width: ${Math.min(100, rate)}%; height: 100%; border-radius: 2px;"></div>
+              </div>
+            `;
+          } else {
+            rateHtml = `<span style="color:rgba(255,255,255,0.3); font-size:11px; margin-left:8px;">-</span>`;
+          }
+          
+          prodSalesHtml += `
+            <div style="border-bottom: 1px solid rgba(255,255,255,0.05); padding: 8px 0; display: flex; flex-direction: column; align-items: flex-start;">
+              <div style="display: flex; justify-content: space-between; width: 100%; font-size: 13px;">
+                <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:55%; font-weight: 500;">${cleanName}</span>
+                <div style="display: flex; align-items: center;">
+                  <span style="font-weight:bold; color:var(--accent);">${soldQty}個<span style="font-weight:normal; color:rgba(255,255,255,0.4); font-size:11px;">/${prepQty || '-'}</span></span>
+                  <span style="font-size:11px; color:#fff; opacity:0.6; margin-left:8px;">¥${soldAmt.toLocaleString()}</span>
+                  ${rateHtml}
+                </div>
+              </div>
+              ${progressHtml}
+            </div>
+          `;
+        });
+        prodSalesDiv.innerHTML = prodSalesHtml;
+      } else {
+        prodSalesDiv.innerHTML = 'データがありません';
+      }
+      
+      if (window.updateAchievementRate) {
+        window.updateAchievementRate(total);
+      }
+      updateStats();
+    };
 
     window.updateAchievementRate = function(totalSales) {
       if (totalSales === undefined) {
@@ -2171,9 +2200,20 @@
     };
 
     // Register Lock Logic
-    window.toggleRegisterLock = () => {
-      registerLocked = !registerLocked;
+    window.toggleRegisterLock = async () => {
+      if (!auth.currentUser) return;
+      const nextLockState = !registerLocked;
+      try {
+        await setDoc(doc(db, "settings", "lock_" + currentEventKey), { locked: nextLockState });
+      } catch(e) {
+        console.error("Lock error", e);
+        alert("ロック状態の変更に失敗しました。");
+      }
+    };
+
+    window.updateLockUI = () => {
       const btn = document.getElementById('btn-lock-register');
+      if (!btn) return;
       const grid = document.getElementById('pos-grid');
       const inputs = document.querySelectorAll('#pos-view select, #pos-view input, #pos-view button:not(#btn-lock-register)');
       
@@ -3279,17 +3319,59 @@
       exhibitionSalesListeners[eventId] = onSnapshot(docRef, (snap) => {
         let total = 0;
         let qty = 0;
+        const daily = {};
         if (snap.exists() && snap.data().records) {
           snap.data().records.forEach(r => {
-            total += r.total || 0;
+            const amount = r.totalAmount !== undefined ? r.totalAmount : (r.total || 0);
+            total += amount;
+            let recordQty = 0;
             if (r.items) {
               r.items.forEach(it => {
                 qty += it.qty || 0;
+                recordQty += it.qty || 0;
               });
             }
+            
+            let dateKey = '不明な日付';
+            if (r.timestamp) {
+              try {
+                const d = new Date(r.timestamp);
+                if (!isNaN(d.getTime())) {
+                  const jstOffset = 9 * 60 * 60 * 1000;
+                  const jstDate = new Date(d.getTime() + jstOffset);
+                  dateKey = jstDate.toISOString().substring(0, 10);
+                }
+              } catch(e) {
+                console.error("Date parse error", e);
+              }
+            }
+            
+            if (!daily[dateKey]) {
+              daily[dateKey] = { sales: 0, qty: 0 };
+            }
+            daily[dateKey].sales += amount;
+            daily[dateKey].qty += recordQty;
           });
         }
-        window.exhibitionSalesCache[eventId] = { totalSales: total, totalQty: qty };
+        
+        // Sort JST dates chronologically to define Day 1, Day 2, etc.
+        const dailySorted = Object.keys(daily).sort().map((dateStr, idx) => {
+          if (dateStr === '不明な日付') {
+            return {
+              label: '日付不明',
+              sales: daily[dateStr].sales,
+              qty: daily[dateStr].qty
+            };
+          }
+          const m_d = dateStr.substring(5).replace('-', '/'); // MM/DD
+          return {
+            label: `${idx + 1}日目 (${m_d})`,
+            sales: daily[dateStr].sales,
+            qty: daily[dateStr].qty
+          };
+        });
+
+        window.exhibitionSalesCache[eventId] = { totalSales: total, totalQty: qty, daily: dailySorted };
         if (typeof window.renderExhibitions === 'function') window.renderExhibitions();
       }, (err) => {
         console.error("Sales sync error for " + eventId, err);
