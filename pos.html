@@ -444,6 +444,17 @@
           <label style="font-size:12px; opacity:0.7;">イベント名</label>
           <input type="text" id="exhibition-name" class="form-input" style="margin-top:4px;" placeholder="例: 名古屋クリマ">
         </div>
+        <div style="margin-bottom:12px;">
+          <label style="font-size:12px; opacity:0.7;">シリーズ（系統分類）</label>
+          <select id="exhibition-series" class="form-select" style="margin-top:4px; width:100%; background:rgba(0,0,0,0.5); color:#fff; border:1px solid rgba(255,255,255,0.15); padding:8px; border-radius:6px;">
+            <option value="auto">🔍 自動判定（イベント名から判別）</option>
+            <option value="design_festa">⛺ デザインフェスタ シリーズ</option>
+            <option value="hmj">⛺ ハンドメイドインジャパン シリーズ</option>
+            <option value="creators_market">⛺ クリエイターズマーケット シリーズ</option>
+            <option value="kanazawa_marche">⛺ 金沢マルシェ シリーズ</option>
+            <option value="other_events">⛺ 単発・その他</option>
+          </select>
+        </div>
         <div style="margin-bottom:12px; display:grid; grid-template-columns:1fr 1fr; gap:10px;">
           <div>
             <label style="font-size:12px; opacity:0.7;">開催日</label>
@@ -3542,6 +3553,7 @@
         document.getElementById('exhibition-status').value = p.status || 'considering';
         document.getElementById('exhibition-booth-memo').value = p.boothMemo || '';
         document.getElementById('exhibition-target-sales').value = p.targetSales || '';
+        document.getElementById('exhibition-series').value = p.series || 'auto';
       } else {
         // New mode
         document.getElementById('exhibition-modal-title').textContent = "＋ 新しい出店計画を追加";
@@ -3553,6 +3565,7 @@
         document.getElementById('exhibition-status').value = 'considering';
         document.getElementById('exhibition-booth-memo').value = '';
         document.getElementById('exhibition-target-sales').value = '';
+        document.getElementById('exhibition-series').value = 'auto';
       }
       document.getElementById('exhibition-modal').style.display = 'flex';
     };
@@ -3568,6 +3581,7 @@
       const status = document.getElementById('exhibition-status').value;
       const boothMemo = document.getElementById('exhibition-booth-memo').value.trim();
       const targetSales = Number(document.getElementById('exhibition-target-sales').value) || 0;
+      const series = document.getElementById('exhibition-series').value;
 
       if (!name) return alert("イベント名を入力してください。");
 
@@ -3581,6 +3595,7 @@
           status,
           boothMemo,
           targetSales,
+          series,
           isBuiltin: updatedPlans[id]?.isBuiltin || false,
           updatedAt: Date.now()
         };
@@ -3988,6 +4003,13 @@
         sortedKeys.forEach(key => {
           const plan = filteredPlans[key];
           const name = (plan.name || '').toLowerCase();
+          
+          if (plan.series && plan.series !== 'auto') {
+            if (seriesData[plan.series]) {
+              seriesData[plan.series].keys.push(key);
+              return;
+            }
+          }
           
           if (name.includes('デザインフェスタ') || name.includes('デザフェス') || name.includes('df')) {
             seriesData.design_festa.keys.push(key);
