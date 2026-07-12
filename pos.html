@@ -1407,6 +1407,8 @@
     window.renderSalesDashboard = () => {
       let total = 0, cash = 0, paypay = 0, credit = 0;
       let reasons = {};
+      let genders = {};
+      let ages = {};
       let productSales = {};
       let productRevenue = {};
       const historyContainer = document.getElementById('dash-history');
@@ -1425,9 +1427,17 @@
         if (r.paymentMethod === 'paypay') paypay += amount;
         if (r.paymentMethod === 'credit') credit += amount;
         
-        // Reasons summary
-        if (r.customer && r.customer.reason) {
-          reasons[r.customer.reason] = (reasons[r.customer.reason] || 0) + 1;
+        // Customer summary
+        if (r.customer) {
+          if (r.customer.reason) {
+            reasons[r.customer.reason] = (reasons[r.customer.reason] || 0) + 1;
+          }
+          if (r.customer.gender) {
+            genders[r.customer.gender] = (genders[r.customer.gender] || 0) + 1;
+          }
+          if (r.customer.age) {
+            ages[r.customer.age] = (ages[r.customer.age] || 0) + 1;
+          }
         }
         
         // Product sales aggregation
@@ -1549,12 +1559,45 @@
       // Render summary
       const summaryDiv = document.getElementById('dash-summary');
       let summaryHtml = '';
-      if (Object.keys(reasons).length > 0) {
-        Object.entries(reasons).sort((a,b)=>b[1]-a[1]).forEach(([reason, count]) => {
-          summaryHtml += `<div style="display:flex; justify-content:space-between; border-bottom:1px solid var(--border); padding:4px 0;">
-            <span>${reason}</span> <span>${count}件</span>
-          </div>`;
-        });
+      
+      const hasGender = Object.keys(genders).length > 0;
+      const hasAge = Object.keys(ages).length > 0;
+      const hasReason = Object.keys(reasons).length > 0;
+      
+      if (hasGender || hasAge || hasReason) {
+        if (hasGender) {
+          summaryHtml += `<div style="font-weight:bold; color:var(--accent); font-size:12px; margin-bottom:4px; opacity:0.65;">👤 性別割合</div>`;
+          Object.entries(genders).sort((a,b)=>b[1]-a[1]).forEach(([gender, count]) => {
+            summaryHtml += `
+              <div style="display:flex; justify-content:space-between; border-bottom:1px solid rgba(255,255,255,0.05); padding:4px 0; font-size:13px;">
+                <span>${gender || '未指定'}</span> <span>${count}件</span>
+              </div>
+            `;
+          });
+        }
+        
+        if (hasAge) {
+          summaryHtml += `<div style="font-weight:bold; color:var(--accent); font-size:12px; margin-top:12px; margin-bottom:4px; opacity:0.65;">🎂 年代割合</div>`;
+          Object.entries(ages).sort((a,b)=>b[1]-a[1]).forEach(([age, count]) => {
+            summaryHtml += `
+              <div style="display:flex; justify-content:space-between; border-bottom:1px solid rgba(255,255,255,0.05); padding:4px 0; font-size:13px;">
+                <span>${age || '未指定'}</span> <span>${count}件</span>
+              </div>
+            `;
+          });
+        }
+        
+        if (hasReason) {
+          summaryHtml += `<div style="font-weight:bold; color:var(--accent); font-size:12px; margin-top:12px; margin-bottom:4px; opacity:0.65;">🔍 来店きっかけ</div>`;
+          Object.entries(reasons).sort((a,b)=>b[1]-a[1]).forEach(([reason, count]) => {
+            summaryHtml += `
+              <div style="display:flex; justify-content:space-between; border-bottom:1px solid rgba(255,255,255,0.05); padding:4px 0; font-size:13px;">
+                <span>${reason || '未指定'}</span> <span>${count}件</span>
+              </div>
+            `;
+          });
+        }
+        
         summaryDiv.innerHTML = summaryHtml;
       } else {
         summaryDiv.innerHTML = 'データがありません';
