@@ -293,6 +293,39 @@
               </div>
             </div>
           </div>
+          
+          <div style="background: var(--panel-bg); padding: 20px; border-radius: 12px; display:flex; flex-direction:column; justify-content:space-between;">
+            <div>
+              <h3 style="margin:0 0 10px 0;">💴 客単価分析</h3>
+              <div style="font-size: 13px; opacity:0.6; margin-bottom:8px; font-weight:bold;">1回のお会計あたり</div>
+              
+              <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:12px; border-bottom:1px solid rgba(255,255,255,0.05); padding-bottom:8px;">
+                <span style="font-size:14px; opacity:0.8;">平均客単価:</span>
+                <span id="dash-avg-ticket" style="font-size:24px; font-weight:bold; color:var(--accent);">¥0</span>
+              </div>
+              
+              <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:12px; border-bottom:1px solid rgba(255,255,255,0.05); padding-bottom:8px;">
+                <span style="font-size:14px; opacity:0.8;">最高客単価:</span>
+                <span id="dash-max-ticket" style="font-size:20px; font-weight:bold; color:#ff7675;">¥0</span>
+              </div>
+
+              <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:12px; border-bottom:1px solid rgba(255,255,255,0.05); padding-bottom:8px;">
+                <span style="font-size:14px; opacity:0.8;">平均買上点数:</span>
+                <span id="dash-avg-items" style="font-size:20px; font-weight:bold; color:#55efc4;">0.0点</span>
+              </div>
+            </div>
+            
+            <div style="background:rgba(0,0,0,0.2); border-radius:10px; padding:10px; border:1px solid rgba(255,255,255,0.05); margin-top:10px;">
+              <div style="font-size:11px; opacity:0.5; margin-bottom:6px; font-weight:bold; display:flex; justify-content:space-between;">
+                <span>平均単価の割合 (最高単価比)</span>
+                <span id="dash-avg-vs-max-pct">0%</span>
+              </div>
+              <div style="background:rgba(255,255,255,0.05); height:8px; border-radius:4px; overflow:hidden;">
+                <div id="dash-avg-vs-max-bar" style="background:linear-gradient(90deg, var(--accent), #ff7675); width:0%; height:100%; border-radius:4px; transition: width 0.5s ease-out;"></div>
+              </div>
+            </div>
+          </div>
+          
           <div style="background: var(--panel-bg); padding: 20px; border-radius: 12px;">
             <h3>顧客サマリー</h3>
             <div id="dash-summary" style="font-size: 14px; line-height: 1.8; color: rgba(255,255,255,0.8); margin-top: 10px;">
@@ -1411,6 +1444,11 @@
       let ages = {};
       let productSales = {};
       let productRevenue = {};
+      
+      let maxTicket = 0;
+      let totalTicketSum = 0;
+      let totalItemQty = 0;
+      
       const historyContainer = document.getElementById('dash-history');
       if (!historyContainer) return;
       historyContainer.innerHTML = '';
@@ -1418,11 +1456,14 @@
       // Sort records by timestamp descending (newest first)
       const sortedRecords = [...lastSalesRecords].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
       salesRecordsCache = sortedRecords; // キャッシュに保存
+      let ticketCount = sortedRecords.length;
       
       sortedRecords.forEach(r => {
         // Totals
         const amount = r.totalAmount !== undefined ? r.totalAmount : (r.total || 0);
         total += amount;
+        totalTicketSum += amount;
+        if (amount > maxTicket) maxTicket = amount;
         if (r.paymentMethod === 'cash') cash += amount;
         if (r.paymentMethod === 'paypay') paypay += amount;
         if (r.paymentMethod === 'credit') credit += amount;
@@ -1443,6 +1484,7 @@
         // Product sales aggregation
         if (r.items) {
           r.items.forEach(item => {
+            totalItemQty += item.qty || 0;
             let pId = item.id;
             if (!pId) {
               const found = window.getFullMasterProducts(window.customProductsData).find(x => x.name.replace(/\n/g, ' ') === item.name);
@@ -1503,6 +1545,23 @@
       document.getElementById('dash-cash').textContent = `¥${cash.toLocaleString()}`;
       document.getElementById('dash-paypay').textContent = `¥${paypay.toLocaleString()}`;
       document.getElementById('dash-credit').textContent = `¥${credit.toLocaleString()}`;
+
+      // Ticket size analysis calculations
+      const avgTicket = ticketCount > 0 ? Math.round(totalTicketSum / ticketCount) : 0;
+      const avgItems = ticketCount > 0 ? (totalItemQty / ticketCount).toFixed(1) : '0.0';
+      const avgVsMaxPct = maxTicket > 0 ? Math.round((avgTicket / maxTicket) * 100) : 0;
+      
+      const avgTicketEl = document.getElementById('dash-avg-ticket');
+      const maxTicketEl = document.getElementById('dash-max-ticket');
+      const avgItemsEl = document.getElementById('dash-avg-items');
+      const avgVsMaxBar = document.getElementById('dash-avg-vs-max-bar');
+      const avgVsMaxPctEl = document.getElementById('dash-avg-vs-max-pct');
+      
+      if (avgTicketEl) avgTicketEl.textContent = `¥${avgTicket.toLocaleString()}`;
+      if (maxTicketEl) maxTicketEl.textContent = `¥${maxTicket.toLocaleString()}`;
+      if (avgItemsEl) avgItemsEl.textContent = `${avgItems}点`;
+      if (avgVsMaxPctEl) avgVsMaxPctEl.textContent = `${avgVsMaxPct}%`;
+      if (avgVsMaxBar) avgVsMaxBar.style.width = `${avgVsMaxPct}%`;
       
       // Calculate JST daily sales breakdown for POS Dashboard
       const dailySales = {};
