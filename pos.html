@@ -354,16 +354,13 @@
         <!-- Hourly Sales Progression Chart -->
         <div style="background: var(--panel-bg); padding: 20px; border-radius: 12px; margin-top: 20px; border: 1px solid rgba(255,255,255,0.06);">
           <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
-            <h3 style="margin:0;">📈 時間帯別 売上推移 (JST)</h3>
+            <h3 style="margin:0;">📈 時間帯別 売上推移 (日別比較)</h3>
             <div style="font-size:11px; opacity:0.5; font-weight:bold;">※会計時のタイムスタンプ基準</div>
           </div>
           
-          <div id="dash-hourly-chart-container" style="display:flex; align-items:flex-end; justify-content:space-between; height:140px; padding:20px 10px 10px 10px; background:rgba(0,0,0,0.2); border-radius:8px; border:1px solid rgba(255,255,255,0.03); box-sizing:border-box;">
-            <!-- Rendered dynamically -->
-          </div>
-          
-          <div id="dash-hourly-labels-container" style="display:flex; justify-content:space-between; margin-top:8px; padding:0 10px; font-size:10px; color:rgba(255,255,255,0.5); font-weight:bold;">
-            <!-- Rendered dynamically -->
+          <div id="dash-hourly-charts-wrapper" style="display:flex; flex-direction:column; gap:16px;">
+            <!-- Rendered dynamically per day -->
+            <div style="color:rgba(255,255,255,0.4); text-align:center; padding:20px;">売上データがありません</div>
           </div>
         </div>
         
@@ -1631,10 +1628,8 @@
         }
       }
       
-      // Calculate Hourly Sales progression (JST)
-      const hourlySales = {
-        9: 0, 10: 0, 11: 0, 12: 0, 13: 0, 14: 0, 15: 0, 16: 0, 17: 0, 18: 0, 19: 0
-      };
+      // Calculate JST hourly sales grouped by date for comparison
+      const hourlySalesByDay = {}; // { 'YYYY-MM-DD': { 9: 0, 10: 0, ... } }
       
       sortedRecords.forEach(r => {
         const amount = r.totalAmount !== undefined ? r.totalAmount : (r.total || 0);
@@ -1644,53 +1639,96 @@
             if (!isNaN(d.getTime())) {
               const jstOffset = 9 * 60 * 60 * 1000;
               const jstDate = new Date(d.getTime() + jstOffset);
+              const dateKey = jstDate.toISOString().substring(0, 10);
               const hr = jstDate.getUTCHours();
+              
+              if (!hourlySalesByDay[dateKey]) {
+                hourlySalesByDay[dateKey] = {
+                  9: 0, 10: 0, 11: 0, 12: 0, 13: 0, 14: 0, 15: 0, 16: 0, 17: 0, 18: 0, 19: 0
+                };
+              }
+              
               if (hr >= 9 && hr < 19) {
-                hourlySales[hr] += amount;
+                hourlySalesByDay[dateKey][hr] += amount;
               } else if (hr >= 19 || hr < 9) {
-                hourlySales[19] += amount;
+                hourlySalesByDay[dateKey][19] += amount;
               }
             }
           } catch(e) {}
         }
       });
       
-      const hourlyChartContainer = document.getElementById('dash-hourly-chart-container');
-      const hourlyLabelsContainer = document.getElementById('dash-hourly-labels-container');
+      const hourlyChartsWrapper = document.getElementById('dash-hourly-charts-wrapper');
       
-      if (hourlyChartContainer && hourlyLabelsContainer) {
-        hourlyChartContainer.innerHTML = '';
-        hourlyLabelsContainer.innerHTML = '';
-        
-        const hoursKeys = [9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19];
-        const maxHourlySales = Math.max(...hoursKeys.map(k => hourlySales[k]), 1000);
-        
-        hoursKeys.forEach(hr => {
-          const salesVal = hourlySales[hr];
-          const pct = Math.max((salesVal / maxHourlySales) * 100, 2); // minimum height for empty bars
-          const labelText = hr === 19 ? "19h〜" : `${hr}h`;
-          const rangeText = hr === 19 ? "19:00以降" : `${hr}:00-${hr+1}:00`;
+      if (hourlyChartsWrapper) {
+        const dateKeys = Object.keys(hourlySalesByDay).sort();
+        if (dateKeys.length > 0) {
+          hourlyChartsWrapper.innerHTML = '';
           
-          const barColor = salesVal > 0 ? "linear-gradient(180deg, var(--accent), #0088cc)" : "rgba(255,255,255,0.03)";
-          const barStyle = salesVal > 0 ? `background: ${barColor}; cursor: pointer;` : `background: ${barColor};`;
-          const tooltip = salesVal > 0 ? `title="${rangeText}: ¥${salesVal.toLocaleString()}"` : `title="${rangeText}: 売上なし"`;
+          // Determine the global maximum hourly sales to normalize bar heights across days for fair comparison!
+          const hoursKeys = [9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19];
+          let maxHourlyVal = 1000;
+          dateKeys.forEach(dateStr => {
+            hoursKeys.forEach(hr => {
+              if (hourlySalesByDay[dateStr][hr] > maxHourlyVal) {
+                maxHourlyVal = hourlySalesByDay[dateStr][hr];
+              }
+            });
+          });
           
-          let valLabel = '';
-          if (salesVal > 0) {
-            valLabel = salesVal >= 1000 ? `¥${(salesVal/1000).toFixed(0)}k` : `¥${salesVal}`;
-          }
-          
-          hourlyChartContainer.innerHTML += `
-            <div style="flex:1; display:flex; flex-direction:column; align-items:center; height:100%; justify-content:flex-end;" ${tooltip}>
-              ${salesVal > 0 ? `<span style="font-size:9px; color:var(--accent); font-weight:bold; margin-bottom:4px; opacity:0.85; white-space:nowrap;">${valLabel}</span>` : ''}
-              <div style="width:55%; max-width:24px; min-width:8px; height:${pct}%; border-radius:4px 4px 0 0; transition: height 0.3s ease-in-out; ${barStyle}"></div>
-            </div>
-          `;
-          
-          hourlyLabelsContainer.innerHTML += `
-            <div style="flex:1; text-align:center;">${labelText}</div>
-          `;
-        });
+          dateKeys.forEach((dateStr, idx) => {
+            const daySales = hourlySalesByDay[dateStr];
+            const dayTotal = hoursKeys.reduce((sum, hr) => sum + daySales[hr], 0);
+            const label = dateStr === '不明な日付' ? '日付不明' : `${idx + 1}日目 (${dateStr.substring(5).replace('-', '/')})`;
+            
+            let barsHtml = '';
+            let labelsHtml = '';
+            
+            hoursKeys.forEach(hr => {
+              const salesVal = daySales[hr];
+              const pct = Math.max((salesVal / maxHourlyVal) * 100, 2); // normalize relative to global max
+              const labelText = hr === 19 ? "19h〜" : `${hr}h`;
+              const rangeText = hr === 19 ? "19:00以降" : `${hr}:00-${hr+1}:00`;
+              
+              const barColor = salesVal > 0 ? "linear-gradient(180deg, var(--accent), #0088cc)" : "rgba(255,255,255,0.03)";
+              const barStyle = salesVal > 0 ? `background: ${barColor}; cursor: pointer;` : `background: ${barColor};`;
+              const tooltip = salesVal > 0 ? `title="${rangeText}: ¥${salesVal.toLocaleString()}"` : `title="${rangeText}: 売上なし"`;
+              
+              let valLabel = '';
+              if (salesVal > 0) {
+                valLabel = salesVal >= 1000 ? `¥${(salesVal/1000).toFixed(0)}k` : `¥${salesVal}`;
+              }
+              
+              barsHtml += `
+                <div style="flex:1; display:flex; flex-direction:column; align-items:center; height:100%; justify-content:flex-end;" ${tooltip}>
+                  ${salesVal > 0 ? `<span style="font-size:9px; color:var(--accent); font-weight:bold; margin-bottom:4px; opacity:0.85; white-space:nowrap;">${valLabel}</span>` : ''}
+                  <div style="width:55%; max-width:24px; min-width:8px; height:${pct}%; border-radius:4px 4px 0 0; transition: height 0.3s ease-in-out; ${barStyle}"></div>
+                </div>
+              `;
+              
+              labelsHtml += `
+                <div style="flex:1; text-align:center;">${labelText}</div>
+              `;
+            });
+            
+            hourlyChartsWrapper.innerHTML += `
+              <div style="background:rgba(0,0,0,0.15); border-radius:8px; padding:12px; border:1px solid rgba(255,255,255,0.03);">
+                <div style="font-size:12px; font-weight:bold; color:var(--accent); margin-bottom:8px; display:flex; justify-content:space-between;">
+                  <span>📅 ${label}</span>
+                  <span style="opacity:0.75; font-size:11px;">日計: ¥${dayTotal.toLocaleString()}</span>
+                </div>
+                <div style="display:flex; align-items:flex-end; justify-content:space-between; height:100px; padding:10px 5px; box-sizing:border-box; background:rgba(0,0,0,0.1); border-radius:6px; border:1px solid rgba(255,255,255,0.02);">
+                  ${barsHtml}
+                </div>
+                <div style="display:flex; justify-content:space-between; margin-top:6px; font-size:9px; color:rgba(255,255,255,0.4); font-weight:bold; padding:0 5px;">
+                  ${labelsHtml}
+                </div>
+              </div>
+            `;
+          });
+        } else {
+          hourlyChartsWrapper.innerHTML = '<div style="color:rgba(255,255,255,0.4); text-align:center; padding:20px;">売上データがありません</div>';
+        }
       }
       
       // Render summary
@@ -3470,10 +3508,10 @@
             const demoButtons = `
               <div style="display:flex; gap:8px; margin-top:8px; flex-wrap:wrap;">
                 <a href="index.html" target="_blank" onclick="event.stopPropagation();" style="display:inline-flex; align-items:center; gap:4px; font-size:10px; padding:4px 8px; border-radius:4px; background:rgba(0,210,255,0.15); border:1px solid var(--accent); color:var(--accent); text-decoration:none; font-weight:bold;">
-                  🎮 3D体験版起動
+                  🎮 3D版起動
                 </a>
                 <a href="index_2d.html" target="_blank" onclick="event.stopPropagation();" style="display:inline-flex; align-items:center; gap:4px; font-size:10px; padding:4px 8px; border-radius:4px; background:rgba(46,204,113,0.15); border:1px solid var(--success); color:var(--success); text-decoration:none; font-weight:bold;">
-                  🎮 2D体験版起動
+                  🎮 2D版起動
                 </a>
                 <a href="https://www.creema.jp/c/kanazawa_moataro/item/onsale" target="_blank" onclick="event.stopPropagation();" style="display:inline-flex; align-items:center; gap:4px; font-size:10px; padding:4px 8px; border-radius:4px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.2); color:#fff; text-decoration:none; font-weight:bold;">
                   🛍️ Creema詳細
@@ -3498,9 +3536,9 @@
               <div style="margin-top:10px; padding:8px; background:rgba(255,255,255,0.03); border-radius:6px; border:1px dashed rgba(255,255,255,0.1); font-size:11px;" onclick="event.stopPropagation();">
                 <span style="color:#ffd700; font-weight:bold;">ℹ️ AI補正リンク</span>: このトピックスに関連する体験デモやCreemaページ等の設定が可能です。
                 <div style="display:flex; gap:8px; margin-top:6px;">
-                  <a href="index.html" target="_blank" style="color:var(--accent); text-decoration:none;">🎮 3D体験版</a>
+                  <a href="index.html" target="_blank" style="color:var(--accent); text-decoration:none;">🎮 3D版</a>
                   <span style="opacity:0.3;">|</span>
-                  <a href="index_2d.html" target="_blank" style="color:var(--success); text-decoration:none;">🎮 2D体験版</a>
+                  <a href="index_2d.html" target="_blank" style="color:var(--success); text-decoration:none;">🎮 2D版</a>
                 </div>
               </div>
             `;

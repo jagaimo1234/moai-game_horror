@@ -429,28 +429,19 @@
         <div style="position: relative; width: 100%; max-width: 550px;">
             <img src="title_bg.png" style="width: 100%; height: auto; display: block;" alt="襲いかかる作者(私)を避けろゲーム">
             
-            <!-- ▼▼▼ イベント情報の更新はここを書き換えてください ▼▼▼ -->
+            <!-- ▼▼▼ イベント情報終了メッセージ ▼▼▼ -->
             <div style="position: absolute; top: 32%; width: 100%; display: flex; flex-direction: column; align-items: center; gap: 12px; z-index: 101;">
                 
-                <!-- イベント名・ブース名 -->
                 <div style="text-align: center; color: #fff; font-family: 'Outfit', sans-serif; font-weight: bold; text-shadow: 0px 2px 5px rgba(0,0,0,1);">
-                    <div style="font-size: clamp(16px, 4.5vw, 22px); margin-bottom: 4px;">HMJ（ハンドメイドインジャパン）</div>
-                    <div style="font-size: clamp(14px, 4vw, 18px); margin-bottom: 4px;">日程: 7月11日(土)・12日(日)</div>
-                    <div style="font-size: clamp(14px, 4vw, 18px); margin-bottom: 4px;">会場: 東京ビッグサイト</div>
-                    <div style="font-size: clamp(14px, 4vw, 18px);">ブースNo: 後日発表！ (Kanazawa Moataro)</div>
+                    <div style="font-size: clamp(16px, 4.5vw, 22px); margin-bottom: 4px; color: #ffd700;">HMJ（ハンドメイドインジャパン）</div>
+                    <div style="font-size: clamp(14px, 4vw, 18px); margin-bottom: 8px; color: #fff;">ご来場・ご交信ありがとうございました！</div>
+                    <div style="font-size: clamp(12px, 3.5vw, 14px); color: rgba(255,255,255,0.7); line-height: 1.5; padding: 0 10px;">
+                        無事にイベントが終了いたしました。<br>
+                        たくさんのご来場、誠にありがとうございました！
+                    </div>
                 </div>
                 
-                <!-- MAPボタン & お品書きボタン（横並び） -->
                 <div style="display: flex; gap: 10px; flex-wrap: wrap; justify-content: center;">
-                    <button onclick="event.stopPropagation(); window.open('https://hmj-fes.jp/', '_blank')" style="
-                        background: rgba(0,0,0,0.5); border: 2px solid rgba(255,255,255,0.6); color: #fff; 
-                        padding: clamp(6px, 1.5vw, 8px) clamp(12px, 3vw, 18px); border-radius: 20px; 
-                        font-size: clamp(12px, 3.5vw, 16px); font-weight: bold;
-                        display: flex; align-items: center; gap: 6px; cursor: pointer; 
-                        backdrop-filter: blur(4px); box-shadow: 0 4px 6px rgba(0,0,0,0.5);
-                    ">
-                        HMJ公式サイト 🌐
-                    </button>
                     <button onclick="event.stopPropagation(); location.href='catalog.html?v=20260526_1'" style="
                         background: rgba(0,210,255,0.15); border: 2px solid rgba(0,210,255,0.6); color: #00d2ff; 
                         padding: clamp(6px, 1.5vw, 8px) clamp(12px, 3vw, 18px); border-radius: 20px; 
@@ -458,7 +449,7 @@
                         display: flex; align-items: center; gap: 6px; cursor: pointer; 
                         backdrop-filter: blur(4px); box-shadow: 0 4px 12px rgba(0,210,255,0.2);
                     ">
-                        📋 お品書き
+                        📋 お品書きを見る
                     </button>
                     <button onclick="event.stopPropagation(); location.href='index.html'" style="
                         background: rgba(46,204,113,0.15); border: 2px solid rgba(46,204,113,0.6); color: #2ecc71; 

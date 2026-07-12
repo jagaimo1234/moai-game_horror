@@ -178,17 +178,7 @@ function spawnYogurt() {
   let isSpecial = false;
   let isGoldenMoai = false;
   
-  const targetTime = new Date('2026-05-30T18:00:00+09:00').getTime();
-  const isBeforeStart = Date.now() < targetTime;
-  const goldSpawnRate = isBeforeStart ? 0.10 : 0.07; // カウントダウン前は10%、18:00以降は「7%の奇跡」に合わせて常時7%に自動調整！
-
-  const rand = Math.random();
-  if (rand < goldSpawnRate || window.debugForceGold) {
-    material = moaiShotMaterial;
-    isSpecial = true;
-    isGoldenMoai = true;
-    window.debugForceGold = false; // フラグをリセット
-  } else if (score > 300) {
+  if (score > 300) {
     // スコア300以上なら確率で特殊キャラに差し替え
     const specialRand = Math.random();
     if (specialRand < 0.05) {
@@ -202,9 +192,7 @@ function spawnYogurt() {
   yogurt.userData.isSpecial = isSpecial;
   yogurt.userData.isGoldenMoai = isGoldenMoai; // 金のモアイ判定用
 
-  if (isGoldenMoai) {
-    yogurt.scale.set(1.4, 1.4, 1.4); // 金のモアイは1.4倍サイズ！存在感が抜群！
-  }
+
 
   yogurt.position.set(
     (Math.random() - 0.5) * 6,
@@ -426,11 +414,7 @@ function animate() {
     const dz = yogurt.position.z - moai.position.z;
     if (Math.abs(dx) < 0.8 && Math.abs(dz) < 0.5) {
 
-      // ===== 吹き飛ばしモード =====
-      if (revengeMode) {
-        blastSprite(yogurt, index);
-        return; // このイテレーション終了
-      }
+
 
       // ===== 通常ゲームオーバー =====
       gameOver = true;
@@ -479,340 +463,27 @@ function animate() {
           <button class="retro-btn btn-insta" onclick="window.open('https://www.instagram.com/moataro_k/', '_blank')" aria-label="Instagram"></button>
         </div>
 
-        ${hitByGold ? `
-        <!-- 👑 金のモアイ衝突特典！極秘シークレット直売所 👑 -->
-        <div onclick="event.stopPropagation()" style="
-          background: linear-gradient(135deg, rgba(15,10,2,0.99) 0%, rgba(38,28,8,0.97) 100%);
-          border: 3px double #ffd700;
-          border-radius: 20px;
-          padding: 24px 20px;
-          margin-top: 15px;
-          box-shadow: 0 0 40px rgba(255,215,0,0.5), inset 0 0 20px rgba(255,215,0,0.2);
-          max-width: 500px;
-          width: 92%;
-          z-index: 102;
-          text-align: center;
-          font-family: 'Outfit', 'Inter', 'DotGothic16', sans-serif;
-        ">
-          <div style="font-size: clamp(18px, 5.5vw, 24px); font-weight: 900; color: #ffd700; text-shadow: 0 0 15px rgba(255,215,0,0.8); letter-spacing: 1.5px; animation: pulse 1.5s infinite;">
-            👑 7%の奇跡！金のモアイ降臨 👑
-          </div>
-          
-          ${isAfterEnd ? `
-          <div style="font-size: 13px; color: #fff; margin-top: 10px; font-weight: 800; line-height: 1.6; letter-spacing: 0.8px;">
-            <span style="background: linear-gradient(90deg, transparent, rgba(255,51,51,0.25) 50%, transparent 100%); padding: 6px 0; display: block; color: #ff4444; font-size: clamp(12px, 3.8vw, 14px); font-weight: 900; border-top: 1px solid rgba(255,51,51,0.3); border-bottom: 1px solid rgba(255,51,51,0.3); text-shadow: 0 0 5px rgba(255,51,51,0.5);">
-              📢 本販売所は閉鎖されました 🗿
-            </span>
-            <span style="color: #ccc; font-size: 12px; display: block; margin-top: 10px; line-height: 1.6; text-align: center;">
-              ご交信ありがとうございました！<br>
-              本特別直売所は <strong style="color: #ffd700;">6月5日(金) 23:59</strong> をもって完全に終了し、閉鎖されました。<br>
-              またの機会を楽しみにお待ちください！
-            </span>
-          </div>
-          ` : isBeforeStart ? `
-          <div style="font-size: 13px; color: #fff; margin-top: 10px; font-weight: 800; line-height: 1.6; letter-spacing: 0.8px;">
-            <span style="background: linear-gradient(90deg, transparent, rgba(255,215,0,0.25) 50%, transparent 100%); padding: 6px 0; display: block; color: #fff; font-size: clamp(12px, 3.8vw, 14px); font-weight: 900; border-top: 1px solid rgba(255,215,0,0.3); border-bottom: 1px solid rgba(255,215,0,0.3); text-shadow: 0 0 5px rgba(255,215,0,0.5);">
-              ✨ 秘密のシークレット直売所 ✨
-            </span>
-            <span style="color: #ffd700; font-size: 12px; display: block; margin-top: 10px; line-height: 1.6; text-align: center;">
-              遭遇確率わずか <strong style="font-size: 14px; text-shadow: 0 0 4px #ffd700;">7%</strong> の「金のモアイ」との交信に成功したぞ！<br>
-              だが、極秘直売所がオープンするのは...<br>
-              <strong style="color: #ff3333; text-shadow: 0 0 8px rgba(255,51,51,0.6); font-size: 14px;">【本日 5月30日(土) 18:00】</strong>からじゃ！<br>
-              ただいま次元のゲートが開くのを調整中。オープンまでわくわくしてお待ちくだされ！
-            </span>
-          </div>
-
-          <!-- カウントダウン表示エリア -->
-          <div style="margin-top: 20px; padding: 15px 10px; background: rgba(0,0,0,0.6); border-radius: 12px; border: 1px solid rgba(255,215,0,0.25); box-shadow: inset 0 0 10px rgba(255,215,0,0.1);">
-            <div style="font-size: 10px; color: #ffd700; letter-spacing: 1.5px; font-weight: 900; margin-bottom: 8px; text-shadow: 0 0 4px rgba(255,215,0,0.3);">SECRET SHOP OPENING IN</div>
-            <div id="gold-countdown-timer" style="display: flex; gap: 8px; justify-content: center; align-items: center; min-height: 50px;">
-              <!-- JSで動的に更新されます -->
-            </div>
-          </div>
-
-          <!-- 極秘商品の予告リスト -->
-          <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 20px; text-align: left;">
-            <div style="font-size: 11px; color: #ffd700; font-weight: bold; letter-spacing: 1px; margin-bottom: 2px; text-align: center; text-shadow: 0 0 5px rgba(255,215,0,0.3);">🔑 特別優待品ラインナップ（予告） 🔑</div>
-            
-            <!-- ① -->
-            <div style="
-              background: rgba(0,0,0,0.5);
-              border: 1px dashed rgba(255,215,0,0.25);
-              border-radius: 10px;
-              padding: 10px 12px;
-              display: flex;
-              justify-content: space-between;
-              align-items: center;
-              opacity: 0.85;
-            ">
-              <span style="font-size: 12px; font-weight: bold; color: rgba(255,255,255,0.85); line-height: 1.35;">① ヨーグルト好きモアイロボmark2 EXゴールドエディション 神スタンドセット</span>
-              <span style="font-size: 9px; font-weight: 900; color: #ffd700; background: rgba(255,215,0,0.1); padding: 3px 6px; border-radius: 4px; border: 1px solid rgba(255,215,0,0.2); white-space: nowrap; margin-left: 8px;">🔒 予告</span>
-            </div>
-
-            <!-- ② -->
-            <div style="
-              background: rgba(0,0,0,0.5);
-              border: 1px dashed rgba(255,215,0,0.25);
-              border-radius: 10px;
-              padding: 10px 12px;
-              display: flex;
-              justify-content: space-between;
-              align-items: center;
-              opacity: 0.85;
-            ">
-              <span style="font-size: 12px; font-weight: bold; color: rgba(255,255,255,0.85); line-height: 1.35;">② モアイロボMark2専用 神スタンド</span>
-              <span style="font-size: 9px; font-weight: 900; color: #ffd700; background: rgba(255,215,0,0.1); padding: 3px 6px; border-radius: 4px; border: 1px solid rgba(255,215,0,0.2); white-space: nowrap; margin-left: 8px;">🔒 予告</span>
-            </div>
-
-            <!-- ③ -->
-            <div style="
-              background: rgba(0,0,0,0.5);
-              border: 1px dashed rgba(255,215,0,0.25);
-              border-radius: 10px;
-              padding: 10px 12px;
-              display: flex;
-              justify-content: space-between;
-              align-items: center;
-              opacity: 0.85;
-            ">
-              <span style="font-size: 12px; font-weight: bold; color: rgba(255,255,255,0.85); line-height: 1.35;">③ ミニおすわりモアイキーホルダー</span>
-              <span style="font-size: 9px; font-weight: 900; color: #ffd700; background: rgba(255,215,0,0.1); padding: 3px 6px; border-radius: 4px; border: 1px solid rgba(255,215,0,0.2); white-space: nowrap; margin-left: 8px;">🔒 予告</span>
-            </div>
-
-            <!-- ④ -->
-            <div style="
-              background: rgba(0,0,0,0.5);
-              border: 1px dashed rgba(255,215,0,0.25);
-              border-radius: 10px;
-              padding: 10px 12px;
-              display: flex;
-              justify-content: space-between;
-              align-items: center;
-              opacity: 0.85;
-            ">
-              <span style="font-size: 12px; font-weight: bold; color: rgba(255,255,255,0.85); line-height: 1.35;">④ まちょいモアイメガネスタンド</span>
-              <span style="font-size: 9px; font-weight: 900; color: #ffd700; background: rgba(255,215,0,0.1); padding: 3px 6px; border-radius: 4px; border: 1px solid rgba(255,215,0,0.2); white-space: nowrap; margin-left: 8px;">🔒 予告</span>
-            </div>
-          </div>
-          
-          <div style="color: rgba(255,255,255,0.7); font-size: 11px; margin-top: 15px; line-height: 1.5;">
-            ※18:00以降に再び「金のモアイ」に出会うと、特別優待品【各7セット限定】の極秘ショップがアンロックされるぞ！
-          </div>
-          ` : `
-          <div style="font-size: 13px; color: #fff; margin-top: 10px; font-weight: 800; line-height: 1.6; letter-spacing: 0.8px;">
-            <span style="background: linear-gradient(90deg, transparent, rgba(255,215,0,0.25) 50%, transparent 100%); padding: 6px 0; display: block; color: #fff; font-size: clamp(12px, 3.8vw, 14px); font-weight: 900; border-top: 1px solid rgba(255,215,0,0.3); border-bottom: 1px solid rgba(255,215,0,0.3); text-shadow: 0 0 5px rgba(255,215,0,0.5);">
-              ✨ 【選ばれしVIP限定】秘密のシークレット直売所 ✨
-            </span>
-            <span style="color: #ffd700; font-size: 12px; display: block; margin-top: 10px; line-height: 1.6; text-align: center;">
-              遭遇確率わずか <strong style="font-size: 14px; text-shadow: 0 0 4px #ffd700;">7%</strong> の「金のモアイ」と交信した時だけ開く、超激レアな直売所じゃ！<br>
-              この画面を閉じると一旦閉まってしまうので、このラッキーな遭遇チャンスをお見逃しなく！<br>
-              幸運を記念し、ラッキーセブン<strong style="color: #ff3333; text-shadow: 0 0 8px rgba(255,51,51,0.6); font-size: 13px;">【各7セット限定】</strong>の極秘・特別優待品を用意したぞ。<br>
-              <span style="display: inline-block; background: rgba(255,51,51,0.15); border: 1px solid rgba(255,51,51,0.3); color: #ff4444; font-weight: 900; padding: 4px 12px; border-radius: 6px; margin-top: 8px; font-size: 11px; letter-spacing: 0.5px; animation: pulse 1.5s infinite;">
-                ⚠️ 本販売所は 6月5日(金) 23:59 をもって完全に閉鎖されます 🗿
-              </span>
-            </span>
-          </div>
-
-          <!-- 極秘商品リスト -->
-          <div style="display: flex; flex-direction: column; gap: 12px; margin-top: 18px; text-align: left;">
-            
-            <!-- ① ヨーグルト好きモアイロボmark2 EXゴールドエディション 神スタンドセット -->
-            <div onclick="window.open('https://minne.com/items/45604230?code=dnroLkLN3M', '_blank')" style="
-              background: rgba(0,0,0,0.75);
-              border: 1px solid rgba(255,215,0,0.4);
-              border-radius: 12px;
-              padding: 14px 16px;
-              cursor: pointer;
-              transition: all 0.2s ease-in-out;
-              display: flex;
-              flex-direction: column;
-              box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-            " onmouseover="this.style.transform='translateY(-2px)'; this.style.borderColor='#ffd700'; this.style.boxShadow='0 8px 20px rgba(255,215,0,0.35)';" onmouseout="this.style.transform='translateY(0)'; this.style.borderColor='rgba(255,215,0,0.4)'; this.style.boxShadow='0 4px 10px rgba(0,0,0,0.3)';" >
-              <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 10px;">
-                <span style="font-size: 13px; font-weight: 800; color: #fff; line-height: 1.45;">① ヨーグルト好きモアイロボmark2 EXゴールドエディション 神スタンドセット</span>
-              </div>
-              <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px;">
-                <span style="font-size: 11px; font-weight: 900; color: #ffd700; text-shadow: 0 0 6px rgba(255,215,0,0.5); display: flex; align-items: center; gap: 4px; font-family: 'Outfit', 'Inter', sans-serif;">
-                  🎁 神価格/送料無料
-                </span>
-                <span style="font-size: 11px; font-weight: bold; color: #ffd700; background: rgba(255,215,0,0.15); padding: 4px 10px; border-radius: 6px; border: 1px solid rgba(255,215,0,0.3); letter-spacing: 0.5px;">🔐 VIP専用ページへ (minne) ▶</span>
-              </div>
-            </div>
-
-            <!-- ② モアイロボMark2専用 神スタンド -->
-            <div onclick="window.open('https://minne.com/items/45611657?code=i6WAylwj9e', '_blank')" style="
-              background: rgba(0,0,0,0.75);
-              border: 1px solid rgba(255,215,0,0.4);
-              border-radius: 12px;
-              padding: 14px 16px;
-              cursor: pointer;
-              transition: all 0.2s ease-in-out;
-              display: flex;
-              flex-direction: column;
-              box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-            " onmouseover="this.style.transform='translateY(-2px)'; this.style.borderColor='#ffd700'; this.style.boxShadow='0 8px 20px rgba(255,215,0,0.35)';" onmouseout="this.style.transform='translateY(0)'; this.style.borderColor='rgba(255,215,0,0.4)'; this.style.boxShadow='0 4px 10px rgba(0,0,0,0.3)';" >
-              <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 10px;">
-                <span style="font-size: 13px; font-weight: 800; color: #fff; line-height: 1.45;">② モアイロボMark2専用 神スタンド</span>
-              </div>
-              <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px;">
-                <span style="font-size: 11px; font-weight: 900; color: #00d2ff; text-shadow: 0 0 6px rgba(0,210,255,0.5); display: flex; align-items: center; gap: 4px; font-family: 'Outfit', 'Inter', sans-serif;">
-                  🚚 送料無料
-                </span>
-                <span style="font-size: 11px; font-weight: bold; color: #ffd700; background: rgba(255,215,0,0.15); padding: 4px 10px; border-radius: 6px; border: 1px solid rgba(255,215,0,0.3); letter-spacing: 0.5px;">🔐 VIP専用ページへ (minne) ▶</span>
-              </div>
-            </div>
-
-            <!-- ③ ミニおすわりモアイキーホルダー -->
-            <div onclick="window.open('https://minne.com/items/45611506?code=j9JRfHjRYW', '_blank')" style="
-              background: rgba(0,0,0,0.75);
-              border: 1px solid rgba(255,215,0,0.4);
-              border-radius: 12px;
-              padding: 14px 16px;
-              cursor: pointer;
-              transition: all 0.2s ease-in-out;
-              display: flex;
-              flex-direction: column;
-              box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-            " onmouseover="this.style.transform='translateY(-2px)'; this.style.borderColor='#ffd700'; this.style.boxShadow='0 8px 20px rgba(255,215,0,0.35)';" onmouseout="this.style.transform='translateY(0)'; this.style.borderColor='rgba(255,215,0,0.4)'; this.style.boxShadow='0 4px 10px rgba(0,0,0,0.3)';" >
-              <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 10px;">
-                <span style="font-size: 13px; font-weight: 800; color: #fff; line-height: 1.45;">③ ミニおすわりモアイキーホルダー</span>
-              </div>
-              <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px;">
-                <span style="font-size: 11px; font-weight: 900; color: #00d2ff; text-shadow: 0 0 6px rgba(0,210,255,0.5); display: flex; align-items: center; gap: 4px; font-family: 'Outfit', 'Inter', sans-serif;">
-                  🚚 送料無料
-                </span>
-                <span style="font-size: 11px; font-weight: bold; color: #ffd700; background: rgba(255,215,0,0.15); padding: 4px 10px; border-radius: 6px; border: 1px solid rgba(255,215,0,0.3); letter-spacing: 0.5px;">🔐 VIP専用ページへ (minne) ▶</span>
-              </div>
-            </div>
-
-            <!-- ④ まちょいモアイメガネスタンド -->
-            <div onclick="window.open('https://minne.com/items/45340967?code=U0jp1xb7cl', '_blank')" style="
-              background: rgba(0,0,0,0.75);
-              border: 1px solid rgba(255,215,0,0.4);
-              border-radius: 12px;
-              padding: 14px 16px;
-              cursor: pointer;
-              transition: all 0.2s ease-in-out;
-              display: flex;
-              flex-direction: column;
-              box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-            " onmouseover="this.style.transform='translateY(-2px)'; this.style.borderColor='#ffd700'; this.style.boxShadow='0 8px 20px rgba(255,215,0,0.35)';" onmouseout="this.style.transform='translateY(0)'; this.style.borderColor='rgba(255,215,0,0.4)'; this.style.boxShadow='0 4px 10px rgba(0,0,0,0.3)';" >
-              <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 10px;">
-                <span style="font-size: 13px; font-weight: 800; color: #fff; line-height: 1.45;">④ まちょいモアイメガネスタンド</span>
-              </div>
-              <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px;">
-                <span style="font-size: 11px; font-weight: 900; color: #ffd700; text-shadow: 0 0 6px rgba(255,215,0,0.5); display: flex; align-items: center; gap: 4px; font-family: 'Outfit', 'Inter', sans-serif;">
-                  🎁 神価格/送料無料
-                </span>
-                <span style="font-size: 11px; font-weight: bold; color: #ffd700; background: rgba(255,215,0,0.15); padding: 4px 10px; border-radius: 6px; border: 1px solid rgba(255,215,0,0.3); letter-spacing: 0.5px;">🔐 VIP専用ページへ (minne) ▶</span>
-              </div>
-            </div>
-
-          </div>
-        </div>
-        `}
-        ` : ''}
-
-        <!-- 💥 吹き飛ばしモード選択 -->
-        <div onclick="event.stopPropagation()" style="
-          background: rgba(20,0,0,0.95);
-          border: 2px solid #ff3333;
-          border-radius: 14px;
-          padding: 20px 28px;
-          text-align: center;
-          max-width: 360px;
-          width: 90%;
-          margin-top: 4px;
-          z-index: 200;
-        ">
-          <div style="font-size:18px; color:#ff4444; font-weight:bold; line-height:1.6; margin-bottom:14px;">
-            😤 腹が立ってきた？<br>私を吹き飛ばしたい？
-          </div>
-          <div style="display:flex; gap:14px; justify-content:center;">
-            <button onclick="window.startRevengeMode()" style="
-              background: linear-gradient(135deg,#ff2200,#ff6600);
-              color:white; border:none;
-              padding:13px 30px; border-radius:10px;
-              font-size:17px; font-weight:bold;
-              cursor:pointer; letter-spacing:1px;
-              box-shadow: 0 4px 14px rgba(255,50,0,0.5);
-            ">はい 💥</button>
-            <button onclick="location.reload()" style="
-              background:#333; color:rgba(255,255,255,0.8);
-              border:1px solid #555;
-              padding:13px 30px; border-radius:10px;
-              font-size:17px; cursor:pointer;
-            ">いいえ</button>
-          </div>
-        </div>
-
-        <!-- ▼▼▼ イベント情報 ▼▼▼ -->
+        <!-- ▼▼▼ イベント情報終了メッセージ ▼▼▼ -->
         <div style="width: 100%; max-width: 550px; display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 20px 0; background: #000; z-index: 101;">
             <div style="text-align: center; color: #fff; font-family: 'Outfit', sans-serif; font-weight: bold; text-shadow: 0px 2px 5px rgba(0,0,0,1);">
-                <div style="font-size: clamp(16px, 4.5vw, 22px); margin-bottom: 4px;">HMJ（ハンドメイドインジャパン）</div>
-                <div style="font-size: clamp(14px, 4vw, 18px); margin-bottom: 4px;">日程: 7月11日(土)・12日(日)</div>
-                <div style="font-size: clamp(14px, 4vw, 18px); margin-bottom: 4px;">会場: 東京ビッグサイト</div>
-                <div style="font-size: clamp(14px, 4vw, 18px);">ブースNo: 後日発表！ (Kanazawa Moataro)</div>
+                <div style="font-size: clamp(16px, 4.5vw, 22px); margin-bottom: 4px; color: #ffd700;">HMJ（ハンドメイドインジャパン）</div>
+                <div style="font-size: clamp(14px, 4vw, 18px); margin-bottom: 8px; color: #fff;">ご来場・ご交信ありがとうございました！</div>
+                <div style="font-size: clamp(12px, 3.5vw, 14px); color: rgba(255,255,255,0.7); line-height: 1.5; padding: 0 10px;">
+                    無事にイベントが終了いたしました。<br>
+                    たくさんのご来場、誠にありがとうございました！
+                </div>
             </div>
             <div style="display: flex; gap: 10px; flex-wrap: wrap; justify-content: center;">
-                <button onclick="event.stopPropagation(); window.open('https://hmj-fes.jp/', '_blank')" style="
-                    background: rgba(0,0,0,0.5); border: 2px solid rgba(255,255,255,0.6); color: #fff;
-                    padding: clamp(6px, 1.5vw, 8px) clamp(12px, 3vw, 18px); border-radius: 20px;
-                    font-size: clamp(12px, 3.5vw, 16px); font-weight: bold;
-                    display: flex; align-items: center; gap: 6px; cursor: pointer;
-                    backdrop-filter: blur(4px); box-shadow: 0 4px 6px rgba(0,0,0,0.5);
-                ">HMJ公式サイト 🌐</button>
                 <button onclick="event.stopPropagation(); location.href='catalog.html?v=20260526_1'" style="
-                    background: rgba(0,210,255,0.15); border: 2px solid rgba(0,210,255,0.6); color: #00d2ff;
+                    background: linear-gradient(135deg, #00d2ff, #0088cc); border: none; color: #000;
                     padding: clamp(6px, 1.5vw, 8px) clamp(12px, 3vw, 18px); border-radius: 20px;
-                    font-size: clamp(12px, 3.5vw, 16px); font-weight: bold;
-                    display: flex; align-items: center; gap: 6px; cursor: pointer;
-                    backdrop-filter: blur(4px); box-shadow: 0 4px 12px rgba(0,210,255,0.2);
-                ">📋 お品書き</button>
+                    font-size: clamp(12px, 3.5vw, 16px); font-weight: bold; cursor: pointer;
+                    box-shadow: 0 4px 6px rgba(0,210,255,0.3);
+                ">お品書きを見る 📚</button>
             </div>
         </div>
-        <!-- ▲▲▲ イベント情報 ここまで ▲▲▲ -->
       `;
-
-      if (hitByGold && isBeforeStart) {
-        const timerEl = document.getElementById('gold-countdown-timer');
-        if (timerEl) {
-          const updateCountdown = () => {
-            const now = Date.now();
-            const diff = targetTime - now;
-            if (diff <= 0) {
-              clearInterval(window.goldCountdownInterval);
-              location.reload();
-              return;
-            }
-            const hours = Math.floor(diff / (1000 * 60 * 60));
-            const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-            const seconds = Math.floor((diff % (1000 * 60)) / 1000);
-            
-            const pad = (n) => String(n).padStart(2, '0');
-            timerEl.innerHTML = `
-              <div style="background: rgba(255,215,0,0.1); border: 1px solid rgba(255,215,0,0.35); padding: 8px 12px; border-radius: 8px; min-width: 50px;">
-                <div style="font-size: 20px; font-weight: 900; color: #ffd700; font-family: 'Outfit', sans-serif;">${pad(hours)}</div>
-                <div style="font-size: 8px; color: rgba(255,255,255,0.6); font-weight: bold; margin-top: 1px;">時間</div>
-              </div>
-              <div style="font-size: 20px; font-weight: 900; color: #ffd700; animation: pulse 1s infinite;">:</div>
-              <div style="background: rgba(255,215,0,0.1); border: 1px solid rgba(255,215,0,0.35); padding: 8px 12px; border-radius: 8px; min-width: 50px;">
-                <div style="font-size: 20px; font-weight: 900; color: #ffd700; font-family: 'Outfit', sans-serif;">${pad(minutes)}</div>
-                <div style="font-size: 8px; color: rgba(255,255,255,0.6); font-weight: bold; margin-top: 1px;">分</div>
-              </div>
-              <div style="font-size: 20px; font-weight: 900; color: #ffd700; animation: pulse 1s infinite;">:</div>
-              <div style="background: rgba(255,215,0,0.1); border: 1px solid rgba(255,215,0,0.35); padding: 8px 12px; border-radius: 8px; min-width: 50px;">
-                <div style="font-size: 20px; font-weight: 900; color: #ffd700; font-family: 'Outfit', sans-serif;">${pad(seconds)}</div>
-                <div style="font-size: 8px; color: rgba(255,255,255,0.6); font-weight: bold; margin-top: 1px;">秒</div>
-              </div>
-            `;
-          };
-          updateCountdown();
-          if (window.goldCountdownInterval) clearInterval(window.goldCountdownInterval);
-          window.goldCountdownInterval = setInterval(updateCountdown, 1000);
-        }
-      }
-
+      
       // ランキング機能（現在オフ）
       // const overlay = document.getElementById('name-input-overlay');
       // const scoreDisplay = document.getElementById('final-score-display');
