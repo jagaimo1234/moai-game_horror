@@ -2426,6 +2426,7 @@
         }
       }
       // Force update of dashboard product sales view
+      if (window.renderSalesDashboard) window.renderSalesDashboard();
       renderAll();
     };
 
@@ -4031,12 +4032,13 @@
         const salesData = [];
         Object.keys(filteredPlans).forEach(key => {
           const plan = filteredPlans[key];
-          const sales = window.exhibitionSalesCache[key] || { totalSales: 0, totalQty: 0 };
+          const sales = window.exhibitionSalesCache[key] || { totalSales: 0, totalQty: 0, daily: [] };
           if (sales.totalSales > 0 || plan.status === 'completed' || plan.status === 'scheduled') {
             salesData.push({
               name: plan.name,
               totalSales: sales.totalSales,
               totalQty: sales.totalQty,
+              daily: sales.daily || [],
               status: plan.status
             });
           }
@@ -4045,12 +4047,26 @@
         if (salesData.length === 0) {
           chartBars.innerHTML = '<div style="opacity:0.5; padding:20px; text-align:center;">売上データが存在するイベントがありません。</div>';
         } else {
-          // Find max sales to scale bars
           const maxSales = Math.max(...salesData.map(d => d.totalSales), 10000);
           salesData.forEach(d => {
             const pct = Math.max((d.totalSales / maxSales) * 100, 3); // minimum 3% for visibility
+            
+            let dailyHtml = '';
+            if (d.daily && d.daily.length > 0) {
+              dailyHtml = `<div style="margin-top:6px; margin-bottom:12px; padding-left:12px; font-size:11px; display:flex; flex-direction:column; gap:4px; border-left:2px solid var(--accent); opacity:0.85;">`;
+              d.daily.forEach(day => {
+                dailyHtml += `
+                  <div style="display:flex; justify-content:space-between; width:240px; color:rgba(255,255,255,0.75);">
+                    <span>📅 ${day.label}:</span>
+                    <span style="font-weight:bold; color:#fff;">¥${day.sales.toLocaleString()} <span style="font-weight:normal; opacity:0.6; font-size:10px;">(${day.qty}点)</span></span>
+                  </div>
+                `;
+              });
+              dailyHtml += `</div>`;
+            }
+
             chartBars.innerHTML += `
-              <div style="margin-bottom:12px;">
+              <div style="margin-bottom:16px;">
                 <div style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:4px; font-weight:bold;">
                   <span>${d.name} (${d.totalQty}点)</span>
                   <span style="color:var(--accent);">¥${d.totalSales.toLocaleString()}</span>
@@ -4058,6 +4074,7 @@
                 <div style="background:rgba(255,255,255,0.05); height:16px; border-radius:8px; overflow:hidden; border:1px solid rgba(255,255,255,0.05);">
                   <div style="background:linear-gradient(90deg, var(--accent), #f39c12); width:${pct}%; height:100%; border-radius:8px;"></div>
                 </div>
+                ${dailyHtml}
               </div>
             `;
           });
