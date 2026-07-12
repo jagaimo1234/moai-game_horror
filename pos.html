@@ -185,7 +185,12 @@
     <section id="pos-view" class="view-section active">
       <div class="product-grid" id="pos-grid"></div>
       <div class="cart-sidebar">
-        <div class="cart-header">🛒 カート</div>
+        <div class="cart-header" style="display:flex; justify-content:space-between; align-items:center;">
+          <span>🛒 カート</span>
+          <button id="btn-lock-register" onclick="toggleRegisterLock()" style="background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.2); color:#fff; font-size:11px; padding:4px 10px; border-radius:6px; cursor:pointer; font-weight:bold; transition:0.2s; display:flex; align-items:center; gap:4px;">
+            🔓 レジロック解除中
+          </button>
+        </div>
         <div class="cart-items" id="cart-items"></div>
         
         <div class="checkout-form">
@@ -291,7 +296,13 @@
             </div>
           </div>
           <div style="background: var(--panel-bg); padding: 20px; border-radius: 12px;">
-            <h3>作品別 販売数</h3>
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <h3 style="margin:0;">作品別 販売状況</h3>
+              <div style="display:flex; background:rgba(0,0,0,0.3); padding:2px; border-radius:6px; font-size:11px;">
+                <button id="btn-sort-sales-qty" onclick="changeAnalyticsSort('qty')" style="background:var(--accent); border:none; color:black; font-weight:bold; padding:2px 8px; border-radius:4px; cursor:pointer;">個数順</button>
+                <button id="btn-sort-sales-amount" onclick="changeAnalyticsSort('amount')" style="background:none; border:none; color:white; padding:2px 8px; border-radius:4px; cursor:pointer;">金額順</button>
+              </div>
+            </div>
             <div id="dash-product-sales" style="font-size: 14px; line-height: 1.8; color: rgba(255,255,255,0.8); margin-top: 10px; max-height: 200px; overflow-y: auto;">
               <!-- Injected via JS -->
               データがありません
@@ -955,6 +966,8 @@
     let unsubSimulation = null;
     let hiddenProductsData = {};
     let salesRecordsCache = []; // 購入履歴のキャッシュ（修正・削除用）
+    let registerLocked = false;
+    let analyticsSortKey = 'qty'; // 'qty' or 'amount'
     
     window.exhibitionPlansData = {};
     window.exhibitionCrawlerData = {};
@@ -1873,6 +1886,10 @@
     }
 
     window.addToCart = (id) => {
+      if (registerLocked) {
+        alert("レジがロックされています。解除してから操作してください。");
+        return;
+      }
       if (!cart[id]) cart[id] = 0;
       const stock = (inventoryData[id] && inventoryData[id].current) || 0;
       if (cart[id] < stock) {
@@ -1884,6 +1901,10 @@
     };
 
     window.updateCartQty = (id, delta) => {
+      if (registerLocked) {
+        alert("レジがロックされています。解除してから操作してください。");
+        return;
+      }
       cart[id] += delta;
       if (cart[id] <= 0) delete cart[id];
       updateCartUI();
@@ -1927,6 +1948,10 @@
 
     window.checkout = async (method) => {
       if (!auth.currentUser) return;
+      if (registerLocked) {
+        alert("レジがロックされています。解除してから操作してください。");
+        return;
+      }
       if (Object.keys(cart).length === 0) return alert("カートが空です");
 
       const products = window.getFullMasterProducts(window.customProductsData);
@@ -2143,6 +2168,61 @@
       await resetSalesData();
       await resetInventoryLogData();
       await resetAllInventoryData();
+    };
+
+    // Register Lock Logic
+    window.toggleRegisterLock = () => {
+      registerLocked = !registerLocked;
+      const btn = document.getElementById('btn-lock-register');
+      const grid = document.getElementById('pos-grid');
+      const inputs = document.querySelectorAll('#pos-view select, #pos-view input, #pos-view button:not(#btn-lock-register)');
+      
+      if (registerLocked) {
+        btn.innerHTML = '🔒 レジロック中 (解除するにはタップ)';
+        btn.style.background = 'rgba(231,76,60,0.15)';
+        btn.style.borderColor = '#e74c3c';
+        btn.style.color = '#e74c3c';
+        if (grid) grid.style.opacity = '0.35';
+        cart = {};
+        updateCartUI();
+      } else {
+        btn.innerHTML = '🔓 レジロック解除中';
+        btn.style.background = 'rgba(255,255,255,0.05)';
+        btn.style.borderColor = 'rgba(255,255,255,0.2)';
+        btn.style.color = '#fff';
+        if (grid) grid.style.opacity = '1';
+      }
+      
+      inputs.forEach(el => {
+        el.disabled = registerLocked;
+      });
+    };
+
+    // Analytics Sorting Logic
+    window.changeAnalyticsSort = (key) => {
+      analyticsSortKey = key;
+      const btnQty = document.getElementById('btn-sort-sales-qty');
+      const btnAmt = document.getElementById('btn-sort-sales-amount');
+      
+      if (btnQty && btnAmt) {
+        if (key === 'qty') {
+          btnQty.style.background = 'var(--accent)';
+          btnQty.style.color = 'black';
+          btnQty.style.fontWeight = 'bold';
+          btnAmt.style.background = 'none';
+          btnAmt.style.color = 'white';
+          btnAmt.style.fontWeight = 'normal';
+        } else {
+          btnAmt.style.background = 'var(--accent)';
+          btnAmt.style.color = 'black';
+          btnAmt.style.fontWeight = 'bold';
+          btnQty.style.background = 'none';
+          btnQty.style.color = 'white';
+          btnQty.style.fontWeight = 'normal';
+        }
+      }
+      // Force update of dashboard product sales view
+      renderAll();
     };
 
     // --- Selection & Sorting Logic ---
