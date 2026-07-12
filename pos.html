@@ -303,9 +303,12 @@
           <div style="background: var(--panel-bg); padding: 20px; border-radius: 12px;">
             <div style="display:flex; justify-content:space-between; align-items:center;">
               <h3 style="margin:0;">作品別 販売状況</h3>
-              <div style="display:flex; background:rgba(0,0,0,0.3); padding:2px; border-radius:6px; font-size:11px;">
-                <button id="btn-sort-sales-qty" onclick="changeAnalyticsSort('qty')" style="background:var(--accent); border:none; color:black; font-weight:bold; padding:2px 8px; border-radius:4px; cursor:pointer;">個数順</button>
-                <button id="btn-sort-sales-amount" onclick="changeAnalyticsSort('amount')" style="background:none; border:none; color:white; padding:2px 8px; border-radius:4px; cursor:pointer;">金額順</button>
+              <div style="display:flex; gap:6px; align-items:center;">
+                <button id="btn-toggle-show-all" onclick="toggleAnalyticsShowAll()" style="background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.15); color:white; font-size:11px; padding:2px 8px; border-radius:4px; cursor:pointer;">🔍 全体表示</button>
+                <div style="display:flex; background:rgba(0,0,0,0.3); padding:2px; border-radius:6px; font-size:11px;">
+                  <button id="btn-sort-sales-qty" onclick="changeAnalyticsSort('qty')" style="background:var(--accent); border:none; color:black; font-weight:bold; padding:2px 8px; border-radius:4px; cursor:pointer;">個数順</button>
+                  <button id="btn-sort-sales-amount" onclick="changeAnalyticsSort('amount')" style="background:none; border:none; color:white; padding:2px 8px; border-radius:4px; cursor:pointer;">金額順</button>
+                </div>
               </div>
             </div>
             <div id="dash-product-sales" style="font-size: 14px; line-height: 1.8; color: rgba(255,255,255,0.8); margin-top: 10px; max-height: 200px; overflow-y: auto;">
@@ -1003,6 +1006,7 @@
     let lastSalesRecords = [];
     let registerLocked = false;
     let analyticsSortKey = 'qty'; // 'qty' or 'amount'
+    let analyticsShowAll = false;
     
     window.exhibitionPlansData = {};
     window.exhibitionCrawlerData = {};
@@ -1580,7 +1584,7 @@
         return b.rate - a.rate;
       });
 
-      const itemsToDisplay = productsWithData.filter(x => x.soldQty > 0 || x.prepQty > 0);
+      const itemsToDisplay = analyticsShowAll ? productsWithData : productsWithData.filter(x => x.soldQty > 0 || x.prepQty > 0);
       
       if (itemsToDisplay.length > 0) {
         itemsToDisplay.forEach(({ p, soldQty, soldAmt, prepQty, rate }) => {
@@ -2485,6 +2489,28 @@
       // Force update of dashboard product sales view
       if (window.renderSalesDashboard) window.renderSalesDashboard();
       renderAll();
+    };
+
+    window.toggleAnalyticsShowAll = () => {
+      analyticsShowAll = !analyticsShowAll;
+      const btn = document.getElementById('btn-toggle-show-all');
+      const salesList = document.getElementById('dash-product-sales');
+      if (btn) {
+        if (analyticsShowAll) {
+          btn.innerHTML = '⚡ 簡易表示に戻す';
+          btn.style.background = 'var(--accent)';
+          btn.style.color = '#000';
+          btn.style.fontWeight = 'bold';
+          if (salesList) salesList.style.maxHeight = 'none';
+        } else {
+          btn.innerHTML = '🔍 全体表示';
+          btn.style.background = 'rgba(255,255,255,0.05)';
+          btn.style.color = '#fff';
+          btn.style.fontWeight = 'normal';
+          if (salesList) salesList.style.maxHeight = '200px';
+        }
+      }
+      if (window.renderSalesDashboard) window.renderSalesDashboard();
     };
 
     // --- Selection & Sorting Logic ---
