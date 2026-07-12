@@ -274,6 +274,11 @@
               <div style="display:flex; justify-content:space-between;"><span>💳 クレジット:</span> <span id="dash-credit">¥0</span></div>
             </div>
             
+            <div id="dash-daily-breakdown-container" style="margin-top: 15px; padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.1); display:none; flex-direction:column; gap:6px; font-size:13px; color:rgba(255,255,255,0.85);">
+              <div style="font-weight:bold; color:var(--accent); margin-bottom:4px; font-size:11px; opacity:0.6;">📅 日別売上</div>
+              <div id="dash-daily-breakdown-list" style="display:flex; flex-direction:column; gap:6px;"></div>
+            </div>
+            
             <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.1);">
               <div style="display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 6px;">
                 <span>🎯 目標達成率:</span>
@@ -1484,6 +1489,58 @@
       document.getElementById('dash-cash').textContent = `¥${cash.toLocaleString()}`;
       document.getElementById('dash-paypay').textContent = `¥${paypay.toLocaleString()}`;
       document.getElementById('dash-credit').textContent = `¥${credit.toLocaleString()}`;
+      
+      // Calculate JST daily sales breakdown for POS Dashboard
+      const dailySales = {};
+      sortedRecords.forEach(r => {
+        const amount = r.totalAmount !== undefined ? r.totalAmount : (r.total || 0);
+        let recordQty = 0;
+        if (r.items) {
+          r.items.forEach(it => {
+            recordQty += it.qty || 0;
+          });
+        }
+        
+        let dateKey = '不明な日付';
+        if (r.timestamp) {
+          try {
+            const d = new Date(r.timestamp);
+            if (!isNaN(d.getTime())) {
+              const jstOffset = 9 * 60 * 60 * 1000;
+              const jstDate = new Date(d.getTime() + jstOffset);
+              dateKey = jstDate.toISOString().substring(0, 10);
+            }
+          } catch(e) {
+            console.error("Date parse error", e);
+          }
+        }
+        if (!dailySales[dateKey]) {
+          dailySales[dateKey] = { sales: 0, qty: 0 };
+        }
+        dailySales[dateKey].sales += amount;
+        dailySales[dateKey].qty += recordQty;
+      });
+      
+      const dailyList = document.getElementById('dash-daily-breakdown-list');
+      const dailyContainer = document.getElementById('dash-daily-breakdown-container');
+      if (dailyList && dailyContainer) {
+        const keys = Object.keys(dailySales).sort();
+        if (keys.length > 0) {
+          dailyContainer.style.display = 'flex';
+          dailyList.innerHTML = '';
+          keys.forEach((dateStr, idx) => {
+            const label = dateStr === '不明な日付' ? '日付不明' : `${idx + 1}日目 (${dateStr.substring(5).replace('-', '/')})`;
+            dailyList.innerHTML += `
+              <div style="display:flex; justify-content:space-between; font-size:12px;">
+                <span>📅 ${label}:</span>
+                <span style="font-weight:bold; color:#fff;">¥${dailySales[dateStr].sales.toLocaleString()} <span style="font-weight:normal; opacity:0.6; font-size:10px;">(${dailySales[dateStr].qty}点)</span></span>
+              </div>
+            `;
+          });
+        } else {
+          dailyContainer.style.display = 'none';
+        }
+      }
       
       // Render summary
       const summaryDiv = document.getElementById('dash-summary');
