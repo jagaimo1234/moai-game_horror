@@ -2701,7 +2701,7 @@
       const btn = document.getElementById('btn-lock-register');
       if (!btn) return;
       const grid = document.getElementById('pos-grid');
-      const inputs = document.querySelectorAll('#pos-view select, #pos-view input, #pos-view button:not(#btn-lock-register)');
+      const lockedSections = ['settings-view', 'simulation-view', 'price-settings-view', 'selection-view'];
       
       if (registerLocked) {
         btn.innerHTML = '🔒 レジロック中 (解除するにはタップ)';
@@ -2711,14 +2711,39 @@
         if (grid) grid.style.opacity = '0.35';
         cart = {};
         updateCartUI();
+        
+        lockedSections.forEach(id => {
+          const el = document.getElementById(id);
+          if (el) {
+            el.style.opacity = '0.5';
+            el.style.pointerEvents = 'none'; // prevent clicks on elements inside
+          }
+        });
       } else {
         btn.innerHTML = '🔓 レジロック解除中';
         btn.style.background = 'rgba(255,255,255,0.05)';
         btn.style.borderColor = 'rgba(255,255,255,0.2)';
         btn.style.color = '#fff';
         if (grid) grid.style.opacity = '1';
+        
+        lockedSections.forEach(id => {
+          const el = document.getElementById(id);
+          if (el) {
+            el.style.opacity = '1';
+            el.style.pointerEvents = 'auto';
+          }
+        });
       }
       
+      const targetSelectors = [
+        '#pos-view select, #pos-view input, #pos-view button:not(#btn-lock-register)',
+        '#settings-view select, #settings-view input, #settings-view button, #settings-view textarea',
+        '#simulation-view select, #simulation-view input, #simulation-view button',
+        '#price-settings-view select, #price-settings-view input, #price-settings-view button',
+        '#selection-view select, #selection-view input, #selection-view button'
+      ];
+      
+      const inputs = document.querySelectorAll(targetSelectors.join(', '));
       inputs.forEach(el => {
         el.disabled = registerLocked;
       });
