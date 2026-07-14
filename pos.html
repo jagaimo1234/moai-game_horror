@@ -988,7 +988,7 @@
         </div>
 
         <!-- Timeline View Container -->
-        <div id="exhibition-timeline-container" style="display:none; flex-direction:column; gap:16px; border-left:3px solid var(--accent); padding-left:20px; margin-left:10px;">
+        <div id="exhibition-timeline-container" style="display:none; flex-direction:column; gap:24px; width:100%;">
           <!-- Generated dynamically -->
         </div>
       </div>
@@ -4021,22 +4021,38 @@
           updatedPlans[id].status = status;
           await setDoc(doc(db, "settings", "exhibition_plans"), updatedPlans);
         } else {
-          // If built-in is not in user config yet, initialize and update
-          const allEvents = window.getAllEvents ? window.getAllEvents(eventConfigData) : {};
-          if (allEvents[id]) {
+          // Check in AI recommendations first
+          const recs = window.exhibitionAiRecommendations || window.AI_RECOMMENDED_EVENTS || {};
+          if (recs[id]) {
             updatedPlans[id] = {
-              name: allEvents[id].label,
-              date: allEvents[id].date || '',
-              deadline: allEvents[id].deadline || '',
-              location: allEvents[id].location || '',
+              ...recs[id],
               status: status,
-              boothMemo: '',
-              isBuiltin: true,
               updatedAt: Date.now()
             };
             await setDoc(doc(db, "settings", "exhibition_plans"), updatedPlans);
+          } else {
+            // If built-in is not in user config yet, initialize and update
+            const allEvents = window.getAllEvents ? window.getAllEvents(eventConfigData) : {};
+            if (allEvents[id]) {
+              updatedPlans[id] = {
+                name: allEvents[id].label,
+                date: allEvents[id].date || '',
+                deadline: allEvents[id].deadline || '',
+                location: allEvents[id].location || '',
+                status: status,
+                boothMemo: '',
+                isBuiltin: true,
+                updatedAt: Date.now()
+              };
+              await setDoc(doc(db, "settings", "exhibition_plans"), updatedPlans);
+            }
           }
         }
+        
+        // Immediately fetch the updated plans locally to trigger state re-render
+        window.exhibitionPlansData = updatedPlans;
+        renderExhibitions();
+        
       } catch (e) {
         console.error("Update status error:", e);
       }
@@ -4454,7 +4470,7 @@
         }
       }
 
-      // RENDER: Timeline View
+      // RENDER: Timeline View (Double Track Lane & Decision Dashboard)
       else if (exhibitionViewMode === 'timeline') {
         timelineContainer.style.display = 'flex';
         timelineContainer.innerHTML = '';
@@ -4464,58 +4480,194 @@
           return;
         }
 
+        // Group by Month (e.g. YYYY-MM)
+        const groups = {}; // { 'YYYY-MM': { label: 'YYYY年MM月', keys: [] } }
         sortedKeys.forEach(key => {
           const plan = filteredPlans[key];
-          const sales = window.exhibitionSalesCache[key] || { totalSales: 0, totalQty: 0 };
-          const reg = detectEventRegion(plan);
-          
-          let regBadgeColor = '#7f8c8d';
-          let regBadgeText = 'その他';
-          if (reg === 'kanto') { regBadgeColor = '#3498db'; regBadgeText = '📍 関東'; }
-          else if (reg === 'tokai') { regBadgeColor = '#2ecc71'; regBadgeText = '📍 東海'; }
-          else if (reg === 'kansai') { regBadgeColor = '#e67e22'; regBadgeText = '📍 関西'; }
-          else if (reg === 'hokuriku') { regBadgeColor = '#9b59b6'; regBadgeText = '📍 北陸'; }
+          let monthKey = '未定';
+          let monthLabel = '📅 日程未定';
+          if (plan.date) {
+            try {
+              const d = new Date(plan.date);
+              if (!isNaN(d.getTime())) {
+                const yr = d.getFullYear();
+                const mo = String(d.getMonth() + 1).padStart(2, '0');
+                monthKey = `${yr}-${mo}`;
+                monthLabel = `📅 ${yr}年${mo}月`;
+              }
+            } catch(e) {}
+          }
+          if (!groups[monthKey]) {
+            groups[monthKey] = { label: monthLabel, keys: [] };
+          }
+          groups[monthKey].keys.push(key);
+        });
 
-          let badgeColor = '#95a5a6';
-          let badgeText = '検討中';
-          if (plan.status === 'scheduled') { badgeColor = 'var(--accent)'; badgeText = '出店予定'; }
-          else if (plan.status === 'completed') { badgeColor = '#2ecc71'; badgeText = '出店済み'; }
-          else if (plan.status === 'canceled') { badgeColor = '#e74c3c'; badgeText = '不参加'; }
+        // Sort groups chronologically
+        const groupKeys = Object.keys(groups).sort((a, b) => {
+          if (a === '未定') return 1;
+          if (b === '未定') return -1;
+          return a.localeCompare(b);
+        });
 
-          let deadlineHtml = '未定';
-          if (plan.deadline) {
-            const dlDate = new Date(plan.deadline);
-            const today = new Date();
-            const diffDays = Math.ceil((dlDate - today) / (1000 * 60 * 60 * 24));
-            if (diffDays > 0 && diffDays <= 7) {
-              deadlineHtml = `<span style="color:#e74c3c; font-weight:bold;">⚠️ 締切: ${plan.deadline} (あと${diffDays}日)</span>`;
-            } else if (diffDays <= 0) {
-              deadlineHtml = `<span style="opacity:0.5;">締切: ${plan.deadline} (終了)</span>`;
+        groupKeys.forEach(gKey => {
+          const grp = groups[gKey];
+          const grpKeys = grp.keys;
+
+          // Track 1: Confirmed / Completed (scheduled, completed)
+          const confirmedKeys = [];
+          // Track 2: Candidates (considering, canceled)
+          const candidateKeys = [];
+
+          grpKeys.forEach(key => {
+            const plan = filteredPlans[key];
+            if (plan.status === 'scheduled' || plan.status === 'completed') {
+              confirmedKeys.push(key);
             } else {
-              deadlineHtml = `締切: ${plan.deadline}`;
+              candidateKeys.push(key);
             }
+          });
+
+          // Render event cards helper
+          const renderCard = (key) => {
+            const plan = filteredPlans[key];
+            const sales = window.exhibitionSalesCache[key] || { totalSales: 0, totalQty: 0 };
+            const reg = detectEventRegion(plan);
+            
+            let regBadgeColor = '#7f8c8d';
+            let regBadgeText = 'その他';
+            if (reg === 'kanto') { regBadgeColor = '#3498db'; regBadgeText = '📍 関東'; }
+            else if (reg === 'tokai') { regBadgeColor = '#2ecc71'; regBadgeText = '📍 東海'; }
+            else if (reg === 'kansai') { regBadgeColor = '#e67e22'; regBadgeText = '📍 関西'; }
+            else if (reg === 'hokuriku') { regBadgeColor = '#9b59b6'; regBadgeText = '📍 北陸'; }
+
+            let badgeColor = '#95a5a6';
+            let badgeText = '検討中';
+            if (plan.status === 'scheduled') { badgeColor = 'var(--accent)'; badgeText = '出店予定'; }
+            else if (plan.status === 'completed') { badgeColor = '#2ecc71'; badgeText = '出店済み'; }
+            else if (plan.status === 'canceled') { badgeColor = '#e74c3c'; badgeText = '不参加'; }
+
+            let deadlineHtml = '';
+            if (plan.deadline) {
+              const dlDate = new Date(plan.deadline);
+              const today = new Date();
+              const diffDays = Math.ceil((dlDate - today) / (1000 * 60 * 60 * 24));
+              if (diffDays > 0 && diffDays <= 7) {
+                deadlineHtml = `<div style="color:#e74c3c; font-weight:bold; font-size:11px; margin-top:2px;">⏳ 締切間近: ${plan.deadline} (あと${diffDays}日)</div>`;
+              } else if (diffDays <= 0) {
+                deadlineHtml = `<div style="opacity:0.5; font-size:11px; margin-top:2px;">⏳ 締切終了: ${plan.deadline}</div>`;
+              } else {
+                deadlineHtml = `<div style="font-size:11px; opacity:0.7; margin-top:2px;">⏳ 締切: ${plan.deadline}</div>`;
+              }
+            }
+
+            // Quick Decision Dashboard Action Buttons
+            let buttonsHtml = '';
+            if (plan.status === 'considering' || !plan.status) {
+              buttonsHtml = `
+                <button onclick="updateExhibitionStatus('${key}', 'scheduled')" style="flex:1; background:var(--success); color:#000; font-weight:bold; border:none; padding:6px; border-radius:4px; font-size:11px; cursor:pointer;">⛺ 出る！</button>
+                <button onclick="updateExhibitionStatus('${key}', 'canceled')" style="background:rgba(231,76,60,0.15); color:#e74c3c; border:1px solid #e74c3c; padding:5px 8px; border-radius:4px; font-size:11px; cursor:pointer;">❌ 出ない</button>
+              `;
+            } else if (plan.status === 'canceled') {
+              buttonsHtml = `
+                <button onclick="updateExhibitionStatus('${key}', 'considering')" style="flex:1; background:rgba(255,255,255,0.05); color:#fff; border:1px solid rgba(255,255,255,0.2); padding:5px; border-radius:4px; font-size:11px; cursor:pointer;">💭 検討に戻す</button>
+              `;
+            } else if (plan.status === 'scheduled') {
+              buttonsHtml = `
+                <button onclick="updateExhibitionStatus('${key}', 'considering')" style="background:rgba(255,255,255,0.05); color:#fff; border:1px solid rgba(255,255,255,0.2); padding:5px 8px; border-radius:4px; font-size:11px; cursor:pointer;">💭 検討に戻す</button>
+                <button onclick="updateExhibitionStatus('${key}', 'completed')" style="flex:1; background:#2ecc71; color:#000; font-weight:bold; border:none; padding:6px; border-radius:4px; font-size:11px; cursor:pointer;">✅ 完了にする</button>
+              `;
+            } else if (plan.status === 'completed') {
+              buttonsHtml = `
+                <button onclick="updateExhibitionStatus('${key}', 'scheduled')" style="flex:1; background:rgba(255,255,255,0.05); color:#fff; border:1px solid rgba(255,255,255,0.2); padding:5px; border-radius:4px; font-size:11px; cursor:pointer;">⛺ 予定に戻す</button>
+              `;
+            }
+
+            return `
+              <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.06); border-radius:8px; padding:12px; display:flex; flex-direction:column; gap:6px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:4px;">
+                  <span style="font-size:11px; font-weight:bold; color:var(--accent);">${plan.date || '日程未定'}</span>
+                  <span style="background:${regBadgeColor}; font-size:9px; padding:1px 4px; border-radius:3px; font-weight:bold; color:#000; white-space:nowrap;">${regBadgeText}</span>
+                </div>
+                <h5 style="margin:0; font-size:13px; color:#fff; line-height:1.4;">${plan.name}</h5>
+                <div style="font-size:11px; opacity:0.75;">📍 ${plan.location || '場所未定'}</div>
+                ${deadlineHtml}
+                ${sales.totalSales > 0 ? `<div style="font-size:11px; color:var(--accent); font-weight:bold; margin-top:2px;">実績売上: ¥${sales.totalSales.toLocaleString()} (${sales.totalQty}点)</div>` : ''}
+                ${plan.boothMemo ? `<div style="font-size:10px; opacity:0.4; border-top:1px dashed rgba(255,255,255,0.05); padding-top:4px; margin-top:2px;">📝 ${plan.boothMemo}</div>` : ''}
+                
+                <!-- Decision Buttons Row -->
+                <div style="display:flex; gap:8px; margin-top:6px; border-top:1px solid rgba(255,255,255,0.05); padding-top:8px;">
+                  ${buttonsHtml}
+                </div>
+              </div>
+            `;
+          };
+
+          // Overlap check inside this month
+          let overlapAlertHtml = '';
+          const activePlans = grpKeys
+            .map(k => ({ key: k, date: filteredPlans[k].date, name: filteredPlans[k].name }))
+            .filter(p => p.date)
+            .sort((a, b) => new Date(a.date) - new Date(b.date));
+
+          const alertMessages = [];
+          for (let i = 0; i < activePlans.length - 1; i++) {
+            const p1 = activePlans[i];
+            const p2 = activePlans[i+1];
+            try {
+              const d1 = new Date(p1.date);
+              const d2 = new Date(p2.date);
+              const diffTime = Math.abs(d2 - d1);
+              const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+              
+              if (diffDays === 0) {
+                alertMessages.push(`<div style="color:#e74c3c; font-weight:bold; font-size:11px;">⚠️ 日程重複: 「${p1.name}」と「${p2.name}」が同じ日に開催されます。</div>`);
+              } else if (diffDays <= 14) {
+                alertMessages.push(`<div style="color:#e67e22; font-weight:bold; font-size:11px;">⚠️ 近接日程: 「${p1.name}」と「${p2.name}」の間隔が短いです (${diffDays}日差)。</div>`);
+              }
+            } catch(e) {}
           }
 
+          if (alertMessages.length > 0) {
+            overlapAlertHtml = `
+              <div style="margin-top:12px; padding:10px; background:rgba(230,126,34,0.08); border:1px solid rgba(230,126,34,0.2); border-radius:6px; display:flex; flex-direction:column; gap:4px;">
+                ${alertMessages.join('')}
+              </div>
+            `;
+          }
+
+          const confirmedCardsHtml = confirmedKeys.map(k => renderCard(k)).join('');
+          const candidateCardsHtml = candidateKeys.map(k => renderCard(k)).join('');
+
           timelineContainer.innerHTML += `
-            <div style="background:var(--panel-bg); border-radius:12px; padding:15px; border:1px solid rgba(255,255,255,0.05); position:relative;">
-              <div style="position:absolute; left:-26px; top:20px; width:12px; height:12px; border-radius:50%; background:var(--accent); border:3px solid var(--bg);"></div>
-              <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:8px;">
-                <div style="display:flex; align-items:center; gap:8px;">
-                  <span style="font-size:12px; opacity:0.6; font-weight:bold;">📅 ${plan.date || '日程未定'}</span>
-                  <span style="background:${regBadgeColor}; font-size:10px; padding:2px 6px; border-radius:4px; font-weight:bold; color:#000;">${regBadgeText}</span>
-                  ${plan.isAiRecommended ? '<span style="background:linear-gradient(45deg, #f1c40f, #f39c12); color:#000; font-size:9px; padding:2px 4px; border-radius:4px; font-weight:bold;">✨ AI提案</span>' : ''}
+            <div style="background:var(--panel-bg); border-radius:12px; padding:16px; border:1px solid rgba(255,255,255,0.05); display:flex; flex-direction:column; gap:12px;">
+              <!-- Month Header -->
+              <div style="font-size:15px; font-weight:bold; color:var(--accent); border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:6px; display:flex; justify-content:space-between; align-items:center;">
+                <span>${grp.label}</span>
+                <span style="font-size:11px; opacity:0.5; font-weight:normal;">出店数: ${confirmedKeys.length} | 候補数: ${candidateKeys.length}</span>
+              </div>
+
+              <!-- Tracks Lane -->
+              <div style="display:flex; gap:16px; align-items:stretch; flex-wrap:wrap;">
+                <!-- Track 1 (Confirmed) -->
+                <div style="flex:1; min-width:250px; background:rgba(0,0,0,0.15); padding:10px; border-radius:8px; border:1px solid rgba(46,204,113,0.05); display:flex; flex-direction:column; gap:8px;">
+                  <div style="font-size:11px; font-weight:bold; color:#2ecc71; margin-bottom:4px; display:flex; align-items:center; gap:4px;">
+                    ⛺ 出店予定 / 実績 (${confirmedKeys.length})
+                  </div>
+                  ${confirmedCardsHtml || '<div style="opacity:0.3; padding:20px; text-align:center; font-size:11px;">予定イベントなし</div>'}
                 </div>
-                <span style="background:${badgeColor}; color:${plan.status === 'scheduled' ? '#000' : '#fff'}; font-size:10px; padding:2px 6px; border-radius:4px; font-weight:bold;">${badgeText}</span>
+
+                <!-- Track 2 (Candidates) -->
+                <div style="flex:1; min-width:250px; background:rgba(0,0,0,0.15); padding:10px; border-radius:8px; border:1px solid rgba(255,215,0,0.05); display:flex; flex-direction:column; gap:8px;">
+                  <div style="font-size:11px; font-weight:bold; color:#ffd700; margin-bottom:4px; display:flex; align-items:center; gap:4px;">
+                    💭 検討中 / AI提案 (${candidateKeys.length})
+                  </div>
+                  ${candidateCardsHtml || '<div style="opacity:0.3; padding:20px; text-align:center; font-size:11px;">検討イベントなし</div>'}
+                </div>
               </div>
-              <h4 style="margin:0 0 8px 0; color:#fff; font-size:15px;">${plan.name}</h4>
-              <div style="font-size:12px; opacity:0.7; display:flex; justify-content:space-between; flex-wrap:wrap; gap:10px;">
-                <span>📍 ${plan.location || '場所未定'}</span>
-                <span>${deadlineHtml}</span>
-                ${sales.totalSales > 0 ? `<span style="color:var(--accent); font-weight:bold;">売上: ¥${sales.totalSales.toLocaleString()} (${sales.totalQty}点)</span>` : ''}
-              </div>
-              <div style="font-size:11px; opacity:0.5; margin-top:8px; border-top:1px solid rgba(255,255,255,0.05); padding-top:6px;">
-                📝 ${plan.boothMemo || 'メモなし'}
-              </div>
+
+              <!-- Alerts -->
+              ${overlapAlertHtml}
             </div>
           `;
         });
