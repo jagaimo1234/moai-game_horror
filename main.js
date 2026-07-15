@@ -3466,12 +3466,51 @@ function showDarkMarketCatalog() {
   keys.right = false;
   keys.fire = false;
 
+  const overlay = document.getElementById('dark-catalog-decrypt-overlay');
+  const progress = document.getElementById('dark-decrypt-progress');
+  const text = document.getElementById('dark-decrypt-text');
+
+  if (overlay && progress && text) {
+    overlay.style.display = 'flex';
+    overlay.style.opacity = '1';
+    progress.style.width = '0%';
+    text.textContent = '[ DECRYPTING SECRET ROUTE... ]';
+    text.style.color = '#ffbc69';
+    text.style.textShadow = '0 0 8px rgba(255,188,105,0.5)';
+    
+    // Play scanning sweep tones
+    playBgmTone(220, 0.15, 0.08, 'sawtooth', -12);
+    setTimeout(() => playBgmTone(330, 0.15, 0.08, 'sawtooth', -12), 180);
+    setTimeout(() => playBgmTone(440, 0.15, 0.08, 'sawtooth', -12), 360);
+    setTimeout(() => playBgmTone(550, 0.15, 0.08, 'sawtooth', -12), 540);
+
+    setTimeout(() => {
+      progress.style.width = '100%';
+    }, 50);
+
+    setTimeout(() => {
+      text.textContent = '[ ACCESS GRANTED ]';
+      text.style.color = '#2ecc71';
+      text.style.textShadow = '0 0 10px rgba(46,204,113,0.8)';
+      // Play success unlock chirp
+      blip(880, 0.1, 0.12, 'sine');
+      setTimeout(() => blip(1320, 0.14, 0.12, 'sine'), 80);
+    }, 750);
+
+    setTimeout(() => {
+      overlay.style.opacity = '0';
+      setTimeout(() => {
+        overlay.style.display = 'none';
+      }, 400);
+    }, 1100);
+  }
+
   const listEl = document.getElementById('dark-catalog-list');
   if (listEl) {
     listEl.innerHTML = '';
-    darkMarketLineup.forEach(item => {
+    darkMarketLineup.forEach((item, index) => {
       listEl.innerHTML += `
-        <div style="display: flex; gap: 12px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; padding: 10px; align-items: center; justify-content: space-between; flex-wrap: wrap;">
+        <div class="catalog-card" style="display: flex; gap: 12px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; padding: 10px; align-items: center; justify-content: space-between; flex-wrap: wrap; opacity: 0; transform: translateY(18px); animation: catalogCardReveal 0.45s cubic-bezier(0.18, 0.89, 0.32, 1.28) forwards; animation-delay: ${1.1 + index * 0.15}s;">
           <div style="display: flex; gap: 12px; align-items: center; flex: 1; min-width: 240px;">
             <img src="${item.img}" alt="" style="width: 50px; height: 50px; border-radius: 6px; object-fit: cover; border: 1px solid rgba(255,255,255,0.1);">
             <div style="text-align: left;">
