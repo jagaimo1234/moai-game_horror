@@ -198,6 +198,15 @@ let tempSelectedMoaiType = 1;
 let moataroInvincibleTimer = 0;
 let moataroClerkSafeTimer = 0;
 let darkMarketNpc = null;
+let currentGuideWaypointIndex = 0;
+let darkMoaiGuideState = 'idle'; // 'idle', 'leading', 'waiting', 'arrived'
+const guideWaypoints = [
+  new THREE.Vector3(0, 0, 16),
+  new THREE.Vector3(0, 0, 9),
+  new THREE.Vector3(-36, 0, 9),
+  new THREE.Vector3(-36, 0, 36),
+  new THREE.Vector3(-45, 0, 36)
+];
 let inDarkMarketZone = false;
 let darkMarketPointLight = null;
 let darkMarketBgmInterval = null;
@@ -3347,7 +3356,9 @@ function createDarkMarket() {
   if (currentStage !== 4) return;
   
   const npcGroup = new THREE.Group();
-  npcGroup.position.set(-45, 0, 36);
+  npcGroup.position.set(0, 0, 16);
+  currentGuideWaypointIndex = 0;
+  darkMoaiGuideState = 'idle';
   
   const moaiTexture = textureLoader.load('./moai_shot.png');
   const moaiMat = new THREE.MeshStandardMaterial({
@@ -3400,8 +3411,9 @@ function createDarkSignTexture() {
 function updateDarkMarketZone(dt) {
   if (currentStage !== 4 || !darkMarketNpc) return;
   
-  const dist = moai.position.distanceTo(darkMarketNpc.position);
-  const inZone = dist < 12.0; // Narrowed from 16 to 12
+  const physicalMarketPos = new THREE.Vector3(-45, 0, 36);
+  const distToMarket = moai.position.distanceTo(physicalMarketPos);
+  const inZone = distToMarket < 14.0;
   
   if (inZone !== inDarkMarketZone) {
     inDarkMarketZone = inZone;
@@ -3427,11 +3439,55 @@ function updateDarkMarketZone(dt) {
     shadyMoai.lookAt(camera.position.x, shadyMoai.parent.position.y + 3.2, camera.position.z);
   }
 
-  // Auto-dialogue trigger on approach (narrowed from 8.5 to 6.0)
-  const autoTriggerDist = 6.0;
-  if (dist < autoTriggerDist && !darkMarketDialogueShown) {
-    darkMarketDialogueShown = true;
-    showDarkMarketDialog();
+  // NPC Guide State Machine
+  const playerDist = moai.position.distanceTo(darkMarketNpc.position);
+
+  if (darkMoaiGuideState === 'idle') {
+    // Wait for player to approach
+    if (playerDist < 8.5 && !darkMarketDialogueShown) {
+      darkMarketDialogueShown = true;
+      showDarkMarketDialog();
+    }
+    if (playerDist > 11.0 && darkMarketDialogueShown) {
+      darkMarketDialogueShown = false;
+    }
+  } else if (darkMoaiGuideState === 'leading') {
+    const target = guideWaypoints[currentGuideWaypointIndex + 1];
+    if (target) {
+      const toTarget = target.clone().sub(darkMarketNpc.position);
+      const distToTarget = toTarget.length();
+      if (distToTarget < 0.5) {
+        currentGuideWaypointIndex++;
+        if (currentGuideWaypointIndex >= guideWaypoints.length - 1) {
+          darkMoaiGuideState = 'arrived';
+          // Ensure NPC snaps exactly to destination
+          darkMarketNpc.position.copy(physicalMarketPos);
+        }
+      } else {
+        if (playerDist > 14.0) {
+          darkMoaiGuideState = 'waiting';
+        } else {
+          const moveDir = toTarget.normalize();
+          darkMarketNpc.position.addScaledVector(moveDir, 3.2 * dt);
+        }
+      }
+    }
+  } else if (darkMoaiGuideState === 'waiting') {
+    // Wait for player to catch up
+    if (playerDist < 7.0) {
+      darkMoaiGuideState = 'leading';
+    }
+  } else if (darkMoaiGuideState === 'arrived') {
+    // Auto-dialogue trigger on approach at destination
+    const autoTriggerDist = 6.0;
+    if (playerDist < autoTriggerDist && !darkMarketDialogueShown) {
+      darkMarketDialogueShown = true;
+      showDarkMarketDialog();
+    }
+    // Reset dialogue shown flag when player moves away so they can interact again
+    if (playerDist > 9.0 && darkMarketDialogueShown) {
+      darkMarketDialogueShown = false;
+    }
   }
 }
 
@@ -3514,41 +3570,46 @@ function showDarkMarketDialog() {
   const noBtn = document.getElementById('btn-dark-no');
   const closeBtn = document.getElementById('btn-dark-close');
 
-  if (moataroMoaiPurchased) {
-    if (!hasDarkMarketCard) {
-      const nukaSprite = starterMoais.find(m => m.userData.isNukayorokobi);
-      if (nukaSprite) {
-        triggerNukaEasterEgg(nukaSprite);
-        return;
-      }
-    } else {
-      if (textEl) {
-        textEl.textContent = '無事にクリアできたらの話だがな……フフフ。';
-      }
-      if (yesBtn) yesBtn.style.display = 'none';
-      if (noBtn) noBtn.style.display = 'none';
-      if (closeBtn) closeBtn.style.display = 'inline-block';
-      const dialog = document.getElementById('dark-market-dialog');
-      if (dialog) dialog.style.display = 'block';
-      blip(440, 0.12, 0.12, 'sine');
-      return;
+  if (darkMoaiGuideState === 'idle') {
+    darkMarketDialogContext = 'guide_start';
+    if (textEl) {
+      textEl.textContent = '……フフフ、お前、モアイの裏取引（minne）に興味はあるか？\n良いものを並べておいた。こっちじゃ、ついてこい……。';
     }
+    if (yesBtn) {
+      yesBtn.style.display = 'inline-block';
+      yesBtn.textContent = 'ついていく';
+    }
+    if (noBtn) {
+      noBtn.style.display = 'inline-block';
+      noBtn.textContent = '断る';
+    }
+    if (closeBtn) closeBtn.style.display = 'none';
+  } else if (darkMoaiGuideState === 'waiting') {
+    darkMarketDialogContext = 'guide_waiting';
+    if (textEl) {
+      textEl.textContent = 'おい、どこへ行く。遅いぞ……。裏取引所はこっちじゃ。';
+    }
+    if (yesBtn) yesBtn.style.display = 'none';
+    if (noBtn) noBtn.style.display = 'none';
+    if (closeBtn) {
+      closeBtn.style.display = 'inline-block';
+      closeBtn.textContent = '閉じる';
+    }
+  } else if (darkMoaiGuideState === 'arrived') {
+    darkMarketDialogContext = 'arrived_trade';
+    if (textEl) {
+      textEl.textContent = 'フフフ……よくついてきたな。ここが『オンライン闇の取引所（minne）』の入り口じゃ。\n現在、裏取引ルートを絶賛構築中だ。\nオープンまで、ちょっと待っててくれよ……フフフ。';
+    }
+    if (yesBtn) {
+      yesBtn.style.display = 'inline-block';
+      yesBtn.textContent = 'minneの準備を見る 🔗';
+    }
+    if (noBtn) {
+      noBtn.style.display = 'inline-block';
+      noBtn.textContent = '用事はない';
+    }
+    if (closeBtn) closeBtn.style.display = 'none';
   }
-  
-  darkMarketDialogContext = 'hmj_question';
-  
-  if (textEl) {
-    textEl.textContent = '……フフフ、ここを見つけたか。\nこの闇の取引所……7月19日（日）15時に開店予定だ。\nお前、今週末のリアルHMJ（東京ビッグサイト）には来られそうか？';
-  }
-  if (yesBtn) {
-    yesBtn.style.display = 'inline-block';
-    yesBtn.textContent = 'はい';
-  }
-  if (noBtn) {
-    noBtn.style.display = 'inline-block';
-    noBtn.textContent = 'いいえ';
-  }
-  if (closeBtn) closeBtn.style.display = 'none';
   
   const dialog = document.getElementById('dark-market-dialog');
   if (dialog) dialog.style.display = 'block';
@@ -3562,54 +3623,37 @@ function handleDarkMarketResponse(answer) {
   const noBtn = document.getElementById('btn-dark-no');
   const closeBtn = document.getElementById('btn-dark-close');
   
-  if (darkMarketDialogContext === 'easter_egg') {
+  if (darkMarketDialogContext === 'guide_start') {
     if (answer === 'yes') {
-      hasDarkMarketCard = true;
-      if (pendingNukaSprite) {
-        if (pendingNukaSprite.parent) pendingNukaSprite.parent.remove(pendingNukaSprite);
-        const idx = starterMoais.indexOf(pendingNukaSprite);
-        if (idx > -1) starterMoais.splice(idx, 1);
-        pendingNukaSprite = null;
-      }
-      
-      const followerTex = textureLoader.load('./nukayorokobi.png');
-      const followerMat = new THREE.SpriteMaterial({ map: followerTex });
-      nukaFollower = new THREE.Sprite(followerMat);
-      nukaFollower.scale.set(1.4, 1.4, 1);
-      nukaFollower.position.copy(moai.position);
-      nukaFollower.position.y += 2.0;
-      world.add(nukaFollower);
-
-      if (textEl) textEl.textContent = '……フフフ、よい判断だ。では健闘を祈る。';
+      darkMoaiGuideState = 'leading';
+      if (textEl) textEl.textContent = '……フフフ、良い子だ。離れずについてくるのじゃぞ……。';
       blip(880, 0.14, 0.12, 'sine');
     } else {
-      if (textEl) textEl.textContent = '……ほう。この申し出を断るとはな。\nまあよい……後悔するなよ……フフフ。';
+      if (textEl) textEl.textContent = '……フフ、冷やかしか。後悔しても知らんぞ……フフフ。';
       blip(580, 0.14, 0.12, 'sine');
     }
-    
     if (yesBtn) yesBtn.style.display = 'none';
     if (noBtn) noBtn.style.display = 'none';
-    if (closeBtn) closeBtn.style.display = 'inline-block';
-    return;
-  }
-
-  if (answer === 'yes') {
-    if (textEl) {
-      textEl.textContent = 'そうか！それは素晴らしい！ならリアル会場（ブース：J-80）で待っているぞ。\nお前の選んだモアイを直接手にとって連れて帰ってやってくれ！\n……なお、この闇の取引所は 7/19（日）15時 に正式オープンするぞ。お楽しみに。';
+    if (closeBtn) {
+      closeBtn.style.display = 'inline-block';
+      closeBtn.textContent = '閉じる';
     }
-    blip(880, 0.14, 0.12, 'sine');
-    playRecordedVoice(VOICE_FILES.darkYes);
-  } else {
-    if (textEl) {
-      textEl.textContent = 'そうか……来られないか。寂しいことだ。\n……だが、がっかりするな。\nこの闇の取引所は 7月19日（日）15時 に正式オープンする予定だ。\nその日になったら、またここへ来るとよい。\nこのゲームを遊んでくれたお前だけの、特別な取引を用意しておこう……フフフ。';
+  } else if (darkMarketDialogContext === 'guide_waiting') {
+    closeDarkMarketDialog();
+  } else if (darkMarketDialogContext === 'arrived_trade') {
+    if (answer === 'yes') {
+      window.open('https://minne.com/@moataro-k', '_blank');
+      closeDarkMarketDialog();
+    } else {
+      if (textEl) textEl.textContent = '用ができたら、いつでも話しかけるが良い……フフフ。';
+      if (yesBtn) yesBtn.style.display = 'none';
+      if (noBtn) noBtn.style.display = 'none';
+      if (closeBtn) {
+        closeBtn.style.display = 'inline-block';
+        closeBtn.textContent = '閉じる';
+      }
     }
-    blip(580, 0.14, 0.12, 'sine');
-    playRecordedVoice(VOICE_FILES.darkNo);
   }
-  
-  if (yesBtn) yesBtn.style.display = 'none';
-  if (noBtn) noBtn.style.display = 'none';
-  if (closeBtn) closeBtn.style.display = 'inline-block';
 }
 
 function closeDarkMarketDialog() {
