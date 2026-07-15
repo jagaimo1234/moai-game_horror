@@ -3490,7 +3490,7 @@ function updateDarkMarketZone(dt) {
           playVoiceCue('bad');
         } else {
           const moveDir = toTarget.normalize();
-          darkMarketNpc.position.addScaledVector(moveDir, 3.2 * dt);
+          darkMarketNpc.position.addScaledVector(moveDir, 8.0 * dt);
           if (performance.now() % 1000 < 30) { // Keep encouraging
             updateNpcLabel("こっちじゃ、ついてまいれ", "#ffd700");
           }
