@@ -3458,6 +3458,38 @@ function closeDarkMarketCatalog() {
 
 window.closeDarkMarketCatalog = closeDarkMarketCatalog;
 
+function showDarkMarketArrivedIntro() {
+  gamePaused = true;
+  stopMobileMove();
+  keys.forward = false;
+  keys.backward = false;
+  keys.left = false;
+  keys.right = false;
+  keys.fire = false;
+
+  darkMarketDialogContext = 'arrived_intro1';
+  
+  const textEl = document.getElementById('dark-market-text');
+  const yesBtn = document.getElementById('btn-dark-yes');
+  const noBtn = document.getElementById('btn-dark-no');
+  const closeBtn = document.getElementById('btn-dark-close');
+
+  if (textEl) {
+    textEl.textContent = '「ククク……無事に辿り着いたな。お前の健闘を称えよう。\nここは作者（モア太郎）の目も届かぬ、路地裏の秘密基地じゃ。」';
+  }
+  if (yesBtn) {
+    yesBtn.style.display = 'inline-block';
+    yesBtn.textContent = '次へ ＞';
+  }
+  if (noBtn) noBtn.style.display = 'none';
+  if (closeBtn) closeBtn.style.display = 'none';
+
+  const dialog = document.getElementById('dark-market-dialog');
+  if (dialog) dialog.style.display = 'block';
+  playRecordedVoice(VOICE_FILES.darkQuestion);
+  blip(440, 0.12, 0.12, 'sine');
+}
+
 
 function createDarkMarket() {
   if (currentStage !== 4) return;
@@ -3603,7 +3635,7 @@ function updateDarkMarketZone(dt) {
     const autoTriggerDist = 6.0;
     if (playerDist < autoTriggerDist && !darkMarketDialogueShown) {
       darkMarketDialogueShown = true;
-      showDarkMarketCatalog();
+      showDarkMarketArrivedIntro();
     }
     // Reset dialogue shown flag when player moves away so they can interact again
     if (playerDist > 9.0 && darkMarketDialogueShown) {
@@ -3663,7 +3695,7 @@ function checkDarkMarketClick() {
   const intersects = raycaster.intersectObjects(darkMarketNpc.children);
   if (intersects.length > 0) {
     if (darkMoaiGuideState === 'arrived') {
-      showDarkMarketCatalog();
+      showDarkMarketArrivedIntro();
     } else {
       showDarkMarketDialog();
     }
@@ -3695,18 +3727,21 @@ function showDarkMarketDialog() {
   const noBtn = document.getElementById('btn-dark-no');
   const closeBtn = document.getElementById('btn-dark-close');
 
+  // Reset close button style
+  if (closeBtn) closeBtn.style.background = '#a020f0';
+
   if (darkMoaiGuideState === 'idle') {
     darkMarketDialogContext = 'guide_start';
     if (textEl) {
-      textEl.textContent = '……フフフ、お前、モアイの裏取引（minne）に興味はあるか？\n良いものを並べておいた。こっちじゃ、ついてこい……。';
+      textEl.textContent = '……クックック。そこを行く旅人よ。\nお前、本物の『モアイロボの信者』か？';
     }
     if (yesBtn) {
       yesBtn.style.display = 'inline-block';
-      yesBtn.textContent = 'ついていく';
+      yesBtn.textContent = 'はい、信者です';
     }
     if (noBtn) {
       noBtn.style.display = 'inline-block';
-      noBtn.textContent = '断る';
+      noBtn.textContent = 'いいえ、違います';
     }
     if (closeBtn) closeBtn.style.display = 'none';
   } else if (darkMoaiGuideState === 'waiting') {
@@ -3721,19 +3756,9 @@ function showDarkMarketDialog() {
       closeBtn.textContent = '閉じる';
     }
   } else if (darkMoaiGuideState === 'arrived') {
-    darkMarketDialogContext = 'arrived_trade';
-    if (textEl) {
-      textEl.textContent = 'フフフ……よくついてきたな。ここが『オンライン闇の取引所（minne）』の入り口じゃ。\n現在、裏取引ルートを絶賛構築中だ。\nオープンまで、ちょっと待っててくれよ……フフフ。';
-    }
-    if (yesBtn) {
-      yesBtn.style.display = 'inline-block';
-      yesBtn.textContent = 'minneの準備を見る 🔗';
-    }
-    if (noBtn) {
-      noBtn.style.display = 'inline-block';
-      noBtn.textContent = '用事はない';
-    }
-    if (closeBtn) closeBtn.style.display = 'none';
+    // Just in case fallback, though arrived is handled by showDarkMarketArrivedIntro
+    showDarkMarketArrivedIntro();
+    return;
   }
   
   const dialog = document.getElementById('dark-market-dialog');
@@ -3750,35 +3775,100 @@ function handleDarkMarketResponse(answer) {
   
   if (darkMarketDialogContext === 'guide_start') {
     if (answer === 'yes') {
-      darkMoaiGuideState = 'leading';
-      if (textEl) textEl.textContent = '……フフフ、良い子だ。離れずについてくるのじゃぞ……。';
-      updateNpcLabel("よし、ついてまいれ！", "#ffd700");
-      blip(880, 0.14, 0.12, 'sine');
+      // Transition to quiz context
+      darkMarketDialogContext = 'guide_quiz';
+      if (textEl) {
+        textEl.textContent = '「ならば答えてみよ……。\n創業者モア太郎が愛した『モアイロボMARK2』の好物といえば何じゃ！？」';
+      }
+      if (yesBtn) {
+        yesBtn.style.display = 'inline-block';
+        yesBtn.textContent = 'やっぱりビール！';
+      }
+      if (noBtn) {
+        noBtn.style.display = 'inline-block';
+        noBtn.textContent = '酒よりヨーグルト！';
+      }
+      if (closeBtn) {
+        closeBtn.style.display = 'inline-block';
+        closeBtn.textContent = 'ただの水！';
+        closeBtn.style.background = 'rgba(255,255,255,0.15)'; 
+      }
+      blip(660, 0.12, 0.12, 'sine');
     } else {
-      if (textEl) textEl.textContent = '……フフ、冷やかしか。後悔しても知らんぞ……フフフ。';
-      updateNpcLabel("裏取引(minne)はこちら...", "#ffd700");
-      blip(580, 0.14, 0.12, 'sine');
-    }
-    if (yesBtn) yesBtn.style.display = 'none';
-    if (noBtn) noBtn.style.display = 'none';
-    if (closeBtn) {
-      closeBtn.style.display = 'inline-block';
-      closeBtn.textContent = '閉じる';
-    }
-  } else if (darkMarketDialogContext === 'guide_waiting') {
-    closeDarkMarketDialog();
-  } else if (darkMarketDialogContext === 'arrived_trade') {
-    if (answer === 'yes') {
-      window.open('https://minne.com/@moataro-k', '_blank');
-      closeDarkMarketDialog();
-    } else {
-      if (textEl) textEl.textContent = '用ができたら、いつでも話しかけるが良い……フフフ。';
+      // Refused
+      if (textEl) {
+        textEl.textContent = '「ふん、ただの冷やかしか。立ち去るがよい……。」';
+      }
+      updateNpcLabel("フン、通りすがりか...", "#ffd700");
       if (yesBtn) yesBtn.style.display = 'none';
       if (noBtn) noBtn.style.display = 'none';
       if (closeBtn) {
         closeBtn.style.display = 'inline-block';
         closeBtn.textContent = '閉じる';
+        closeBtn.style.background = '#a020f0';
       }
+      blip(330, 0.12, 0.12, 'sine');
+    }
+  } else if (darkMarketDialogContext === 'guide_quiz') {
+    // Reset close button style
+    if (closeBtn) closeBtn.style.background = '#a020f0';
+
+    if (answer === 'no') { // Correct answer is Option B (noBtn: '酒よりヨーグルト！')
+      darkMoaiGuideState = 'leading';
+      if (textEl) {
+        textEl.textContent = '「ククク……見事じゃ！真の信者と認めよう。\nついてまいれ、秘められた『闇の直販ゲート』へ案内しよう……。」';
+      }
+      updateNpcLabel("よし、ついてまいれ！", "#ffd700");
+      blip(880, 0.14, 0.12, 'sine');
+      if (yesBtn) yesBtn.style.display = 'none';
+      if (noBtn) noBtn.style.display = 'none';
+      if (closeBtn) {
+        closeBtn.style.display = 'inline-block';
+        closeBtn.textContent = 'ついていく';
+      }
+    } else {
+      // Wrong answers (Option A or Option C)
+      if (textEl) {
+        textEl.textContent = '「愚か者め！修行が足りん、出直してまいれ！(怒)」';
+      }
+      updateNpcLabel("修行して出直してまいれ！", "#ff3333");
+      playRecordedVoice(VOICE_FILES.darkNo);
+      playVoiceCue('bad');
+      if (yesBtn) yesBtn.style.display = 'none';
+      if (noBtn) noBtn.style.display = 'none';
+      if (closeBtn) {
+        closeBtn.style.display = 'inline-block';
+        closeBtn.textContent = '出直す';
+      }
+    }
+    // Set context to end so clicking Close/ついていく closes and starts moving
+    darkMarketDialogContext = 'guide_quiz_end';
+  } else if (darkMarketDialogContext === 'guide_quiz_end') {
+    closeDarkMarketDialog();
+  } else if (darkMarketDialogContext === 'guide_waiting') {
+    closeDarkMarketDialog();
+  } else if (darkMarketDialogContext === 'arrived_intro1') {
+    darkMarketDialogContext = 'arrived_intro2';
+    if (textEl) {
+      textEl.textContent = '「これより開くのは、一般には決して流通しない、秘蔵のモアイたちの闇ルート。\n心して取引するのじゃぞ……フフフ。」';
+    }
+    if (yesBtn) {
+      yesBtn.style.display = 'inline-block';
+      yesBtn.textContent = '🌌 闇の取引所を開く';
+    }
+    if (noBtn) {
+      noBtn.style.display = 'none';
+    }
+    if (closeBtn) {
+      closeBtn.style.display = 'inline-block';
+      closeBtn.textContent = '断る';
+    }
+  } else if (darkMarketDialogContext === 'arrived_intro2') {
+    if (answer === 'yes') {
+      closeDarkMarketDialog();
+      showDarkMarketCatalog();
+    } else {
+      closeDarkMarketDialog();
     }
   }
 }
@@ -4751,7 +4841,11 @@ if (btnDarkClose) {
   btnDarkClose.addEventListener('pointerdown', (event) => {
     event.preventDefault();
     event.stopPropagation();
-    closeDarkMarketDialog();
+    if (darkMarketDialogContext === 'guide_quiz') {
+      handleDarkMarketResponse('optionC');
+    } else {
+      closeDarkMarketDialog();
+    }
   });
 }
 
