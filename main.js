@@ -201,7 +201,7 @@ let darkMarketNpc = null;
 let currentGuideWaypointIndex = 0;
 let darkMoaiGuideState = 'idle'; // 'idle', 'leading', 'waiting', 'arrived'
 const guideWaypoints = [
-  new THREE.Vector3(0, 0, 16),
+  new THREE.Vector3(0, 0, -46),
   new THREE.Vector3(0, 0, 9),
   new THREE.Vector3(-36, 0, 9),
   new THREE.Vector3(-36, 0, 36),
@@ -3356,7 +3356,7 @@ function createDarkMarket() {
   if (currentStage !== 4) return;
   
   const npcGroup = new THREE.Group();
-  npcGroup.position.set(0, 0, 16);
+  npcGroup.position.set(0, 0, -46);
   currentGuideWaypointIndex = 0;
   darkMoaiGuideState = 'idle';
   
