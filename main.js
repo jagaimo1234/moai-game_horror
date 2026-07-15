@@ -3427,6 +3427,7 @@ function showDarkMarketCatalog() {
             <img src="${item.img}" alt="" style="width: 50px; height: 50px; border-radius: 6px; object-fit: cover; border: 1px solid rgba(255,255,255,0.1);">
             <div style="text-align: left;">
               <span style="font-size: 8px; color: #ffbc69; border: 1px solid #ffbc69; padding: 1px 3px; border-radius: 3px; font-weight: bold; vertical-align: middle;">${item.category}</span>
+              <span style="font-size: 8px; color: #ff4d4d; border: 1px solid #ff4d4d; padding: 1px 3px; border-radius: 3px; font-weight: bold; vertical-align: middle; margin-left: 4px;">2週間限定</span>
               <h4 style="margin: 3px 0 1px 0; font-size: 13px; color: #fff; font-weight: bold;">${item.name}</h4>
               <p style="margin: 0; font-size: 10.5px; opacity: 0.7; line-height: 1.4;">${item.desc}</p>
             </div>
