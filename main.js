@@ -3352,6 +3352,19 @@ function createDarkMarketBoothStructure(x, z) {
   nukaMoaiSprite.userData.label = nukaLabel;
 }
 
+
+function updateNpcLabel(text, color = '#ffd700') {
+  if (!darkMarketNpc) return;
+  if (darkMarketNpc.userData.guideLabel) {
+    darkMarketNpc.remove(darkMarketNpc.userData.guideLabel);
+  }
+  const label = createTextSprite(text, color, 28);
+  label.position.set(0, 5.8, 0); // Position above Moai NPC
+  label.userData.faceCamera = true;
+  darkMarketNpc.add(label);
+  darkMarketNpc.userData.guideLabel = label;
+}
+
 function createDarkMarket() {
   if (currentStage !== 4) return;
   
@@ -3359,6 +3372,11 @@ function createDarkMarket() {
   npcGroup.position.set(0, 0, -46);
   currentGuideWaypointIndex = 0;
   darkMoaiGuideState = 'idle';
+  
+  // Create guide label inside npcGroup later when textures are ready
+  setTimeout(() => {
+    updateNpcLabel("裏取引(minne)はこちら...", "#ffd700");
+  }, 200);
   
   const moaiTexture = textureLoader.load('./moai_shot.png');
   const moaiMat = new THREE.MeshStandardMaterial({
@@ -3462,20 +3480,29 @@ function updateDarkMarketZone(dt) {
           darkMoaiGuideState = 'arrived';
           // Ensure NPC snaps exactly to destination
           darkMarketNpc.position.copy(physicalMarketPos);
+          updateNpcLabel("到着じゃ！裏取引を開くぞ", "#2ecc71");
         }
       } else {
-        if (playerDist > 14.0) {
+        // Tightened from 14.0 to 7.5 units to trigger anger immediately if player falls behind
+        if (playerDist > 7.5) {
           darkMoaiGuideState = 'waiting';
+          updateNpcLabel("おい！サボるな！(怒)", "#ff3333");
+          playVoiceCue('bad');
         } else {
           const moveDir = toTarget.normalize();
           darkMarketNpc.position.addScaledVector(moveDir, 3.2 * dt);
+          if (performance.now() % 1000 < 30) { // Keep encouraging
+            updateNpcLabel("こっちじゃ、ついてまいれ", "#ffd700");
+          }
         }
       }
     }
   } else if (darkMoaiGuideState === 'waiting') {
     // Wait for player to catch up
-    if (playerDist < 7.0) {
+    if (playerDist < 4.5) {
       darkMoaiGuideState = 'leading';
+      updateNpcLabel("よし、案内再開じゃ", "#ffd700");
+      blip(660, 0.1, 0.1, 'sine');
     }
   } else if (darkMoaiGuideState === 'arrived') {
     // Auto-dialogue trigger on approach at destination
@@ -3627,9 +3654,11 @@ function handleDarkMarketResponse(answer) {
     if (answer === 'yes') {
       darkMoaiGuideState = 'leading';
       if (textEl) textEl.textContent = '……フフフ、良い子だ。離れずについてくるのじゃぞ……。';
+      updateNpcLabel("よし、ついてまいれ！", "#ffd700");
       blip(880, 0.14, 0.12, 'sine');
     } else {
       if (textEl) textEl.textContent = '……フフ、冷やかしか。後悔しても知らんぞ……フフフ。';
+      updateNpcLabel("裏取引(minne)はこちら...", "#ffd700");
       blip(580, 0.14, 0.12, 'sine');
     }
     if (yesBtn) yesBtn.style.display = 'none';
