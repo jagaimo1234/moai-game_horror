@@ -3475,7 +3475,7 @@ function showDarkMarketArrivedIntro() {
   const closeBtn = document.getElementById('btn-dark-close');
 
   if (textEl) {
-    textEl.textContent = '「ククク……無事に辿り着いたな。お前の健闘を称えよう。\nここは作者（モア太郎）の目も届かぬ、路地裏の秘密基地じゃ。」';
+    textEl.textContent = '「ククク……無事に辿り着いたな。お前の健闘を称えよう。\n実はな……作者の『モア太郎』には完全内緒で、秘蔵の作品たちをこっそり手配しておいたのじゃ。」';
   }
   if (yesBtn) {
     yesBtn.style.display = 'inline-block';
@@ -3850,18 +3850,18 @@ function handleDarkMarketResponse(answer) {
   } else if (darkMarketDialogContext === 'arrived_intro1') {
     darkMarketDialogContext = 'arrived_intro2';
     if (textEl) {
-      textEl.textContent = '「これより開くのは、一般には決して流通しない、秘蔵のモアイたちの闇ルート。\n心して取引するのじゃぞ……フフフ。」';
+      textEl.textContent = '「表の公式ショップには決して並ばない、ここだけの『裏ルート』。\nお前とワシだけの【秘密の取引】じゃ。クックック……心して見るが良いぞ。」';
     }
     if (yesBtn) {
       yesBtn.style.display = 'inline-block';
-      yesBtn.textContent = '🌌 闇の取引所を開く';
+      yesBtn.textContent = '🌌 秘密の取引所を開く';
     }
     if (noBtn) {
       noBtn.style.display = 'none';
     }
     if (closeBtn) {
       closeBtn.style.display = 'inline-block';
-      closeBtn.textContent = '断る';
+      closeBtn.textContent = '内緒にする（断る）';
     }
   } else if (darkMarketDialogContext === 'arrived_intro2') {
     if (answer === 'yes') {
