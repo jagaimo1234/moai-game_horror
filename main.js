@@ -307,6 +307,7 @@ const hud = {
 
 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 let userVoiceBuffer = null;
+let mainBgmAudio = null;
 let bgmTimer = null;
 let bgmStep = 0;
 let bgmRunning = false;
@@ -2287,23 +2288,20 @@ function startBgm(mode = 'game') {
   if (audioCtx.state === 'suspended') audioCtx.resume();
   bgmRunning = true;
   bgmStep = 0;
-  if (!bgmGain) {
-    bgmGain = audioCtx.createGain();
-    bgmGain.gain.value = 0.12;
-    bgmGain.connect(audioCtx.destination);
+  
+  if (!mainBgmAudio) {
+    mainBgmAudio = new Audio('./蛍の光-閉店の時間.mp3');
+    mainBgmAudio.loop = true;
+    mainBgmAudio.volume = 0.15;
   }
-  scheduleBgmStep();
+  
+  mainBgmAudio.play().catch(e => console.log('BGM play deferred:', e));
 }
 
 function stopBgm() {
   bgmRunning = false;
-  if (bgmTimer) {
-    clearTimeout(bgmTimer);
-    bgmTimer = null;
-  }
-  if (bgmGain) {
-    bgmGain.gain.cancelScheduledValues(audioCtx.currentTime);
-    bgmGain.gain.setTargetAtTime(0.0001, audioCtx.currentTime, 0.08);
+  if (mainBgmAudio) {
+    mainBgmAudio.pause();
   }
 }
 
@@ -2385,6 +2383,12 @@ function playRecordedVoiceBuffer(buffer, { volume = 1 } = {}) {
       bgmGain.gain.setTargetAtTime(0.02, now, 0.02);
       bgmGain.gain.setTargetAtTime(bgmMode === 'menu' ? 0.055 : 0.09, now + Math.min(1.8, buffer.duration + 0.1), 0.18);
     }
+    if (mainBgmAudio) {
+      mainBgmAudio.volume = 0.03;
+      setTimeout(() => {
+        if (mainBgmAudio && bgmRunning) mainBgmAudio.volume = 0.15;
+      }, Math.min(1800, (buffer.duration + 0.1) * 1000));
+    }
     const source = audioCtx.createBufferSource();
     const gain = audioCtx.createGain();
     source.buffer = buffer;
@@ -2425,6 +2429,12 @@ function playVoiceCue(kind = 'shop') {
     bgmGain.gain.cancelScheduledValues(now);
     bgmGain.gain.setTargetAtTime(0.018, now, 0.02);
     bgmGain.gain.setTargetAtTime(0.09, now + 0.95, 0.18);
+  }
+  if (mainBgmAudio) {
+    mainBgmAudio.volume = 0.03;
+    setTimeout(() => {
+      if (mainBgmAudio && bgmRunning) mainBgmAudio.volume = 0.15;
+    }, 1000);
   }
   const notes = kind === 'thanks'
     ? [660, 740, 830, 660, 520]
