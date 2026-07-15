@@ -3408,7 +3408,56 @@ const darkMarketLineup = [
   }
 ];
 
+
+let darkMarketCountdownInterval = null;
+
+function startDarkMarketCountdown() {
+  if (darkMarketCountdownInterval) {
+    clearInterval(darkMarketCountdownInterval);
+  }
+
+  // Load or set target date (2 weeks from first open)
+  let targetTime = localStorage.getItem('darkMarketTargetDate');
+  if (!targetTime) {
+    targetTime = Date.now() + 14 * 24 * 60 * 60 * 1000; // 14 days
+    localStorage.setItem('darkMarketTargetDate', targetTime);
+  } else {
+    targetTime = Number(targetTime);
+  }
+
+  function updateTimer() {
+    const now = Date.now();
+    const diff = targetTime - now;
+    const timerEl = document.getElementById('catalog-countdown-timer');
+    if (!timerEl) return;
+
+    if (diff <= 0) {
+      timerEl.textContent = '取引終了 (閉鎖されました)';
+      clearInterval(darkMarketCountdownInterval);
+      return;
+    }
+
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+    const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+    timerEl.textContent = `${days}日 ${hours}時間 ${minutes}分 ${seconds}秒`;
+  }
+
+  updateTimer();
+  darkMarketCountdownInterval = setInterval(updateTimer, 1000);
+}
+
+function stopDarkMarketCountdown() {
+  if (darkMarketCountdownInterval) {
+    clearInterval(darkMarketCountdownInterval);
+    darkMarketCountdownInterval = null;
+  }
+}
+
 function showDarkMarketCatalog() {
+  startDarkMarketCountdown();
   gamePaused = true;
   stopMobileMove();
   keys.forward = false;
@@ -3450,6 +3499,7 @@ function showDarkMarketCatalog() {
 }
 
 function closeDarkMarketCatalog() {
+  stopDarkMarketCountdown();
   const dialog = document.getElementById('dark-market-catalog-dialog');
   if (dialog) dialog.style.display = 'none';
   gamePaused = false;
