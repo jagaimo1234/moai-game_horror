@@ -3456,6 +3456,46 @@ function stopDarkMarketCountdown() {
   }
 }
 
+
+let currentCarouselIndex = 0;
+
+function slideCarousel(dir) {
+  const count = darkMarketLineup.length;
+  currentCarouselIndex = (currentCarouselIndex + dir + count) % count;
+  updateCarouselPosition();
+  blip(660, 0.05, 0.05, 'triangle');
+}
+
+function jumpToSlide(idx) {
+  currentCarouselIndex = idx;
+  updateCarouselPosition();
+  blip(660, 0.05, 0.05, 'triangle');
+}
+
+function updateCarouselPosition() {
+  const track = document.getElementById('dark-catalog-track');
+  if (track) {
+    track.style.transform = `translateX(-${currentCarouselIndex * 100}%)`;
+  }
+  
+  // Update dot elements styling
+  const dots = document.querySelectorAll('.catalog-dot');
+  dots.forEach((dot, idx) => {
+    if (idx === currentCarouselIndex) {
+      dot.style.background = '#ffbc69';
+      dot.style.boxShadow = '0 0 8px #ffbc69';
+      dot.style.transform = 'scale(1.3)';
+    } else {
+      dot.style.background = 'rgba(255,255,255,0.25)';
+      dot.style.boxShadow = 'none';
+      dot.style.transform = 'scale(1)';
+    }
+  });
+}
+
+window.slideCarousel = slideCarousel;
+window.jumpToSlide = jumpToSlide;
+
 function showDarkMarketCatalog() {
   startDarkMarketCountdown();
   gamePaused = true;
@@ -3505,31 +3545,41 @@ function showDarkMarketCatalog() {
     }, 1100);
   }
 
-  const listEl = document.getElementById('dark-catalog-list');
-  if (listEl) {
-    listEl.innerHTML = '';
+  currentCarouselIndex = 0;
+  const trackEl = document.getElementById('dark-catalog-track');
+  const dotsEl = document.getElementById('dark-catalog-dots');
+  
+  if (trackEl) {
+    trackEl.innerHTML = '';
     darkMarketLineup.forEach((item, index) => {
-      listEl.innerHTML += `
-        <div class="catalog-card" style="display: flex; gap: 12px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; padding: 10px; align-items: center; justify-content: space-between; flex-wrap: wrap; opacity: 0; transform: translateY(18px); animation: catalogCardReveal 0.45s cubic-bezier(0.18, 0.89, 0.32, 1.28) forwards; animation-delay: ${1.1 + index * 0.15}s;">
-          <div style="display: flex; gap: 12px; align-items: center; flex: 1; min-width: 240px;">
-            <img src="${item.img}" alt="" style="width: 50px; height: 50px; border-radius: 6px; object-fit: cover; border: 1px solid rgba(255,255,255,0.1);">
-            <div style="text-align: left;">
-              <span style="font-size: 8px; color: #ffbc69; border: 1px solid #ffbc69; padding: 1px 3px; border-radius: 3px; font-weight: bold; vertical-align: middle;">${item.category}</span>
-              <span style="font-size: 8px; color: #ff4d4d; border: 1px solid #ff4d4d; padding: 1px 3px; border-radius: 3px; font-weight: bold; vertical-align: middle; margin-left: 4px;">2週間限定</span>
-              <h4 style="margin: 3px 0 1px 0; font-size: 13px; color: #fff; font-weight: bold;">${item.name}</h4>
-              <p style="margin: 0; font-size: 10.5px; opacity: 0.7; line-height: 1.4;">${item.desc}</p>
-            </div>
+      trackEl.innerHTML += `
+        <div class="catalog-card" style="flex: 0 0 100%; display: flex; flex-direction: column; align-items: center; text-align: center; box-sizing: border-box; padding: 5px 12px; opacity: 0; transform: translateY(18px); animation: catalogCardReveal 0.45s cubic-bezier(0.18, 0.89, 0.32, 1.28) forwards; animation-delay: ${1.1 + index * 0.12}s;">
+          <div style="margin-bottom: 8px;">
+            <span style="font-size: 9px; color: #ffbc69; border: 1px solid #ffbc69; padding: 2px 5px; border-radius: 4px; font-weight: bold; vertical-align: middle;">${item.category}</span>
+            <span style="font-size: 9px; color: #ff4d4d; border: 1px solid #ff4d4d; padding: 2px 5px; border-radius: 4px; font-weight: bold; vertical-align: middle; margin-left: 6px;">2週間限定</span>
           </div>
-          <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 4px; min-width: 130px;">
-            <span style="font-size: 14px; font-weight: bold; color: #ffbc69;">${item.price}</span>
-            <button type="button" onclick="event.stopPropagation(); window.open('${item.link}', '_blank')" style="background: #e67e22; color: white; border: none; font-size: 10px; padding: 5px 10px; border-radius: 4px; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 3px; box-shadow: 0 2px 6px rgba(230,126,34,0.3);">
-              🌌 minneでカートに入れる 🔗
-            </button>
-          </div>
+          <img src="${item.img}" alt="" style="width: 130px; height: 130px; border-radius: 10px; object-fit: cover; border: 2px solid rgba(255,188,105,0.3); box-shadow: 0 6px 15px rgba(0,0,0,0.5); margin-bottom: 12px;">
+          <h3 style="margin: 0 0 6px 0; font-size: 16px; color: #fff; font-weight: bold;">${item.name}</h3>
+          <p style="margin: 0 0 12px 0; font-size: 11.5px; opacity: 0.75; line-height: 1.5; max-width: 340px; min-height: 36px; height: 36px;">${item.desc}</p>
+          <div style="font-size: 18px; font-weight: 900; color: #ffbc69; margin-bottom: 12px;">${item.price}</div>
+          <button type="button" onclick="event.stopPropagation(); window.open('${item.link}', '_blank')" style="background: #e67e22; color: white; border: none; font-size: 11.5px; padding: 8px 24px; border-radius: 6px; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 4px; box-shadow: 0 3px 10px rgba(230,126,34,0.4); transition: all 0.2s;">
+            🌌 minneでカートに入れる 🔗
+          </button>
         </div>
       `;
     });
   }
+
+  if (dotsEl) {
+    dotsEl.innerHTML = '';
+    darkMarketLineup.forEach((_, index) => {
+      dotsEl.innerHTML += `
+        <div class="catalog-dot" onclick="jumpToSlide(${index})" style="width: 8px; height: 8px; border-radius: 50%; background: ${index === 0 ? '#ffbc69' : 'rgba(255,255,255,0.25)'}; cursor: pointer; transition: all 0.25s; box-shadow: ${index === 0 ? '0 0 8px #ffbc69' : 'none'}; transform: ${index === 0 ? 'scale(1.3)' : 'scale(1)'};"></div>
+      `;
+    });
+  }
+  
+  updateCarouselPosition();
 
   const dialog = document.getElementById('dark-market-catalog-dialog');
   if (dialog) dialog.style.display = 'block';
