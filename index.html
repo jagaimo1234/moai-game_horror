@@ -1172,6 +1172,26 @@
         </div>
     </div>
 
+    <!-- Dark Market Catalog Dialog -->
+    <div id="dark-market-catalog-dialog" style="display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 30; width: 95%; max-width: 550px; max-height: 85vh; overflow-y: auto; padding: 20px; border-radius: 16px; background: rgba(12, 6, 20, 0.98); border: 3px solid #ffbc69; box-shadow: 0 20px 50px rgba(255,188,105,0.35); text-align: left; box-sizing: border-box; backdrop-filter: blur(15px); pointer-events: auto; color: #fff; font-family: sans-serif;">
+        <div style="font-size: 18px; font-weight: 900; color: #ffbc69; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid rgba(255,188,105,0.2); padding-bottom: 8px;">
+            <span style="display: flex; align-items: center; gap: 8px;">🔮 闇の取引所 〜ONLINE BLACK MARKET〜</span>
+            <button type="button" onclick="closeDarkMarketCatalog()" style="background: none; border: none; color: #ffbc69; font-size: 24px; cursor: pointer; font-weight: bold; padding: 0 5px; line-height: 1;">✕</button>
+        </div>
+        <div style="font-size: 12px; color: #fff6cf; background: rgba(255,246,207,0.08); padding: 10px; border-radius: 8px; margin-bottom: 16px; border-left: 4px solid #ffbc69; line-height: 1.5;">
+            💡 <b>お買い物方法</b>: 欲しい作品のボタンをタップすると、minneアプリ/サイトが開きます。カートに入れ、決済をお進めください。
+            <br>🚚 minne上で合計 <b>2,000円以上</b> ご購入いただくと <b>送料無料</b> になります！
+        </div>
+
+        <div id="dark-catalog-list" style="display: flex; flex-direction: column; gap: 12px;">
+            <!-- Rendered dynamically by main.js -->
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; margin-top: 18px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 12px;">
+            <button type="button" onclick="closeDarkMarketCatalog()" style="padding: 8px 20px; border-radius: 6px; background: rgba(255,255,255,0.15); color: #fff; border: none; cursor: pointer; font-weight: bold; font-size: 13px;">取引所を去る</button>
+        </div>
+    </div>
+
     <div id="catalog-overlay">
         <button id="catalog-close" type="button">ゲームに戻る</button>
         <iframe id="catalog-frame" title="お品書き"></iframe>
@@ -1185,7 +1205,7 @@
       }
     }
     </script>
-    <script type="module" src="./main.js?v=20260715_npc_v4"></script>
+    <script type="module" src="./main.js?v=20260715_npc_v5"></script>
 </body>
 
 </html>

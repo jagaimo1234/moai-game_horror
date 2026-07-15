@@ -3365,6 +3365,100 @@ function updateNpcLabel(text, color = '#ffd700') {
   darkMarketNpc.userData.guideLabel = label;
 }
 
+const darkMarketLineup = [
+  {
+    category: '① 幻の子たち',
+    name: 'やったーモアイペン立て',
+    price: '1,900円',
+    desc: '「やったー！」と喜ぶ姿を立体化した幻のペン立て。',
+    img: './moai_shot.png',
+    link: 'https://minne.com/items/40898516'
+  },
+  {
+    category: '① 幻の子たち',
+    name: '腕組みモアイペン立て（タケシ風）',
+    price: '1,900円',
+    desc: '一般販売されなかった幻の作品。',
+    img: './moai_shot.png',
+    link: 'https://minne.com/items/40898555'
+  },
+  {
+    category: '② モアイロボ 共闘セット',
+    name: 'モアイロボ共闘セット',
+    price: '4,000円',
+    desc: '初号機＋MARK2＋神スタンド。進化の系譜を並べて飾るための特別セット。',
+    img: './moai_shot.png',
+    link: 'https://minne.com/items/40898588'
+  },
+  {
+    category: '③ まちょいモアイルアースタンド',
+    name: 'まちょいモアイルアースタンド',
+    price: '3,000円',
+    desc: 'キーホルダーやアクセも飾れるマッチョなスタンド。青虫くん付き。',
+    img: './moai_lure.png',
+    link: 'https://minne.com/items/40898600'
+  },
+  {
+    category: '④ ミニモアイキーホルダー',
+    name: 'ミニモアイキーホルダー',
+    price: '500円',
+    desc: '小さな相棒。複数並べても楽しい！',
+    img: './moai_shot.png',
+    link: 'https://minne.com/items/40898622'
+  }
+];
+
+function showDarkMarketCatalog() {
+  gamePaused = true;
+  stopMobileMove();
+  keys.forward = false;
+  keys.backward = false;
+  keys.left = false;
+  keys.right = false;
+  keys.fire = false;
+
+  const listEl = document.getElementById('dark-catalog-list');
+  if (listEl) {
+    listEl.innerHTML = '';
+    darkMarketLineup.forEach(item => {
+      listEl.innerHTML += `
+        <div style="display: flex; gap: 12px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; padding: 10px; align-items: center; justify-content: space-between; flex-wrap: wrap;">
+          <div style="display: flex; gap: 12px; align-items: center; flex: 1; min-width: 240px;">
+            <img src="${item.img}" alt="" style="width: 50px; height: 50px; border-radius: 6px; object-fit: cover; border: 1px solid rgba(255,255,255,0.1);">
+            <div style="text-align: left;">
+              <span style="font-size: 8px; color: #ffbc69; border: 1px solid #ffbc69; padding: 1px 3px; border-radius: 3px; font-weight: bold; vertical-align: middle;">${item.category}</span>
+              <h4 style="margin: 3px 0 1px 0; font-size: 13px; color: #fff; font-weight: bold;">${item.name}</h4>
+              <p style="margin: 0; font-size: 10.5px; opacity: 0.7; line-height: 1.4;">${item.desc}</p>
+            </div>
+          </div>
+          <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 4px; min-width: 130px;">
+            <span style="font-size: 14px; font-weight: bold; color: #ffbc69;">${item.price}</span>
+            <button type="button" onclick="event.stopPropagation(); window.open('${item.link}', '_blank')" style="background: #e67e22; color: white; border: none; font-size: 10px; padding: 5px 10px; border-radius: 4px; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 3px; box-shadow: 0 2px 6px rgba(230,126,34,0.3);">
+              🌌 minneでカートに入れる 🔗
+            </button>
+          </div>
+        </div>
+      `;
+    });
+  }
+
+  const dialog = document.getElementById('dark-market-catalog-dialog');
+  if (dialog) dialog.style.display = 'block';
+  playRecordedVoice(VOICE_FILES.darkQuestion);
+  blip(440, 0.12, 0.12, 'sine');
+}
+
+function closeDarkMarketCatalog() {
+  const dialog = document.getElementById('dark-market-catalog-dialog');
+  if (dialog) dialog.style.display = 'none';
+  gamePaused = false;
+  stopCurrentVoice();
+  blip(330, 0.1, 0.1, 'sine');
+}
+
+window.closeDarkMarketCatalog = closeDarkMarketCatalog;
+
+
 function createDarkMarket() {
   if (currentStage !== 4) return;
   
@@ -3509,7 +3603,7 @@ function updateDarkMarketZone(dt) {
     const autoTriggerDist = 6.0;
     if (playerDist < autoTriggerDist && !darkMarketDialogueShown) {
       darkMarketDialogueShown = true;
-      showDarkMarketDialog();
+      showDarkMarketCatalog();
     }
     // Reset dialogue shown flag when player moves away so they can interact again
     if (playerDist > 9.0 && darkMarketDialogueShown) {
@@ -3568,7 +3662,11 @@ function checkDarkMarketClick() {
   raycaster.setFromCamera(mouse, camera);
   const intersects = raycaster.intersectObjects(darkMarketNpc.children);
   if (intersects.length > 0) {
-    showDarkMarketDialog();
+    if (darkMoaiGuideState === 'arrived') {
+      showDarkMarketCatalog();
+    } else {
+      showDarkMarketDialog();
+    }
   }
 }
 
