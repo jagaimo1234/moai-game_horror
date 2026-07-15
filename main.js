@@ -2099,7 +2099,7 @@ function setHud() {
         <div class="hud-steps" style="display: flex; flex-direction: column; gap: 3px; margin-top: 5px;">
           <span class="hud-step ${step1Class}">① モアイ購入: ${moataroMoaiPurchased ? '完了' : '未達成'}</span>
           <span class="hud-step ${step2Class}">② ヨーグルト: ${crystals}/${required}個 (作者強奪: ${stageFourStealDone ? 'OK' : '必要'})</span>
-          <span class="hud-step ${step3Class}">③ 会場から脱出！ (🎁クーポンGET)</span>
+          <span class="hud-step ${step3Class}">③ 会場から脱出！ (🌌闇の取引所予告)</span>
         </div>
       `;
     } else {
@@ -4129,9 +4129,9 @@ function finishGame(won) {
       <div style="display: flex; align-items: center; justify-content: flex-start; gap: 15px; margin: 12px 0; padding: 12px; background: rgba(255,255,255,0.08); border-radius: 12px; border-left: 5px solid #ffd700; box-shadow: 0 4px 12px rgba(0,0,0,0.3);">
         <img src="${moaiImg}" alt="moai" style="width: 70px; height: 70px; object-fit: contain; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.6));">
         <div style="text-align: left; flex: 1;">
-          <div style="font-size: 11px; color: #ffd700; font-weight: 900; margin-bottom: 2px; letter-spacing: 1px;">CLEAR REWARD</div>
+          <div style="font-size: 11px; color: #ffd700; font-weight: 900; margin-bottom: 2px; letter-spacing: 1px;">👑 CLEAR COLLECTED</div>
           <div style="font-size: 15px; font-weight: 900; color: #ffffff; margin-bottom: 4px;">${moaiName}</div>
-          <div style="font-size: 16px; font-weight: 900; color: #ffbc69;">✨ 300円引き</div>
+          <div style="font-size: 14px; font-weight: 900; color: #77f4ff;">✨ 交信成功の証！</div>
         </div>
       </div>
     `;
@@ -4143,7 +4143,7 @@ function finishGame(won) {
           <div style="text-align: left; flex: 1;">
             <div style="font-size: 11px; color: #d28cff; font-weight: 900; margin-bottom: 2px; letter-spacing: 1px;">DARK MARKET BONUS</div>
             <div style="font-size: 15px; font-weight: 900; color: #ffffff; margin-bottom: 4px;">ぬかよろこびモアイペン立て</div>
-            <div style="font-size: 16px; font-weight: 900; color: #77f4ff;">✨ 200円引き</div>
+            <div style="font-size: 14px; font-weight: 900; color: #d28cff;">✨ 裏取引ルート解放！</div>
           </div>
         </div>
       `;
@@ -4152,38 +4152,28 @@ function finishGame(won) {
     couponHtml = `
       <div style="background: linear-gradient(180deg, #2a1e38 0%, #0b151b 100%); border: 3px solid #ffd700; border-radius: 16px; padding: 20px; margin: 15px auto 25px; max-width: 460px; box-shadow: 0 16px 40px rgba(0,0,0,0.8), inset 0 0 20px rgba(255,215,0,0.1); text-align: center; box-sizing: border-box; position: relative; overflow: hidden;">
         
-        <h3 style="color: #ffd700; margin: 0 0 10px 0; font-size: 22px; font-weight: 900; letter-spacing: 2px; text-shadow: 0 2px 8px rgba(255,215,0,0.6);">🎉 おめでとう！ 🎉</h3>
-        <p style="margin: 0 0 15px 0; font-size: 14px; color: #fff; font-weight: bold; line-height: 1.5;">特別な割引クーポンをゲットしたぞ！<br>これをHMJに持ってきてくれ！</p>
+        <h3 style="color: #ffd700; margin: 0 0 10px 0; font-size: 22px; font-weight: 900; letter-spacing: 2px; text-shadow: 0 2px 8px rgba(255,215,0,0.6);">🎉 脱出成功 ＆ 感謝！！！ 🎉</h3>
+        <p style="margin: 0 0 15px 0; font-size: 14px; color: #fff; font-weight: bold; line-height: 1.5; text-align: left;">
+          ヨーグルトを無事に集め、作者の追跡から脱出できたぞ！<br>
+          ハンドメイドインジャパンフェス（HMJ）をお楽しみいただき、本当にありがとうございました！！！<br><br>
+          リアルイベントは閉幕いたしましたが、このゲームを遊んでくれたお前だけのための<b>『オンライン闇の取引所（minne）』はこれからオープンするぞ！</b><br>
+          ちょっと待っててくれ。
+        </p>
         
         ${itemsHtml}
 
-        <!-- SNS Links inside ED Coupon (Moved Higher Up) -->
-        <div style="display: flex; justify-content: center; gap: 20px; margin: 15px 0 10px 0; background: rgba(255,255,255,0.05); padding: 8px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.1); pointer-events: auto;">
-          <a href="https://www.instagram.com/moataro_k/" target="_blank" onclick="event.stopPropagation();" style="color: #ff007f; text-decoration: none; font-size: 13px; font-weight: bold; display: inline-flex; align-items: center; gap: 4px;">📸 Instagram</a>
-          <a href="https://x.com/kanazawamoataro" target="_blank" onclick="event.stopPropagation();" style="color: #1da1f2; text-decoration: none; font-size: 13px; font-weight: bold; display: inline-flex; align-items: center; gap: 4px;">🐦 X (Twitter)</a>
+        <div style="background: linear-gradient(90deg, #8e44ad, #3498db); color: #fff; font-size: 15px; font-weight: 900; padding: 14px; border-radius: 8px; margin-top: 18px; box-shadow: 0 4px 15px rgba(142,68,173,0.5); text-shadow: 0 1px 3px rgba(0,0,0,0.5);">
+          🌌 オンライン闇の取引所（minne） 🌌<br>
+          <span style="font-size: 12px; display: block; margin-top: 6px; font-weight: bold; opacity: 0.95;">現在、ネット上に裏取引ルートを構築中だ。<br>オープン時は公式SNSでお知らせするぞ！</span>
         </div>
 
-        <div style="background: linear-gradient(90deg, #ff416c, #ff4b2b); color: #fff; font-size: 16px; font-weight: 900; padding: 14px; border-radius: 8px; margin-top: 18px; box-shadow: 0 4px 15px rgba(255,75,43,0.5); text-shadow: 0 1px 3px rgba(0,0,0,0.5); animation: pulse 1.5s infinite alternate;">
-          📸 この画面をスクショして保存！📸<br>
-          <span style="font-size: 13px; display: block; margin-top: 6px; font-weight: bold; opacity: 0.95;">お会計の時に私（作者）に見せてね！</span>
-        </div>
-        
-        <div style="margin-top: 15px; font-size: 15px; color: #77f4ff; font-weight: 900; font-family: 'DotGothic16', sans-serif;">
-          📍 待ってる場所: HMJブース【J-80】<br>Kanazawa Moataro
-          <div style="margin-top: 8px;">
-            <button type="button" onclick="event.stopPropagation(); window.open('https://hmj-fes.jp/ichiran/40303', '_blank')" style="background: #e67e22; color: white; border: none; font-size: 11px; padding: 6px 12px; border-radius: 20px; font-weight: bold; cursor: pointer; box-shadow: 0 2px 8px rgba(230,126,34,0.4);">HMJ公式お品書きはこちら 🔗</button>
+        <!-- SNS Links for waiting updates -->
+        <div style="margin-top: 20px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.15); text-align: center;">
+          <div style="font-size: 11px; color: rgba(255,255,255,0.6); margin-bottom: 8px; font-weight: bold;">📢 最新情報をフォローして待つ</div>
+          <div style="display: flex; justify-content: center; gap: 20px; pointer-events: auto;">
+            <a href="https://www.instagram.com/moataro_k/" target="_blank" onclick="event.stopPropagation();" style="color: #ff007f; text-decoration: none; font-size: 13px; font-weight: bold; display: inline-flex; align-items: center; gap: 4px;">📸 Instagram</a>
+            <a href="https://x.com/kanazawamoataro" target="_blank" onclick="event.stopPropagation();" style="color: #1da1f2; text-decoration: none; font-size: 13px; font-weight: bold; display: inline-flex; align-items: center; gap: 4px;">🐦 X (Twitter)</a>
           </div>
-        </div>
-
-        <div style="margin-top: 15px; font-size: 13px; color: #ffbc69; font-weight: bold; line-height: 1.5; background: rgba(0,0,0,0.4); padding: 10px; border-radius: 8px;">
-          🌐 イベントに来られない方へ<br>
-          <span style="font-size: 11px; color: #fff; font-weight: normal;">後日オンラインでオープンする「闇の取引所」を<br>楽しみにお待ちください！</span>
-        </div>
-
-        <div style="margin-top: 18px; font-size: 11px; color: rgba(255,255,255,0.5); line-height: 1.5; text-align: left; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.15);">
-          ※他クーポンとの併用はできません。<br>
-          ※本クーポンのご利用には、お会計時にこの画面のスクリーンショット提示が必要です。<br>
-          ※有効期限は、HMJイベント開催期間中のみとなります。
         </div>
         
       </div>
