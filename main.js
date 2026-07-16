@@ -3646,8 +3646,15 @@ function showDarkMarketCatalog() {
 
 
 function triggerGiantAuthorChase() {
-  if (currentStage !== 4 || !authors[0]) return;
-  if (moataroMoaiPurchased) return; // Prevent double trigger
+  alert('DEBUG ALERT: triggerGiantAuthorChase triggered!\ncurrentStage = ' + currentStage + ' (' + (typeof currentStage) + ')\nauthors[0] exists = ' + (!!authors[0]) + '\nmoataroMoaiPurchased = ' + moataroMoaiPurchased);
+  if (currentStage !== 4 || !authors[0]) {
+    alert('DEBUG ALERT: Rejected stage/author check! currentStage=' + currentStage + ', author=' + (!!authors[0]));
+    return;
+  }
+  if (moataroMoaiPurchased) {
+    alert('DEBUG ALERT: Rejected double trigger! moataroMoaiPurchased is already true.');
+    return;
+  }
   
   moataroMoaiPurchased = true;
   
