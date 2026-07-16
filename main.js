@@ -3367,95 +3367,62 @@ function updateNpcLabel(text, color = '#ffd700') {
 
 const darkMarketLineup = [
   {
-    category: '① 幻の子たち',
+    category: '未公開・盗品',
     name: 'やったーモアイペン立て',
-    price: '1,900円',
-    desc: '「やったー！」と喜ぶ姿を立体化した幻のペン立て。',
+    price: '1,800円 (通常: 1,900円)',
+    desc: '「やったー！」と喜ぶ姿を立体化したペン立て。作者に内緒で勝手に値引きしたぞ。',
     img: './moai_shot.png',
     link: 'https://minne.com/items/40898516'
   },
   {
-    category: '① 幻の子たち',
-    name: '腕組みモアイペン立て（タケシ風）',
-    price: '1,900円',
-    desc: '一般販売されなかった幻の作品。',
+    category: '未公開・盗品',
+    name: 'どや顔モアイペン立て',
+    price: '1,800円 (通常: 1,900円)',
+    desc: '不敵などや顔がじわじわくるペン立て。一般販売されなかった幻の作品じゃ。',
     img: './moai_shot.png',
     link: 'https://minne.com/items/40898555'
   },
   {
-    category: '② モアイロボ 共闘セット',
-    name: 'モアイロボ共闘セット',
-    price: '4,000円',
-    desc: '初号機＋MARK2＋神スタンド。進化の系譜を並べて飾るための特別セット。',
+    category: '未公開・盗品',
+    name: 'レッドモアイロボmark2(試作機)',
+    price: '2,500円',
+    desc: 'ほほ、これを盗むのは特に苦労したわい……！貴重なレッドカラーの試作機モデル。',
     img: './moai_shot.png',
-    link: 'https://minne.com/items/40898588'
+    link: 'https://minne.com/items/40974411'
   },
   {
-    category: '③ まちょいモアイルアースタンド',
-    name: 'まちょいモアイルアースタンド',
-    price: '3,000円',
-    desc: 'キーホルダーやアクセも飾れるマッチョなスタンド。青虫くん付き。',
+    category: '勝手に割引',
+    name: 'モアイなルアースタンド',
+    price: '3,000円 (通常: 3,500円)',
+    desc: 'キーホルダーやアクセサリーも飾れるスタンド。青虫くん付き。勝手に割引したぞ！',
     img: './moai_lure.png',
     link: 'https://minne.com/items/40898600'
   },
   {
-    category: '④ ミニモアイキーホルダー',
-    name: 'ミニモアイキーホルダー',
+    category: '勝手に割引',
+    name: 'モアイロボ初号機とmark2セット',
+    price: '4,000円 (通常: 4,500円)',
+    desc: '友情セットじゃ。初代とMARK2を並べて飾って楽しんでほしい。勝手に割引じゃ！',
+    img: './moai_shot.png',
+    link: 'https://minne.com/items/40898588'
+  },
+  {
+    category: 'その他',
+    name: 'ミニおすわりモアイキーホルダー',
     price: '500円',
-    desc: '小さな相棒。複数並べても楽しい！',
+    desc: '小さな相棒。送料無料（2,000円以上）に届かない時の買い合わせにピッタリじゃ。',
     img: './moai_shot.png',
     link: 'https://minne.com/items/40898622'
+  },
+  {
+    category: 'その他',
+    name: 'モアイロボmark2用 神スタンド',
+    price: '500円',
+    desc: 'モアイロボ単体を神々しくディスプレイできる特製スタンドじゃ。',
+    img: './moai_shot.png',
+    link: 'https://minne.com/items/40974422'
   }
 ];
-
-
-let darkMarketCountdownInterval = null;
-
-function startDarkMarketCountdown() {
-  if (darkMarketCountdownInterval) {
-    clearInterval(darkMarketCountdownInterval);
-  }
-
-  // Load or set target date (2 weeks from first open)
-  let targetTime = localStorage.getItem('darkMarketTargetDate');
-  if (!targetTime) {
-    targetTime = Date.now() + 14 * 24 * 60 * 60 * 1000; // 14 days
-    localStorage.setItem('darkMarketTargetDate', targetTime);
-  } else {
-    targetTime = Number(targetTime);
-  }
-
-  function updateTimer() {
-    const now = Date.now();
-    const diff = targetTime - now;
-    const timerEl = document.getElementById('catalog-countdown-timer');
-    if (!timerEl) return;
-
-    if (diff <= 0) {
-      timerEl.textContent = '取引終了 (閉鎖されました)';
-      clearInterval(darkMarketCountdownInterval);
-      return;
-    }
-
-    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-    const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-    const seconds = Math.floor((diff % (1000 * 60)) / 1000);
-
-    timerEl.textContent = `${days}日 ${hours}時間 ${minutes}分 ${seconds}秒`;
-  }
-
-  updateTimer();
-  darkMarketCountdownInterval = setInterval(updateTimer, 1000);
-}
-
-function stopDarkMarketCountdown() {
-  if (darkMarketCountdownInterval) {
-    clearInterval(darkMarketCountdownInterval);
-    darkMarketCountdownInterval = null;
-  }
-}
-
 
 let currentCarouselIndex = 0;
 
@@ -3528,6 +3495,53 @@ function updateCarouselPosition() {
 
 window.slideCarousel = slideCarousel;
 window.jumpToSlide = jumpToSlide;
+
+let darkMarketCountdownInterval = null;
+
+function startDarkMarketCountdown() {
+  if (darkMarketCountdownInterval) {
+    clearInterval(darkMarketCountdownInterval);
+  }
+
+  // Load or set target date (2 weeks from first open)
+  let targetTime = localStorage.getItem('darkMarketTargetDate');
+  if (!targetTime) {
+    targetTime = Date.now() + 14 * 24 * 60 * 60 * 1000; // 14 days
+    localStorage.setItem('darkMarketTargetDate', targetTime);
+  } else {
+    targetTime = Number(targetTime);
+  }
+
+  function updateTimer() {
+    const now = Date.now();
+    const diff = targetTime - now;
+    const timerEl = document.getElementById('catalog-countdown-timer');
+    if (!timerEl) return;
+
+    if (diff <= 0) {
+      timerEl.textContent = '取引終了 (閉鎖されました)';
+      clearInterval(darkMarketCountdownInterval);
+      return;
+    }
+
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+    const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+    timerEl.textContent = `${days}日 ${hours}時間 ${minutes}分 ${seconds}秒`;
+  }
+
+  updateTimer();
+  darkMarketCountdownInterval = setInterval(updateTimer, 1000);
+}
+
+function stopDarkMarketCountdown() {
+  if (darkMarketCountdownInterval) {
+    clearInterval(darkMarketCountdownInterval);
+    darkMarketCountdownInterval = null;
+  }
+}
 
 function showDarkMarketCatalog() {
   startDarkMarketCountdown();
@@ -3658,7 +3672,7 @@ function showDarkMarketArrivedIntro() {
   const closeBtn = document.getElementById('btn-dark-close');
 
   if (textEl) {
-    textEl.textContent = '「ククク……無事に辿り着いたな。お前の健闘を称えよう。\n実はな……作者の『モア太郎』には完全内緒で、秘蔵の作品たちをこっそり手配しておいたのじゃ。」';
+    textEl.textContent = '「ククク……無事に辿り着いたな。お前の健闘を称えよう。\n実を言うと、作者の『モア太郎』に無断で、未公開の作品を盗んできたのじゃ。フフフ……見たことない作品があるじゃろう？」';
   }
   if (yesBtn) {
     yesBtn.style.display = 'inline-block';
@@ -4033,7 +4047,7 @@ function handleDarkMarketResponse(answer) {
   } else if (darkMarketDialogContext === 'arrived_intro1') {
     darkMarketDialogContext = 'arrived_intro2';
     if (textEl) {
-      textEl.textContent = '「表の公式ショップには決して並ばない、ここだけの『裏ルート』。\nお前とワシだけの【秘密の取引】じゃ。クックック……心して見るが良いぞ。」';
+      textEl.textContent = '「それだけではない、今回はワシが勝手に値引きもして、販売してやろうと思うてな……。\nさすがに作者に怒られるから【完全秘密の取引】じゃよ。フフフ、心して見るが良いぞ。」';
     }
     if (yesBtn) {
       yesBtn.style.display = 'inline-block';
