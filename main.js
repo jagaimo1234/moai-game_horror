@@ -4794,6 +4794,19 @@ function bindKey(code, pressed) {
 window.addEventListener('keydown', (event) => {
   bindKey(event.code, true);
   if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Space'].includes(event.code)) event.preventDefault();
+  
+  // DEBUG KEY: Press 'T' to teleport directly to Dark Market
+  if (event.code === 'KeyT') {
+    if (currentStage === 4 && darkMarketNpc) {
+      moai.position.set(-40, 0, 36);
+      setEntityGroundHeight(moai);
+      darkMarketNpc.position.copy(physicalMarketPos);
+      darkMoaiGuideState = 'arrived';
+      showDarkMarketArrivedIntro();
+      blip(880, 0.1, 0.1, 'sine');
+      console.log('DEBUG: Teleported to Dark Market');
+    }
+  }
 });
 
 window.addEventListener('keyup', (event) => {
