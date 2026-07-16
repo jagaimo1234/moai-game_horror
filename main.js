@@ -4800,7 +4800,7 @@ window.addEventListener('keydown', (event) => {
     if (currentStage === 4 && darkMarketNpc) {
       moai.position.set(-40, 0, 36);
       setEntityGroundHeight(moai);
-      darkMarketNpc.position.copy(physicalMarketPos);
+      darkMarketNpc.position.set(-45, 0, 36); // Explicit target coordinates instead of out-of-scope variable
       darkMoaiGuideState = 'arrived';
       showDarkMarketArrivedIntro();
       blip(880, 0.1, 0.1, 'sine');
