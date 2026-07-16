@@ -1026,7 +1026,7 @@
             border-radius: 16px;
             padding: 14px 10px;
             box-sizing: border-box;
-            transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1), opacity 0.4s ease, border 0.3s ease, box-shadow 0.3s ease;
+            transition: transform 0.45s cubic-bezier(0.25, 0.8, 0.25, 1), opacity 0.45s ease, border 0.3s ease, box-shadow 0.3s ease;
             transform-style: preserve-3d;
             backface-visibility: hidden;
             display: flex;
@@ -1034,17 +1034,14 @@
             align-items: center;
             text-align: center;
             justify-content: space-between;
-            opacity: 0; /* Default invisible before reveal */
         }
         #dark-catalog-track {
             opacity: 0;
-            transition: opacity 0.3s ease;
+            transition: opacity 0.5s ease-out;
+            transform-style: preserve-3d;
         }
         #dark-catalog-track.revealed {
             opacity: 1;
-        }
-        #dark-catalog-track.revealed .catalog-card {
-            animation: catalogCardReveal 0.45s cubic-bezier(0.18, 0.89, 0.32, 1.28) forwards;
         }
     </style>
 </head>
@@ -1276,7 +1273,7 @@
       }
     }
     </script>
-    <script type="module" src="./main.js?v=20260716_npc_v15"></script>
+    <script type="module" src="./main.js?v=20260716_npc_v16"></script>
 </body>
 
 </html>

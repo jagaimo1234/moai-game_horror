@@ -3596,7 +3596,7 @@ function showDarkMarketCatalog() {
     darkMarketLineup.forEach((item, index) => {
       // Add custom click to jump to slide if clicking non-active card
       trackEl.innerHTML += `
-        <div class="catalog-card" onclick="if(currentCarouselIndex !== ${index}) { jumpToSlide(${index}); }" style="animation-delay: ${index * 0.12}s; cursor: pointer;">
+        <div class="catalog-card" onclick="if(currentCarouselIndex !== ${index}) { jumpToSlide(${index}); }" style="cursor: pointer;">
           <div style="margin-bottom: 2px;">
             <span style="font-size: 8px; color: #ffbc69; border: 1px solid #ffbc69; padding: 1px 4px; border-radius: 3px; font-weight: bold; vertical-align: middle;">${item.category}</span>
             <span style="font-size: 8px; color: #ff4d4d; border: 1px solid #ff4d4d; padding: 1px 4px; border-radius: 3px; font-weight: bold; vertical-align: middle; margin-left: 4px;">限定</span>
