@@ -3539,6 +3539,11 @@ function showDarkMarketCatalog() {
   keys.right = false;
   keys.fire = false;
 
+  const track = document.getElementById('dark-catalog-track');
+  if (track) {
+    track.classList.remove('revealed');
+  }
+
   const overlay = document.getElementById('dark-catalog-decrypt-overlay');
   const progress = document.getElementById('dark-decrypt-progress');
   const text = document.getElementById('dark-decrypt-text');
@@ -3572,6 +3577,10 @@ function showDarkMarketCatalog() {
 
     setTimeout(() => {
       overlay.style.opacity = '0';
+      const track = document.getElementById('dark-catalog-track');
+      if (track) {
+        track.classList.add('revealed');
+      }
       setTimeout(() => {
         overlay.style.display = 'none';
       }, 400);
@@ -3587,7 +3596,7 @@ function showDarkMarketCatalog() {
     darkMarketLineup.forEach((item, index) => {
       // Add custom click to jump to slide if clicking non-active card
       trackEl.innerHTML += `
-        <div class="catalog-card" onclick="if(currentCarouselIndex !== ${index}) { jumpToSlide(${index}); }" style="opacity: 0; animation: catalogCardReveal 0.45s cubic-bezier(0.18, 0.89, 0.32, 1.28) forwards; animation-delay: ${1.1 + index * 0.12}s; cursor: pointer;">
+        <div class="catalog-card" onclick="if(currentCarouselIndex !== ${index}) { jumpToSlide(${index}); }" style="animation-delay: ${index * 0.12}s; cursor: pointer;">
           <div style="margin-bottom: 2px;">
             <span style="font-size: 8px; color: #ffbc69; border: 1px solid #ffbc69; padding: 1px 4px; border-radius: 3px; font-weight: bold; vertical-align: middle;">${item.category}</span>
             <span style="font-size: 8px; color: #ff4d4d; border: 1px solid #ff4d4d; padding: 1px 4px; border-radius: 3px; font-weight: bold; vertical-align: middle; margin-left: 4px;">限定</span>
