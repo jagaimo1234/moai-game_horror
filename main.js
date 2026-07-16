@@ -3674,9 +3674,13 @@ function triggerGiantAuthorChase() {
   blip(130, 0.45, 0.45, 'sawtooth');
   blip(90, 0.65, 0.45, 'sawtooth');
   
-  // Open dramatic dialog announcement
-  const textEl = document.getElementById('dialog-text');
+  // Open dramatic dialog announcement using correct element IDs
+  const textEl = document.getElementById('dark-market-text');
   const dialog = document.getElementById('dark-market-dialog');
+  const yesBtn = document.getElementById('btn-dark-yes');
+  const noBtn = document.getElementById('btn-dark-no');
+  const closeBtn = document.getElementById('btn-dark-close');
+  
   if (textEl && dialog) {
     dialog.style.display = 'block';
     gamePaused = true;
@@ -3684,9 +3688,8 @@ function triggerGiantAuthorChase() {
     textEl.textContent = '「きみわたしの作品を盗んだ？？（激怒）」\n\n背後に巨大な作者モア太郎が現れた！捕まらないように脱出せよ！';
     
     // Hide default options and show a single escape button
-    const yesBtn = document.getElementById('btn-dark-yes');
-    const closeBtn = document.getElementById('btn-dark-close');
     if (yesBtn) yesBtn.style.display = 'none';
+    if (noBtn) noBtn.style.display = 'none';
     if (closeBtn) {
       closeBtn.style.display = 'inline-block';
       closeBtn.textContent = 'ひえぇぇ！！（逃げる）';
@@ -3696,7 +3699,7 @@ function triggerGiantAuthorChase() {
         closeDarkMarketDialog();
         // Restore original click handler and label
         closeBtn.onclick = origCloseClick;
-        closeBtn.textContent = '内緒にする（断る）';
+        closeBtn.textContent = '閉じる';
       };
     }
   }
