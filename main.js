@@ -2095,7 +2095,7 @@ function setHud() {
     const progress = Math.min(100, Math.round((crystals / required) * 100));
     const stageFourStealDone = currentStage !== 4 || stolenYogurts > 0;
     const goal = (currentStage === 4 && !moataroMoaiPurchased)
-      ? '金沢モア太郎ブース（J-80）でモアイを購入して連れていく'
+      ? '金沢モアたろうブース（J-80）でモアイを購入して連れていく'
       : escapeOpen ? `ゲート解放中: ヨーグルト${required}個を持って脱出` : config.mission;
     const special = `${ringHint}${helperHint}`.trim();
 
@@ -3692,7 +3692,7 @@ function triggerGiantAuthorChase() {
     dialog.style.display = 'block';
     gamePaused = true;
     stopCurrentVoice();
-    textEl.textContent = '「きみわたしの作品を盗んだ？？（激怒）」\n\n背後に巨大な作者モア太郎が現れた！捕まらないように脱出せよ！';
+    textEl.textContent = '「きみわたしの作品を盗んだ？？（激怒）」\n\n背後に巨大な作者モアたろうが現れた！捕まらないように脱出せよ！';
     
     // Hide default options and show a single escape button
     if (yesBtn) yesBtn.style.display = 'none';
@@ -3740,7 +3740,7 @@ function showDarkMarketArrivedIntro() {
   const closeBtn = document.getElementById('btn-dark-close');
 
   if (textEl) {
-    textEl.textContent = '「ククク……無事に辿り着いたな。お前の健闘を称えよう。\n実を言うと、作者の『モア太郎』に無断で、未公開の作品を盗んできたのじゃ。フフフ……見たことない作品があるじゃろう？」';
+    textEl.textContent = '「ククク……無事に辿り着いたな。お前の健闘を称えよう。\n実を言うと、作者の『モアたろう』に無断で、未公開の作品を盗んできたのじゃ。フフフ……見たことない作品があるじゃろう？」';
   }
   if (yesBtn) {
     yesBtn.style.display = 'inline-block';
@@ -4043,7 +4043,7 @@ function handleDarkMarketResponse(answer) {
       // Transition to quiz context
       darkMarketDialogContext = 'guide_quiz';
       if (textEl) {
-        textEl.textContent = '「ならば答えてみよ……。\n創業者モア太郎が愛した『モアイロボMARK2』の好物といえば何じゃ！？」';
+        textEl.textContent = '「ならば答えてみよ……。\n創業者モアたろうが愛した『モアイロボMARK2』の好物といえば何じゃ！？」';
       }
       if (yesBtn) {
         yesBtn.style.display = 'inline-block';
