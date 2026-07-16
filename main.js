@@ -3473,10 +3473,43 @@ function jumpToSlide(idx) {
 }
 
 function updateCarouselPosition() {
-  const track = document.getElementById('dark-catalog-track');
-  if (track) {
-    track.style.transform = `translateX(-${currentCarouselIndex * 100}%)`;
-  }
+  const cards = document.querySelectorAll('.catalog-card');
+  const count = darkMarketLineup.length;
+  if (!cards.length) return;
+
+  cards.forEach((card, idx) => {
+    let diff = idx - currentCarouselIndex;
+    if (diff > 2) diff -= count;
+    if (diff < -2) diff += count;
+
+    const absDiff = Math.abs(diff);
+
+    // 3D positioning calculations
+    const tx = diff * 125; // Horizontal offset
+    const tz = -absDiff * 95; // Depth offset
+    const ry = diff * -25; // Y rotation
+    const sc = 1 - absDiff * 0.12; // Scale down side cards
+
+    card.style.transform = `translateX(${tx}px) translateZ(${tz}px) rotateY(${ry}deg) scale(${sc})`;
+    card.style.zIndex = 10 - absDiff;
+
+    if (absDiff === 0) {
+      card.style.opacity = '1';
+      card.style.pointerEvents = 'auto';
+      card.style.border = '2px solid #ffbc69';
+      card.style.boxShadow = '0 10px 30px rgba(255,188,105,0.3), 0 0 15px rgba(255,188,105,0.15)';
+    } else if (absDiff === 1) {
+      card.style.opacity = '0.55';
+      card.style.pointerEvents = 'auto'; // allow clicking side cards to select them!
+      card.style.border = '1px solid rgba(255,255,255,0.15)';
+      card.style.boxShadow = '0 5px 15px rgba(0,0,0,0.5)';
+    } else {
+      card.style.opacity = '0.12';
+      card.style.pointerEvents = 'none';
+      card.style.border = '1px solid rgba(255,255,255,0.05)';
+      card.style.boxShadow = 'none';
+    }
+  });
   
   // Update dot elements styling
   const dots = document.querySelectorAll('.catalog-dot');
@@ -3552,17 +3585,18 @@ function showDarkMarketCatalog() {
   if (trackEl) {
     trackEl.innerHTML = '';
     darkMarketLineup.forEach((item, index) => {
+      // Add custom click to jump to slide if clicking non-active card
       trackEl.innerHTML += `
-        <div class="catalog-card" style="flex: 0 0 100%; display: flex; flex-direction: column; align-items: center; text-align: center; box-sizing: border-box; padding: 5px 12px; opacity: 0; transform: translateY(18px); animation: catalogCardReveal 0.45s cubic-bezier(0.18, 0.89, 0.32, 1.28) forwards; animation-delay: ${1.1 + index * 0.12}s;">
-          <div style="margin-bottom: 8px;">
-            <span style="font-size: 9px; color: #ffbc69; border: 1px solid #ffbc69; padding: 2px 5px; border-radius: 4px; font-weight: bold; vertical-align: middle;">${item.category}</span>
-            <span style="font-size: 9px; color: #ff4d4d; border: 1px solid #ff4d4d; padding: 2px 5px; border-radius: 4px; font-weight: bold; vertical-align: middle; margin-left: 6px;">2週間限定</span>
+        <div class="catalog-card" onclick="if(currentCarouselIndex !== ${index}) { jumpToSlide(${index}); }" style="opacity: 0; animation: catalogCardReveal 0.45s cubic-bezier(0.18, 0.89, 0.32, 1.28) forwards; animation-delay: ${1.1 + index * 0.12}s; cursor: pointer;">
+          <div style="margin-bottom: 2px;">
+            <span style="font-size: 8px; color: #ffbc69; border: 1px solid #ffbc69; padding: 1px 4px; border-radius: 3px; font-weight: bold; vertical-align: middle;">${item.category}</span>
+            <span style="font-size: 8px; color: #ff4d4d; border: 1px solid #ff4d4d; padding: 1px 4px; border-radius: 3px; font-weight: bold; vertical-align: middle; margin-left: 4px;">限定</span>
           </div>
-          <img src="${item.img}" alt="" style="width: 130px; height: 130px; border-radius: 10px; object-fit: cover; border: 2px solid rgba(255,188,105,0.3); box-shadow: 0 6px 15px rgba(0,0,0,0.5); margin-bottom: 12px;">
-          <h3 style="margin: 0 0 6px 0; font-size: 16px; color: #fff; font-weight: bold;">${item.name}</h3>
-          <p style="margin: 0 0 12px 0; font-size: 11.5px; opacity: 0.75; line-height: 1.5; max-width: 340px; min-height: 36px; height: 36px;">${item.desc}</p>
-          <div style="font-size: 18px; font-weight: 900; color: #ffbc69; margin-bottom: 12px;">${item.price}</div>
-          <button type="button" onclick="event.stopPropagation(); window.open('${item.link}', '_blank')" style="background: #e67e22; color: white; border: none; font-size: 11.5px; padding: 8px 24px; border-radius: 6px; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 4px; box-shadow: 0 3px 10px rgba(230,126,34,0.4); transition: all 0.2s;">
+          <img src="${item.img}" alt="" style="width: 90px; height: 90px; border-radius: 8px; object-fit: cover; border: 1.5px solid rgba(255,188,105,0.3); box-shadow: 0 5px 12px rgba(0,0,0,0.5); margin: 4px 0;">
+          <h4 style="margin: 0; font-size: 12.5px; color: #fff; font-weight: bold; line-height: 1.2;">${item.name}</h4>
+          <p style="margin: 0; font-size: 9.5px; opacity: 0.7; line-height: 1.35; height: 38px; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; width: 100%; text-overflow: ellipsis;">${item.desc}</p>
+          <div style="font-size: 15px; font-weight: 900; color: #ffbc69; margin: 2px 0;">${item.price}</div>
+          <button type="button" onclick="event.stopPropagation(); window.open('${item.link}', '_blank')" style="background: #e67e22; color: white; border: none; font-size: 10px; padding: 6px 16px; border-radius: 5px; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 3px; box-shadow: 0 2px 6px rgba(230,126,34,0.3); transition: all 0.2s;">
             🌌 minneでカートに入れる 🔗
           </button>
         </div>
