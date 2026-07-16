@@ -2690,11 +2690,11 @@ function isInMoataroServiceZone() {
 }
 
 function isMoataroClerk(enemy, index) {
-  return currentStage === 4 && index === 0 && enemy.userData.ai?.active && (moataroServiceActive || moataroClerkSafeTimer > 0 || moataroMoaiPurchased);
+  return currentStage === 4 && index === 0 && enemy.userData.ai?.active && (moataroServiceActive || moataroClerkSafeTimer > 0) && !moataroMoaiPurchased;
 }
 
 function isMoataroSafeAuthor(enemy, index) {
-  return currentStage === 4 && index === 0 && enemy.userData.ai?.active && (moataroServiceActive || moataroClerkSafeTimer > 0 || moataroMoaiPurchased);
+  return currentStage === 4 && index === 0 && enemy.userData.ai?.active && (moataroServiceActive || moataroClerkSafeTimer > 0) && !moataroMoaiPurchased;
 }
 
 function updateMoataroClerk(enemy, dt) {
@@ -3642,6 +3642,64 @@ function showDarkMarketCatalog() {
   if (dialog) dialog.style.display = 'block';
   playRecordedVoice(VOICE_FILES.darkQuestion);
   blip(440, 0.12, 0.12, 'sine');
+}
+
+
+function triggerGiantAuthorChase() {
+  if (currentStage !== 4 || !authors[0]) return;
+  if (moataroMoaiPurchased) return; // Prevent double trigger
+  
+  moataroMoaiPurchased = true;
+  
+  // Teleport the Giant Author near the exit path of the secret alley (-36, 0, 16)
+  authors[0].position.set(-36, 0, 16);
+  setEntityGroundHeight(authors[0]);
+  
+  // Make Moataro HUGE
+  authors[0].scale.set(13.0, 13.0, 13.0);
+  
+  // Activate him and make him chase the player
+  authors[0].userData.ai.active = true;
+  authors[0].visible = true;
+  
+  // Display the red angry dialogue bubble above the giant boss
+  if (authors[0].userData.serviceLabel) {
+    authors[0].userData.serviceLabel.position.set(0, 8.5, 0);
+    authors[0].userData.serviceLabel.scale.set(6.5, 1.5, 1);
+    setTextSprite(authors[0].userData.serviceLabel, 'きみわたしの作品を盗んだ？？（激怒）', '#ff4d4d', 26);
+    authors[0].userData.serviceLabel.visible = true;
+  }
+  
+  // Play angry synthesiser tones
+  blip(130, 0.45, 0.45, 'sawtooth');
+  blip(90, 0.65, 0.45, 'sawtooth');
+  
+  // Open dramatic dialog announcement
+  const textEl = document.getElementById('dialog-text');
+  const dialog = document.getElementById('dark-market-dialog');
+  if (textEl && dialog) {
+    dialog.style.display = 'block';
+    gamePaused = true;
+    stopCurrentVoice();
+    textEl.textContent = '「きみわたしの作品を盗んだ？？（激怒）」\n\n背後に巨大な作者モア太郎が現れた！捕まらないように脱出せよ！';
+    
+    // Hide default options and show a single escape button
+    const yesBtn = document.getElementById('btn-dark-yes');
+    const closeBtn = document.getElementById('btn-dark-close');
+    if (yesBtn) yesBtn.style.display = 'none';
+    if (closeBtn) {
+      closeBtn.style.display = 'inline-block';
+      closeBtn.textContent = 'ひえぇぇ！！（逃げる）';
+      
+      const origCloseClick = closeBtn.onclick;
+      closeBtn.onclick = () => {
+        closeDarkMarketDialog();
+        // Restore original click handler and label
+        closeBtn.onclick = origCloseClick;
+        closeBtn.textContent = '内緒にする（断る）';
+      };
+    }
+  }
 }
 
 function closeDarkMarketCatalog() {
