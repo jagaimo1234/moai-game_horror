@@ -3371,7 +3371,7 @@ const darkMarketLineup = [
     name: 'やったーモアイペン立て',
     price: '1,800円 (通常: 1,900円)',
     desc: '「やったー！」と喜ぶ姿を立体化したペン立て。作者に内緒で勝手に値引きしたぞ。',
-    img: './moai_shot.png',
+    img: './yatta_moai.jpg',
     link: 'https://minne.com/items/40898516'
   },
   {
@@ -3379,15 +3379,15 @@ const darkMarketLineup = [
     name: 'どや顔モアイペン立て',
     price: '1,800円 (通常: 1,900円)',
     desc: '不敵などや顔がじわじわくるペン立て。一般販売されなかった幻の作品じゃ。',
-    img: './moai_shot.png',
+    img: './doyagao_moai.jpg',
     link: 'https://minne.com/items/40898555'
   },
   {
     category: '未公開・盗品',
     name: 'レッドモアイロボmark2(試作機)',
     price: '2,500円',
-    desc: 'ほほ、これを盗むのは特に苦労したわい……！貴重なレッドカラーの試作機モデル。',
-    img: './moai_shot.png',
+    desc: 'ほほ、これを盗むのは特に苦労したわい……！貴重なレッドカラーのできたて試作機モデル。',
+    img: './red_moairobo.jpg',
     link: 'https://minne.com/items/40974411'
   },
   {
@@ -3395,7 +3395,7 @@ const darkMarketLineup = [
     name: 'モアイなルアースタンド',
     price: '3,000円 (通常: 3,500円)',
     desc: 'キーホルダーやアクセサリーも飾れるスタンド。青虫くん付き。勝手に割引したぞ！',
-    img: './moai_lure.png',
+    img: './moai_lure_stand.jpg',
     link: 'https://minne.com/items/40898600'
   },
   {
@@ -3403,7 +3403,7 @@ const darkMarketLineup = [
     name: 'モアイロボ初号機とmark2セット',
     price: '4,000円 (通常: 4,500円)',
     desc: '友情セットじゃ。初代とMARK2を並べて飾って楽しんでほしい。勝手に割引じゃ！',
-    img: './moai_shot.png',
+    img: './moairobo_friendship_set.jpg',
     link: 'https://minne.com/items/40898588'
   },
   {
@@ -3411,7 +3411,7 @@ const darkMarketLineup = [
     name: 'ミニおすわりモアイキーホルダー',
     price: '500円',
     desc: '小さな相棒。送料無料（2,000円以上）に届かない時の買い合わせにピッタリじゃ。',
-    img: './moai_shot.png',
+    img: './mini_osuwari_keyholder.png',
     link: 'https://minne.com/items/40898622'
   },
   {
