@@ -3537,6 +3537,13 @@ function stopDarkMarketCountdown() {
 }
 
 function showDarkMarketCatalog() {
+  const now = Date.now();
+  const openTime = new Date('2026-07-19T15:00:00+09:00').getTime();
+  const closeTime = new Date('2026-08-02T15:00:00+09:00').getTime();
+  if (now < openTime || now > closeTime) {
+    return;
+  }
+
   startDarkMarketCountdown();
   gamePaused = true;
   stopMobileMove();
@@ -3717,6 +3724,14 @@ function closeDarkMarketCatalog() {
 window.closeDarkMarketCatalog = closeDarkMarketCatalog;
 
 function showDarkMarketArrivedIntro() {
+  const now = Date.now();
+  const openTime = new Date('2026-07-19T15:00:00+09:00').getTime();
+  const closeTime = new Date('2026-08-02T15:00:00+09:00').getTime();
+  if (now < openTime || now > closeTime) {
+    showDarkMarketDialog();
+    return;
+  }
+
   gamePaused = true;
   stopMobileMove();
   keys.forward = false;
