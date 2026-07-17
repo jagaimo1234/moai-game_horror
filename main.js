@@ -198,6 +198,15 @@ let tempSelectedMoaiType = 1;
 let moataroInvincibleTimer = 0;
 let moataroClerkSafeTimer = 0;
 let darkMarketNpc = null;
+let currentGuideWaypointIndex = 0;
+let darkMoaiGuideState = 'idle'; // 'idle', 'leading', 'waiting', 'arrived'
+const guideWaypoints = [
+  new THREE.Vector3(0, 0, -46),
+  new THREE.Vector3(0, 0, 9),
+  new THREE.Vector3(-36, 0, 9),
+  new THREE.Vector3(-36, 0, 36),
+  new THREE.Vector3(-45, 0, 36)
+];
 let inDarkMarketZone = false;
 let darkMarketPointLight = null;
 let darkMarketBgmInterval = null;
@@ -2086,7 +2095,7 @@ function setHud() {
     const progress = Math.min(100, Math.round((crystals / required) * 100));
     const stageFourStealDone = currentStage !== 4 || stolenYogurts > 0;
     const goal = (currentStage === 4 && !moataroMoaiPurchased)
-      ? '金沢モア太郎ブース（J-80）でモアイを購入して連れていく'
+      ? '金沢モアたろうブース（J-80）でモアイを購入して連れていく'
       : escapeOpen ? `ゲート解放中: ヨーグルト${required}個を持って脱出` : config.mission;
     const special = `${ringHint}${helperHint}`.trim();
 
@@ -2681,11 +2690,11 @@ function isInMoataroServiceZone() {
 }
 
 function isMoataroClerk(enemy, index) {
-  return currentStage === 4 && index === 0 && enemy.userData.ai?.active && (moataroServiceActive || moataroClerkSafeTimer > 0 || moataroMoaiPurchased);
+  return currentStage === 4 && index === 0 && enemy.userData.ai?.active && (moataroServiceActive || moataroClerkSafeTimer > 0) && !moataroMoaiPurchased;
 }
 
 function isMoataroSafeAuthor(enemy, index) {
-  return currentStage === 4 && index === 0 && enemy.userData.ai?.active && (moataroServiceActive || moataroClerkSafeTimer > 0 || moataroMoaiPurchased);
+  return currentStage === 4 && index === 0 && enemy.userData.ai?.active && (moataroServiceActive || moataroClerkSafeTimer > 0) && !moataroMoaiPurchased;
 }
 
 function updateMoataroClerk(enemy, dt) {
@@ -3343,11 +3352,415 @@ function createDarkMarketBoothStructure(x, z) {
   nukaMoaiSprite.userData.label = nukaLabel;
 }
 
+
+function updateNpcLabel(text, color = '#ffd700') {
+  if (!darkMarketNpc) return;
+  if (darkMarketNpc.userData.guideLabel) {
+    darkMarketNpc.remove(darkMarketNpc.userData.guideLabel);
+  }
+  const label = createTextSprite(text, color, 28);
+  label.position.set(0, 5.8, 0); // Position above Moai NPC
+  label.userData.faceCamera = true;
+  darkMarketNpc.add(label);
+  darkMarketNpc.userData.guideLabel = label;
+}
+
+const darkMarketLineup = [
+  {
+    category: '未公開・盗品',
+    name: 'やったーモアイペン立て',
+    price: '1,800円 (通常: 1,900円)',
+    desc: '「やったー！」と喜ぶ姿を立体化したペン立て。作者に内緒で勝手に値引きしたぞ。',
+    img: './yatta_moai.jpg',
+    link: 'https://minne.com/items/40898516'
+  },
+  {
+    category: '未公開・盗品',
+    name: 'どや顔モアイペン立て',
+    price: '1,800円 (通常: 1,900円)',
+    desc: '不敵などや顔がじわじわくるペン立て。一般販売されなかった幻の作品じゃ。',
+    img: './doyagao_moai.jpg',
+    link: 'https://minne.com/items/40898555'
+  },
+  {
+    category: '未公開・盗品',
+    name: 'レッドモアイロボmark2(試作機)',
+    price: '2,500円',
+    desc: 'ほほ、これを盗むのは特に苦労したわい……！貴重なレッドカラーのできたて試作機モデル。',
+    img: './red_moairobo.jpg',
+    link: 'https://minne.com/items/40974411'
+  },
+  {
+    category: '勝手に割引',
+    name: 'モアイなルアースタンド',
+    price: '3,000円 (通常: 3,500円)',
+    desc: 'キーホルダーやアクセサリーも飾れるスタンド。青虫くん付き。勝手に割引したぞ！',
+    img: './moai_lure_stand.jpg',
+    link: 'https://minne.com/items/40898600'
+  },
+  {
+    category: '勝手に割引',
+    name: 'モアイロボ初号機とmark2セット',
+    price: '4,000円 (通常: 4,500円)',
+    desc: '友情セットじゃ。初代とMARK2を並べて飾って楽しんでほしい。勝手に割引じゃ！',
+    img: './moairobo_friendship_set.jpg',
+    link: 'https://minne.com/items/40898588'
+  },
+  {
+    category: 'その他',
+    name: 'ミニおすわりモアイキーホルダー',
+    price: '500円',
+    desc: '小さな相棒。送料無料（2,000円以上）に届かない時の買い合わせにピッタリじゃ。',
+    img: './mini_osuwari_keyholder.png',
+    link: 'https://minne.com/items/40898622'
+  },
+  {
+    category: 'その他',
+    name: 'モアイロボmark2用 神スタンド',
+    price: '500円',
+    desc: 'モアイロボ単体を神々しくディスプレイできる特製スタンドじゃ。',
+    img: './moai_shot.png',
+    link: 'https://minne.com/items/40974422'
+  }
+];
+
+let currentCarouselIndex = 0;
+
+function slideCarousel(dir) {
+  const count = darkMarketLineup.length;
+  currentCarouselIndex = (currentCarouselIndex + dir + count) % count;
+  updateCarouselPosition();
+  blip(660, 0.05, 0.05, 'triangle');
+}
+
+function jumpToSlide(idx) {
+  currentCarouselIndex = idx;
+  updateCarouselPosition();
+  blip(660, 0.05, 0.05, 'triangle');
+}
+
+function updateCarouselPosition() {
+  const cards = document.querySelectorAll('.catalog-card');
+  const count = darkMarketLineup.length;
+  if (!cards.length) return;
+
+  cards.forEach((card, idx) => {
+    let diff = idx - currentCarouselIndex;
+    if (diff > 2) diff -= count;
+    if (diff < -2) diff += count;
+
+    const absDiff = Math.abs(diff);
+
+    // 3D positioning calculations
+    const tx = diff * 125; // Horizontal offset
+    const tz = -absDiff * 95; // Depth offset
+    const ry = diff * -25; // Y rotation
+    const sc = 1 - absDiff * 0.12; // Scale down side cards
+
+    card.style.transform = `translateX(${tx}px) translateZ(${tz}px) rotateY(${ry}deg) scale(${sc})`;
+    card.style.zIndex = 10 - absDiff;
+
+    if (absDiff === 0) {
+      card.style.opacity = '1';
+      card.style.pointerEvents = 'auto';
+      card.style.border = '2px solid #ffbc69';
+      card.style.boxShadow = '0 10px 30px rgba(255,188,105,0.3), 0 0 15px rgba(255,188,105,0.15)';
+    } else if (absDiff === 1) {
+      card.style.opacity = '0.55';
+      card.style.pointerEvents = 'auto'; // allow clicking side cards to select them!
+      card.style.border = '1px solid rgba(255,255,255,0.15)';
+      card.style.boxShadow = '0 5px 15px rgba(0,0,0,0.5)';
+    } else {
+      card.style.opacity = '0.12';
+      card.style.pointerEvents = 'none';
+      card.style.border = '1px solid rgba(255,255,255,0.05)';
+      card.style.boxShadow = 'none';
+    }
+  });
+  
+  // Update dot elements styling
+  const dots = document.querySelectorAll('.catalog-dot');
+  dots.forEach((dot, idx) => {
+    if (idx === currentCarouselIndex) {
+      dot.style.background = '#ffbc69';
+      dot.style.boxShadow = '0 0 8px #ffbc69';
+      dot.style.transform = 'scale(1.3)';
+    } else {
+      dot.style.background = 'rgba(255,255,255,0.25)';
+      dot.style.boxShadow = 'none';
+      dot.style.transform = 'scale(1)';
+    }
+  });
+}
+
+window.slideCarousel = slideCarousel;
+window.jumpToSlide = jumpToSlide;
+
+let darkMarketCountdownInterval = null;
+
+function startDarkMarketCountdown() {
+  if (darkMarketCountdownInterval) {
+    clearInterval(darkMarketCountdownInterval);
+  }
+
+  const targetTime = new Date('2026-08-02T15:00:00+09:00').getTime();
+
+  function updateTimer() {
+    const now = Date.now();
+    const diff = targetTime - now;
+    const timerEl = document.getElementById('catalog-countdown-timer');
+    if (!timerEl) return;
+
+    if (diff <= 0) {
+      timerEl.textContent = '取引終了 (閉鎖されました)';
+      clearInterval(darkMarketCountdownInterval);
+      return;
+    }
+
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+    const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+    timerEl.textContent = `${days}日 ${hours}時間 ${minutes}分 ${seconds}秒`;
+  }
+
+  updateTimer();
+  darkMarketCountdownInterval = setInterval(updateTimer, 1000);
+}
+
+function stopDarkMarketCountdown() {
+  if (darkMarketCountdownInterval) {
+    clearInterval(darkMarketCountdownInterval);
+    darkMarketCountdownInterval = null;
+  }
+}
+
+function showDarkMarketCatalog() {
+  startDarkMarketCountdown();
+  gamePaused = true;
+  stopMobileMove();
+  keys.forward = false;
+  keys.backward = false;
+  keys.left = false;
+  keys.right = false;
+  keys.fire = false;
+
+  const track = document.getElementById('dark-catalog-track');
+  if (track) {
+    track.classList.remove('revealed');
+  }
+
+  const overlay = document.getElementById('dark-catalog-decrypt-overlay');
+  const progress = document.getElementById('dark-decrypt-progress');
+  const text = document.getElementById('dark-decrypt-text');
+
+  if (overlay && progress && text) {
+    overlay.style.display = 'flex';
+    overlay.style.opacity = '1';
+    progress.style.width = '0%';
+    text.textContent = '[ DECRYPTING SECRET ROUTE... ]';
+    text.style.color = '#ffbc69';
+    text.style.textShadow = '0 0 8px rgba(255,188,105,0.5)';
+    
+    // Play scanning sweep tones
+    playBgmTone(220, 0.15, 0.08, 'sawtooth', -12);
+    setTimeout(() => playBgmTone(330, 0.15, 0.08, 'sawtooth', -12), 180);
+    setTimeout(() => playBgmTone(440, 0.15, 0.08, 'sawtooth', -12), 360);
+    setTimeout(() => playBgmTone(550, 0.15, 0.08, 'sawtooth', -12), 540);
+
+    setTimeout(() => {
+      progress.style.width = '100%';
+    }, 50);
+
+    setTimeout(() => {
+      text.textContent = '[ ACCESS GRANTED ]';
+      text.style.color = '#2ecc71';
+      text.style.textShadow = '0 0 10px rgba(46,204,113,0.8)';
+      // Play success unlock chirp
+      blip(880, 0.1, 0.12, 'sine');
+      setTimeout(() => blip(1320, 0.14, 0.12, 'sine'), 80);
+    }, 750);
+
+    setTimeout(() => {
+      overlay.style.opacity = '0';
+      const track = document.getElementById('dark-catalog-track');
+      if (track) {
+        track.classList.add('revealed');
+      }
+      setTimeout(() => {
+        overlay.style.display = 'none';
+      }, 400);
+    }, 1100);
+  }
+
+  currentCarouselIndex = 0;
+  const trackEl = document.getElementById('dark-catalog-track');
+  const dotsEl = document.getElementById('dark-catalog-dots');
+  
+  if (trackEl) {
+    trackEl.innerHTML = '';
+    darkMarketLineup.forEach((item, index) => {
+      // Add custom click to jump to slide if clicking non-active card
+      trackEl.innerHTML += `
+        <div class="catalog-card" onclick="if(currentCarouselIndex !== ${index}) { jumpToSlide(${index}); }" style="cursor: pointer;">
+          <div style="margin-bottom: 2px;">
+            <span style="font-size: 8px; color: #ffbc69; border: 1px solid #ffbc69; padding: 1px 4px; border-radius: 3px; font-weight: bold; vertical-align: middle;">${item.category}</span>
+            <span style="font-size: 8px; color: #ff4d4d; border: 1px solid #ff4d4d; padding: 1px 4px; border-radius: 3px; font-weight: bold; vertical-align: middle; margin-left: 4px;">限定</span>
+          </div>
+          <img src="${item.img}" alt="" style="width: 90px; height: 90px; border-radius: 8px; object-fit: cover; border: 1.5px solid rgba(255,188,105,0.3); box-shadow: 0 5px 12px rgba(0,0,0,0.5); margin: 4px 0;">
+          <h4 style="margin: 0; font-size: 12.5px; color: #fff; font-weight: bold; line-height: 1.2;">${item.name}</h4>
+          <p style="margin: 0; font-size: 9.5px; opacity: 0.7; line-height: 1.35; height: 38px; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; width: 100%; text-overflow: ellipsis;">${item.desc}</p>
+          <div style="font-size: 15px; font-weight: 900; color: #ffbc69; margin: 2px 0;">${item.price}</div>
+          <button type="button" onclick="event.stopPropagation(); window.open('${item.link}', '_blank')" style="background: #e67e22; color: white; border: none; font-size: 10px; padding: 6px 16px; border-radius: 5px; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 3px; box-shadow: 0 2px 6px rgba(230,126,34,0.3); transition: all 0.2s;">
+            🌌 minneでカートに入れる 🔗
+          </button>
+        </div>
+      `;
+    });
+  }
+
+  if (dotsEl) {
+    dotsEl.innerHTML = '';
+    darkMarketLineup.forEach((_, index) => {
+      dotsEl.innerHTML += `
+        <div class="catalog-dot" onclick="jumpToSlide(${index})" style="width: 8px; height: 8px; border-radius: 50%; background: ${index === 0 ? '#ffbc69' : 'rgba(255,255,255,0.25)'}; cursor: pointer; transition: all 0.25s; box-shadow: ${index === 0 ? '0 0 8px #ffbc69' : 'none'}; transform: ${index === 0 ? 'scale(1.3)' : 'scale(1)'};"></div>
+      `;
+    });
+  }
+  
+  updateCarouselPosition();
+
+  const dialog = document.getElementById('dark-market-catalog-dialog');
+  if (dialog) dialog.style.display = 'block';
+  playRecordedVoice(VOICE_FILES.darkQuestion);
+  blip(440, 0.12, 0.12, 'sine');
+}
+
+
+function triggerGiantAuthorChase() {
+  alert('DEBUG ALERT: triggerGiantAuthorChase triggered!\ncurrentStage = ' + currentStage + ' (' + (typeof currentStage) + ')\nauthors[0] exists = ' + (!!authors[0]) + '\nmoataroMoaiPurchased = ' + moataroMoaiPurchased);
+  if (currentStage !== 4 || !authors[0]) {
+    alert('DEBUG ALERT: Rejected stage/author check! currentStage=' + currentStage + ', author=' + (!!authors[0]));
+    return;
+  }
+  if (moataroMoaiPurchased) {
+    alert('DEBUG ALERT: Rejected double trigger! moataroMoaiPurchased is already true.');
+    return;
+  }
+  
+  moataroMoaiPurchased = true;
+  
+  // Teleport the Giant Author near the exit path of the secret alley (-36, 0, 16)
+  authors[0].position.set(-36, 0, 16);
+  setEntityGroundHeight(authors[0]);
+  
+  // Make Moataro HUGE
+  authors[0].scale.set(13.0, 13.0, 13.0);
+  
+  // Activate him and make him chase the player
+  authors[0].userData.ai.active = true;
+  authors[0].visible = true;
+  
+  // Display the red angry dialogue bubble above the giant boss
+  if (authors[0].userData.serviceLabel) {
+    authors[0].userData.serviceLabel.position.set(0, 8.5, 0);
+    authors[0].userData.serviceLabel.scale.set(6.5, 1.5, 1);
+    setTextSprite(authors[0].userData.serviceLabel, 'きみわたしの作品を盗んだ？？（激怒）', '#ff4d4d', 26);
+    authors[0].userData.serviceLabel.visible = true;
+  }
+  
+  // Play angry synthesiser tones
+  blip(130, 0.45, 0.45, 'sawtooth');
+  blip(90, 0.65, 0.45, 'sawtooth');
+  
+  // Open dramatic dialog announcement using correct element IDs
+  const textEl = document.getElementById('dark-market-text');
+  const dialog = document.getElementById('dark-market-dialog');
+  const yesBtn = document.getElementById('btn-dark-yes');
+  const noBtn = document.getElementById('btn-dark-no');
+  const closeBtn = document.getElementById('btn-dark-close');
+  
+  if (textEl && dialog) {
+    dialog.style.display = 'block';
+    gamePaused = true;
+    stopCurrentVoice();
+    textEl.textContent = '「きみわたしの作品を盗んだ？？（激怒）」\n\n背後に巨大な作者モアたろうが現れた！捕まらないように脱出せよ！';
+    
+    // Hide default options and show a single escape button
+    if (yesBtn) yesBtn.style.display = 'none';
+    if (noBtn) noBtn.style.display = 'none';
+    if (closeBtn) {
+      closeBtn.style.display = 'inline-block';
+      closeBtn.textContent = 'ひえぇぇ！！（逃げる）';
+      
+      const origCloseClick = closeBtn.onclick;
+      closeBtn.onclick = () => {
+        closeDarkMarketDialog();
+        // Restore original click handler and label
+        closeBtn.onclick = origCloseClick;
+        closeBtn.textContent = '閉じる';
+      };
+    }
+  }
+}
+
+function closeDarkMarketCatalog() {
+  stopDarkMarketCountdown();
+  const dialog = document.getElementById('dark-market-catalog-dialog');
+  if (dialog) dialog.style.display = 'none';
+  gamePaused = false;
+  stopCurrentVoice();
+  blip(330, 0.1, 0.1, 'sine');
+}
+
+window.closeDarkMarketCatalog = closeDarkMarketCatalog;
+
+function showDarkMarketArrivedIntro() {
+  gamePaused = true;
+  stopMobileMove();
+  keys.forward = false;
+  keys.backward = false;
+  keys.left = false;
+  keys.right = false;
+  keys.fire = false;
+
+  darkMarketDialogContext = 'arrived_intro1';
+  
+  const textEl = document.getElementById('dark-market-text');
+  const yesBtn = document.getElementById('btn-dark-yes');
+  const noBtn = document.getElementById('btn-dark-no');
+  const closeBtn = document.getElementById('btn-dark-close');
+
+  if (textEl) {
+    textEl.textContent = '「ククク……無事に辿り着いたな。お前の健闘を称えよう。\n実を言うと、作者の『モアたろう』に無断で、未公開の作品を盗んできたのじゃ。フフフ……見たことない作品があるじゃろう？」';
+  }
+  if (yesBtn) {
+    yesBtn.style.display = 'inline-block';
+    yesBtn.textContent = '次へ ＞';
+  }
+  if (noBtn) noBtn.style.display = 'none';
+  if (closeBtn) closeBtn.style.display = 'none';
+
+  const dialog = document.getElementById('dark-market-dialog');
+  if (dialog) dialog.style.display = 'block';
+  playRecordedVoice(VOICE_FILES.darkQuestion);
+  blip(440, 0.12, 0.12, 'sine');
+}
+
+
 function createDarkMarket() {
   if (currentStage !== 4) return;
   
   const npcGroup = new THREE.Group();
-  npcGroup.position.set(-45, 0, 36);
+  npcGroup.position.set(0, 0, -46);
+  currentGuideWaypointIndex = 0;
+  darkMoaiGuideState = 'idle';
+  
+  // Create guide label inside npcGroup later when textures are ready
+  setTimeout(() => {
+    updateNpcLabel("裏取引(minne)はこちら...", "#ffd700");
+  }, 200);
   
   const moaiTexture = textureLoader.load('./moai_shot.png');
   const moaiMat = new THREE.MeshStandardMaterial({
@@ -3400,8 +3813,9 @@ function createDarkSignTexture() {
 function updateDarkMarketZone(dt) {
   if (currentStage !== 4 || !darkMarketNpc) return;
   
-  const dist = moai.position.distanceTo(darkMarketNpc.position);
-  const inZone = dist < 12.0; // Narrowed from 16 to 12
+  const physicalMarketPos = new THREE.Vector3(-45, 0, 36);
+  const distToMarket = moai.position.distanceTo(physicalMarketPos);
+  const inZone = distToMarket < 14.0;
   
   if (inZone !== inDarkMarketZone) {
     inDarkMarketZone = inZone;
@@ -3427,11 +3841,64 @@ function updateDarkMarketZone(dt) {
     shadyMoai.lookAt(camera.position.x, shadyMoai.parent.position.y + 3.2, camera.position.z);
   }
 
-  // Auto-dialogue trigger on approach (narrowed from 8.5 to 6.0)
-  const autoTriggerDist = 6.0;
-  if (dist < autoTriggerDist && !darkMarketDialogueShown) {
-    darkMarketDialogueShown = true;
-    showDarkMarketDialog();
+  // NPC Guide State Machine
+  const playerDist = moai.position.distanceTo(darkMarketNpc.position);
+
+  if (darkMoaiGuideState === 'idle') {
+    // Wait for player to approach
+    if (playerDist < 8.5 && !darkMarketDialogueShown) {
+      darkMarketDialogueShown = true;
+      showDarkMarketDialog();
+    }
+    if (playerDist > 11.0 && darkMarketDialogueShown) {
+      darkMarketDialogueShown = false;
+    }
+  } else if (darkMoaiGuideState === 'leading') {
+    const target = guideWaypoints[currentGuideWaypointIndex + 1];
+    if (target) {
+      const toTarget = target.clone().sub(darkMarketNpc.position);
+      const distToTarget = toTarget.length();
+      if (distToTarget < 0.5) {
+        currentGuideWaypointIndex++;
+        if (currentGuideWaypointIndex >= guideWaypoints.length - 1) {
+          darkMoaiGuideState = 'arrived';
+          // Ensure NPC snaps exactly to destination
+          darkMarketNpc.position.copy(physicalMarketPos);
+          updateNpcLabel("到着じゃ！裏取引を開くぞ", "#2ecc71");
+        }
+      } else {
+        // Tightened from 14.0 to 7.5 units to trigger anger immediately if player falls behind
+        if (playerDist > 7.5) {
+          darkMoaiGuideState = 'waiting';
+          updateNpcLabel("おい！サボるな！(怒)", "#ff3333");
+          playVoiceCue('bad');
+        } else {
+          const moveDir = toTarget.normalize();
+          darkMarketNpc.position.addScaledVector(moveDir, 8.0 * dt);
+          if (performance.now() % 1000 < 30) { // Keep encouraging
+            updateNpcLabel("こっちじゃ、ついてまいれ", "#ffd700");
+          }
+        }
+      }
+    }
+  } else if (darkMoaiGuideState === 'waiting') {
+    // Wait for player to catch up
+    if (playerDist < 4.5) {
+      darkMoaiGuideState = 'leading';
+      updateNpcLabel("よし、案内再開じゃ", "#ffd700");
+      blip(660, 0.1, 0.1, 'sine');
+    }
+  } else if (darkMoaiGuideState === 'arrived') {
+    // Auto-dialogue trigger on approach at destination
+    const autoTriggerDist = 6.0;
+    if (playerDist < autoTriggerDist && !darkMarketDialogueShown) {
+      darkMarketDialogueShown = true;
+      showDarkMarketArrivedIntro();
+    }
+    // Reset dialogue shown flag when player moves away so they can interact again
+    if (playerDist > 9.0 && darkMarketDialogueShown) {
+      darkMarketDialogueShown = false;
+    }
   }
 }
 
@@ -3485,7 +3952,11 @@ function checkDarkMarketClick() {
   raycaster.setFromCamera(mouse, camera);
   const intersects = raycaster.intersectObjects(darkMarketNpc.children);
   if (intersects.length > 0) {
-    showDarkMarketDialog();
+    if (darkMoaiGuideState === 'arrived') {
+      showDarkMarketArrivedIntro();
+    } else {
+      showDarkMarketDialog();
+    }
   }
 }
 
@@ -3514,41 +3985,39 @@ function showDarkMarketDialog() {
   const noBtn = document.getElementById('btn-dark-no');
   const closeBtn = document.getElementById('btn-dark-close');
 
-  if (moataroMoaiPurchased) {
-    if (!hasDarkMarketCard) {
-      const nukaSprite = starterMoais.find(m => m.userData.isNukayorokobi);
-      if (nukaSprite) {
-        triggerNukaEasterEgg(nukaSprite);
-        return;
-      }
-    } else {
-      if (textEl) {
-        textEl.textContent = '無事にクリアできたらの話だがな……フフフ。';
-      }
-      if (yesBtn) yesBtn.style.display = 'none';
-      if (noBtn) noBtn.style.display = 'none';
-      if (closeBtn) closeBtn.style.display = 'inline-block';
-      const dialog = document.getElementById('dark-market-dialog');
-      if (dialog) dialog.style.display = 'block';
-      blip(440, 0.12, 0.12, 'sine');
-      return;
+  // Reset close button style
+  if (closeBtn) closeBtn.style.background = '#a020f0';
+
+  if (darkMoaiGuideState === 'idle') {
+    darkMarketDialogContext = 'guide_start';
+    if (textEl) {
+      textEl.textContent = '……クックック。そこを行く旅人よ。\nお前、本物の『モアイロボの信者』か？';
     }
+    if (yesBtn) {
+      yesBtn.style.display = 'inline-block';
+      yesBtn.textContent = 'はい、信者です';
+    }
+    if (noBtn) {
+      noBtn.style.display = 'inline-block';
+      noBtn.textContent = 'いいえ、違います';
+    }
+    if (closeBtn) closeBtn.style.display = 'none';
+  } else if (darkMoaiGuideState === 'waiting') {
+    darkMarketDialogContext = 'guide_waiting';
+    if (textEl) {
+      textEl.textContent = 'おい、どこへ行く。遅いぞ……。裏取引所はこっちじゃ。';
+    }
+    if (yesBtn) yesBtn.style.display = 'none';
+    if (noBtn) noBtn.style.display = 'none';
+    if (closeBtn) {
+      closeBtn.style.display = 'inline-block';
+      closeBtn.textContent = '閉じる';
+    }
+  } else if (darkMoaiGuideState === 'arrived') {
+    // Just in case fallback, though arrived is handled by showDarkMarketArrivedIntro
+    showDarkMarketArrivedIntro();
+    return;
   }
-  
-  darkMarketDialogContext = 'hmj_question';
-  
-  if (textEl) {
-    textEl.textContent = '……フフフ、ここを見つけたか。\nこの闇の取引所……7月19日（日）15時に開店予定だ。\nお前、今週末のリアルHMJ（東京ビッグサイト）には来られそうか？';
-  }
-  if (yesBtn) {
-    yesBtn.style.display = 'inline-block';
-    yesBtn.textContent = 'はい';
-  }
-  if (noBtn) {
-    noBtn.style.display = 'inline-block';
-    noBtn.textContent = 'いいえ';
-  }
-  if (closeBtn) closeBtn.style.display = 'none';
   
   const dialog = document.getElementById('dark-market-dialog');
   if (dialog) dialog.style.display = 'block';
@@ -3562,54 +4031,104 @@ function handleDarkMarketResponse(answer) {
   const noBtn = document.getElementById('btn-dark-no');
   const closeBtn = document.getElementById('btn-dark-close');
   
-  if (darkMarketDialogContext === 'easter_egg') {
+  if (darkMarketDialogContext === 'guide_start') {
     if (answer === 'yes') {
-      hasDarkMarketCard = true;
-      if (pendingNukaSprite) {
-        if (pendingNukaSprite.parent) pendingNukaSprite.parent.remove(pendingNukaSprite);
-        const idx = starterMoais.indexOf(pendingNukaSprite);
-        if (idx > -1) starterMoais.splice(idx, 1);
-        pendingNukaSprite = null;
+      // Transition to quiz context
+      darkMarketDialogContext = 'guide_quiz';
+      if (textEl) {
+        textEl.textContent = '「ならば答えてみよ……。\n創業者モアたろうが愛した『モアイロボMARK2』の好物といえば何じゃ！？」';
       }
-      
-      const followerTex = textureLoader.load('./nukayorokobi.png');
-      const followerMat = new THREE.SpriteMaterial({ map: followerTex });
-      nukaFollower = new THREE.Sprite(followerMat);
-      nukaFollower.scale.set(1.4, 1.4, 1);
-      nukaFollower.position.copy(moai.position);
-      nukaFollower.position.y += 2.0;
-      world.add(nukaFollower);
-
-      if (textEl) textEl.textContent = '……フフフ、よい判断だ。では健闘を祈る。';
-      blip(880, 0.14, 0.12, 'sine');
+      if (yesBtn) {
+        yesBtn.style.display = 'inline-block';
+        yesBtn.textContent = 'やっぱりビール！';
+      }
+      if (noBtn) {
+        noBtn.style.display = 'inline-block';
+        noBtn.textContent = '酒よりヨーグルト！';
+      }
+      if (closeBtn) {
+        closeBtn.style.display = 'inline-block';
+        closeBtn.textContent = 'ただの水！';
+        closeBtn.style.background = 'rgba(255,255,255,0.15)'; 
+      }
+      blip(660, 0.12, 0.12, 'sine');
     } else {
-      if (textEl) textEl.textContent = '……ほう。この申し出を断るとはな。\nまあよい……後悔するなよ……フフフ。';
-      blip(580, 0.14, 0.12, 'sine');
+      // Refused
+      if (textEl) {
+        textEl.textContent = '「ふん、ただの冷やかしか。立ち去るがよい……。」';
+      }
+      updateNpcLabel("フン、通りすがりか...", "#ffd700");
+      if (yesBtn) yesBtn.style.display = 'none';
+      if (noBtn) noBtn.style.display = 'none';
+      if (closeBtn) {
+        closeBtn.style.display = 'inline-block';
+        closeBtn.textContent = '閉じる';
+        closeBtn.style.background = '#a020f0';
+      }
+      blip(330, 0.12, 0.12, 'sine');
     }
-    
-    if (yesBtn) yesBtn.style.display = 'none';
-    if (noBtn) noBtn.style.display = 'none';
-    if (closeBtn) closeBtn.style.display = 'inline-block';
-    return;
-  }
+  } else if (darkMarketDialogContext === 'guide_quiz') {
+    // Reset close button style
+    if (closeBtn) closeBtn.style.background = '#a020f0';
 
-  if (answer === 'yes') {
-    if (textEl) {
-      textEl.textContent = 'そうか！それは素晴らしい！ならリアル会場（ブース：J-80）で待っているぞ。\nお前の選んだモアイを直接手にとって連れて帰ってやってくれ！\n……なお、この闇の取引所は 7/19（日）15時 に正式オープンするぞ。お楽しみに。';
+    if (answer === 'no') { // Correct answer is Option B (noBtn: '酒よりヨーグルト！')
+      darkMoaiGuideState = 'leading';
+      if (textEl) {
+        textEl.textContent = '「ククク……見事じゃ！真の信者と認めよう。\nついてまいれ、秘められた『闇の直販ゲート』へ案内しよう……。」';
+      }
+      updateNpcLabel("よし、ついてまいれ！", "#ffd700");
+      blip(880, 0.14, 0.12, 'sine');
+      if (yesBtn) yesBtn.style.display = 'none';
+      if (noBtn) noBtn.style.display = 'none';
+      if (closeBtn) {
+        closeBtn.style.display = 'inline-block';
+        closeBtn.textContent = 'ついていく';
+      }
+    } else {
+      // Wrong answers (Option A or Option C)
+      if (textEl) {
+        textEl.textContent = '「愚か者め！修行が足りん、出直してまいれ！(怒)」';
+      }
+      updateNpcLabel("修行して出直してまいれ！", "#ff3333");
+      playRecordedVoice(VOICE_FILES.darkNo);
+      playVoiceCue('bad');
+      if (yesBtn) yesBtn.style.display = 'none';
+      if (noBtn) noBtn.style.display = 'none';
+      if (closeBtn) {
+        closeBtn.style.display = 'inline-block';
+        closeBtn.textContent = '出直す';
+      }
     }
-    blip(880, 0.14, 0.12, 'sine');
-    playRecordedVoice(VOICE_FILES.darkYes);
-  } else {
+    // Set context to end so clicking Close/ついていく closes and starts moving
+    darkMarketDialogContext = 'guide_quiz_end';
+  } else if (darkMarketDialogContext === 'guide_quiz_end') {
+    closeDarkMarketDialog();
+  } else if (darkMarketDialogContext === 'guide_waiting') {
+    closeDarkMarketDialog();
+  } else if (darkMarketDialogContext === 'arrived_intro1') {
+    darkMarketDialogContext = 'arrived_intro2';
     if (textEl) {
-      textEl.textContent = 'そうか……来られないか。寂しいことだ。\n……だが、がっかりするな。\nこの闇の取引所は 7月19日（日）15時 に正式オープンする予定だ。\nその日になったら、またここへ来るとよい。\nこのゲームを遊んでくれたお前だけの、特別な取引を用意しておこう……フフフ。';
+      textEl.textContent = '「それだけではない、今回はワシが勝手に値引きもして、販売してやろうと思うてな……。\nさすがに作者に怒られるから【完全秘密の取引】じゃよ。フフフ、心して見るが良いぞ。」';
     }
-    blip(580, 0.14, 0.12, 'sine');
-    playRecordedVoice(VOICE_FILES.darkNo);
+    if (yesBtn) {
+      yesBtn.style.display = 'inline-block';
+      yesBtn.textContent = '🌌 秘密の取引所を開く';
+    }
+    if (noBtn) {
+      noBtn.style.display = 'none';
+    }
+    if (closeBtn) {
+      closeBtn.style.display = 'inline-block';
+      closeBtn.textContent = '内緒にする（断る）';
+    }
+  } else if (darkMarketDialogContext === 'arrived_intro2') {
+    if (answer === 'yes') {
+      closeDarkMarketDialog();
+      showDarkMarketCatalog();
+    } else {
+      closeDarkMarketDialog();
+    }
   }
-  
-  if (yesBtn) yesBtn.style.display = 'none';
-  if (noBtn) noBtn.style.display = 'none';
-  if (closeBtn) closeBtn.style.display = 'inline-block';
 }
 
 function closeDarkMarketDialog() {
@@ -4149,6 +4668,56 @@ function finishGame(won) {
       `;
     }
 
+    const now = Date.now();
+    const openTime = new Date('2026-07-19T15:00:00+09:00').getTime();
+    const closeTime = new Date('2026-08-02T15:00:00+09:00').getTime();
+    let marketSection = '';
+    let couponText = '';
+
+    if (now < openTime) {
+      couponText = 'リアルイベントは閉幕いたしましたが、このゲームを遊んでくれたお前だけのための<b>『オンライン闇の取引所（minne）』は間もなくオープンするぞ！</b><br>オープンまでもうしばらく待っててくれ。';
+      marketSection = `
+        <div style="background: linear-gradient(90deg, #8e44ad, #3498db); color: #fff; font-size: 15px; font-weight: 900; padding: 14px; border-radius: 8px; margin-top: 18px; box-shadow: 0 4px 15px rgba(142,68,173,0.5); text-shadow: 0 1px 3px rgba(0,0,0,0.5);">
+          🌌 オンライン闇の取引所（minne） 🌌<br>
+          <span style="font-size: 12px; display: block; margin-top: 6px; font-weight: bold; opacity: 0.95;">
+            現在、ネット上に裏取引ルートを構築中じゃ！<br>
+            オープン日時: 7/19(日) 15:00 JST<br>
+            公式SNSでお知らせするぞ！
+          </span>
+        </div>
+      `;
+    } else if (now > closeTime) {
+      couponText = 'リアルイベントは閉幕し、オンライン闇の取引所の開催期間（2週間）も終了いたしました。遊んでいただきありがとうございました！';
+      marketSection = `
+        <div style="background: #333; color: #888; font-size: 15px; font-weight: 900; padding: 14px; border-radius: 8px; margin-top: 18px; border: 2px solid #555;">
+          🌌 オンライン闇の取引所（閉鎖） 🌌<br>
+          <span style="font-size: 12px; display: block; margin-top: 6px; font-weight: bold;">
+            裏取引所はすでに閉鎖されたぞ。<br>
+            またの機会を楽しみに待つが良い！
+          </span>
+        </div>
+      `;
+    } else {
+      const diff = closeTime - now;
+      const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+      const timeStr = `${days}日 ${hours}時間 ${minutes}分`;
+
+      couponText = 'リアルイベントは閉幕いたしましたが、このゲームを遊んでくれたお前だけのための<b>『オンライン闇の取引所（minne）』が2週間限定でオープンしたぞ！</b><br>掘り出し物があるから見にいくが良い。';
+      marketSection = `
+        <div style="background: linear-gradient(90deg, #1abc9c, #2ecc71); color: #fff; font-size: 15px; font-weight: 900; padding: 14px; border-radius: 8px; margin-top: 18px; box-shadow: 0 4px 15px rgba(46,204,113,0.5); text-shadow: 0 1px 3px rgba(0,0,0,0.5); pointer-events: auto;">
+          🌌 オンライン闇の取引所（minne）オープン中！ 🌌<br>
+          <span style="font-size: 12px; display: block; margin-top: 6px; font-weight: bold; opacity: 0.95;">
+            2週間限定オープン！閉鎖まであと: <span style="color: #ffeb3b; font-weight: bold;">${timeStr}</span>
+          </span>
+          <a href="https://minne.com/@moataro-k" target="_blank" onclick="event.stopPropagation();" style="display: block; margin-top: 10px; padding: 8px; background: #e67e22; border-radius: 6px; color: #fff; text-decoration: none; font-weight: bold; font-size: 13px; box-shadow: 0 2px 5px rgba(0,0,0,0.3);">
+            👉 闇の取引所 (minne) へ潜入する 🔗
+          </a>
+        </div>
+      `;
+    }
+
     couponHtml = `
       <div style="background: linear-gradient(180deg, #2a1e38 0%, #0b151b 100%); border: 3px solid #ffd700; border-radius: 16px; padding: 20px; margin: 15px auto 25px; max-width: 460px; box-shadow: 0 16px 40px rgba(0,0,0,0.8), inset 0 0 20px rgba(255,215,0,0.1); text-align: center; box-sizing: border-box; position: relative; overflow: hidden;">
         
@@ -4156,16 +4725,12 @@ function finishGame(won) {
         <p style="margin: 0 0 15px 0; font-size: 14px; color: #fff; font-weight: bold; line-height: 1.5; text-align: left;">
           ヨーグルトを無事に集め、作者の追跡から脱出できたぞ！<br>
           ハンドメイドインジャパンフェス（HMJ）をお楽しみいただき、本当にありがとうございました！！！<br><br>
-          リアルイベントは閉幕いたしましたが、このゲームを遊んでくれたお前だけのための<b>『オンライン闇の取引所（minne）』はこれからオープンするぞ！</b><br>
-          ちょっと待っててくれ。
+          ${couponText}
         </p>
         
         ${itemsHtml}
-
-        <div style="background: linear-gradient(90deg, #8e44ad, #3498db); color: #fff; font-size: 15px; font-weight: 900; padding: 14px; border-radius: 8px; margin-top: 18px; box-shadow: 0 4px 15px rgba(142,68,173,0.5); text-shadow: 0 1px 3px rgba(0,0,0,0.5);">
-          🌌 オンライン闇の取引所（minne） 🌌<br>
-          <span style="font-size: 12px; display: block; margin-top: 6px; font-weight: bold; opacity: 0.95;">現在、ネット上に裏取引ルートを構築中だ。<br>オープン時は公式SNSでお知らせするぞ！</span>
-        </div>
+ 
+        ${marketSection}
 
         <!-- SNS Links for waiting updates -->
         <div style="margin-top: 20px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.15); text-align: center;">
@@ -4350,6 +4915,19 @@ function bindKey(code, pressed) {
 window.addEventListener('keydown', (event) => {
   bindKey(event.code, true);
   if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Space'].includes(event.code)) event.preventDefault();
+  
+  // DEBUG KEY: Press 'T' to teleport directly to Dark Market
+  if (event.code === 'KeyT') {
+    if (currentStage === 4 && darkMarketNpc) {
+      moai.position.set(-40, 0, 36);
+      setEntityGroundHeight(moai);
+      darkMarketNpc.position.set(-45, 0, 36); // Explicit target coordinates instead of out-of-scope variable
+      darkMoaiGuideState = 'arrived';
+      showDarkMarketArrivedIntro();
+      blip(880, 0.1, 0.1, 'sine');
+      console.log('DEBUG: Teleported to Dark Market');
+    }
+  }
 });
 
 window.addEventListener('keyup', (event) => {
@@ -4580,7 +5158,11 @@ if (btnDarkClose) {
   btnDarkClose.addEventListener('pointerdown', (event) => {
     event.preventDefault();
     event.stopPropagation();
-    closeDarkMarketDialog();
+    if (darkMarketDialogContext === 'guide_quiz') {
+      handleDarkMarketResponse('optionC');
+    } else {
+      closeDarkMarketDialog();
+    }
   });
 }
 
