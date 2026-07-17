@@ -3503,7 +3503,14 @@ function startDarkMarketCountdown() {
     clearInterval(darkMarketCountdownInterval);
   }
 
-  const targetTime = new Date('2026-08-02T15:00:00+09:00').getTime();
+  // Load or set target date (2 weeks from first open)
+  let targetTime = localStorage.getItem('darkMarketTargetDate');
+  if (!targetTime) {
+    targetTime = Date.now() + 14 * 24 * 60 * 60 * 1000; // 14 days
+    localStorage.setItem('darkMarketTargetDate', targetTime);
+  } else {
+    targetTime = Number(targetTime);
+  }
 
   function updateTimer() {
     const now = Date.now();
@@ -3537,13 +3544,6 @@ function stopDarkMarketCountdown() {
 }
 
 function showDarkMarketCatalog() {
-  const now = Date.now();
-  const openTime = new Date('2026-07-19T15:00:00+09:00').getTime();
-  const closeTime = new Date('2026-08-02T15:00:00+09:00').getTime();
-  if (now < openTime || now > closeTime) {
-    return;
-  }
-
   startDarkMarketCountdown();
   gamePaused = true;
   stopMobileMove();
@@ -3724,14 +3724,6 @@ function closeDarkMarketCatalog() {
 window.closeDarkMarketCatalog = closeDarkMarketCatalog;
 
 function showDarkMarketArrivedIntro() {
-  const now = Date.now();
-  const openTime = new Date('2026-07-19T15:00:00+09:00').getTime();
-  const closeTime = new Date('2026-08-02T15:00:00+09:00').getTime();
-  if (now < openTime || now > closeTime) {
-    showDarkMarketDialog();
-    return;
-  }
-
   gamePaused = true;
   stopMobileMove();
   keys.forward = false;
@@ -3774,17 +3766,7 @@ function createDarkMarket() {
   
   // Create guide label inside npcGroup later when textures are ready
   setTimeout(() => {
-    const now = Date.now();
-    const openTime = new Date('2026-07-19T15:00:00+09:00').getTime();
-    const closeTime = new Date('2026-08-02T15:00:00+09:00').getTime();
-
-    if (now < openTime) {
-      updateNpcLabel("7/19 15:00 準備中じゃ...", "#ffd700");
-    } else if (now > closeTime) {
-      updateNpcLabel("閉鎖されたぞ", "#ff3333");
-    } else {
-      updateNpcLabel("裏取引(minne)はこちら...", "#ffd700");
-    }
+    updateNpcLabel("裏取引(minne)はこちら...", "#ffd700");
   }, 200);
   
   const moaiTexture = textureLoader.load('./moai_shot.png');
@@ -3868,21 +3850,6 @@ function updateDarkMarketZone(dt) {
 
   // NPC Guide State Machine
   const playerDist = moai.position.distanceTo(darkMarketNpc.position);
-
-  const now = Date.now();
-  const openTime = new Date('2026-07-19T15:00:00+09:00').getTime();
-  const closeTime = new Date('2026-08-02T15:00:00+09:00').getTime();
-
-  if (now < openTime || now > closeTime) {
-    if (playerDist < 8.5 && !darkMarketDialogueShown) {
-      darkMarketDialogueShown = true;
-      showDarkMarketDialog();
-    }
-    if (playerDist > 11.0 && darkMarketDialogueShown) {
-      darkMarketDialogueShown = false;
-    }
-    return;
-  }
 
   if (darkMoaiGuideState === 'idle') {
     // Wait for player to approach
@@ -4028,63 +3995,35 @@ function showDarkMarketDialog() {
   // Reset close button style
   if (closeBtn) closeBtn.style.background = '#a020f0';
 
-  const now = Date.now();
-  const openTime = new Date('2026-07-19T15:00:00+09:00').getTime();
-  const closeTime = new Date('2026-08-02T15:00:00+09:00').getTime();
-
-  if (now < openTime) {
-    darkMarketDialogContext = 'before_open';
+  if (darkMoaiGuideState === 'idle') {
+    darkMarketDialogContext = 'guide_start';
     if (textEl) {
-      textEl.textContent = '「……クックック。そこを行く旅人よ。\n裏取引所のオープンは【7/19(日) 15:00】じゃ。\nそれまで待つが良い。」';
+      textEl.textContent = '……クックック。そこを行く旅人よ。\nお前、本物の『モアイロボの信者』か？';
+    }
+    if (yesBtn) {
+      yesBtn.style.display = 'inline-block';
+      yesBtn.textContent = 'はい、信者です';
+    }
+    if (noBtn) {
+      noBtn.style.display = 'inline-block';
+      noBtn.textContent = 'いいえ、違います';
+    }
+    if (closeBtn) closeBtn.style.display = 'none';
+  } else if (darkMoaiGuideState === 'waiting') {
+    darkMarketDialogContext = 'guide_waiting';
+    if (textEl) {
+      textEl.textContent = 'おい、どこへ行く。遅いぞ……。裏取引所はこっちじゃ。';
     }
     if (yesBtn) yesBtn.style.display = 'none';
     if (noBtn) noBtn.style.display = 'none';
     if (closeBtn) {
       closeBtn.style.display = 'inline-block';
-      closeBtn.textContent = '立ち去る';
+      closeBtn.textContent = '閉じる';
     }
-  } else if (now > closeTime) {
-    darkMarketDialogContext = 'after_close';
-    if (textEl) {
-      textEl.textContent = '「……クックック。裏取引所はすでに閉鎖されてしまったわい。\nまたの機会を待つが良い……。」';
-    }
-    if (yesBtn) yesBtn.style.display = 'none';
-    if (noBtn) noBtn.style.display = 'none';
-    if (closeBtn) {
-      closeBtn.style.display = 'inline-block';
-      closeBtn.textContent = '立ち去る';
-    }
-  } else {
-    if (darkMoaiGuideState === 'idle') {
-      darkMarketDialogContext = 'guide_start';
-      if (textEl) {
-        textEl.textContent = '……クックック。そこを行く旅人よ。\nお前、本物の『モアイロボの信者』か？';
-      }
-      if (yesBtn) {
-        yesBtn.style.display = 'inline-block';
-        yesBtn.textContent = 'はい、信者です';
-      }
-      if (noBtn) {
-        noBtn.style.display = 'inline-block';
-        noBtn.textContent = 'いいえ、違います';
-      }
-      if (closeBtn) closeBtn.style.display = 'none';
-    } else if (darkMoaiGuideState === 'waiting') {
-      darkMarketDialogContext = 'guide_waiting';
-      if (textEl) {
-        textEl.textContent = 'おい、どこへ行く。遅いぞ……。裏取引所はこっちじゃ。';
-      }
-      if (yesBtn) yesBtn.style.display = 'none';
-      if (noBtn) noBtn.style.display = 'none';
-      if (closeBtn) {
-        closeBtn.style.display = 'inline-block';
-        closeBtn.textContent = '閉じる';
-      }
-    } else if (darkMoaiGuideState === 'arrived') {
-      // Just in case fallback, though arrived is handled by showDarkMarketArrivedIntro
-      showDarkMarketArrivedIntro();
-      return;
-    }
+  } else if (darkMoaiGuideState === 'arrived') {
+    // Just in case fallback, though arrived is handled by showDarkMarketArrivedIntro
+    showDarkMarketArrivedIntro();
+    return;
   }
   
   const dialog = document.getElementById('dark-market-dialog');
@@ -4098,11 +4037,6 @@ function handleDarkMarketResponse(answer) {
   const yesBtn = document.getElementById('btn-dark-yes');
   const noBtn = document.getElementById('btn-dark-no');
   const closeBtn = document.getElementById('btn-dark-close');
-
-  if (darkMarketDialogContext === 'before_open' || darkMarketDialogContext === 'after_close') {
-    closeDarkMarketDialog();
-    return;
-  }
   
   if (darkMarketDialogContext === 'guide_start') {
     if (answer === 'yes') {
@@ -4741,56 +4675,6 @@ function finishGame(won) {
       `;
     }
 
-    const now = Date.now();
-    const openTime = new Date('2026-07-19T15:00:00+09:00').getTime();
-    const closeTime = new Date('2026-08-02T15:00:00+09:00').getTime();
-    let marketSection = '';
-    let couponText = '';
-
-    if (now < openTime) {
-      couponText = 'リアルイベントは閉幕いたしましたが、このゲームを遊んでくれたお前だけのための<b>『オンライン闇の取引所（minne）』は間もなくオープンするぞ！</b><br>オープンまでもうしばらく待っててくれ。';
-      marketSection = `
-        <div style="background: linear-gradient(90deg, #8e44ad, #3498db); color: #fff; font-size: 15px; font-weight: 900; padding: 14px; border-radius: 8px; margin-top: 18px; box-shadow: 0 4px 15px rgba(142,68,173,0.5); text-shadow: 0 1px 3px rgba(0,0,0,0.5);">
-          🌌 オンライン闇の取引所（minne） 🌌<br>
-          <span style="font-size: 12px; display: block; margin-top: 6px; font-weight: bold; opacity: 0.95;">
-            現在、ネット上に裏取引ルートを構築中じゃ！<br>
-            オープン日時: 7/19(日) 15:00 JST<br>
-            公式SNSでお知らせするぞ！
-          </span>
-        </div>
-      `;
-    } else if (now > closeTime) {
-      couponText = 'リアルイベントは閉幕し、オンライン闇の取引所の開催期間（2週間）も終了いたしました。遊んでいただきありがとうございました！';
-      marketSection = `
-        <div style="background: #333; color: #888; font-size: 15px; font-weight: 900; padding: 14px; border-radius: 8px; margin-top: 18px; border: 2px solid #555;">
-          🌌 オンライン闇の取引所（閉鎖） 🌌<br>
-          <span style="font-size: 12px; display: block; margin-top: 6px; font-weight: bold;">
-            裏取引所はすでに閉鎖されたぞ。<br>
-            またの機会を楽しみに待つが良い！
-          </span>
-        </div>
-      `;
-    } else {
-      const diff = closeTime - now;
-      const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-      const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-      const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-      const timeStr = `${days}日 ${hours}時間 ${minutes}分`;
-
-      couponText = 'リアルイベントは閉幕いたしましたが、このゲームを遊んでくれたお前だけのための<b>『オンライン闇の取引所（minne）』が2週間限定でオープンしたぞ！</b><br>掘り出し物があるから見にいくが良い。';
-      marketSection = `
-        <div style="background: linear-gradient(90deg, #1abc9c, #2ecc71); color: #fff; font-size: 15px; font-weight: 900; padding: 14px; border-radius: 8px; margin-top: 18px; box-shadow: 0 4px 15px rgba(46,204,113,0.5); text-shadow: 0 1px 3px rgba(0,0,0,0.5); pointer-events: auto;">
-          🌌 オンライン闇の取引所（minne）オープン中！ 🌌<br>
-          <span style="font-size: 12px; display: block; margin-top: 6px; font-weight: bold; opacity: 0.95;">
-            2週間限定オープン！閉鎖まであと: <span style="color: #ffeb3b; font-weight: bold;">${timeStr}</span>
-          </span>
-          <a href="https://minne.com/@moataro-k" target="_blank" onclick="event.stopPropagation();" style="display: block; margin-top: 10px; padding: 8px; background: #e67e22; border-radius: 6px; color: #fff; text-decoration: none; font-weight: bold; font-size: 13px; box-shadow: 0 2px 5px rgba(0,0,0,0.3);">
-            👉 闇の取引所 (minne) へ潜入する 🔗
-          </a>
-        </div>
-      `;
-    }
-
     couponHtml = `
       <div style="background: linear-gradient(180deg, #2a1e38 0%, #0b151b 100%); border: 3px solid #ffd700; border-radius: 16px; padding: 20px; margin: 15px auto 25px; max-width: 460px; box-shadow: 0 16px 40px rgba(0,0,0,0.8), inset 0 0 20px rgba(255,215,0,0.1); text-align: center; box-sizing: border-box; position: relative; overflow: hidden;">
         
@@ -4798,12 +4682,16 @@ function finishGame(won) {
         <p style="margin: 0 0 15px 0; font-size: 14px; color: #fff; font-weight: bold; line-height: 1.5; text-align: left;">
           ヨーグルトを無事に集め、作者の追跡から脱出できたぞ！<br>
           ハンドメイドインジャパンフェス（HMJ）をお楽しみいただき、本当にありがとうございました！！！<br><br>
-          ${couponText}
+          リアルイベントは閉幕いたしましたが、このゲームを遊んでくれたお前だけのための<b>『オンライン闇の取引所（minne）』はこれからオープンするぞ！</b><br>
+          ちょっと待っててくれ。
         </p>
         
         ${itemsHtml}
- 
-        ${marketSection}
+
+        <div style="background: linear-gradient(90deg, #8e44ad, #3498db); color: #fff; font-size: 15px; font-weight: 900; padding: 14px; border-radius: 8px; margin-top: 18px; box-shadow: 0 4px 15px rgba(142,68,173,0.5); text-shadow: 0 1px 3px rgba(0,0,0,0.5);">
+          🌌 オンライン闇の取引所（minne） 🌌<br>
+          <span style="font-size: 12px; display: block; margin-top: 6px; font-weight: bold; opacity: 0.95;">現在、ネット上に裏取引ルートを構築中だ。<br>オープン時は公式SNSでお知らせするぞ！</span>
+        </div>
 
         <!-- SNS Links for waiting updates -->
         <div style="margin-top: 20px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.15); text-align: center;">
