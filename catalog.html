@@ -663,7 +663,9 @@
     }
   </style>
 
-  <script src="data.js?v=20260717_2217"></script>
+  <script>
+    document.write('<script src="data.js?v=' + Date.now() + '"><\/script>');
+  </script>
   <script>
     const DEV_STATUSES = [
       { label: "💭 発掘中", desc: "アイデア・構想段階" },
