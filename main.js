@@ -3774,7 +3774,17 @@ function createDarkMarket() {
   
   // Create guide label inside npcGroup later when textures are ready
   setTimeout(() => {
-    updateNpcLabel("裏取引(minne)はこちら...", "#ffd700");
+    const now = Date.now();
+    const openTime = new Date('2026-07-19T15:00:00+09:00').getTime();
+    const closeTime = new Date('2026-08-02T15:00:00+09:00').getTime();
+
+    if (now < openTime) {
+      updateNpcLabel("7/19 15:00 準備中じゃ...", "#ffd700");
+    } else if (now > closeTime) {
+      updateNpcLabel("閉鎖されたぞ", "#ff3333");
+    } else {
+      updateNpcLabel("裏取引(minne)はこちら...", "#ffd700");
+    }
   }, 200);
   
   const moaiTexture = textureLoader.load('./moai_shot.png');
@@ -3858,6 +3868,21 @@ function updateDarkMarketZone(dt) {
 
   // NPC Guide State Machine
   const playerDist = moai.position.distanceTo(darkMarketNpc.position);
+
+  const now = Date.now();
+  const openTime = new Date('2026-07-19T15:00:00+09:00').getTime();
+  const closeTime = new Date('2026-08-02T15:00:00+09:00').getTime();
+
+  if (now < openTime || now > closeTime) {
+    if (playerDist < 8.5 && !darkMarketDialogueShown) {
+      darkMarketDialogueShown = true;
+      showDarkMarketDialog();
+    }
+    if (playerDist > 11.0 && darkMarketDialogueShown) {
+      darkMarketDialogueShown = false;
+    }
+    return;
+  }
 
   if (darkMoaiGuideState === 'idle') {
     // Wait for player to approach
@@ -4003,35 +4028,63 @@ function showDarkMarketDialog() {
   // Reset close button style
   if (closeBtn) closeBtn.style.background = '#a020f0';
 
-  if (darkMoaiGuideState === 'idle') {
-    darkMarketDialogContext = 'guide_start';
+  const now = Date.now();
+  const openTime = new Date('2026-07-19T15:00:00+09:00').getTime();
+  const closeTime = new Date('2026-08-02T15:00:00+09:00').getTime();
+
+  if (now < openTime) {
+    darkMarketDialogContext = 'before_open';
     if (textEl) {
-      textEl.textContent = '……クックック。そこを行く旅人よ。\nお前、本物の『モアイロボの信者』か？';
-    }
-    if (yesBtn) {
-      yesBtn.style.display = 'inline-block';
-      yesBtn.textContent = 'はい、信者です';
-    }
-    if (noBtn) {
-      noBtn.style.display = 'inline-block';
-      noBtn.textContent = 'いいえ、違います';
-    }
-    if (closeBtn) closeBtn.style.display = 'none';
-  } else if (darkMoaiGuideState === 'waiting') {
-    darkMarketDialogContext = 'guide_waiting';
-    if (textEl) {
-      textEl.textContent = 'おい、どこへ行く。遅いぞ……。裏取引所はこっちじゃ。';
+      textEl.textContent = '「……クックック。そこを行く旅人よ。\n裏取引所のオープンは【7/19(日) 15:00】じゃ。\nそれまで待つが良い。」';
     }
     if (yesBtn) yesBtn.style.display = 'none';
     if (noBtn) noBtn.style.display = 'none';
     if (closeBtn) {
       closeBtn.style.display = 'inline-block';
-      closeBtn.textContent = '閉じる';
+      closeBtn.textContent = '立ち去る';
     }
-  } else if (darkMoaiGuideState === 'arrived') {
-    // Just in case fallback, though arrived is handled by showDarkMarketArrivedIntro
-    showDarkMarketArrivedIntro();
-    return;
+  } else if (now > closeTime) {
+    darkMarketDialogContext = 'after_close';
+    if (textEl) {
+      textEl.textContent = '「……クックック。裏取引所はすでに閉鎖されてしまったわい。\nまたの機会を待つが良い……。」';
+    }
+    if (yesBtn) yesBtn.style.display = 'none';
+    if (noBtn) noBtn.style.display = 'none';
+    if (closeBtn) {
+      closeBtn.style.display = 'inline-block';
+      closeBtn.textContent = '立ち去る';
+    }
+  } else {
+    if (darkMoaiGuideState === 'idle') {
+      darkMarketDialogContext = 'guide_start';
+      if (textEl) {
+        textEl.textContent = '……クックック。そこを行く旅人よ。\nお前、本物の『モアイロボの信者』か？';
+      }
+      if (yesBtn) {
+        yesBtn.style.display = 'inline-block';
+        yesBtn.textContent = 'はい、信者です';
+      }
+      if (noBtn) {
+        noBtn.style.display = 'inline-block';
+        noBtn.textContent = 'いいえ、違います';
+      }
+      if (closeBtn) closeBtn.style.display = 'none';
+    } else if (darkMoaiGuideState === 'waiting') {
+      darkMarketDialogContext = 'guide_waiting';
+      if (textEl) {
+        textEl.textContent = 'おい、どこへ行く。遅いぞ……。裏取引所はこっちじゃ。';
+      }
+      if (yesBtn) yesBtn.style.display = 'none';
+      if (noBtn) noBtn.style.display = 'none';
+      if (closeBtn) {
+        closeBtn.style.display = 'inline-block';
+        closeBtn.textContent = '閉じる';
+      }
+    } else if (darkMoaiGuideState === 'arrived') {
+      // Just in case fallback, though arrived is handled by showDarkMarketArrivedIntro
+      showDarkMarketArrivedIntro();
+      return;
+    }
   }
   
   const dialog = document.getElementById('dark-market-dialog');
@@ -4045,6 +4098,11 @@ function handleDarkMarketResponse(answer) {
   const yesBtn = document.getElementById('btn-dark-yes');
   const noBtn = document.getElementById('btn-dark-no');
   const closeBtn = document.getElementById('btn-dark-close');
+
+  if (darkMarketDialogContext === 'before_open' || darkMarketDialogContext === 'after_close') {
+    closeDarkMarketDialog();
+    return;
+  }
   
   if (darkMarketDialogContext === 'guide_start') {
     if (answer === 'yes') {
