@@ -336,6 +336,33 @@ const MASTER_PRODUCTS = [
     name:  'まちょいモアイルアースタンド',
     desc:  'モアイがあなたの大切なルアー（釣具）をがっちりホールドする、釣り人必見の専用ディスプレイスタンド。お気に入りのルアーをおしゃれにディスプレイして、次の釣行へのモチベーションを高めましょう！'
   },
+  {
+    id: 'yatta_moai',
+    image: 'images/kurima/yatta_moai.jpg',
+    images: [
+      'images/kurima/yatta_moai.jpg',
+    ],
+    name:  'やったー\nモアイペン立て',
+    desc:  '表情は変わらない。でも、うれしい。両手を広げて全身で喜びを表現するモアイのペン立て。デスクを明るく彩ります。'
+  },
+  {
+    id: 'doyagao_moai',
+    image: 'images/kurima/doyagao_moai.jpg',
+    images: [
+      'images/kurima/doyagao_moai.jpg',
+    ],
+    name:  'どやがお\nモアイペン立て',
+    desc:  'ちょっとジムリーダーっぽい、腕組みをしてドヤ顔を決めるモアイのペン立て。自信に満ち溢れた佇まいでペンをしっかりホールドします。'
+  },
+  {
+    id: 'red_moairobo',
+    image: 'images/kurima/red_moairobo.jpg',
+    images: [
+      'images/kurima/red_moairobo.jpg',
+    ],
+    name:  'MOAI ROBO MARK 2\nRed prototype',
+    desc:  'ヨーグルト大好きなモアイロボ MARK 2のレッドカラー試作機（プロトタイプ）。軽井沢で満喫中の作者から強奪したと言われる特別な仕様です。組み立て式フィギュア。'
+  },
 ];
 
 const EVENTS = {
