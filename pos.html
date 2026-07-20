@@ -172,13 +172,25 @@
     </header>
 
     <!-- Event Tabs -->
-    <div style="display:flex; align-items:center; overflow-x:auto; padding:0 20px 10px; gap:10px; background:var(--header-bg); border-bottom:1px solid var(--border);">
-      <div class="event-tabs" id="event-tabs" style="display:flex; gap:10px; padding:0; flex-wrap:nowrap; overflow:visible;">
-        <!-- Injected via JS -->
+    <div style="display:flex; flex-direction:column; gap:10px; padding:10px 20px; background:#15151a; border-bottom: 1px solid var(--border);">
+      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+        <div style="display:flex; flex-direction:column; gap:8px; flex:1; min-width:0;">
+          <!-- Marche Section -->
+          <div style="display:flex; align-items:center; gap:8px; min-width:0;">
+            <span style="font-size:11px; font-weight:bold; color:var(--accent); opacity:0.8; width:65px; flex-shrink:0;">⛺ マルシェ:</span>
+            <div class="event-tabs" id="event-tabs-marche" style="display:flex; gap:8px; overflow-x:auto; white-space:nowrap; flex:1; padding-bottom:2px;"></div>
+          </div>
+          <!-- Non-Marche Section -->
+          <div style="display:flex; align-items:center; gap:8px; min-width:0; border-top:1px solid rgba(255,255,255,0.05); padding-top:6px;">
+            <span style="font-size:11px; font-weight:bold; color:#aaa; opacity:0.8; width:65px; flex-shrink:0;">📦 その他:</span>
+            <div class="event-tabs" id="event-tabs-non-marche" style="display:flex; gap:8px; overflow-x:auto; white-space:nowrap; flex:1; padding-bottom:2px;"></div>
+          </div>
+        </div>
+        <div style="display:flex; gap:8px; flex-shrink:0; align-items:center;">
+          <button onclick="openNewEventModal()" style="background:rgba(0,210,255,0.1); border:1px solid #00d2ff; color:#00d2ff; padding:6px 12px; border-radius:20px; font-weight:bold; cursor:pointer; font-size:12px; white-space:nowrap;">➕ 追加</button>
+          <button onclick="openEditEventOrderModal()" style="background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.2); color:#fff; padding:6px 12px; border-radius:20px; font-weight:bold; cursor:pointer; font-size:12px; white-space:nowrap;">↕️ 並び替え</button>
+        </div>
       </div>
-      <button onclick="openNewEventModal()" style="background:rgba(0,210,255,0.1); border:1px solid #00d2ff; color:#00d2ff; padding:8px 16px; border-radius:20px; font-weight:bold; cursor:pointer; font-size:12px; flex-shrink:0; white-space:nowrap;">
-        ＋ 新規追加
-      </button>
     </div>
 
     <!-- POS View -->
@@ -499,9 +511,27 @@
           <input type="checkbox" id="edit-event-is-marche" style="width:16px; height:16px; cursor:pointer;">
           <label for="edit-event-is-marche" style="font-size:12px; opacity:0.8; cursor:pointer;">マルシェ（出店イベント）として扱う</label>
         </div>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:20px; border-top:1px solid rgba(255,255,255,0.05); padding-top:15px;">
+          <button class="btn" style="background:rgba(231,76,60,0.15); border:1px solid var(--danger); color:var(--danger); font-size:12px; padding:6px 12px;" onclick="deleteCurrentEvent()">🗑️ このイベントを削除</button>
+          <div style="display:flex; gap:10px;">
+            <button class="btn" style="background:#444; color:white;" onclick="document.getElementById('edit-event-modal').style.display='none'">キャンセル</button>
+            <button class="btn btn-primary" id="edit-event-save-btn">保存する</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Edit Event Order Modal -->
+    <div id="edit-event-order-modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.8); z-index:2000; align-items:center; justify-content:center; padding:20px;">
+      <div style="background:var(--panel-bg); width:100%; max-width:400px; border-radius:12px; padding:20px; border:1px solid var(--border);">
+        <h3 style="margin-bottom:15px;">イベントの並び替え</h3>
+        <p style="font-size:11px; opacity:0.7; margin-bottom:12px;">タブに表示されるイベントの順番を変更できます。</p>
+        <div id="event-order-list" style="display:flex; flex-direction:column; gap:8px; max-height:300px; overflow-y:auto; margin-bottom:20px; background:rgba(0,0,0,0.2); padding:10px; border-radius:8px;">
+          <!-- Injected via JS -->
+        </div>
         <div style="display:flex; justify-content:flex-end; gap:10px;">
-          <button class="btn" style="background:#444; color:white;" onclick="document.getElementById('edit-event-modal').style.display='none'">キャンセル</button>
-          <button class="btn btn-primary" id="edit-event-save-btn">保存する</button>
+          <button class="btn" style="background:#444; color:white;" onclick="document.getElementById('edit-event-order-modal').style.display='none'">キャンセル</button>
+          <button class="btn btn-primary" onclick="saveEventOrder()">順序を保存</button>
         </div>
       </div>
     </div>
@@ -1146,16 +1176,33 @@
     };
 
     function buildTabs() {
-      const tabsContainer = document.getElementById('event-tabs');
-      tabsContainer.innerHTML = '';
+      const marcheContainer = document.getElementById('event-tabs-marche');
+      const nonMarcheContainer = document.getElementById('event-tabs-non-marche');
+      if (!marcheContainer || !nonMarcheContainer) return;
+      
+      marcheContainer.innerHTML = '';
+      nonMarcheContainer.innerHTML = '';
+      
       const allEvents = window.getAllEvents(eventConfigData);
       
-      Object.keys(allEvents).forEach(key => {
+      let sortedKeys = Object.keys(allEvents);
+      if (eventConfigData && eventConfigData._order) {
+        const order = eventConfigData._order;
+        sortedKeys.sort((a, b) => {
+          const idxA = order.indexOf(a);
+          const idxB = order.indexOf(b);
+          if (idxA === -1 && idxB === -1) return 0;
+          if (idxA === -1) return 1;
+          if (idxB === -1) return -1;
+          return idxA - idxB;
+        });
+      }
+
+      sortedKeys.forEach(key => {
+        const ev = allEvents[key];
         const btn = document.createElement('div');
         btn.id = `tab-${key}`;
         btn.className = `event-tab ${key === currentEventKey ? 'active' : ''}`;
-        
-        const ev = allEvents[key];
         btn.textContent = ev.label;
         btn.onclick = () => window.switchEvent(key);
         
@@ -1166,9 +1213,10 @@
             btn.style.background = 'rgba(255,255,255,0.15)';
             btn.style.color = 'var(--accent)';
           }
+          nonMarcheContainer.appendChild(btn);
+        } else {
+          marcheContainer.appendChild(btn);
         }
-        
-        tabsContainer.appendChild(btn);
       });
     }
 
@@ -5460,6 +5508,114 @@
         alert("更新に失敗しました。");
       }
     });
+
+    let tempEventOrder = [];
+
+    window.openEditEventOrderModal = () => {
+      const allEvents = window.getAllEvents(eventConfigData);
+      
+      let sortedKeys = Object.keys(allEvents);
+      if (eventConfigData && eventConfigData._order) {
+        const order = eventConfigData._order;
+        sortedKeys.sort((a, b) => {
+          const idxA = order.indexOf(a);
+          const idxB = order.indexOf(b);
+          if (idxA === -1 && idxB === -1) return 0;
+          if (idxA === -1) return 1;
+          if (idxB === -1) return -1;
+          return idxA - idxB;
+        });
+      }
+      
+      tempEventOrder = [...sortedKeys];
+      renderEventOrderList();
+      
+      document.getElementById('edit-event-order-modal').style.display = 'flex';
+    };
+
+    function renderEventOrderList() {
+      const allEvents = window.getAllEvents(eventConfigData);
+      const container = document.getElementById('event-order-list');
+      container.innerHTML = '';
+      
+      tempEventOrder.forEach((key, idx) => {
+        const ev = allEvents[key] || {};
+        const isMarcheStr = ev.isMarche !== false ? '⛺' : '📦';
+        
+        container.innerHTML += `
+          <div style="display:flex; justify-content:space-between; align-items:center; background:rgba(255,255,255,0.05); padding:8px 12px; border-radius:6px; border:1px solid rgba(255,255,255,0.05);">
+            <span style="font-size:13px; font-weight:bold;">${isMarcheStr} ${ev.label} <span style="font-size:10px; opacity:0.5; font-weight:normal;">(${key})</span></span>
+            <div style="display:flex; gap:6px;">
+              <button onclick="moveEventOrder(${idx}, -1)" style="background:rgba(255,255,255,0.1); border:none; color:white; padding:4px 8px; border-radius:4px; cursor:pointer; font-size:11px;" ${idx === 0 ? 'disabled' : ''}>▲ 上へ</button>
+              <button onclick="moveEventOrder(${idx}, 1)" style="background:rgba(255,255,255,0.1); border:none; color:white; padding:4px 8px; border-radius:4px; cursor:pointer; font-size:11px;" ${idx === tempEventOrder.length - 1 ? 'disabled' : ''}>▼ 下へ</button>
+            </div>
+          </div>
+        `;
+      });
+    }
+
+    window.moveEventOrder = (idx, direction) => {
+      const targetIdx = idx + direction;
+      if (targetIdx < 0 || targetIdx >= tempEventOrder.length) return;
+      
+      const temp = tempEventOrder[idx];
+      tempEventOrder[idx] = tempEventOrder[targetIdx];
+      tempEventOrder[targetIdx] = temp;
+      
+      renderEventOrderList();
+    };
+
+    window.saveEventOrder = async () => {
+      if (!auth.currentUser) return;
+      try {
+        const config = { ...eventConfigData };
+        config._order = tempEventOrder;
+        await setDoc(doc(db, "settings", "event_config"), config, { merge: true });
+        
+        document.getElementById('edit-event-order-modal').style.display = 'none';
+        alert("イベント順序を保存しました。");
+        buildTabs();
+      } catch(e) {
+        console.error(e);
+        alert("順序の保存に失敗しました。");
+      }
+    };
+
+    window.deleteCurrentEvent = async () => {
+      const allEvents = window.getAllEvents(eventConfigData);
+      const ev = allEvents[currentEventKey] || {};
+      
+      const defaultKeys = ['kurima', 'designfesta', 'hmj', 'history', 'moairoom'];
+      if (defaultKeys.includes(currentEventKey)) {
+        alert("初期設定されている基本イベントは削除できません。");
+        return;
+      }
+      
+      if (!confirm(`イベント「${ev.label || currentEventKey}」を削除しますか？\nこの操作は元に戻せません。`)) {
+        return;
+      }
+      
+      if (!auth.currentUser) return;
+      
+      try {
+        const config = { ...eventConfigData };
+        delete config[currentEventKey];
+        
+        if (config._order) {
+          config._order = config._order.filter(key => key !== currentEventKey);
+        }
+        
+        await setDoc(doc(db, "settings", "event_config"), config);
+        
+        document.getElementById('edit-event-modal').style.display = 'none';
+        alert("イベントを削除しました。");
+        
+        switchEvent(DEFAULT_EVENT);
+      } catch(e) {
+        console.error(e);
+        alert("削除に失敗しました。");
+      }
+    };
   </script>
 
   <!-- Print Tile Modal -->
