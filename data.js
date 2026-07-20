@@ -536,6 +536,7 @@ window.getAllEvents = function(configData) {
         merged[key] = {
           ...merged[key],
           label: config.label,
+          fullName: config.fullName || config.label,
           date: config.date || null,
           location: config.location || null,
           products: merged[key]?.products || []
