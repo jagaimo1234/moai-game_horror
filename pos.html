@@ -260,7 +260,8 @@
         <div style="display: flex; justify-content: space-between; align-items: center;">
           <h2>📊 ダッシュボード (<span id="dash-event-name"></span>)</h2>
           <div style="display: flex; gap: 8px; align-items: center;">
-            <button class="btn btn-primary" style="font-size:12px; padding:6px 12px;" onclick="printSalesReport()">📄 売上報告書 (確定申告用)</button>
+            <button id="btn-print-sales-report" class="btn btn-primary" style="font-size:12px; padding:6px 12px;" onclick="printSalesReport()">📄 売上報告書 (確定申告用)</button>
+            <span id="badge-non-marche" style="display:none; background:rgba(255,255,255,0.05); border:1px dashed rgba(255,255,255,0.3); color:rgba(255,255,255,0.6); padding:6px 12px; border-radius:8px; font-size:11px; font-weight:bold;">⚠️ 非マルシェ（報告書対象外）</span>
             <button class="btn" style="background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.2); font-size:12px; padding:6px 12px; color:var(--accent);" onclick="openEditEventModal()">⚙️ 出店情報を編集</button>
             <button class="btn" style="background:rgba(231,76,60,0.2); color:var(--danger); border:1px solid var(--danger); font-size:11px; padding:4px 8px;" onclick="resetSalesData()">売上のみリセット</button>
             <button class="btn" style="background:rgba(231,76,60,0.2); color:var(--danger); border:1px solid var(--danger); font-size:11px; padding:4px 8px;" onclick="resetInventoryLogData()">在庫履歴のみリセット</button>
@@ -459,9 +460,13 @@
           <label style="font-size:12px; opacity:0.7;">イベント正式名称（売上報告書用）</label>
           <input type="text" id="new-event-fullname" class="form-input" style="margin-top:4px;" placeholder="例: クリエーターズマーケット vol.52">
         </div>
-        <div style="margin-bottom:20px;">
+        <div style="margin-bottom:12px;">
           <label style="font-size:12px; opacity:0.7;">開催日 (スケジュール管理用)</label>
           <input type="date" id="new-event-date" class="form-input" style="margin-top:4px; color-scheme:dark;">
+        </div>
+        <div style="margin-bottom:20px; display:flex; align-items:center; gap:8px;">
+          <input type="checkbox" id="new-event-is-marche" style="width:16px; height:16px; cursor:pointer;" checked>
+          <label for="new-event-is-marche" style="font-size:12px; opacity:0.8; cursor:pointer;">マルシェ（出店イベント）として登録する</label>
         </div>
         <div style="display:flex; justify-content:flex-end; gap:10px;">
           <button class="btn" style="background:#444; color:white;" onclick="document.getElementById('new-event-modal').style.display='none'">キャンセル</button>
@@ -486,9 +491,13 @@
           <label style="font-size:12px; opacity:0.7;">開催日（確定申告・報告書表示用）</label>
           <input type="text" id="edit-event-date-text" class="form-input" style="margin-top:4px;" placeholder="例: 2025年9月6日（土）">
         </div>
-        <div style="margin-bottom:20px;">
+        <div style="margin-bottom:12px;">
           <label style="font-size:12px; opacity:0.7;">会場（住所・会場名）</label>
           <input type="text" id="edit-event-location" class="form-input" style="margin-top:4px;" placeholder="例: 東京ドームシティ プリズムホール">
+        </div>
+        <div style="margin-bottom:20px; display:flex; align-items:center; gap:8px;">
+          <input type="checkbox" id="edit-event-is-marche" style="width:16px; height:16px; cursor:pointer;">
+          <label for="edit-event-is-marche" style="font-size:12px; opacity:0.8; cursor:pointer;">マルシェ（出店イベント）として扱う</label>
         </div>
         <div style="display:flex; justify-content:flex-end; gap:10px;">
           <button class="btn" style="background:#444; color:white;" onclick="document.getElementById('edit-event-modal').style.display='none'">キャンセル</button>
@@ -1145,8 +1154,20 @@
         const btn = document.createElement('div');
         btn.id = `tab-${key}`;
         btn.className = `event-tab ${key === currentEventKey ? 'active' : ''}`;
-        btn.textContent = allEvents[key].label;
+        
+        const ev = allEvents[key];
+        btn.textContent = ev.label;
         btn.onclick = () => window.switchEvent(key);
+        
+        if (ev.isMarche === false) {
+          btn.style.border = '1px dashed rgba(255,255,255,0.3)';
+          btn.style.opacity = '0.7';
+          if (key === currentEventKey) {
+            btn.style.background = 'rgba(255,255,255,0.15)';
+            btn.style.color = 'var(--accent)';
+          }
+        }
+        
         tabsContainer.appendChild(btn);
       });
     }
@@ -1354,6 +1375,13 @@
       const topicsEvName = document.getElementById('topics-event-name');
       if (topicsEvName) topicsEvName.textContent = evLabel;
       if (window.renderTopics) window.renderTopics();
+
+      // マルシェ/非マルシェによる売上報告書ボタンの表示制御
+      const isMarche = currentEv.isMarche !== false;
+      const printBtn = document.getElementById('btn-print-sales-report');
+      const nonMarcheBadge = document.getElementById('badge-non-marche');
+      if (printBtn) printBtn.style.display = isMarche ? 'inline-block' : 'none';
+      if (nonMarcheBadge) nonMarcheBadge.style.display = isMarche ? 'none' : 'inline-block';
       
       updateVisibilityUI();
 
@@ -3031,6 +3059,7 @@
       document.getElementById('new-event-name').value = '';
       document.getElementById('new-event-fullname').value = '';
       document.getElementById('new-event-date').value = '';
+      document.getElementById('new-event-is-marche').checked = true;
       document.getElementById('new-event-modal').style.display = 'flex';
     };
 
@@ -3040,6 +3069,7 @@
       const nameInput = document.getElementById('new-event-name').value.trim();
       const fullNameInput = document.getElementById('new-event-fullname').value.trim();
       const dateInput = document.getElementById('new-event-date').value;
+      const isMarcheInput = document.getElementById('new-event-is-marche').checked;
 
       if (!idInput || !nameInput) {
         alert("管理用IDとイベント略称は必須です。");
@@ -3061,6 +3091,7 @@
         config[idInput] = { 
           label: nameInput, 
           fullName: fullNameInput || nameInput, 
+          isMarche: isMarcheInput,
           status: 'hidden', 
           date: dateInput || null 
         };
@@ -5392,6 +5423,7 @@
       document.getElementById('edit-event-fullname').value = ev.fullName || ev.label || '';
       document.getElementById('edit-event-date-text').value = ev.date || '';
       document.getElementById('edit-event-location').value = ev.location || '';
+      document.getElementById('edit-event-is-marche').checked = ev.isMarche !== false;
       
       document.getElementById('edit-event-modal').style.display = 'flex';
     };
@@ -5402,6 +5434,7 @@
       const fullNameInput = document.getElementById('edit-event-fullname').value.trim();
       const dateInput = document.getElementById('edit-event-date-text').value.trim();
       const locationInput = document.getElementById('edit-event-location').value.trim();
+      const isMarcheInput = document.getElementById('edit-event-is-marche').checked;
 
       if (!nameInput) {
         alert("表示名は必須です。");
@@ -5414,6 +5447,7 @@
           ...(config[currentEventKey] || {}),
           label: nameInput,
           fullName: fullNameInput || nameInput,
+          isMarche: isMarcheInput,
           date: dateInput || null,
           location: locationInput || null
         };

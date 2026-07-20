@@ -399,11 +399,13 @@ const MASTER_PRODUCTS = [
 const EVENTS = {
   kurima: {
     label: '名古屋クリマ',
+    isMarche: true,
     defaultStatus: 'hidden',
     products: []
   },
   designfesta: {
     label: 'デザインフェスタ',
+    isMarche: true,
     defaultStatus: 'hidden',
     products: [
       ...MASTER_PRODUCTS
@@ -411,6 +413,7 @@ const EVENTS = {
   },
   hmj: {
     label: 'HMJ 7/11,12',
+    isMarche: true,
     heroHtml: `
       <div class="topics-container">
         <div class="topics-header">
@@ -465,7 +468,7 @@ const EVENTS = {
             <div class="topic-bullet">🆕</div>
             <div class="topic-content">
               <div class="topic-headline">おすわりモアイカスタムパーツ登場！</div>
-              <div class="topic-sub">Mk-IIに装着できる、レトロ可愛いおすわりモアイのカスタム追加パーツ。</div>
+              <div class="topic-sub">Mk-IIに装着できる, レトロ可愛いおすわりモアイのカスタム追加パーツ。</div>
             </div>
           </div>
         </div>
@@ -477,6 +480,7 @@ const EVENTS = {
   },
   history: {
     label: '歴代図鑑',
+    isMarche: false,
     heroHtml: `
       <div class="history-epic-story">
         <div class="epic-title">起源 - ORIGIN -</div>
@@ -505,6 +509,7 @@ const EVENTS = {
   },
   moairoom: {
     label: '🗿 モアイの部屋',
+    isMarche: false,
     products: [],
     defaultStatus: 'hidden'
   }
@@ -537,6 +542,7 @@ window.getAllEvents = function(configData) {
           ...merged[key],
           label: config.label,
           fullName: config.fullName || config.label,
+          isMarche: config.isMarche !== undefined ? config.isMarche : (merged[key]?.isMarche !== undefined ? merged[key].isMarche : true),
           date: config.date || null,
           location: config.location || null,
           products: merged[key]?.products || []
