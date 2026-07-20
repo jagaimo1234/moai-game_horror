@@ -341,6 +341,11 @@ const MASTER_PRODUCTS = [
     image: 'images/kurima/yatta_moai.jpg',
     images: [
       'images/kurima/yatta_moai.jpg',
+      'images/kurima/yatta_moai/IMG_1070_studio.png',
+      'images/kurima/yatta_moai/IMG_1071_studio.png',
+      'images/kurima/yatta_moai/IMG_1072_studio.png',
+      'images/kurima/yatta_moai/IMG_1083_studio.png',
+      'images/kurima/yatta_moai/okIMG_1073_studio.png',
     ],
     name:  'やったー\nモアイペン立て',
     desc:  '表情は変わらない。でも、うれしい。両手を広げて全身で喜びを表現するモアイのペン立て。デスクを明るく彩ります。'
@@ -350,6 +355,12 @@ const MASTER_PRODUCTS = [
     image: 'images/kurima/doyagao_moai.jpg',
     images: [
       'images/kurima/doyagao_moai.jpg',
+      'images/kurima/doyagao_moai/IMG_1075_studio.png',
+      'images/kurima/doyagao_moai/IMG_1076_studio.png',
+      'images/kurima/doyagao_moai/IMG_1078_studio.png',
+      'images/kurima/doyagao_moai/IMG_1079_studio.png',
+      'images/kurima/doyagao_moai/IMG_1080_studio.png',
+      'images/kurima/doyagao_moai/IMG_1081_studio.png',
     ],
     name:  'どやがお\nモアイペン立て',
     desc:  'ちょっとジムリーダーっぽい、腕組みをしてドヤ顔を決めるモアイのペン立て。自信に満ち溢れた佇まいでペンをしっかりホールドします。'
@@ -359,9 +370,29 @@ const MASTER_PRODUCTS = [
     image: 'images/kurima/red_moairobo.jpg',
     images: [
       'images/kurima/red_moairobo.jpg',
+      'images/kurima/red_moairobo/IMG_1065_studio.png',
+      'images/kurima/red_moairobo/IMG_1066_studio.png',
+      'images/kurima/red_moairobo/IMG_1067_studio_blue.png',
+      'images/kurima/red_moairobo/IMG_1069_studio.png',
     ],
     name:  'MOAI ROBO MARK 2\nRed prototype',
-    desc:  'ヨーグルト大好きなモアイロボ MARK 2のレッドカラー試作機（プロトタイプ）。軽井沢で満喫中の作者から強奪したと言われる特別な仕様です。組み立て式フィギュア。'
+    desc:  'ヨーグルト大好きなモアイロボ MARK 2のレッドカラー試作機（プロトタイプ）。軽井沢で満喫中の作者から強奪した言われる特別な仕様です。組み立て式フィギュア。'
+  },
+  {
+    id: 'moairobo_friendship_set',
+    image: 'images/kurima/moairobo_friendship_set.jpg',
+    images: [
+      'images/kurima/moairobo_friendship_set.jpg',
+      'images/kurima/moairobo_friendship_set/IMG_1089_studio.png',
+      'images/kurima/moairobo_friendship_set/IMG_1092_studio.png',
+      'images/kurima/moairobo_friendship_set/IMG_1094_studio.png',
+      'images/kurima/moairobo_friendship_set/IMG_1096_studio.png',
+      'images/kurima/moairobo_friendship_set/IMG_1097_studio.png',
+      'images/kurima/moairobo_friendship_set/IMG_1098_studio.png',
+      'images/kurima/moairobo_friendship_set/IMG_1099_studio.png',
+    ],
+    name:  'MOAI ROBO\n初号機 & MARK2\n友情セット',
+    desc:  '初号機とMARK2が並んでヨーグルトで乾杯！2体組み立て式フィギュアのセット。酒よりヨーグルト好きなモアイロボたちの友情を感じてください。'
   },
 ];
 
@@ -506,6 +537,7 @@ window.getAllEvents = function(configData) {
           ...merged[key],
           label: config.label,
           date: config.date || null,
+          location: config.location || null,
           products: merged[key]?.products || []
         };
       }

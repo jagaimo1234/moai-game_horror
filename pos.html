@@ -261,6 +261,7 @@
           <h2>📊 ダッシュボード (<span id="dash-event-name"></span>)</h2>
           <div style="display: flex; gap: 8px; align-items: center;">
             <button class="btn btn-primary" style="font-size:12px; padding:6px 12px;" onclick="printSalesReport()">📄 売上報告書 (確定申告用)</button>
+            <button class="btn" style="background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.2); font-size:12px; padding:6px 12px; color:var(--accent);" onclick="openEditEventModal()">⚙️ 出店情報を編集</button>
             <button class="btn" style="background:rgba(231,76,60,0.2); color:var(--danger); border:1px solid var(--danger); font-size:11px; padding:4px 8px;" onclick="resetSalesData()">売上のみリセット</button>
             <button class="btn" style="background:rgba(231,76,60,0.2); color:var(--danger); border:1px solid var(--danger); font-size:11px; padding:4px 8px;" onclick="resetInventoryLogData()">在庫履歴のみリセット</button>
           </div>
@@ -461,6 +462,29 @@
         <div style="display:flex; justify-content:flex-end; gap:10px;">
           <button class="btn" style="background:#444; color:white;" onclick="document.getElementById('new-event-modal').style.display='none'">キャンセル</button>
           <button class="btn btn-primary" id="new-event-save-btn">追加する</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Edit Event Modal -->
+    <div id="edit-event-modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.8); z-index:2000; align-items:center; justify-content:center; padding:20px;">
+      <div style="background:var(--panel-bg); width:100%; max-width:400px; border-radius:12px; padding:20px; border:1px solid var(--border);">
+        <h3 style="margin-bottom:15px;">出店イベント情報の編集</h3>
+        <div style="margin-bottom:12px;">
+          <label style="font-size:12px; opacity:0.7;">イベント表示名</label>
+          <input type="text" id="edit-event-name" class="form-input" style="margin-top:4px;" placeholder="例: 東京ハンドメイドマルシェ2025秋">
+        </div>
+        <div style="margin-bottom:12px;">
+          <label style="font-size:12px; opacity:0.7;">開催日（確定申告・報告書表示用）</label>
+          <input type="text" id="edit-event-date-text" class="form-input" style="margin-top:4px;" placeholder="例: 2025年9月6日（土）">
+        </div>
+        <div style="margin-bottom:20px;">
+          <label style="font-size:12px; opacity:0.7;">会場（住所・会場名）</label>
+          <input type="text" id="edit-event-location" class="form-input" style="margin-top:4px;" placeholder="例: 東京ドームシティ プリズムホール">
+        </div>
+        <div style="display:flex; justify-content:flex-end; gap:10px;">
+          <button class="btn" style="background:#444; color:white;" onclick="document.getElementById('edit-event-modal').style.display='none'">キャンセル</button>
+          <button class="btn btn-primary" id="edit-event-save-btn">保存する</button>
         </div>
       </div>
     </div>
@@ -5344,6 +5368,46 @@
       `);
       printWindow.document.close();
     };
+
+    window.openEditEventModal = () => {
+      const allEvents = window.getAllEvents(eventConfigData);
+      const ev = allEvents[currentEventKey] || {};
+      
+      document.getElementById('edit-event-name').value = ev.label || '';
+      document.getElementById('edit-event-date-text').value = ev.date || '';
+      document.getElementById('edit-event-location').value = ev.location || '';
+      
+      document.getElementById('edit-event-modal').style.display = 'flex';
+    };
+
+    document.getElementById('edit-event-save-btn').addEventListener('click', async () => {
+      if (!auth.currentUser) return;
+      const nameInput = document.getElementById('edit-event-name').value.trim();
+      const dateInput = document.getElementById('edit-event-date-text').value.trim();
+      const locationInput = document.getElementById('edit-event-location').value.trim();
+
+      if (!nameInput) {
+        alert("表示名は必須です。");
+        return;
+      }
+
+      try {
+        const config = { ...eventConfigData };
+        config[currentEventKey] = {
+          ...(config[currentEventKey] || {}),
+          label: nameInput,
+          date: dateInput || null,
+          location: locationInput || null
+        };
+        await setDoc(doc(db, "settings", "event_config"), config, { merge: true });
+        
+        document.getElementById('edit-event-modal').style.display = 'none';
+        alert("イベント情報を更新しました。");
+      } catch(e) {
+        console.error(e);
+        alert("更新に失敗しました。");
+      }
+    });
   </script>
 
   <!-- Print Tile Modal -->
