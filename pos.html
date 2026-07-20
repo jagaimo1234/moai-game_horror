@@ -259,7 +259,8 @@
       <div class="scroll-container">
         <div style="display: flex; justify-content: space-between; align-items: center;">
           <h2>📊 ダッシュボード (<span id="dash-event-name"></span>)</h2>
-          <div style="display: flex; gap: 8px;">
+          <div style="display: flex; gap: 8px; align-items: center;">
+            <button class="btn btn-primary" style="font-size:12px; padding:6px 12px;" onclick="printSalesReport()">📄 売上報告書 (確定申告用)</button>
             <button class="btn" style="background:rgba(231,76,60,0.2); color:var(--danger); border:1px solid var(--danger); font-size:11px; padding:4px 8px;" onclick="resetSalesData()">売上のみリセット</button>
             <button class="btn" style="background:rgba(231,76,60,0.2); color:var(--danger); border:1px solid var(--danger); font-size:11px; padding:4px 8px;" onclick="resetInventoryLogData()">在庫履歴のみリセット</button>
           </div>
@@ -5140,6 +5141,208 @@
           </div>
         `;
       });
+    };
+
+    window.printSalesReport = () => {
+      const allEvents = window.getAllEvents(eventConfigData);
+      const ev = allEvents[currentEventKey] || {};
+      const eventLabel = ev.label || '不明なイベント';
+      const eventDate = ev.date || '年　月　日（　）';
+      const eventLocation = ev.location || '';
+      
+      const now = new Date();
+      const createdDateStr = `${now.getFullYear()}年${now.getMonth() + 1}月${now.getDate()}日`;
+
+      if (!salesRecordsCache || salesRecordsCache.length === 0) {
+        alert("売上データが存在しないため、報告書を出力できません。");
+        return;
+      }
+
+      // 商品ごとに集計
+      const productSummary = {};
+      let totalQty = 0;
+      let totalAmount = 0;
+
+      salesRecordsCache.forEach(record => {
+        if (record.items) {
+          record.items.forEach(item => {
+            const key = item.id || item.name;
+            if (!productSummary[key]) {
+              productSummary[key] = {
+                name: item.name,
+                price: item.price,
+                qty: 0,
+                amount: 0
+              };
+            }
+            productSummary[key].qty += item.qty;
+            productSummary[key].amount += item.price * item.qty;
+            
+            totalQty += item.qty;
+            totalAmount += item.price * item.qty;
+          });
+        }
+      });
+
+      const productRows = Object.values(productSummary).map(p => `
+        <tr>
+          <td style="padding: 10px; border-bottom: 1px solid #ddd; text-align: left;">${p.name.replace(/\n/g, ' ')}</td>
+          <td style="padding: 10px; border-bottom: 1px solid #ddd; text-align: right;">${p.price.toLocaleString()}</td>
+          <td style="padding: 10px; border-bottom: 1px solid #ddd; text-align: right;">${p.qty.toLocaleString()}</td>
+          <td style="padding: 10px; border-bottom: 1px solid #ddd; text-align: right;">${p.amount.toLocaleString()}</td>
+        </tr>
+      `).join('');
+
+      let targetYear = now.getFullYear();
+      const yearMatch = eventLabel.match(/\d{4}/) || eventDate.match(/\d{4}/);
+      if (yearMatch) {
+        targetYear = yearMatch[0];
+      }
+
+      const printWindow = window.open('', '_blank');
+      printWindow.document.write(\`
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="utf-8">
+          <title>\${targetYear}年度 \${eventLabel} 売上報告書</title>
+          <style>
+            body {
+              font-family: 'Helvetica Neue', Arial, 'Hiragino Kaku Gothic ProN', Meiryo, sans-serif;
+              color: #333;
+              line-height: 1.6;
+              padding: 40px;
+              max-width: 800px;
+              margin: 0 auto;
+            }
+            .header-area {
+              display: flex;
+              justify-content: space-between;
+              align-items: flex-end;
+              margin-bottom: 30px;
+            }
+            h1 {
+              font-size: 24px;
+              margin: 0;
+            }
+            .created-date {
+              font-size: 14px;
+              color: #666;
+            }
+            h2 {
+              font-size: 18px;
+              border-bottom: 2px solid #333;
+              padding-bottom: 5px;
+              margin-top: 30px;
+              margin-bottom: 15px;
+            }
+            ul {
+              list-style: none;
+              padding-left: 0;
+            }
+            li {
+              margin-bottom: 8px;
+              padding-left: 15px;
+              position: relative;
+            }
+            li::before {
+              content: "•";
+              position: absolute;
+              left: 0;
+              color: #333;
+            }
+            table {
+              width: 100%;
+              border-collapse: collapse;
+              margin-top: 15px;
+              margin-bottom: 15px;
+            }
+            th {
+              background-color: #f2f7fa;
+              padding: 10px;
+              border-bottom: 2px solid #ddd;
+              font-weight: bold;
+            }
+            td {
+              padding: 10px;
+              border-bottom: 1px solid #ddd;
+            }
+            .total-row {
+              font-weight: bold;
+              background-color: #f9f9f9;
+            }
+            .total-row td {
+              border-bottom: 2px solid #333;
+              border-top: 1px solid #333;
+            }
+            @media print {
+              body {
+                padding: 20px;
+              }
+              .no-print {
+                display: none;
+              }
+            }
+          </style>
+        </head>
+        <body>
+          <div class="no-print" style="margin-bottom: 20px; text-align: right;">
+            <button onclick="window.print()" style="padding: 10px 20px; font-size: 16px; font-weight: bold; background: #00d2ff; border: none; border-radius: 4px; cursor: pointer; color: black;">印刷する / PDF保存</button>
+          </div>
+          <div class="header-area">
+            <h1>\${targetYear}年度 \${eventLabel} 売上報告書</h1>
+            <div class="created-date">作成日: \${createdDateStr}</div>
+          </div>
+
+          <h2>1. イベント概要</h2>
+          <ul>
+            <li><strong>イベント名：</strong>\${eventLabel}</li>
+            <li><strong>開催日：</strong>\${eventDate}</li>
+            <li><strong>会場：</strong>\${eventLocation || '（未登録）'}</li>
+            <li><strong>屋号（ブランド名）：</strong>Kanazawa Moataro</li>
+            <li><strong>出展者名：</strong>木邑 遼太郎</li>
+          </ul>
+
+          <h2>2. 売上集計結果</h2>
+          <p>当日の販売記録および棚卸しに基づく集計結果は以下の通りです。</p>
+          <table>
+            <thead>
+              <tr>
+                <th style="text-align: left;">商品名</th>
+                <th style="text-align: right; width: 120px;">単価（税込）</th>
+                <th style="text-align: right; width: 100px;">販売数量</th>
+                <th style="text-align: right; width: 140px;">小計（円）</th>
+              </tr>
+            </thead>
+            <tbody>
+              \${productRows}
+              <tr class="total-row">
+                <td style="text-align: left;">合計金額</td>
+                <td></td>
+                <td style="text-align: right;">\${totalQty.toLocaleString()}</td>
+                <td style="text-align: right;">¥\${totalAmount.toLocaleString()}</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <h2>3. 特記事項</h2>
+          <ul>
+            <li>本報告書は、上記期間中の現金およびキャッシュレス決済による売上の総計である。</li>
+            <li>販売データは当日のレジ締め記録および在庫差異より算出した。</li>
+            <li>本資料は、\${targetYear}年度確定申告における「事業所得」の売上高を証明する根拠資料として作成した。</li>
+          </ul>
+
+          <script>
+            window.onload = function() {
+              setTimeout(function() {
+                window.print();
+              }, 500);
+            };
+          <\/script>
+        </body>
+        </html>
+      \`);
+      printWindow.document.close();
     };
   </script>
 
