@@ -5200,12 +5200,12 @@
       }
 
       const printWindow = window.open('', '_blank');
-      printWindow.document.write(\`
+      printWindow.document.write(`
         <!DOCTYPE html>
         <html>
         <head>
           <meta charset="utf-8">
-          <title>\${targetYear}年度 \${eventLabel} 売上報告書</title>
+          <title>${targetYear}年度 ${eventLabel} 売上報告書</title>
           <style>
             body {
               font-family: 'Helvetica Neue', Arial, 'Hiragino Kaku Gothic ProN', Meiryo, sans-serif;
@@ -5290,15 +5290,15 @@
             <button onclick="window.print()" style="padding: 10px 20px; font-size: 16px; font-weight: bold; background: #00d2ff; border: none; border-radius: 4px; cursor: pointer; color: black;">印刷する / PDF保存</button>
           </div>
           <div class="header-area">
-            <h1>\${targetYear}年度 \${eventLabel} 売上報告書</h1>
-            <div class="created-date">作成日: \${createdDateStr}</div>
+            <h1>${targetYear}年度 ${eventLabel} 売上報告書</h1>
+            <div class="created-date">作成日: ${createdDateStr}</div>
           </div>
 
           <h2>1. イベント概要</h2>
           <ul>
-            <li><strong>イベント名：</strong>\${eventLabel}</li>
-            <li><strong>開催日：</strong>\${eventDate}</li>
-            <li><strong>会場：</strong>\${eventLocation || '（未登録）'}</li>
+            <li><strong>イベント名：</strong>${eventLabel}</li>
+            <li><strong>開催日：</strong>${eventDate}</li>
+            <li><strong>会場：</strong>${eventLocation || '（未登録）'}</li>
             <li><strong>屋号（ブランド名）：</strong>Kanazawa Moataro</li>
             <li><strong>出展者名：</strong>木邑 遼太郎</li>
           </ul>
@@ -5315,12 +5315,12 @@
               </tr>
             </thead>
             <tbody>
-              \${productRows}
+              ${productRows}
               <tr class="total-row">
                 <td style="text-align: left;">合計金額</td>
                 <td></td>
-                <td style="text-align: right;">\${totalQty.toLocaleString()}</td>
-                <td style="text-align: right;">¥\${totalAmount.toLocaleString()}</td>
+                <td style="text-align: right;">${totalQty.toLocaleString()}</td>
+                <td style="text-align: right;">¥${totalAmount.toLocaleString()}</td>
               </tr>
             </tbody>
           </table>
@@ -5329,7 +5329,7 @@
           <ul>
             <li>本報告書は、上記期間中の現金およびキャッシュレス決済による売上の総計である。</li>
             <li>販売データは当日のレジ締め記録および在庫差異より算出した。</li>
-            <li>本資料は、\${targetYear}年度確定申告における「事業所得」の売上高を証明する根拠資料として作成した。</li>
+            <li>本資料は、${targetYear}年度確定申告における「事業所得」の売上高を証明する根拠資料として作成した。</li>
           </ul>
 
           <script>
@@ -5341,7 +5341,7 @@
           <\/script>
         </body>
         </html>
-      \`);
+      `);
       printWindow.document.close();
     };
   </script>
