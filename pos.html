@@ -1466,10 +1466,36 @@
           if (typeof window.renderProductionPlans === 'function') window.renderProductionPlans();
         });
 
-        // Works Master listener
-        onSnapshot(doc(db, "settings", "works_master"), (snap) => {
-          if (snap.exists()) window.worksMasterData = snap.data();
-          else window.worksMasterData = {};
+        // Works Master listener (自動初期シード付き)
+        onSnapshot(doc(db, "settings", "works_master"), async (snap) => {
+          if (snap.exists() && Object.keys(snap.data()).length > 0) {
+            window.worksMasterData = snap.data();
+          } else {
+            // 未入力・未保存状態の場合、全作品の初期マスターを自動シード保存
+            const initialMaster = {};
+            const allProducts = window.getFullMasterProducts ? window.getFullMasterProducts(window.customProductsData) : MASTER_PRODUCTS;
+            allProducts.forEach(p => {
+              initialMaster[p.id] = {
+                workId: p.id,
+                name: p.name ? p.name.replace(/\n/g, ' ') : p.id,
+                defaultPrice: p.price || 0,
+                features: '',
+                dimensions: '',
+                material: '',
+                usage: '',
+                creatorNote: '',
+                approvedDescription: p.desc || '',
+                profileStatus: 'unregistered',
+                updatedAt: Date.now()
+              };
+            });
+            window.worksMasterData = initialMaster;
+            try {
+              await setDoc(doc(db, "settings", "works_master"), initialMaster);
+            } catch(e) {
+              console.error("Auto seed works_master error:", e);
+            }
+          }
           if (typeof window.renderCatalogView === 'function') window.renderCatalogView();
         });
 
