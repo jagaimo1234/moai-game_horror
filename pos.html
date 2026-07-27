@@ -1466,16 +1466,20 @@
           if (typeof window.renderProductionPlans === 'function') window.renderProductionPlans();
         });
 
-        // Works Master listener (自動初期シード付き)
+        // Works Master listener (全作品自動補完シード機能)
         onSnapshot(doc(db, "settings", "works_master"), async (snap) => {
-          if (snap.exists() && Object.keys(snap.data()).length > 0) {
-            window.worksMasterData = snap.data();
-          } else {
-            // 未入力・未保存状態の場合、全作品の初期マスターを自動シード保存
-            const initialMaster = {};
-            const allProducts = window.getFullMasterProducts ? window.getFullMasterProducts(window.customProductsData) : MASTER_PRODUCTS;
-            allProducts.forEach(p => {
-              initialMaster[p.id] = {
+          const currentData = snap.exists() ? snap.data() : {};
+          window.worksMasterData = currentData;
+
+          // 未登録の作品をチェックして全作品を自動補完
+          const allProducts = window.getFullMasterProducts ? window.getFullMasterProducts(window.customProductsData) : MASTER_PRODUCTS;
+          let hasNewSeed = false;
+          const mergedMaster = { ...currentData };
+
+          allProducts.forEach(p => {
+            if (!mergedMaster[p.id]) {
+              hasNewSeed = true;
+              mergedMaster[p.id] = {
                 workId: p.id,
                 name: p.name ? p.name.replace(/\n/g, ' ') : p.id,
                 defaultPrice: p.price || 0,
@@ -1488,14 +1492,18 @@
                 profileStatus: 'unregistered',
                 updatedAt: Date.now()
               };
-            });
-            window.worksMasterData = initialMaster;
+            }
+          });
+
+          if (hasNewSeed) {
+            window.worksMasterData = mergedMaster;
             try {
-              await setDoc(doc(db, "settings", "works_master"), initialMaster);
+              await setDoc(doc(db, "settings", "works_master"), mergedMaster);
             } catch(e) {
-              console.error("Auto seed works_master error:", e);
+              console.error("Auto补完 works_master error:", e);
             }
           }
+
           if (typeof window.renderCatalogView === 'function') window.renderCatalogView();
         });
 
