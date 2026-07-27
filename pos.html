@@ -1038,6 +1038,9 @@
             </p>
           </div>
           <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
+            <button class="btn" style="background:rgba(46,204,113,0.15); border:1px solid #2ecc71; color:#2ecc71; font-size:13px; font-weight:bold;" onclick="syncAllWorksToMaster()">
+              🔄 全作品を外部連携用に一括登録
+            </button>
             <button class="btn" style="background:rgba(255,215,0,0.15); border:1px solid gold; color:gold; font-size:13px; font-weight:bold;" onclick="openDevProductModal()">
               🚀 ＋ 開発予定の新作を宣言する！
             </button>
@@ -1466,12 +1469,11 @@
           if (typeof window.renderProductionPlans === 'function') window.renderProductionPlans();
         });
 
-        // Works Master listener (全作品自動補完シード機能)
+        // Works Master listener (ログイン認証済み時に全作品を自動一括保存)
         onSnapshot(doc(db, "settings", "works_master"), async (snap) => {
           const currentData = snap.exists() ? snap.data() : {};
           window.worksMasterData = currentData;
 
-          // 未登録の作品をチェックして全作品を自動補完
           const allProducts = window.getFullMasterProducts ? window.getFullMasterProducts(window.customProductsData) : MASTER_PRODUCTS;
           let hasNewSeed = false;
           const mergedMaster = { ...currentData };
@@ -1495,12 +1497,12 @@
             }
           });
 
-          if (hasNewSeed) {
+          if (hasNewSeed && auth.currentUser) {
             window.worksMasterData = mergedMaster;
             try {
               await setDoc(doc(db, "settings", "works_master"), mergedMaster);
             } catch(e) {
-              console.error("Auto补完 works_master error:", e);
+              console.error("Auto seed error:", e);
             }
           }
 
@@ -3449,6 +3451,45 @@
     // ============================================================
     // ▼▼▼ 作品図鑑 (Works Catalog Master) 管理ロジック ▼▼▼
     // ============================================================
+
+    window.syncAllWorksToMaster = async () => {
+      if (!auth.currentUser) {
+        alert("ログインが必要です");
+        return;
+      }
+      try {
+        const allProducts = window.getFullMasterProducts ? window.getFullMasterProducts(window.customProductsData) : MASTER_PRODUCTS;
+        const currentData = { ...window.worksMasterData };
+        let count = 0;
+
+        allProducts.forEach(p => {
+          if (!currentData[p.id]) {
+            currentData[p.id] = {
+              workId: p.id,
+              name: p.name ? p.name.replace(/\n/g, ' ') : p.id,
+              defaultPrice: p.price || 0,
+              features: '',
+              dimensions: '',
+              material: '',
+              usage: '',
+              creatorNote: '',
+              approvedDescription: p.desc || '',
+              profileStatus: 'unregistered',
+              updatedAt: Date.now()
+            };
+            count++;
+          }
+        });
+
+        await setDoc(doc(db, "settings", "works_master"), currentData);
+        window.worksMasterData = currentData;
+        alert(`全作品をクラウド（API）へ一括登録・同期しました！\n（${count} 件の作品を新規追加）`);
+        window.renderCatalogView();
+      } catch(e) {
+        console.error(e);
+        alert("一括同期に失敗しました: " + e.message);
+      }
+    };
 
     window.setCatalogFilter = (filter) => {
       window.currentCatalogFilter = filter;
