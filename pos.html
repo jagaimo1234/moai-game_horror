@@ -162,8 +162,9 @@
         <button class="sys-tab-btn" onclick="switchSysTab('settings')">📦 在庫設定</button>
         <button class="sys-tab-btn" onclick="switchSysTab('simulation')">🎯 シミュ</button>
         <button class="sys-tab-btn" onclick="switchSysTab('price-settings')">💴 金額設定</button>
-        <button class="sys-tab-btn" onclick="switchSysTab('selection')">✅ 出品選択</button>
         <button class="sys-tab-btn" onclick="switchSysTab('exhibition')">⛺ 出店計画</button>
+        <button class="sys-tab-btn" onclick="switchSysTab('catalog')">📖 作品図鑑</button>
+        <button class="sys-tab-btn" onclick="switchSysTab('selection')">✅ 出品選択</button>
       </div>
       <div>
         <span id="user-email" style="font-size: 12px; opacity: 0.6; margin-right: 12px;"></span>
@@ -571,6 +572,76 @@
       </div>
     </div>
 
+    <!-- Work Detail Master Modal -->
+    <div id="work-detail-modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); z-index:2050; align-items:center; justify-content:center; padding:20px;">
+      <div style="background:var(--panel-bg); width:100%; max-width:600px; border-radius:12px; padding:24px; border:1px solid var(--accent); max-height:90vh; overflow-y:auto; box-shadow:0 10px 30px rgba(0,0,0,0.8);">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:12px;">
+          <h3 style="color:var(--accent); font-size:18px; margin:0; display:flex; align-items:center; gap:8px;">
+            📖 作品純粋データの編集
+          </h3>
+          <button style="background:none; border:none; color:white; font-size:20px; cursor:pointer;" onclick="document.getElementById('work-detail-modal').style.display='none'">✕</button>
+        </div>
+
+        <input type="hidden" id="work-detail-id">
+
+        <!-- Work Header Preview -->
+        <div style="display:flex; gap:16px; align-items:center; background:rgba(0,0,0,0.3); padding:12px; border-radius:8px; margin-bottom:20px;">
+          <img id="work-detail-img-preview" src="" style="width:70px; height:70px; object-fit:cover; border-radius:6px; background:#222;">
+          <div>
+            <div id="work-detail-title-preview" style="font-weight:bold; font-size:16px; color:white; margin-bottom:4px;"></div>
+            <div id="work-detail-id-preview" style="font-size:11px; opacity:0.6; font-family:monospace;"></div>
+          </div>
+        </div>
+
+        <!-- Inputs Grid -->
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:16px;">
+          <div>
+            <label style="font-size:12px; opacity:0.8; font-weight:bold;">作品名</label>
+            <input type="text" id="work-detail-name" class="form-input" style="margin-top:4px; font-size:13px;" placeholder="作品名">
+          </div>
+          <div>
+            <label style="font-size:12px; opacity:0.8; font-weight:bold;">基準価格 (円)</label>
+            <input type="number" id="work-detail-price" class="form-input" style="margin-top:4px; font-size:13px;" placeholder="3500">
+          </div>
+        </div>
+
+        <div style="margin-bottom:16px;">
+          <label style="font-size:12px; opacity:0.8; font-weight:bold;">作品の特徴 (造形・ギミック・魅力など)</label>
+          <textarea id="work-detail-features" class="form-input" rows="2" style="margin-top:4px; font-size:13px;" placeholder="例: 組み換え可能で表情が変わる。手にヨーグルトを持たせることができる。"></textarea>
+        </div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; margin-bottom:16px;">
+          <div>
+            <label style="font-size:12px; opacity:0.8; font-weight:bold;">サイズ・寸法</label>
+            <input type="text" id="work-detail-dimensions" class="form-input" style="margin-top:4px; font-size:12px;" placeholder="例: H85 × W50mm">
+          </div>
+          <div>
+            <label style="font-size:12px; opacity:0.8; font-weight:bold;">材質・素材</label>
+            <input type="text" id="work-detail-material" class="form-input" style="margin-top:4px; font-size:12px;" placeholder="例: PLA樹脂, セメント">
+          </div>
+          <div>
+            <label style="font-size:12px; opacity:0.8; font-weight:bold;">用途</label>
+            <input type="text" id="work-detail-usage" class="form-input" style="margin-top:4px; font-size:12px;" placeholder="例: フィギュア, ペン立て">
+          </div>
+        </div>
+
+        <div style="margin-bottom:16px;">
+          <label style="font-size:12px; opacity:0.8; font-weight:bold;">作者のこだわり・ひとこと</label>
+          <textarea id="work-detail-creator-note" class="form-input" rows="2" style="margin-top:4px; font-size:13px;" placeholder="例: モアイの無表情と相反する健気さを全身で表現しました。"></textarea>
+        </div>
+
+        <div style="margin-bottom:20px;">
+          <label style="font-size:12px; opacity:0.8; font-weight:bold;">正式な作品紹介文 (お品書き・図鑑用)</label>
+          <textarea id="work-detail-approved-desc" class="form-input" rows="3" style="margin-top:4px; font-size:13px;" placeholder="例: 酒よりヨーグルト好きなモアイロボット。組み立て式フィギュア。"></textarea>
+        </div>
+
+        <div style="display:flex; justify-content:flex-end; gap:10px;">
+          <button class="btn" style="background:#444; color:white;" onclick="document.getElementById('work-detail-modal').style.display='none'">キャンセル</button>
+          <button class="btn btn-primary" onclick="saveWorkDetail()" style="padding:8px 24px;">保存して登録済みにする</button>
+        </div>
+      </div>
+    </div>
+
     <!-- Exhibition Edit Modal -->
     <div id="exhibition-modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.8); z-index:2000; align-items:center; justify-content:center; padding:20px;">
       <div style="background:var(--panel-bg); width:100%; max-width:450px; border-radius:12px; padding:20px; border:1px solid var(--accent); max-height:90vh; overflow-y:auto;">
@@ -943,12 +1014,51 @@
           </div>
           <div style="display:flex; gap:10px; flex-wrap:wrap;">
             <button id="selection-mode-btn" class="btn" style="background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.2); color:white; font-size:13px;" onclick="toggleSelectionSortMode()">お品書き並べ替えモードへ</button>
-            <button class="btn" style="background:rgba(255,215,0,0.15); border:1px solid gold; color:gold; font-size:13px; font-weight:bold;" onclick="openDevProductModal()">＋ 開発予定の新作を宣言する！</button>
+            <button class="btn" style="background:rgba(255,215,0,0.15); border:1px solid gold; color:gold; font-size:13px; font-weight:bold;" onclick="switchSysTab('catalog'); setTimeout(()=>openDevProductModal(), 100);">🚀 📖 作品図鑑で新作宣言する！</button>
             <button class="btn" style="background:rgba(0,210,255,0.15); border:1px solid #00d2ff; color:#00d2ff; font-size:13px; font-weight:bold;" onclick="generateBulkTilePrint()">✅ 選択中を一括タイル印刷</button>
             <button class="btn btn-primary" onclick="saveSelectedProducts()" style="font-size:14px; padding:8px 20px;">選択内容を保存</button>
           </div>
         </div>
         <div id="selection-list" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(150px, 1fr)); gap:12px;">
+          <!-- Injected via JS -->
+        </div>
+      </div>
+    </section>
+
+    <!-- Works Catalog View -->
+    <section id="catalog-view" class="view-section">
+      <div class="scroll-container" style="padding:20px; box-sizing:border-box; width:100%;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; border-bottom:2px solid var(--accent); padding-bottom:12px; flex-wrap:wrap; gap:15px;">
+          <div>
+            <h2 style="font-size:22px; font-weight:bold; color:var(--accent); margin-bottom:6px; display:flex; align-items:center; gap:8px;">
+              📖 作品図鑑 (作品マスター管理)
+            </h2>
+            <p style="font-size:13px; opacity:0.8; margin:0;">
+              各作品の純粋なデータ（特徴・サイズ・材質・用途）を一元管理します。未入力の作品は打ち込んでください。
+            </p>
+          </div>
+          <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
+            <button class="btn" style="background:rgba(255,215,0,0.15); border:1px solid gold; color:gold; font-size:13px; font-weight:bold;" onclick="openDevProductModal()">
+              🚀 ＋ 開発予定の新作を宣言する！
+            </button>
+          </div>
+        </div>
+
+        <!-- Filter & Search Bar -->
+        <div style="background:var(--panel-bg); padding:16px; border-radius:10px; margin-bottom:20px; border:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
+          <div style="display:flex; gap:8px; flex-wrap:wrap;" id="catalog-filter-btns">
+            <button class="btn catalog-filter-btn active" onclick="setCatalogFilter('all')" data-filter="all">すべて</button>
+            <button class="btn catalog-filter-btn" onclick="setCatalogFilter('unregistered')" data-filter="unregistered" style="color:#f39c12; border-color:#f39c12;">⚠️ 作品情報未打ち込み</button>
+            <button class="btn catalog-filter-btn" onclick="setCatalogFilter('registered')" data-filter="registered" style="color:#2ecc71; border-color:#2ecc71;">✅ 登録済み</button>
+            <button class="btn catalog-filter-btn" onclick="setCatalogFilter('dev')" data-filter="dev" style="color:gold; border-color:gold;">🛠 開発中/新作</button>
+          </div>
+          <div style="display:flex; align-items:center; gap:8px;">
+            <input type="text" id="catalog-search-input" class="form-input" placeholder="🔍 作品名・特徴で検索..." oninput="renderCatalogView()" style="width:220px; font-size:13px; padding:6px 12px;">
+          </div>
+        </div>
+
+        <!-- Catalog Grid -->
+        <div id="catalog-grid" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(220px, 1fr)); gap:16px;">
           <!-- Injected via JS -->
         </div>
       </div>
@@ -1108,6 +1218,8 @@
     let badgesData = {};
     let descriptionsData = {};
     window.customProductsData = {};
+    window.worksMasterData = {};
+    window.currentCatalogFilter = 'all';
     window.eventProductsData = {}; // { eventKey: [ids] }
     window.eventConfigData = {};   // { eventKey: { visible: bool } }
     window.topicsMasterData = {};  // { id: { title, desc, icon, isBuiltin, builtinType } }
@@ -1253,6 +1365,9 @@
       if (tabId === 'exhibition' && window.renderExhibitions) {
         window.renderExhibitions();
       }
+      if (tabId === 'catalog' && window.renderCatalogView) {
+        window.renderCatalogView();
+      }
     };
 
     // Auth
@@ -1349,6 +1464,13 @@
           if (snap.exists()) window.productionPlansData = snap.data();
           else window.productionPlansData = {};
           if (typeof window.renderProductionPlans === 'function') window.renderProductionPlans();
+        });
+
+        // Works Master listener
+        onSnapshot(doc(db, "settings", "works_master"), (snap) => {
+          if (snap.exists()) window.worksMasterData = snap.data();
+          else window.worksMasterData = {};
+          if (typeof window.renderCatalogView === 'function') window.renderCatalogView();
         });
 
         listenToEventData();
@@ -3288,6 +3410,195 @@
         
         alert("削除しました。");
       } catch(e) { console.error(e); }
+    };
+
+    // ============================================================
+    // ▼▼▼ 作品図鑑 (Works Catalog Master) 管理ロジック ▼▼▼
+    // ============================================================
+
+    window.setCatalogFilter = (filter) => {
+      window.currentCatalogFilter = filter;
+      document.querySelectorAll('.catalog-filter-btn').forEach(btn => {
+        if (btn.getAttribute('data-filter') === filter) {
+          btn.classList.add('active');
+        } else {
+          btn.classList.remove('active');
+        }
+      });
+      window.renderCatalogView();
+    };
+
+    window.renderCatalogView = () => {
+      const grid = document.getElementById('catalog-grid');
+      if (!grid) return;
+
+      const allProducts = window.getFullMasterProducts ? window.getFullMasterProducts(window.customProductsData) : MASTER_PRODUCTS;
+      const searchInput = document.getElementById('catalog-search-input');
+      const searchQuery = searchInput ? searchInput.value.trim().toLowerCase() : '';
+      const filter = window.currentCatalogFilter || 'all';
+
+      grid.innerHTML = '';
+
+      allProducts.forEach(p => {
+        const pId = p.id;
+        const wData = window.worksMasterData[pId] || {};
+        
+        // 判定: 特徴・寸法・素材・こだわりのいずれも未登録の場合
+        const hasFacts = (wData.features && wData.features.trim()) || 
+                         (wData.dimensions && wData.dimensions.trim()) || 
+                         (wData.material && wData.material.trim()) ||
+                         (wData.creatorNote && wData.creatorNote.trim());
+        
+        const isRegistered = Boolean(hasFacts);
+        const isDev = Boolean(p.isDev);
+
+        // Filter Check
+        if (filter === 'unregistered' && isRegistered) return;
+        if (filter === 'registered' && !isRegistered) return;
+        if (filter === 'dev' && !isDev) return;
+
+        // Search Check
+        if (searchQuery) {
+          const nameMatch = (p.name || '').toLowerCase().includes(searchQuery);
+          const featMatch = (wData.features || '').toLowerCase().includes(searchQuery);
+          const matMatch = (wData.material || '').toLowerCase().includes(searchQuery);
+          if (!nameMatch && !featMatch && !matMatch) return;
+        }
+
+        // Create Card HTML
+        const card = document.createElement('div');
+        card.className = 'catalog-item-card';
+        card.style.cssText = `
+          background: var(--panel-bg);
+          border: 1px solid ${isRegistered ? 'rgba(46, 204, 113, 0.3)' : 'rgba(243, 156, 18, 0.6)'};
+          border-radius: 10px;
+          padding: 12px;
+          display: flex;
+          flex-direction: column;
+          gap: 10px;
+          position: relative;
+          cursor: pointer;
+          transition: transform 0.15s ease, box-shadow 0.15s ease;
+          overflow: hidden;
+        `;
+        card.onclick = () => window.openWorkDetailModal(pId);
+        card.onmouseover = () => card.style.transform = 'translateY(-3px)';
+        card.onmouseout = () => card.style.transform = 'none';
+
+        // Image & Badges
+        const imgPath = p.image || 'mini_osuwari_keyholder.png';
+        
+        // Status Badge HTML
+        let badgeHtml = '';
+        if (isDev) {
+          badgeHtml = `<span style="background:linear-gradient(45deg, #f1c40f, #e67e22); color:#000; font-size:10px; font-weight:bold; padding:3px 8px; border-radius:12px; box-shadow:0 2px 4px rgba(0,0,0,0.3);">🛠 開発中/新作</span>`;
+        } else if (isRegistered) {
+          badgeHtml = `<span style="background:rgba(46, 204, 113, 0.2); color:#2ecc71; border:1px solid #2ecc71; font-size:10px; font-weight:bold; padding:3px 8px; border-radius:12px;">✅ 登録済み</span>`;
+        } else {
+          badgeHtml = `<span style="background:rgba(243, 156, 18, 0.25); color:#f39c12; border:1px solid #f39c12; font-size:11px; font-weight:bold; padding:4px 8px; border-radius:12px;">⚠️ 作品情報を打ち込んでください</span>`;
+        }
+
+        // Specs List
+        let specsTags = [];
+        if (wData.dimensions) specsTags.push(`📐 ${wData.dimensions}`);
+        if (wData.material) specsTags.push(`📦 ${wData.material}`);
+
+        card.innerHTML = `
+          <div style="display:flex; justify-content:space-between; align-items:center; gap:6px;">
+            ${badgeHtml}
+            <span style="font-size:10px; opacity:0.5; font-family:monospace;">${pId}</span>
+          </div>
+
+          <div style="display:flex; gap:12px; align-items:center;">
+            <img src="${imgPath}" style="width:64px; height:64px; object-fit:cover; border-radius:8px; background:#111;" onerror="this.src='mini_osuwari_keyholder.png'">
+            <div style="flex:1; overflow:hidden;">
+              <div style="font-weight:bold; font-size:14px; color:white; line-height:1.3; overflow:hidden; text-overflow:ellipsis; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical;">
+                ${p.name ? p.name.replace(/\n/g, ' ') : '無題'}
+              </div>
+              <div style="font-size:12px; color:var(--accent); font-weight:bold; margin-top:4px;">
+                ¥${(wData.defaultPrice !== undefined ? wData.defaultPrice : (p.price || 0)).toLocaleString()}
+              </div>
+            </div>
+          </div>
+
+          <div style="font-size:11px; color:rgba(255,255,255,0.7); background:rgba(0,0,0,0.25); padding:8px; border-radius:6px; min-height:36px; display:flex; flex-direction:column; gap:3px;">
+            ${wData.features ? `<div style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">💡 ${wData.features}</div>` : ''}
+            ${specsTags.length > 0 ? `<div style="font-size:10px; opacity:0.8;">${specsTags.join(' | ')}</div>` : ''}
+            ${!wData.features && specsTags.length === 0 ? `<div style="color:#f39c12; font-style:italic;">クリックして作品データ（特徴・サイズ等）を入力 ✏️</div>` : ''}
+          </div>
+        `;
+
+        grid.appendChild(card);
+      });
+    };
+
+    window.openWorkDetailModal = (pId) => {
+      const allProducts = window.getFullMasterProducts ? window.getFullMasterProducts(window.customProductsData) : MASTER_PRODUCTS;
+      const p = allProducts.find(x => x.id === pId) || { id: pId, name: pId };
+      const wData = window.worksMasterData[pId] || {};
+
+      document.getElementById('work-detail-id').value = pId;
+      document.getElementById('work-detail-name').value = wData.name || p.name || '';
+      document.getElementById('work-detail-price').value = wData.defaultPrice !== undefined ? wData.defaultPrice : (p.price || 0);
+      document.getElementById('work-detail-features').value = wData.features || '';
+      document.getElementById('work-detail-dimensions').value = wData.dimensions || '';
+      document.getElementById('work-detail-material').value = wData.material || '';
+      document.getElementById('work-detail-usage').value = wData.usage || '';
+      document.getElementById('work-detail-creator-note').value = wData.creatorNote || '';
+      document.getElementById('work-detail-approved-desc').value = wData.approvedDescription || p.desc || '';
+
+      document.getElementById('work-detail-title-preview').textContent = p.name ? p.name.replace(/\n/g, ' ') : pId;
+      document.getElementById('work-detail-id-preview').textContent = `ID: ${pId}`;
+      const img = document.getElementById('work-detail-img-preview');
+      if (img) img.src = p.image || 'mini_osuwari_keyholder.png';
+
+      document.getElementById('work-detail-modal').style.display = 'flex';
+    };
+
+    window.saveWorkDetail = async () => {
+      if (!auth.currentUser) {
+        alert("ログインが必要です");
+        return;
+      }
+      const pId = document.getElementById('work-detail-id').value;
+      if (!pId) return;
+
+      const name = document.getElementById('work-detail-name').value.trim();
+      const defaultPrice = parseInt(document.getElementById('work-detail-price').value) || 0;
+      const features = document.getElementById('work-detail-features').value.trim();
+      const dimensions = document.getElementById('work-detail-dimensions').value.trim();
+      const material = document.getElementById('work-detail-material').value.trim();
+      const usage = document.getElementById('work-detail-usage').value.trim();
+      const creatorNote = document.getElementById('work-detail-creator-note').value.trim();
+      const approvedDescription = document.getElementById('work-detail-approved-desc').value.trim();
+
+      const hasFacts = features || dimensions || material || creatorNote;
+      const profileStatus = hasFacts ? 'registered' : 'unregistered';
+
+      try {
+        const updatedMaster = { ...window.worksMasterData };
+        updatedMaster[pId] = {
+          ...updatedMaster[pId],
+          workId: pId,
+          name: name,
+          defaultPrice: defaultPrice,
+          features: features,
+          dimensions: dimensions,
+          material: material,
+          usage: usage,
+          creatorNote: creatorNote,
+          approvedDescription: approvedDescription,
+          profileStatus: profileStatus,
+          updatedAt: Date.now()
+        };
+
+        await setDoc(doc(db, "settings", "works_master"), updatedMaster);
+        document.getElementById('work-detail-modal').style.display = 'none';
+        alert("作品純粋データを保存しました！");
+      } catch(e) {
+        console.error("Save work detail error:", e);
+        alert("作品情報の保存に失敗しました: " + e.message);
+      }
     };
 
     window.togglePrintSelection = (id) => {
