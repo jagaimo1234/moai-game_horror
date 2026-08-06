@@ -809,9 +809,21 @@
           <label style="font-size:12px; opacity:0.7;">イベント正式名称（売上報告書用）</label>
           <input type="text" id="new-event-fullname" class="form-input" style="margin-top:4px;" placeholder="例: クリエーターズマーケット vol.52">
         </div>
-        <div style="margin-bottom:12px;">
-          <label style="font-size:12px; opacity:0.7;">開催日 (スケジュール管理用)</label>
-          <input type="date" id="new-event-date" class="form-input" onclick="try{this.showPicker()}catch(e){}" style="margin-top:4px; color-scheme:dark; cursor:pointer;">
+        <div style="display:grid; grid-template-columns:2fr 1fr; gap:10px; margin-bottom:12px;">
+          <div>
+            <label style="font-size:12px; opacity:0.8;">開始日 (初日)</label>
+            <input type="date" id="new-event-date" class="form-input" onclick="try{this.showPicker()}catch(e){}" style="margin-top:4px; color-scheme:dark; cursor:pointer;">
+          </div>
+          <div>
+            <label style="font-size:12px; opacity:0.8; font-weight:bold; color:var(--accent);">開催日数</label>
+            <select id="new-event-days-count" class="form-select" style="margin-top:4px; background:rgba(0,0,0,0.5); color:#fff; border:1px solid var(--accent); padding:6px; border-radius:6px; font-weight:bold;">
+              <option value="1">1日間 (単日)</option>
+              <option value="2" selected>2日間 (両日)</option>
+              <option value="3">3日間</option>
+              <option value="4">4日間</option>
+              <option value="5">5日間</option>
+            </select>
+          </div>
         </div>
         <div style="margin-bottom:20px; display:flex; align-items:center; gap:8px;">
           <input type="checkbox" id="new-event-is-marche" style="width:16px; height:16px; cursor:pointer;" checked>
