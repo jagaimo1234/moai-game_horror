@@ -5445,7 +5445,7 @@
         }
       }
 
-      // RENDER: Full-width Seamless Continuous Timeline (Sticky Header, Slot Packing, Connectors, Perfect Month Alignment)
+      // RENDER: Full-width Seamless Continuous Timeline (Sticky Header, Slot Packing, Connectors, Perfect Month Alignment, Timezone Fix)
       else if (exhibitionViewMode === 'timeline') {
         timelineContainer.style.display = 'flex';
         timelineContainer.innerHTML = '';
@@ -5456,6 +5456,19 @@
         }
 
         const promoPlans = getPromotionPlans ? getPromotionPlans() : [];
+
+        // Helper: Parse date string as local Date 00:00:00 (prevents UTC timezone shift bug)
+        const parseLocalDate = (dateStr) => {
+          if (!dateStr) return null;
+          if (dateStr instanceof Date) return new Date(dateStr.getFullYear(), dateStr.getMonth(), dateStr.getDate());
+          const str = String(dateStr).split('T')[0];
+          const parts = str.split('-');
+          if (parts.length === 3) {
+            return new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]));
+          }
+          const d = new Date(dateStr);
+          return isNaN(d.getTime()) ? null : new Date(d.getFullYear(), d.getMonth(), d.getDate());
+        };
 
         // 1. Collect and Build Full Continuous Timeline Months
         const now = new Date();
@@ -5468,13 +5481,21 @@
         sortedKeys.forEach(k => {
           const p = filteredPlans[k];
           if (p.date && p.status !== 'canceled') {
-            try {
-              const d = new Date(p.date);
-              if (!isNaN(d.getTime())) {
-                minYear = Math.min(minYear, d.getFullYear());
-                maxYear = Math.max(maxYear, d.getFullYear());
-              }
-            } catch(e) {}
+            const d = parseLocalDate(p.date);
+            if (d) {
+              minYear = Math.min(minYear, d.getFullYear());
+              maxYear = Math.max(maxYear, d.getFullYear());
+            }
+          }
+        });
+
+        promoPlans.forEach(pr => {
+          if (pr.startDate) {
+            const d = parseLocalDate(pr.startDate);
+            if (d) {
+              minYear = Math.min(minYear, d.getFullYear());
+              maxYear = Math.max(maxYear, d.getFullYear());
+            }
           }
         });
 
@@ -5502,9 +5523,12 @@
 
         const dayNames = ['日', '月', '火', '水', '木', '金', '土'];
 
+        // Helper to convert Date to day index offset accurately in local time
         const getDayOffset = (dateObj) => {
-          const diffMs = dateObj - rangeStartDate;
-          return Math.floor(diffMs / (1000 * 60 * 60 * 24));
+          const d = parseLocalDate(dateObj);
+          if (!d) return 0;
+          const diffMs = d.getTime() - rangeStartDate.getTime();
+          return Math.round(diffMs / (1000 * 60 * 60 * 24));
         };
 
         if (!window.activeTimelineYearMonth) {
@@ -5517,22 +5541,22 @@
           const p = filteredPlans[k];
           if (!p.date || p.status === 'canceled') return; // ❌ 出ない は完全非表示
           try {
-            const d = new Date(p.date);
-            if (d >= rangeStartDate && d <= rangeEndDate) {
+            const d = parseLocalDate(p.date);
+            if (d && d >= rangeStartDate && d <= rangeEndDate) {
               const offset = getDayOffset(d);
               rangeEvents.push({ key: k, plan: p, eventDate: d, startOffset: offset, endOffset: offset });
             }
           } catch(e) {}
         });
 
-        // Filter promotions
+        // Filter promotions accurately using parseLocalDate
         const rangePromos = [];
         promoPlans.forEach((pr, idx) => {
           if (!pr.startDate) return;
           try {
-            const s = new Date(pr.startDate);
-            const e = pr.endDate ? new Date(pr.endDate) : new Date(s);
-            if (e >= rangeStartDate && s <= rangeEndDate) {
+            const s = parseLocalDate(pr.startDate);
+            const e = pr.endDate ? parseLocalDate(pr.endDate) : new Date(s);
+            if (s && e && e >= rangeStartDate && s <= rangeEndDate) {
               const startOffset = Math.max(0, getDayOffset(s));
               const endOffset = Math.min(totalSpanDays - 1, getDayOffset(e));
               rangePromos.push({ promo: pr, index: idx, startDate: s, endDate: e, startOffset, endOffset });
@@ -5586,7 +5610,7 @@
           }
         });
 
-        // 3. ROW PACKING ALGORITHM (スマート行割り当て: 重なっていないアイテムは1行に収める)
+        // 3. ROW PACKING ALGORITHM
         function packItemsIntoRows(items) {
           const sorted = [...items].sort((a, b) => a.startOffset - b.startOffset);
           const rowEnds = [];
@@ -5638,7 +5662,6 @@
         let monthHeaderBannerHtml = '';
 
         monthList.forEach(mInfo => {
-          // Month banner uses flex proportional to number of days in that month -> 100% exact alignment!
           monthHeaderBannerHtml += `
             <div id="gantt-month-banner-${mInfo.yearMonthStr}" style="flex:${mInfo.days}; text-align:center; padding:6px; font-size:12px; font-weight:bold; color:var(--accent); border-right:2px solid rgba(255,255,255,0.3); background:rgba(0,210,255,0.06); box-sizing:border-box;">
               🗓️ ${mInfo.year}年 ${mInfo.month}月 (${mInfo.days}日)
@@ -5666,8 +5689,6 @@
         });
 
         // 5. PACK & RENDER LANES (Smart Row Packing)
-
-        // Helper to render packed row container
         function renderPackedLaneHtml(packedItems, totalRows, renderItemFn, emptyText) {
           if (!packedItems || packedItems.length === 0) {
             return `<div class="gantt-track-row" style="display:flex; align-items:center; justify-content:center; opacity:0.3; font-size:11px;">${emptyText}</div>`;
@@ -5736,7 +5757,7 @@
               ...ev,
               prepDays,
               startOffset: pStart,
-              endOffset: ev.startOffset // End offset is the event date itself
+              endOffset: ev.startOffset
             };
           });
 
@@ -5747,7 +5768,6 @@
 
             const startPct = (ev.startOffset / totalSpanDays) * 100;
             const widthPct = (duration / totalSpanDays) * 100;
-            const endPct = (ev.endOffset / totalSpanDays) * 100;
 
             return `
               <div class="gantt-bar-item gantt-bar-prep" 
@@ -5756,14 +5776,13 @@
                    title="「${ev.plan.name}」の制作・搬入準備期間 (${ev.prepDays}日間)">
                 <span>🔨</span>
                 <span>制作・準備 (${ev.prepDays}日間) - ${ev.plan.name}</span>
-                <!-- Dashed Vertical Line to Event Date -->
                 <div style="position:absolute; right:0; top:-24px; bottom:0; border-right:2px dashed rgba(0,210,255,0.7); pointer-events:none; z-index:10;" title="出店日への接続"></div>
               </div>
             `;
           }, '確定・本命イベントの制作準備期間はありません');
         }
 
-        // Lane 3: Promotions Sub-rows (Packed)
+        // Lane 3: Promotions Sub-rows (Packed & Correct Duration)
         let promoSubRowsHtml = '';
         if (window.timelineLanes.promo) {
           const { packedItems, rowCount } = packItemsIntoRows(rangePromos);
@@ -5772,13 +5791,16 @@
             const startPct = (pm.startOffset / totalSpanDays) * 100;
             const widthPct = (duration / totalSpanDays) * 100;
 
+            const sStr = `${pm.startDate.getFullYear()}/${pm.startDate.getMonth()+1}/${pm.startDate.getDate()}`;
+            const eStr = `${pm.endDate.getFullYear()}/${pm.endDate.getMonth()+1}/${pm.endDate.getDate()}`;
+
             return `
               <div class="gantt-bar-item gantt-bar-promo" 
                    style="left:${startPct}%; width:${widthPct}%;"
                    onclick="openPromotionModal(${pm.index})"
-                   title="💡 企画: ${pm.promo.title}">
+                   title="💡 企画: ${pm.promo.title}&#10;期間: ${sStr} 〜 ${eStr} (${duration}日間)">
                 <span>💡</span>
-                <span style="overflow:hidden; text-overflow:ellipsis;">${pm.promo.title}</span>
+                <span style="overflow:hidden; text-overflow:ellipsis;">${pm.promo.title} (${sStr}〜${eStr})</span>
               </div>
             `;
           }, 'セール・企画はありません');
@@ -5792,8 +5814,8 @@
             const p = filteredPlans[k];
             if (p.deadline && p.status !== 'canceled') {
               try {
-                const dl = new Date(p.deadline);
-                if (dl >= rangeStartDate && dl <= rangeEndDate) {
+                const dl = parseLocalDate(p.deadline);
+                if (dl && dl >= rangeStartDate && dl <= rangeEndDate) {
                   const off = getDayOffset(dl);
                   deadlinesInRange.push({ key: k, plan: p, startOffset: off, endOffset: off, dlDate: dl });
                 }
@@ -5896,7 +5918,7 @@
           `;
         }).join('');
 
-        // Dynamic Total Width: 1 month = 33.3vw of viewport -> Exactly 3 months fill 1 screen width!
+        // Dynamic Total Width calculation
         const calcWidthVw = Math.max(300, (totalSpanDays / 91.25) * 100);
 
         // 6. Assemble Final Container HTML
@@ -5948,7 +5970,7 @@
               <div style="padding:14px 20px; border-bottom:1px solid rgba(255,255,255,0.06); display:flex; justify-content:space-between; align-items:center; background:rgba(0,0,0,0.2);">
                 <div style="display:flex; align-items:center; gap:10px;">
                   <h3 style="margin:0; font-size:16px; color:var(--accent);">🌐 全月シームレスガントチャート (${monthList[0].year}年${monthList[0].month}月 〜 ${monthList[monthList.length-1].year}年${monthList[monthList.length-1].month}月)</h3>
-                  <span style="font-size:11px; opacity:0.6;">(左列固定 / 月日位置100%一致 / 破線連携 / 重複時のみ改行)</span>
+                  <span style="font-size:11px; opacity:0.6;">(セール企画・出店日のローカルタイムゾーン精密判定適用)</span>
                 </div>
                 <div style="font-size:11px; opacity:0.5;">スクロールしても左列カテゴリ固定 / 横スクロールで全月閲覧</div>
               </div>
