@@ -5445,7 +5445,7 @@
         }
       }
 
-      // RENDER: Full-width Seamless Continuous Timeline (Sticky Header, Slot Packing, Connectors, Perfect Month Alignment, Timezone & Type Guard)
+      // RENDER: Full-width Seamless Continuous Timeline (Sticky Header, Slot Packing, Connectors, Perfect Month Alignment, Timezone & ID Fix)
       else if (exhibitionViewMode === 'timeline') {
         timelineContainer.style.display = 'flex';
         timelineContainer.innerHTML = '';
@@ -5458,7 +5458,7 @@
 
           const promoPlans = getPromotionPlans ? getPromotionPlans() : [];
 
-          // Robust Helper: Parse any date format (string, timestamp, object, Date) as local Date 00:00:00
+          // Robust Helper: Parse any date format as local Date 00:00:00
           const parseLocalDate = (val) => {
             if (!val) return null;
             try {
@@ -5492,7 +5492,7 @@
             }
           };
 
-          // 1. Collect and Build Full Continuous Timeline Months
+          // 1. Collect and Build Full Continuous Timeline Months (Include all events AND promotions)
           const now = new Date();
           const currentYear = now.getFullYear();
           const currentYearMonthStr = `${currentYear}-${String(now.getMonth() + 1).padStart(2, '0')}`;
@@ -5513,11 +5513,10 @@
 
           promoPlans.forEach(pr => {
             if (pr && pr.startDate) {
-              const d = parseLocalDate(pr.startDate);
-              if (d) {
-                minYear = Math.min(minYear, d.getFullYear());
-                maxYear = Math.max(maxYear, d.getFullYear());
-              }
+              const d1 = parseLocalDate(pr.startDate);
+              const d2 = parseLocalDate(pr.endDate) || d1;
+              if (d1) minYear = Math.min(minYear, d1.getFullYear());
+              if (d2) maxYear = Math.max(maxYear, d2.getFullYear());
             }
           });
 
@@ -5804,7 +5803,7 @@
             }, '確定・本命イベントの制作準備期間はありません');
           }
 
-          // Lane 3: Promotions Sub-rows (Packed & Correct Duration)
+          // Lane 3: Promotions Sub-rows (Packed & Fix openPromotionModal with promo.id!)
           let promoSubRowsHtml = '';
           if (window.timelineLanes.promo) {
             const { packedItems, rowCount } = packItemsIntoRows(rangePromos);
@@ -5816,10 +5815,12 @@
               const sStr = pm.startDate ? `${pm.startDate.getFullYear()}/${pm.startDate.getMonth()+1}/${pm.startDate.getDate()}` : '';
               const eStr = pm.endDate ? `${pm.endDate.getFullYear()}/${pm.endDate.getMonth()+1}/${pm.endDate.getDate()}` : '';
 
+              const promoId = (pm.promo && pm.promo.id) ? pm.promo.id : '';
+
               return `
                 <div class="gantt-bar-item gantt-bar-promo" 
                      style="left:${startPct}%; width:${widthPct}%;"
-                     onclick="openPromotionModal(${pm.index})"
+                     onclick="openPromotionModal('${promoId}')"
                      title="💡 企画: ${pm.promo.title}&#10;期間: ${sStr} 〜 ${eStr} (${duration}日間)">
                   <span>💡</span>
                   <span style="overflow:hidden; text-overflow:ellipsis;">${pm.promo.title} ${sStr ? `(${sStr}〜${eStr})` : ''}</span>
@@ -5992,7 +5993,7 @@
                 <div style="padding:14px 20px; border-bottom:1px solid rgba(255,255,255,0.06); display:flex; justify-content:space-between; align-items:center; background:rgba(0,0,0,0.2);">
                   <div style="display:flex; align-items:center; gap:10px;">
                     <h3 style="margin:0; font-size:16px; color:var(--accent);">🌐 全月シームレスガントチャート (${monthList[0].year}年${monthList[0].month}月 〜 ${monthList[monthList.length-1].year}年${monthList[monthList.length-1].month}月)</h3>
-                    <span style="font-size:11px; opacity:0.6;">(全期間の安定動作保護適用済み)</span>
+                    <span style="font-size:11px; opacity:0.6;">(全期間・全セール日付連動 & クリック連動保護済み)</span>
                   </div>
                   <div style="font-size:11px; opacity:0.5;">スクロールしても左列カテゴリ固定 / 横スクロールで全月閲覧</div>
                 </div>
