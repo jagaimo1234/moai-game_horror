@@ -1115,6 +1115,7 @@
                 <button class="btn view-mode-btn" id="btn-mode-timeline" onclick="setExhibitionViewMode('timeline')" style="padding:4px 12px; font-size:12px; color:#fff; background:none; border-radius:4px;">📅 タイムライン</button>
                 <button class="btn view-mode-btn" id="btn-mode-chart" onclick="setExhibitionViewMode('chart')" style="padding:4px 12px; font-size:12px; color:#fff; background:none; border-radius:4px;">📊 売上グラフ</button>
                 <button class="btn view-mode-btn" id="btn-mode-roadmap" onclick="setExhibitionViewMode('roadmap')" style="padding:4px 12px; font-size:12px; color:#fff; background:none; border-radius:4px;">📈 成長ロードマップ</button>
+                <button class="btn view-mode-btn" id="btn-mode-promotion" onclick="setExhibitionViewMode('promotion')" style="padding:4px 12px; font-size:12px; color:#fff; background:none; border-radius:4px;">💡 企画・セール管理</button>
               </div>
             </div>
           </div>
@@ -1175,6 +1176,176 @@
         <!-- Timeline View Container -->
         <div id="exhibition-timeline-container" style="display:none; flex-direction:column; gap:24px; width:100%;">
           <!-- Generated dynamically -->
+        </div>
+
+        <!-- Promotion & Sales Hub View Container -->
+        <div id="exhibition-promotion-container" style="display:none; flex-direction:column; gap:20px; width:100%;">
+          <div style="background:var(--panel-bg); padding:20px; border-radius:12px; border:1px solid rgba(255,255,255,0.08); display:flex; flex-direction:column; gap:16px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
+              <div>
+                <h3 style="font-size:18px; margin:0 0 6px 0; color:var(--accent); display:flex; align-items:center; gap:8px;">
+                  💡 企画・セール・イベント連動プロモーション管理
+                </h3>
+                <p style="margin:0; font-size:12px; color:rgba(255,255,255,0.6);">
+                  ネットセール・ゲーム感覚企画・イベント現場企画の構想から安売り検証、PDCA振り返りまでを一元管理します。
+                </p>
+              </div>
+              <button class="btn btn-primary" onclick="openPromotionModal()" style="font-weight:bold; font-size:13px; padding:8px 16px; background:linear-gradient(135deg, #9b59b6, #8e44ad); border:none;">
+                ＋ 新しい企画を立案する
+              </button>
+            </div>
+
+            <!-- Frequency & Guard Alert Banner -->
+            <div id="promotion-guard-banner" style="background:rgba(155,89,182,0.12); border:1px solid rgba(155,89,182,0.3); border-radius:8px; padding:12px 16px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px;">
+              <div style="display:flex; align-items:center; gap:10px;">
+                <span style="font-size:20px;">🛡️</span>
+                <span id="promotion-guard-text" style="font-size:12px; color:#e0e0e0;">企画頻度のチェック中...</span>
+              </div>
+              <div id="promotion-stats-badges" style="display:flex; gap:8px;"></div>
+            </div>
+          </div>
+
+          <!-- Promotion List Grid Container -->
+          <div id="promotion-list-grid" style="display:grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap:16px;">
+            <!-- Rendered dynamically -->
+          </div>
+        </div>
+
+        <!-- Promotion Edit / Create Modal -->
+        <div id="promotion-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.75); backdrop-filter:blur(4px); z-index:9999; justify-content:center; align-items:center; padding:20px; box-sizing:border-box;">
+          <div style="background:#1e1e24; border:1px solid rgba(255,255,255,0.15); border-radius:14px; width:100%; max-width:680px; max-height:90vh; display:flex; flex-direction:column; overflow:hidden; box-shadow:0 10px 30px rgba(0,0,0,0.5);">
+            <!-- Modal Header -->
+            <div style="padding:16px 20px; background:#15151a; border-bottom:1px solid rgba(255,255,255,0.1); display:flex; justify-content:space-between; align-items:center;">
+              <h3 id="promotion-modal-title" style="margin:0; font-size:16px; color:var(--accent); display:flex; align-items:center; gap:8px;">💡 企画の立案・編集</h3>
+              <button onclick="closePromotionModal()" style="background:none; border:none; color:#aaa; font-size:20px; cursor:pointer; padding:0; line-height:1;">✕</button>
+            </div>
+            <!-- Modal Body (Scrollable) -->
+            <div style="padding:20px; overflow-y:auto; flex:1; display:flex; flex-direction:column; gap:16px;">
+              <input type="hidden" id="promo-edit-id" value="">
+              
+              <!-- Basic Info -->
+              <div style="display:flex; flex-direction:column; gap:6px;">
+                <label style="font-size:12px; font-weight:bold; color:#ccc;">企画タイトル <span style="color:#e74c3c;">*</span></label>
+                <input type="text" id="promo-title" class="form-input" style="background:rgba(0,0,0,0.3); color:#fff; border:1px solid rgba(255,255,255,0.15); padding:8px 12px; border-radius:6px; font-size:13px;" placeholder="例: 8/1〜8/14 夏のモアイゲームセール">
+              </div>
+
+              <!-- Date & Status -->
+              <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:12px;">
+                <div style="display:flex; flex-direction:column; gap:6px;">
+                  <label style="font-size:12px; font-weight:bold; color:#ccc;">開始日</label>
+                  <input type="date" id="promo-start-date" class="form-input" style="background:rgba(0,0,0,0.3); color:#fff; border:1px solid rgba(255,255,255,0.15); padding:6px 10px; border-radius:6px; font-size:12px;">
+                </div>
+                <div style="display:flex; flex-direction:column; gap:6px;">
+                  <label style="font-size:12px; font-weight:bold; color:#ccc;">終了日</label>
+                  <input type="date" id="promo-end-date" class="form-input" style="background:rgba(0,0,0,0.3); color:#fff; border:1px solid rgba(255,255,255,0.15); padding:6px 10px; border-radius:6px; font-size:12px;">
+                </div>
+                <div style="display:flex; flex-direction:column; gap:6px;">
+                  <label style="font-size:12px; font-weight:bold; color:#ccc;">ステータス</label>
+                  <select id="promo-status" class="form-input" style="background:rgba(0,0,0,0.3); color:#fff; border:1px solid rgba(255,255,255,0.15); padding:6px 10px; border-radius:6px; font-size:12px;">
+                    <option value="draft">💭 構想中</option>
+                    <option value="ready">🛠️ 準備中</option>
+                    <option value="active">🔥 開催中</option>
+                    <option value="completed">🎉 完了・振り返り済</option>
+                  </select>
+                </div>
+              </div>
+
+              <!-- Type & Channel -->
+              <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
+                <div style="display:flex; flex-direction:column; gap:6px;">
+                  <label style="font-size:12px; font-weight:bold; color:#ccc;">企画タイプ</label>
+                  <select id="promo-type" class="form-input" style="background:rgba(0,0,0,0.3); color:#fff; border:1px solid rgba(255,255,255,0.15); padding:6px 10px; border-radius:6px; font-size:12px;">
+                    <option value="game">🎮 ゲーム感覚・体験型企画</option>
+                    <option value="limited">✨ イベント限定品・特別仕様</option>
+                    <option value="clearance">📦 在庫・訳あり処分セール</option>
+                    <option value="seasonal">🌿 季節限定キャンペーン</option>
+                    <option value="other">💡 その他・実験企画</option>
+                  </select>
+                </div>
+                <div style="display:flex; flex-direction:column; gap:6px;">
+                  <label style="font-size:12px; font-weight:bold; color:#ccc;">実施チャネル / 関連出店</label>
+                  <input type="text" id="promo-channel" class="form-input" style="background:rgba(0,0,0,0.3); color:#fff; border:1px solid rgba(255,255,255,0.15); padding:6px 10px; border-radius:6px; font-size:12px;" placeholder="例: minne / SNS / クリマ54現場連動">
+                </div>
+              </div>
+
+              <!-- Concept / Intent -->
+              <div style="display:flex; flex-direction:column; gap:6px;">
+                <label style="font-size:12px; font-weight:bold; color:#ccc;">開催意図・狙い・コンセプト</label>
+                <textarea id="promo-concept" class="form-input" style="background:rgba(0,0,0,0.3); color:#fff; border:1px solid rgba(255,255,255,0.15); padding:8px 12px; border-radius:6px; font-size:12px; min-height:60px; resize:vertical;" placeholder="例: 夏休み期間にSNS拡散を狙い、ゲームで購入権が得られる仕掛けを作る。単なる値下げではなく体験価値を提供。"></textarea>
+              </div>
+
+              <!-- Target Products Selection (Read-only from Catalog) -->
+              <div style="display:flex; flex-direction:column; gap:6px;">
+                <label style="font-size:12px; font-weight:bold; color:#ccc; display:flex; justify-content:space-between; align-items:center;">
+                  <span>📦 対象作品の選択（作品図鑑参照）</span>
+                  <span style="font-size:11px; opacity:0.6; font-weight:normal;">熟考: 安売りしすぎていないか注意</span>
+                </label>
+                <div id="promo-products-selector" style="background:rgba(0,0,0,0.3); border:1px solid rgba(255,255,255,0.1); border-radius:6px; padding:10px; max-height:140px; overflow-y:auto; display:grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap:6px;">
+                  <!-- Rendered dynamically from catalogMaster -->
+                </div>
+              </div>
+
+              <!-- Guard Checklist (Self Refinement) -->
+              <div style="background:rgba(241,196,15,0.08); border:1px solid rgba(241,196,15,0.25); border-radius:8px; padding:12px; display:flex; flex-direction:column; gap:8px;">
+                <span style="font-size:12px; font-weight:bold; color:gold; display:flex; align-items:center; gap:6px;">
+                  🛡️ 安売り・企画クオリティ チェックリスト（熟考エリア）
+                </span>
+                <label style="font-size:11px; color:#ddd; cursor:pointer; display:flex; align-items:center; gap:6px;">
+                  <input type="checkbox" id="chk-guard-1"> 本当にこの対象作品でいいか？（ブランド価値を損なわないか）
+                </label>
+                <label style="font-size:11px; color:#ddd; cursor:pointer; display:flex; align-items:center; gap:6px;">
+                  <input type="checkbox" id="chk-guard-2"> 直近でセールが続いてお得感が麻痺していないか？
+                </label>
+                <label style="font-size:11px; color:#ddd; cursor:pointer; display:flex; align-items:center; gap:6px;">
+                  <input type="checkbox" id="chk-guard-3"> 購入フローやルールは顧客にとってシンプルか？
+                </label>
+              </div>
+
+              <!-- PDCA Review & Reflection -->
+              <div style="border-top:1px dashed rgba(255,255,255,0.15); padding-top:12px; display:flex; flex-direction:column; gap:10px;">
+                <span style="font-size:13px; font-weight:bold; color:#2ecc71; display:flex; align-items:center; gap:6px;">
+                  📝 実施効果・PDCA振り返り（反省点＆成功点）
+                </span>
+                
+                <div style="display:flex; align-items:center; gap:12px;">
+                  <label style="font-size:12px; color:#ccc;">自己評価:</label>
+                  <select id="promo-rating" class="form-input" style="background:rgba(0,0,0,0.3); color:#fff; border:1px solid rgba(255,255,255,0.15); padding:4px 8px; border-radius:6px; font-size:12px;">
+                    <option value="0">未評価</option>
+                    <option value="5">★★★★★ (大成功)</option>
+                    <option value="4">★★★★☆ (成功)</option>
+                    <option value="3">★★★☆☆ (普通・手応えあり)</option>
+                    <option value="2">★★☆☆☆ (課題あり)</option>
+                    <option value="1">★☆☆☆☆ (いまいちだった)</option>
+                  </select>
+                </div>
+
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+                  <div style="display:flex; flex-direction:column; gap:4px;">
+                    <label style="font-size:11px; color:#e74c3c; font-weight:bold;">⚠️ 反省点・いまいちだった点</label>
+                    <textarea id="promo-reflection-bad" class="form-input" style="background:rgba(0,0,0,0.3); color:#fff; border:1px solid rgba(231,76,60,0.3); padding:6px; border-radius:6px; font-size:11px; height:54px; resize:vertical;" placeholder="例: 購入までのステップが複雑だった。作り込みがあまく雑に見えた。お得感がなかった。"></textarea>
+                  </div>
+                  <div style="display:flex; flex-direction:column; gap:4px;">
+                    <label style="font-size:11px; color:#2ecc71; font-weight:bold;">🎉 成果・成功要因（良かった点）</label>
+                    <textarea id="promo-reflection-good" class="form-input" style="background:rgba(0,0,0,0.3); color:#fff; border:1px solid rgba(46,204,113,0.3); padding:6px; border-radius:6px; font-size:11px; height:54px; resize:vertical;" placeholder="例: ゲーム感覚がおもしろく評判が良かった。限定品の見せ方で即完売した。"></textarea>
+                  </div>
+                </div>
+
+                <div style="display:flex; flex-direction:column; gap:4px;">
+                  <label style="font-size:11px; color:#aaa;">📌 次回（翌年）への申し送りメモ</label>
+                  <input type="text" id="promo-next-memo" class="form-input" style="background:rgba(0,0,0,0.3); color:#fff; border:1px solid rgba(255,255,255,0.1); padding:6px; border-radius:6px; font-size:11px;" placeholder="例: 来年8月も同時期に開催。ただしステップを2段階以内に簡略化する。">
+                </div>
+              </div>
+            </div>
+
+            <!-- Modal Footer -->
+            <div style="padding:14px 20px; background:#15151a; border-top:1px solid rgba(255,255,255,0.1); display:flex; justify-content:space-between; align-items:center;">
+              <button id="promo-btn-delete" onclick="deletePromotionPlan()" style="background:rgba(231,76,60,0.2); border:1px solid #e74c3c; color:#e74c3c; padding:6px 12px; border-radius:6px; font-size:12px; cursor:pointer; display:none;">削除</button>
+              <div style="display:flex; gap:10px; margin-left:auto;">
+                <button onclick="closePromotionModal()" style="background:rgba(255,255,255,0.1); border:none; color:#fff; padding:6px 14px; border-radius:6px; font-size:12px; cursor:pointer;">キャンセル</button>
+                <button onclick="savePromotionPlan()" style="background:linear-gradient(135deg, #2ecc71, #27ae60); border:none; color:#fff; font-weight:bold; padding:6px 18px; border-radius:6px; font-size:12px; cursor:pointer;">保存する</button>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </section>
@@ -4858,6 +5029,7 @@
       const timelineContainer = document.getElementById('exhibition-timeline-container');
       const chartContainer = document.getElementById('exhibition-chart-container');
       const roadmapContainer = document.getElementById('exhibition-roadmap-container');
+      const promotionContainer = document.getElementById('exhibition-promotion-container');
       if (!boardContainer || !timelineContainer || !chartContainer || !roadmapContainer) return;
 
       // Hide all by default
@@ -4865,6 +5037,13 @@
       timelineContainer.style.display = 'none';
       chartContainer.style.display = 'none';
       roadmapContainer.style.display = 'none';
+      if (promotionContainer) promotionContainer.style.display = 'none';
+
+      if (exhibitionViewMode === 'promotion') {
+        if (promotionContainer) promotionContainer.style.display = 'flex';
+        if (window.renderExhibitionPromotions) window.renderExhibitionPromotions();
+        return;
+      }
 
       // Merge builtin events from config
       const allEvents = window.getAllEvents ? window.getAllEvents(eventConfigData) : {};
@@ -5998,9 +6177,320 @@
         
         switchEvent(DEFAULT_EVENT);
       } catch(e) {
-        console.error(e);
-        alert("削除に失敗しました。");
+    // ▼▼▼ 企画・セール管理（Promotion & Sales Hub）ロジック ▼▼▼
+    const PROMO_STORAGE_KEY = 'moai_promotion_plans_v1';
+
+    function getPromotionPlans() {
+      try {
+        const raw = localStorage.getItem(PROMO_STORAGE_KEY);
+        return raw ? JSON.parse(raw) : [];
+      } catch (e) {
+        console.error("Failed to load promotion plans", e);
+        return [];
       }
+    }
+
+    function savePromotionPlansData(plans) {
+      try {
+        localStorage.setItem(PROMO_STORAGE_KEY, JSON.stringify(plans));
+      } catch (e) {
+        console.error("Failed to save promotion plans", e);
+      }
+    }
+
+    window.renderExhibitionPromotions = () => {
+      const grid = document.getElementById('promotion-list-grid');
+      const guardText = document.getElementById('promotion-guard-text');
+      const statsBadges = document.getElementById('promotion-stats-badges');
+      if (!grid) return;
+
+      const plans = getPromotionPlans();
+      
+      // Calculate frequency guard (plans within last 30 days or active)
+      const now = new Date();
+      const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+      
+      const recentPlans = plans.filter(p => {
+        if (!p.startDate) return false;
+        const d = new Date(p.startDate);
+        return d >= thirtyDaysAgo;
+      });
+
+      const activeCount = plans.filter(p => p.status === 'active').length;
+      const readyCount = plans.filter(p => p.status === 'ready').length;
+      const reviewNeeded = plans.filter(p => (p.status === 'active' || p.status === 'completed') && !p.reflectionGood && !p.reflectionBad).length;
+
+      if (statsBadges) {
+        statsBadges.innerHTML = `
+          <span style="background:rgba(155,89,182,0.3); color:#e0b0ff; padding:2px 8px; border-radius:10px; font-size:11px; font-weight:bold;">全 ${plans.length} 件</span>
+          <span style="background:rgba(46,204,113,0.3); color:#2ecc71; padding:2px 8px; border-radius:10px; font-size:11px; font-weight:bold;">🔥 開催中 ${activeCount}</span>
+          ${reviewNeeded > 0 ? `<span style="background:rgba(241,196,15,0.3); color:gold; padding:2px 8px; border-radius:10px; font-size:11px; font-weight:bold;">📝 振り返り待ち ${reviewNeeded}</span>` : ''}
+        `;
+      }
+
+      if (guardText) {
+        if (recentPlans.length >= 3) {
+          guardText.innerHTML = `<strong style="color:#f39c12;">⚠️ 直近30日間に ${recentPlans.length} 件の企画が密集しています。</strong> 割引の連発はお得感の慣れを生むため、ゲーム感覚・限定品企画の割合を増やしましょう！`;
+        } else {
+          guardText.innerHTML = `直近30日間の企画数: <strong>${recentPlans.length} 件</strong>。適切なペースでブランド価値を高めながらプロモーションを展開できています。`;
+        }
+      }
+
+      if (plans.length === 0) {
+        grid.innerHTML = `
+          <div style="grid-column: 1 / -1; background:rgba(255,255,255,0.02); border:1px dashed rgba(255,255,255,0.1); border-radius:12px; padding:40px; text-align:center; color:#aaa;">
+            <p style="font-size:16px; margin:0 0 8px 0; color:#fff;">💡 まだ企画が立案されていません</p>
+            <p style="font-size:12px; margin:0 0 16px 0;">「8/1〜8/14 夏のモアイセール」や「限定作品ガチャ」など、ネット＆現場の企画を自由に追加してみましょう！</p>
+            <button class="btn btn-primary" onclick="openPromotionModal()" style="font-size:12px; padding:6px 16px; background:linear-gradient(135deg, #9b59b6, #8e44ad); border:none; cursor:pointer;">
+              ＋ 最初の企画を立案する
+            </button>
+          </div>
+        `;
+        return;
+      }
+
+      const typeLabels = {
+        game: { text: '🎮 ゲーム感覚', bg: 'rgba(52, 152, 219, 0.2)', border: '#3498db' },
+        limited: { text: '✨ 限定品・特別仕様', bg: 'rgba(155, 89, 182, 0.2)', border: '#9b59b6' },
+        clearance: { text: '📦 在庫・訳あり', bg: 'rgba(230, 126, 34, 0.2)', border: '#e67e22' },
+        seasonal: { text: '🌿 季節キャンペーン', bg: 'rgba(46, 204, 113, 0.2)', border: '#2ecc71' },
+        other: { text: '💡 実験企画', bg: 'rgba(149, 165, 166, 0.2)', border: '#95a5a6' }
+      };
+
+      const statusLabels = {
+        draft: { text: '💭 構想中', color: '#95a5a6' },
+        ready: { text: '🛠️ 準備中', color: '#f39c12' },
+        active: { text: '🔥 開催中', color: '#2ecc71' },
+        completed: { text: '🎉 完了', color: '#3498db' }
+      };
+
+      const sortedPlans = [...plans].sort((a, b) => {
+        const order = { active: 0, ready: 1, draft: 2, completed: 3 };
+        if (order[a.status] !== order[b.status]) return order[a.status] - order[b.status];
+        return new Date(b.startDate || 0) - new Date(a.startDate || 0);
+      });
+
+      grid.innerHTML = sortedPlans.map(p => {
+        const typeInfo = typeLabels[p.type] || typeLabels.other;
+        const statusInfo = statusLabels[p.status] || statusLabels.draft;
+        const ratingStars = p.rating && p.rating !== '0' ? '★'.repeat(Number(p.rating)) + '☆'.repeat(5 - Number(p.rating)) : '未評価';
+        const targetProductsCount = (p.productIds || []).length;
+
+        return `
+          <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); border-radius:12px; padding:16px; display:flex; flex-direction:column; gap:12px; position:relative; box-shadow:0 4px 12px rgba(0,0,0,0.2);">
+            <!-- Card Header -->
+            <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:10px;">
+              <span style="background:${typeInfo.bg}; border:1px solid ${typeInfo.border}; color:#fff; font-size:11px; font-weight:bold; padding:2px 8px; border-radius:6px;">
+                ${typeInfo.text}
+              </span>
+              <span style="color:${statusInfo.color}; font-size:12px; font-weight:bold;">
+                ${statusInfo.text}
+              </span>
+            </div>
+
+            <!-- Title & Channel -->
+            <div>
+              <h4 style="margin:0 0 4px 0; font-size:15px; color:#fff; word-break:break-word;">${escapeHtml(p.title || '無題の企画')}</h4>
+              <div style="font-size:11px; color:rgba(255,255,255,0.5); display:flex; align-items:center; gap:8px;">
+                <span>📅 ${p.startDate || '未定'} 〜 ${p.endDate || '未定'}</span>
+                ${p.channel ? `<span>📍 ${escapeHtml(p.channel)}</span>` : ''}
+              </div>
+            </div>
+
+            <!-- Concept preview -->
+            ${p.concept ? `
+              <div style="background:rgba(0,0,0,0.25); border-left:3px solid var(--accent); padding:6px 10px; border-radius:0 6px 6px 0; font-size:11px; color:#ddd; line-height:1.4;">
+                ${escapeHtml(p.concept)}
+              </div>
+            ` : ''}
+
+            <!-- Target products summary & Guard Badge -->
+            <div style="display:flex; justify-content:space-between; align-items:center; font-size:11px; color:#aaa; border-top:1px dashed rgba(255,255,255,0.08); padding-top:8px;">
+              <span>📦 対象作品: <strong>${targetProductsCount} 点</strong></span>
+              ${p.guardCheckedCount > 0 ? `<span style="color:gold;">🛡️ 熟考済 (${p.guardCheckedCount}/3)</span>` : `<span style="color:#777;">🛡️ 熟考未完了</span>`}
+            </div>
+
+            <!-- Reflection / PDCA snippet -->
+            ${(p.reflectionBad || p.reflectionGood || (p.rating && p.rating !== '0')) ? `
+              <div style="background:rgba(46,204,113,0.06); border:1px solid rgba(46,204,113,0.2); border-radius:8px; padding:8px 10px; display:flex; flex-direction:column; gap:4px; font-size:11px;">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                  <span style="color:#2ecc71; font-weight:bold;">PDCA振り返り</span>
+                  <span style="color:gold;">${ratingStars}</span>
+                </div>
+                ${p.reflectionBad ? `<div style="color:#e74c3c; font-size:10px;">⚠️ ${escapeHtml(p.reflectionBad)}</div>` : ''}
+                ${p.reflectionGood ? `<div style="color:#2ecc71; font-size:10px;">🎉 ${escapeHtml(p.reflectionGood)}</div>` : ''}
+                ${p.nextMemo ? `<div style="color:#aaa; font-size:10px; margin-top:2px;">📌 ${escapeHtml(p.nextMemo)}</div>` : ''}
+              </div>
+            ` : ''}
+
+            <!-- Actions -->
+            <div style="margin-top:auto; padding-top:8px; display:flex; justify-content:flex-end;">
+              <button onclick="openPromotionModal('${p.id}')" style="background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.15); color:#fff; font-size:11px; padding:4px 12px; border-radius:6px; cursor:pointer;">
+                ✏️ 編集・振り返り
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    };
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    // Modal Helpers
+    window.openPromotionModal = (id) => {
+      const modal = document.getElementById('promotion-modal');
+      const titleEl = document.getElementById('promotion-modal-title');
+      const btnDelete = document.getElementById('promo-btn-delete');
+      const selector = document.getElementById('promo-products-selector');
+      if (!modal) return;
+
+      // Populate Catalog Products in Selector (Read-only reference)
+      const catalogMaster = window.catalogMaster || {};
+      let productOptionsHtml = '';
+      const productList = Array.isArray(catalogMaster) ? catalogMaster : Object.values(catalogMaster);
+
+      if (productList.length > 0) {
+        productOptionsHtml = productList.map(item => {
+          const itemTitle = item.title || item.name || item.id || '作品';
+          const itemId = item.id || itemTitle;
+          return `
+            <label style="font-size:11px; color:#ddd; cursor:pointer; display:flex; align-items:center; gap:6px; background:rgba(255,255,255,0.03); padding:4px 6px; border-radius:4px;">
+              <input type="checkbox" class="chk-promo-prod" value="${escapeHtml(itemId)}"> ${escapeHtml(itemTitle)}
+            </label>
+          `;
+        }).join('');
+      } else {
+        productOptionsHtml = '<span style="font-size:11px; color:#888;">作品図鑑の読み込み中、または個別作品選択が不要な場合はそのまま保存できます。</span>';
+      }
+      if (selector) selector.innerHTML = productOptionsHtml;
+
+      if (id) {
+        const plans = getPromotionPlans();
+        const plan = plans.find(p => p.id === id);
+        if (plan) {
+          if (titleEl) titleEl.innerHTML = '💡 企画の編集・PDCA振り返り';
+          document.getElementById('promo-edit-id').value = plan.id;
+          document.getElementById('promo-title').value = plan.title || '';
+          document.getElementById('promo-start-date').value = plan.startDate || '';
+          document.getElementById('promo-end-date').value = plan.endDate || '';
+          document.getElementById('promo-status').value = plan.status || 'draft';
+          document.getElementById('promo-type').value = plan.type || 'game';
+          document.getElementById('promo-channel').value = plan.channel || '';
+          document.getElementById('promo-concept').value = plan.concept || '';
+
+          const selProductIds = plan.productIds || [];
+          document.querySelectorAll('.chk-promo-prod').forEach(chk => {
+            chk.checked = selProductIds.includes(chk.value);
+          });
+
+          document.getElementById('chk-guard-1').checked = !!plan.guard1;
+          document.getElementById('chk-guard-2').checked = !!plan.guard2;
+          document.getElementById('chk-guard-3').checked = !!plan.guard3;
+
+          document.getElementById('promo-rating').value = plan.rating || '0';
+          document.getElementById('promo-reflection-bad').value = plan.reflectionBad || '';
+          document.getElementById('promo-reflection-good').value = plan.reflectionGood || '';
+          document.getElementById('promo-next-memo').value = plan.nextMemo || '';
+
+          if (btnDelete) btnDelete.style.display = 'block';
+        }
+      } else {
+        if (titleEl) titleEl.innerHTML = '💡 新しい企画の立案';
+        document.getElementById('promo-edit-id').value = '';
+        document.getElementById('promo-title').value = '';
+        document.getElementById('promo-start-date').value = '';
+        document.getElementById('promo-end-date').value = '';
+        document.getElementById('promo-status').value = 'draft';
+        document.getElementById('promo-type').value = 'game';
+        document.getElementById('promo-channel').value = '';
+        document.getElementById('promo-concept').value = '';
+
+        document.querySelectorAll('.chk-promo-prod').forEach(chk => chk.checked = false);
+        document.getElementById('chk-guard-1').checked = false;
+        document.getElementById('chk-guard-2').checked = false;
+        document.getElementById('chk-guard-3').checked = false;
+
+        document.getElementById('promo-rating').value = '0';
+        document.getElementById('promo-reflection-bad').value = '';
+        document.getElementById('promo-reflection-good').value = '';
+        document.getElementById('promo-next-memo').value = '';
+
+        if (btnDelete) btnDelete.style.display = 'none';
+      }
+
+      modal.style.display = 'flex';
+    };
+
+    window.closePromotionModal = () => {
+      const modal = document.getElementById('promotion-modal');
+      if (modal) modal.style.display = 'none';
+    };
+
+    window.savePromotionPlan = () => {
+      const title = document.getElementById('promo-title').value.trim();
+      if (!title) {
+        alert("企画タイトルを入力してください。");
+        return;
+      }
+
+      const id = document.getElementById('promo-edit-id').value || ('promo_' + Date.now());
+      const selectedProducts = [];
+      document.querySelectorAll('.chk-promo-prod:checked').forEach(chk => {
+        selectedProducts.push(chk.value);
+      });
+
+      const g1 = document.getElementById('chk-guard-1').checked;
+      const g2 = document.getElementById('chk-guard-2').checked;
+      const g3 = document.getElementById('chk-guard-3').checked;
+      const guardCheckedCount = (g1 ? 1 : 0) + (g2 ? 1 : 0) + (g3 ? 1 : 0);
+
+      const planData = {
+        id: id,
+        title: title,
+        startDate: document.getElementById('promo-start-date').value,
+        endDate: document.getElementById('promo-end-date').value,
+        status: document.getElementById('promo-status').value,
+        type: document.getElementById('promo-type').value,
+        channel: document.getElementById('promo-channel').value.trim(),
+        concept: document.getElementById('promo-concept').value.trim(),
+        productIds: selectedProducts,
+        guard1: g1,
+        guard2: g2,
+        guard3: g3,
+        guardCheckedCount: guardCheckedCount,
+        rating: document.getElementById('promo-rating').value,
+        reflectionBad: document.getElementById('promo-reflection-bad').value.trim(),
+        reflectionGood: document.getElementById('promo-reflection-good').value.trim(),
+        nextMemo: document.getElementById('promo-next-memo').value.trim(),
+        updatedAt: Date.now()
+      };
+
+      let plans = getPromotionPlans();
+      const existingIdx = plans.findIndex(p => p.id === id);
+      if (existingIdx >= 0) {
+        plans[existingIdx] = planData;
+      } else {
+        plans.push(planData);
+      }
+
+      savePromotionPlansData(plans);
+      closePromotionModal();
+      window.renderExhibitionPromotions();
+    };
+
+    window.deletePromotionPlan = () => {
+      const id = document.getElementById('promo-edit-id').value;
+      if (!id) return;
+      if (!confirm("この企画を削除してもよろしいですか？")) return;
+
+      let plans = getPromotionPlans();
+      plans = plans.filter(p => p.id !== id);
+      savePromotionPlansData(plans);
+      closePromotionModal();
+      window.renderExhibitionPromotions();
     };
   </script>
 
