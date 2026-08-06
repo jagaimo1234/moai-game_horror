@@ -6560,7 +6560,8 @@
                 <div>
                   <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
                     <span style="background:${regBadgeColor}; font-size:9px; padding:2px 5px; border-radius:4px; font-weight:bold; color:#000;">${regBadgeText}</span>
-                    <div style="display:flex; gap:4px;">
+                    <div style="display:flex; gap:4px; align-items:center;">
+                      <button class="btn" style="background:linear-gradient(135deg, #00d2ff, #0081ff); color:#000; font-weight:bold; padding:2px 8px; font-size:10px; border-radius:4px; border:none; cursor:pointer;" onclick="openExhibitionToTabModal('${key}')">🎪 出店登録</button>
                       <button class="btn" style="background:rgba(255,255,255,0.05); padding:2px 5px; font-size:9px; color:#fff;" onclick="openExhibitionModal('${key}')">編集</button>
                       ${!isBuiltin ? `<button class="btn" style="background:rgba(231,76,60,0.2); padding:2px 5px; font-size:9px; color:var(--danger);" onclick="deleteExhibition('${key}')">削除</button>` : ''}
                     </div>
