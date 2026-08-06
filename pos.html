@@ -3838,53 +3838,101 @@
 
 // Deduplication Cleaner for Exhibition Plans (Smart Fuzzy Name & Date Integration)
     
-    // Explicit Fix: Ensure Design Festa 63 (Completed) and Design Festa 64 (Scheduled) are separated with correct sales
-    window.fixDesignFestaSeparation = async () => {
+// Explicit Fix: Repair Kurima & Design Festa past vs future separation
+    window.fixEventHistorySeparation = async () => {
       if (!auth.currentUser) return;
       try {
         const plans = { ...window.exhibitionPlansData };
+        let hasChanges = false;
 
-        // Ensure Design Festa 63 exists in Completed column
-        plans['designfesta63'] = {
-          name: 'デザインフェスタ vol.63',
-          date: '2026-05-18',
-          location: '東京ビッグサイト',
-          status: 'completed',
-          prepDays: 30,
-          updatedAt: Date.now()
-        };
+        // Repair Kurima past vs future
+        if (!plans['kurima50'] && !plans['kurima_past']) {
+          plans['kurima50'] = {
+            name: 'クリエーターズマーケットvol.50',
+            label: 'クリマ50',
+            fullName: 'クリエーターズマーケットvol.50',
+            date: '2024-06-22',
+            location: 'ポートメッセなごや',
+            status: 'completed',
+            prepDays: 30,
+            updatedAt: Date.now()
+          };
+          hasChanges = true;
+        }
 
-        // Ensure Design Festa 64 exists in Scheduled column without past sales
+        // Fix "名古屋クリマ (開催:未定)" if present, update to Kurima 50
+        if (plans['kurima']) {
+          plans['kurima50'] = {
+            ...plans['kurima'],
+            name: 'クリエーターズマーケットvol.50',
+            label: 'クリマ50',
+            fullName: 'クリエーターズマーケットvol.50',
+            date: '2024-06-22',
+            location: 'ポートメッセなごや',
+            status: 'completed'
+          };
+          delete plans['kurima'];
+          hasChanges = true;
+        }
+
+        // Kurima 54 (Future)
+        if (!plans['kurima54']) {
+          plans['kurima54'] = {
+            name: 'クリエーターズマーケットvol.54',
+            label: 'クリマ54',
+            fullName: 'クリエーターズマーケットvol.54',
+            date: '2026-06-20',
+            location: 'ポートメッセなごや',
+            status: 'scheduled',
+            prepDays: 35,
+            updatedAt: Date.now()
+          };
+          hasChanges = true;
+        }
+
+        // Design Festa 63 (Past)
+        if (!plans['designfesta63']) {
+          plans['designfesta63'] = {
+            name: 'デザインフェスタ vol.63',
+            label: 'デザフェス63',
+            fullName: 'デザインフェスタ vol.63',
+            date: '2026-05-18',
+            location: '東京ビッグサイト',
+            status: 'completed',
+            prepDays: 30,
+            updatedAt: Date.now()
+          };
+          hasChanges = true;
+        }
+
+        // Design Festa 64 (Future)
         if (!plans['designfesta64'] && !plans['designfesta_64']) {
           plans['designfesta64'] = {
             name: 'デザインフェスタ vol.64',
+            label: 'デザフェス64',
+            fullName: 'デザインフェスタ vol.64',
             date: '2026-11-15',
             location: '東京ビッグサイト',
             status: 'scheduled',
             prepDays: 40,
             updatedAt: Date.now()
           };
-        } else {
-          // If designfesta64 already exists, make sure its status is scheduled
-          const k64 = plans['designfesta64'] ? 'designfesta64' : 'designfesta_64';
-          plans[k64] = {
-            ...plans[k64],
-            name: 'デザインフェスタ vol.64',
-            status: 'scheduled'
-          };
+          hasChanges = true;
         }
 
-        await setDoc(doc(db, "settings", "exhibition_plans"), plans);
-        console.log("Successfully repaired Design Festa 63 & 64 separation!");
-        if (typeof window.renderExhibitionView === 'function') {
-          window.renderExhibitionView();
+        if (hasChanges) {
+          await setDoc(doc(db, "settings", "exhibition_plans"), plans);
+          console.log("Successfully repaired Event History Separation (Kurima & DesignFesta)!");
+          if (typeof window.renderExhibitionView === 'function') {
+            window.renderExhibitionView();
+          }
         }
       } catch(e) {
-        console.error("Fix Design Festa Error:", e);
+        console.error("Fix Event History Error:", e);
       }
     };
 
-    window.cleanDuplicateExhibitionPlans = async () => {
+        window.cleanDuplicateExhibitionPlans = async () => {
       if (!auth.currentUser) return;
       try {
         const rawPlans = { ...window.exhibitionPlansData };
@@ -6045,7 +6093,7 @@
                      onclick="openExhibitionModal('${ev.key}')"
                      title="${plan.name} (${ev.eventDate.getFullYear()}/${ev.eventDate.getMonth()+1}/${ev.eventDate.getDate()})&#10;ステータス: ${statusLabel}&#10;場所: ${plan.location || '未定'}">
                   <span>${badgeIcon}</span>
-                  <span style="overflow:hidden; text-overflow:ellipsis;">${plan.name} [${statusLabel}]</span>
+                  <span style="overflow:hidden; text-overflow:ellipsis;">${plan.fullName || plan.name} [${statusLabel}]</span>
                 </div>
               `;
             }, '登録された出店イベント候補はありません');
@@ -6212,7 +6260,10 @@
                   <span style="font-size:12px; font-weight:bold; color:var(--accent);">📅 ${plan.date}</span>
                   <span style="background:${regBadgeColor}; font-size:9px; padding:1px 6px; border-radius:3px; font-weight:bold; color:#000;">${regBadgeText}</span>
                 </div>
-                <h5 style="margin:0; font-size:14px; color:#fff; cursor:pointer;" onclick="openExhibitionModal('${key}')">${plan.name}</h5>
+                <h5 style="margin:0; font-size:14px; color:#fff; cursor:pointer;" onclick="openExhibitionModal('${key}')">
+                ${plan.fullName || plan.name}
+                ${(plan.label && plan.label !== (plan.fullName || plan.name)) ? `<span style="font-size:10px; opacity:0.6; font-weight:normal; margin-left:6px; background:rgba(255,255,255,0.1); padding:1px 6px; border-radius:4px;">(略称: ${plan.label})</span>` : ''}
+              </h5>
                 <div style="font-size:11px; opacity:0.75;">📍 ${plan.location || '場所未定'} ｜ 🔨 準備: ${plan.prepDays || 7}日前から</div>
                 ${plan.deadline ? `<div style="font-size:11px; color:#f39c12;">⏳ 締切: ${plan.deadline}</div>` : ''}
                 ${sales.totalSales > 0 ? `<div style="font-size:11px; color:var(--accent); font-weight:bold;">実績: ¥${sales.totalSales.toLocaleString()} (${sales.totalQty}点)</div>` : ''}
