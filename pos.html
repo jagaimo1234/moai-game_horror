@@ -375,6 +375,25 @@
       box-sizing: border-box !important;
     }
 
+  
+    /* Sticky Left Column for Gantt Chart */
+    .gantt-lane-header, .gantt-grid-header-title {
+      position: sticky !important;
+      left: 0 !important;
+      z-index: 30 !important;
+      background: #161620 !important;
+      box-shadow: 4px 0 12px rgba(0, 0, 0, 0.5) !important;
+    }
+    
+    /* Gantt Connector Line */
+    .gantt-connector-line {
+      position: absolute;
+      width: 2px;
+      border-right: 2px dashed rgba(0, 210, 255, 0.5);
+      pointer-events: none;
+      z-index: 4;
+    }
+
   </style>
 </head>
 <body>
@@ -5426,7 +5445,7 @@
         }
       }
 
-      // RENDER: Full-width Seamless Continuous Timeline (12-Month All-Month Continuous Track)
+      // RENDER: Full-width Seamless Continuous Timeline (Sticky Header, Slot Packing, Connectors, Perfect Month Alignment)
       else if (exhibitionViewMode === 'timeline') {
         timelineContainer.style.display = 'flex';
         timelineContainer.innerHTML = '';
@@ -5438,12 +5457,11 @@
 
         const promoPlans = getPromotionPlans ? getPromotionPlans() : [];
 
-        // 1. Collect and Build Full 12-Month Continuous Timeline
+        // 1. Collect and Build Full Continuous Timeline Months
         const now = new Date();
         const currentYear = now.getFullYear();
         const currentYearMonthStr = `${currentYear}-${String(now.getMonth() + 1).padStart(2, '0')}`;
 
-        // Determine min and max year from data (or default to current year 1~12 months)
         let minYear = currentYear;
         let maxYear = currentYear;
 
@@ -5460,7 +5478,6 @@
           }
         });
 
-        // Build continuous month list covering all years
         const monthList = [];
         let totalSpanDays = 0;
 
@@ -5485,13 +5502,11 @@
 
         const dayNames = ['日', '月', '火', '水', '木', '金', '土'];
 
-        // Helper to convert Date to day index offset
         const getDayOffset = (dateObj) => {
           const diffMs = dateObj - rangeStartDate;
           return Math.floor(diffMs / (1000 * 60 * 60 * 24));
         };
 
-        // Active target month for jump/scroll
         if (!window.activeTimelineYearMonth) {
           window.activeTimelineYearMonth = currentYearMonthStr;
         }
@@ -5505,7 +5520,7 @@
             const d = new Date(p.date);
             if (d >= rangeStartDate && d <= rangeEndDate) {
               const offset = getDayOffset(d);
-              rangeEvents.push({ key: k, plan: p, eventDate: d, offset: offset });
+              rangeEvents.push({ key: k, plan: p, eventDate: d, startOffset: offset, endOffset: offset });
             }
           } catch(e) {}
         });
@@ -5525,19 +5540,17 @@
           } catch(err) {}
         });
 
-        // Lane Visibility state
         if (!window.timelineLanes) {
           window.timelineLanes = { events: true, prep: true, promo: true, deadlines: true };
         }
 
         // 2. Intelligent Conflict & Overlap Detection
         const conflicts = [];
-
         for (let i = 0; i < rangeEvents.length; i++) {
           for (let j = i + 1; j < rangeEvents.length; j++) {
             const e1 = rangeEvents[i];
             const e2 = rangeEvents[j];
-            const diffDays = Math.abs(e2.offset - e1.offset);
+            const diffDays = Math.abs(e2.startOffset - e1.startOffset);
             if (diffDays === 0) {
               conflicts.push({
                 type: 'danger',
@@ -5558,8 +5571,8 @@
           const status = ev.plan.status || 'considering';
           if (status === 'scheduled' || status === 'strong_intent') {
             const prepDays = Number(ev.plan.prepDays) || 7;
-            const prepStartOffset = Math.max(0, ev.offset - prepDays);
-            const prepEndOffset = ev.offset;
+            const prepStartOffset = Math.max(0, ev.startOffset - prepDays);
+            const prepEndOffset = ev.startOffset;
 
             rangePromos.forEach(pm => {
               if (Math.max(prepStartOffset, pm.startOffset) <= Math.min(prepEndOffset, pm.endOffset)) {
@@ -5573,7 +5586,31 @@
           }
         });
 
-        // 3. Build Header & Option Jump Controls
+        // 3. ROW PACKING ALGORITHM (スマート行割り当て: 重なっていないアイテムは1行に収める)
+        function packItemsIntoRows(items) {
+          const sorted = [...items].sort((a, b) => a.startOffset - b.startOffset);
+          const rowEnds = [];
+
+          sorted.forEach(item => {
+            let placed = false;
+            for (let r = 0; r < rowEnds.length; r++) {
+              if (rowEnds[r] < item.startOffset) { // Row free
+                item.rowIndex = r;
+                rowEnds[r] = item.endOffset;
+                placed = true;
+                break;
+              }
+            }
+            if (!placed) {
+              item.rowIndex = rowEnds.length;
+              rowEnds.push(item.endOffset);
+            }
+          });
+
+          return { packedItems: sorted, rowCount: Math.max(1, rowEnds.length) };
+        }
+
+        // 4. Build Header & Option Jump Controls
         const monthOptionsHtml = monthList.map(mInfo => {
           return `<option value="${mInfo.yearMonthStr}" ${mInfo.yearMonthStr === window.activeTimelineYearMonth ? 'selected' : ''}>📅 ${mInfo.year}年 ${mInfo.month}月へジャンプ</option>`;
         }).join('');
@@ -5596,15 +5633,15 @@
           `;
         }
 
-        // Render Day Header Columns & Month Section Dividers for All Months
+        // Render Perfect Aligned Month Top Banner & Day Headers
         let dayHeadersHtml = '';
         let monthHeaderBannerHtml = '';
 
         monthList.forEach(mInfo => {
-          const pctWidth = (mInfo.days / totalSpanDays) * 100;
+          // Month banner uses flex proportional to number of days in that month -> 100% exact alignment!
           monthHeaderBannerHtml += `
-            <div id="gantt-month-banner-${mInfo.yearMonthStr}" style="width:${pctWidth}%; text-align:center; padding:6px; font-size:13px; font-weight:bold; color:var(--accent); border-right:2px solid rgba(255,255,255,0.25); background:rgba(0,210,255,0.06); flex-shrink:0;">
-              🗓️ ${mInfo.year}年 ${mInfo.month}月 <span style="font-size:10px; opacity:0.6; font-weight:normal;">(${mInfo.days}日)</span>
+            <div id="gantt-month-banner-${mInfo.yearMonthStr}" style="flex:${mInfo.days}; text-align:center; padding:6px; font-size:12px; font-weight:bold; color:var(--accent); border-right:2px solid rgba(255,255,255,0.3); background:rgba(0,210,255,0.06); box-sizing:border-box;">
+              🗓️ ${mInfo.year}年 ${mInfo.month}月 (${mInfo.days}日)
             </div>
           `;
 
@@ -5628,116 +5665,126 @@
           }
         });
 
-        // 4. Build Swimlanes for All Months (Multi-row Sublane)
+        // 5. PACK & RENDER LANES (Smart Row Packing)
 
-        // Lane 1: Events Sub-rows
+        // Helper to render packed row container
+        function renderPackedLaneHtml(packedItems, totalRows, renderItemFn, emptyText) {
+          if (!packedItems || packedItems.length === 0) {
+            return `<div class="gantt-track-row" style="display:flex; align-items:center; justify-content:center; opacity:0.3; font-size:11px;">${emptyText}</div>`;
+          }
+
+          let rowsHtml = '';
+          for (let r = 0; r < totalRows; r++) {
+            const rowItems = packedItems.filter(item => item.rowIndex === r);
+            const itemsHtml = rowItems.map(item => renderItemFn(item)).join('');
+            rowsHtml += `<div class="gantt-track-row">${itemsHtml}</div>`;
+          }
+          return rowsHtml;
+        }
+
+        // Lane 1: Events Sub-rows (Packed)
         let eventSubRowsHtml = '';
         if (window.timelineLanes.events) {
-          if (rangeEvents.length === 0) {
-            eventSubRowsHtml = `<div class="gantt-track-row" style="display:flex; align-items:center; justify-content:center; opacity:0.3; font-size:11px;">登録された出店イベント候補はありません</div>`;
-          } else {
-            eventSubRowsHtml = rangeEvents.map(ev => {
-              const startPct = (ev.offset / totalSpanDays) * 100;
-              const widthPct = Math.max((1 / totalSpanDays) * 100, 0.4);
-              const plan = ev.plan;
-              const status = plan.status || 'considering';
+          const { packedItems, rowCount } = packItemsIntoRows(rangeEvents);
+          eventSubRowsHtml = renderPackedLaneHtml(packedItems, rowCount, (ev) => {
+            const startPct = (ev.startOffset / totalSpanDays) * 100;
+            const widthPct = Math.max((1 / totalSpanDays) * 100, 0.5);
+            const plan = ev.plan;
+            const status = plan.status || 'considering';
 
-              let barClass = 'gantt-bar-scheduled';
-              let statusLabel = '確定';
-              let badgeIcon = '👑';
-              
-              if (status === 'strong_intent') {
-                barClass = 'gantt-bar-prep';
-                statusLabel = '意思強め';
-                badgeIcon = '🔥';
-              } else if (status === 'considering') {
-                barClass = 'gantt-bar-considering';
-                statusLabel = '検討中';
-                badgeIcon = '💭';
-              } else if (status === 'candidate') {
-                barClass = 'gantt-bar-completed';
-                statusLabel = 'AI候補';
-                badgeIcon = '❓';
-              } else if (status === 'completed') {
-                barClass = 'gantt-bar-completed';
-                statusLabel = '出店済';
-                badgeIcon = '🎉';
-              }
+            let barClass = 'gantt-bar-scheduled';
+            let statusLabel = '確定';
+            let badgeIcon = '👑';
+            
+            if (status === 'strong_intent') {
+              barClass = 'gantt-bar-prep';
+              statusLabel = '意思強め';
+              badgeIcon = '🔥';
+            } else if (status === 'considering') {
+              barClass = 'gantt-bar-considering';
+              statusLabel = '検討中';
+              badgeIcon = '💭';
+            } else if (status === 'candidate') {
+              barClass = 'gantt-bar-completed';
+              statusLabel = 'AI候補';
+              badgeIcon = '❓';
+            } else if (status === 'completed') {
+              barClass = 'gantt-bar-completed';
+              statusLabel = '出店済';
+              badgeIcon = '🎉';
+            }
 
-              return `
-                <div class="gantt-track-row">
-                  <div class="gantt-bar-item ${barClass}" 
-                       style="left:${startPct}%; width:${widthPct}%;" 
-                       onclick="openExhibitionModal('${ev.key}')"
-                       title="${plan.name} (${ev.eventDate.getFullYear()}/${ev.eventDate.getMonth()+1}/${ev.eventDate.getDate()})&#10;ステータス: ${statusLabel}&#10;場所: ${plan.location || '未定'}">
-                    <span>${badgeIcon}</span>
-                    <span style="overflow:hidden; text-overflow:ellipsis;">${plan.name} [${statusLabel}]</span>
-                  </div>
-                </div>
-              `;
-            }).join('');
-          }
+            return `
+              <div class="gantt-bar-item ${barClass}" 
+                   style="left:${startPct}%; width:${widthPct}%;" 
+                   onclick="openExhibitionModal('${ev.key}')"
+                   title="${plan.name} (${ev.eventDate.getFullYear()}/${ev.eventDate.getMonth()+1}/${ev.eventDate.getDate()})&#10;ステータス: ${statusLabel}&#10;場所: ${plan.location || '未定'}">
+                <span>${badgeIcon}</span>
+                <span style="overflow:hidden; text-overflow:ellipsis;">${plan.name} [${statusLabel}]</span>
+              </div>
+            `;
+          }, '登録された出店イベント候補はありません');
         }
 
-        // Lane 2: Prep Period Sub-rows (Only 'scheduled' & 'strong_intent')
+        // Lane 2: Prep Period Sub-rows (Packed & Dashed Connector Line)
         let prepSubRowsHtml = '';
         if (window.timelineLanes.prep) {
-          const prepEvents = rangeEvents.filter(ev => ev.plan.status === 'scheduled' || ev.plan.status === 'strong_intent');
-          
-          if (prepEvents.length === 0) {
-            prepSubRowsHtml = `<div class="gantt-track-row" style="display:flex; align-items:center; justify-content:center; opacity:0.3; font-size:11px;">確定・本命イベントの制作準備期間はありません</div>`;
-          } else {
-            prepSubRowsHtml = prepEvents.map(ev => {
-              const prepDays = Number(ev.plan.prepDays) || 7;
-              const prepStartOffset = Math.max(0, ev.offset - prepDays);
-              const duration = ev.offset - prepStartOffset;
-              if (duration <= 0) return '';
-              
-              const startPct = (prepStartOffset / totalSpanDays) * 100;
-              const widthPct = (duration / totalSpanDays) * 100;
+          const prepEvents = rangeEvents.filter(ev => ev.plan.status === 'scheduled' || ev.plan.status === 'strong_intent').map(ev => {
+            const prepDays = Number(ev.plan.prepDays) || 7;
+            const pStart = Math.max(0, ev.startOffset - prepDays);
+            return {
+              ...ev,
+              prepDays,
+              startOffset: pStart,
+              endOffset: ev.startOffset // End offset is the event date itself
+            };
+          });
 
-              return `
-                <div class="gantt-track-row">
-                  <div class="gantt-bar-item gantt-bar-prep" 
-                       style="left:${startPct}%; width:${widthPct}%;"
-                       onclick="openExhibitionModal('${ev.key}')"
-                       title="「${ev.plan.name}」の制作・搬入準備期間 (${prepDays}日間)">
-                    <span>🔨</span>
-                    <span>制作・準備 (${prepDays}日間) - ${ev.plan.name}</span>
-                  </div>
-                </div>
-              `;
-            }).join('');
-          }
+          const { packedItems, rowCount } = packItemsIntoRows(prepEvents);
+          prepSubRowsHtml = renderPackedLaneHtml(packedItems, rowCount, (ev) => {
+            const duration = ev.endOffset - ev.startOffset;
+            if (duration <= 0) return '';
+
+            const startPct = (ev.startOffset / totalSpanDays) * 100;
+            const widthPct = (duration / totalSpanDays) * 100;
+            const endPct = (ev.endOffset / totalSpanDays) * 100;
+
+            return `
+              <div class="gantt-bar-item gantt-bar-prep" 
+                   style="left:${startPct}%; width:${widthPct}%;"
+                   onclick="openExhibitionModal('${ev.key}')"
+                   title="「${ev.plan.name}」の制作・搬入準備期間 (${ev.prepDays}日間)">
+                <span>🔨</span>
+                <span>制作・準備 (${ev.prepDays}日間) - ${ev.plan.name}</span>
+                <!-- Dashed Vertical Line to Event Date -->
+                <div style="position:absolute; right:0; top:-24px; bottom:0; border-right:2px dashed rgba(0,210,255,0.7); pointer-events:none; z-index:10;" title="出店日への接続"></div>
+              </div>
+            `;
+          }, '確定・本命イベントの制作準備期間はありません');
         }
 
-        // Lane 3: Promotions Sub-rows
+        // Lane 3: Promotions Sub-rows (Packed)
         let promoSubRowsHtml = '';
         if (window.timelineLanes.promo) {
-          if (rangePromos.length === 0) {
-            promoSubRowsHtml = `<div class="gantt-track-row" style="display:flex; align-items:center; justify-content:center; opacity:0.3; font-size:11px;">セール・企画はありません</div>`;
-          } else {
-            promoSubRowsHtml = rangePromos.map(pm => {
-              const duration = Math.max(1, (pm.endOffset - pm.startOffset) + 1);
-              const startPct = (pm.startOffset / totalSpanDays) * 100;
-              const widthPct = (duration / totalSpanDays) * 100;
+          const { packedItems, rowCount } = packItemsIntoRows(rangePromos);
+          promoSubRowsHtml = renderPackedLaneHtml(packedItems, rowCount, (pm) => {
+            const duration = Math.max(1, (pm.endOffset - pm.startOffset) + 1);
+            const startPct = (pm.startOffset / totalSpanDays) * 100;
+            const widthPct = (duration / totalSpanDays) * 100;
 
-              return `
-                <div class="gantt-track-row">
-                  <div class="gantt-bar-item gantt-bar-promo" 
-                       style="left:${startPct}%; width:${widthPct}%;"
-                       onclick="openPromotionModal(${pm.index})"
-                       title="💡 企画: ${pm.promo.title}">
-                    <span>💡</span>
-                    <span style="overflow:hidden; text-overflow:ellipsis;">${pm.promo.title}</span>
-                  </div>
-                </div>
-              `;
-            }).join('');
-          }
+            return `
+              <div class="gantt-bar-item gantt-bar-promo" 
+                   style="left:${startPct}%; width:${widthPct}%;"
+                   onclick="openPromotionModal(${pm.index})"
+                   title="💡 企画: ${pm.promo.title}">
+                <span>💡</span>
+                <span style="overflow:hidden; text-overflow:ellipsis;">${pm.promo.title}</span>
+              </div>
+            `;
+          }, 'セール・企画はありません');
         }
 
-        // Lane 4: Deadlines Sub-rows
+        // Lane 4: Deadlines Sub-rows (Packed)
         let deadlineSubRowsHtml = '';
         if (window.timelineLanes.deadlines) {
           const deadlinesInRange = [];
@@ -5747,32 +5794,28 @@
               try {
                 const dl = new Date(p.deadline);
                 if (dl >= rangeStartDate && dl <= rangeEndDate) {
-                  deadlinesInRange.push({ key: k, plan: p, offset: getDayOffset(dl), dlDate: dl });
+                  const off = getDayOffset(dl);
+                  deadlinesInRange.push({ key: k, plan: p, startOffset: off, endOffset: off, dlDate: dl });
                 }
               } catch(e) {}
             }
           });
 
-          if (deadlinesInRange.length === 0) {
-            deadlineSubRowsHtml = `<div class="gantt-track-row" style="display:flex; align-items:center; justify-content:center; opacity:0.3; font-size:11px;">応募締切はありません</div>`;
-          } else {
-            deadlineSubRowsHtml = deadlinesInRange.map(dl => {
-              const startPct = (dl.offset / totalSpanDays) * 100;
-              const widthPct = Math.max((1 / totalSpanDays) * 100, 0.4);
+          const { packedItems, rowCount } = packItemsIntoRows(deadlinesInRange);
+          deadlineSubRowsHtml = renderPackedLaneHtml(packedItems, rowCount, (dl) => {
+            const startPct = (dl.startOffset / totalSpanDays) * 100;
+            const widthPct = Math.max((1 / totalSpanDays) * 100, 0.5);
 
-              return `
-                <div class="gantt-track-row">
-                  <div class="gantt-bar-item" 
-                       style="left:${startPct}%; width:${widthPct}%; background:rgba(231,76,60,0.85); border:1px solid #e74c3c; color:#fff;"
-                       onclick="openExhibitionModal('${dl.key}')"
-                       title="⏳ 応募締切: ${dl.plan.name}">
-                    <span>⏳</span>
-                    <span>締切: ${dl.plan.name}</span>
-                  </div>
-                </div>
-              `;
-            }).join('');
-          }
+            return `
+              <div class="gantt-bar-item" 
+                   style="left:${startPct}%; width:${widthPct}%; background:rgba(231,76,60,0.85); border:1px solid #e74c3c; color:#fff;"
+                   onclick="openExhibitionModal('${dl.key}')"
+                   title="⏳ 応募締切: ${dl.plan.name}">
+                <span>⏳</span>
+                <span>締切: ${dl.plan.name}</span>
+              </div>
+            `;
+          }, '応募締切はありません');
         }
 
         // Conflicts Report Panel
@@ -5853,11 +5896,10 @@
           `;
         }).join('');
 
-        // Dynamic Total Width calculation: 1 month is 33.3vw of viewport width (so 3 months fill 1 screen width exactly!)
-        // totalSpanDays / (average days in 3 months = ~91.25) * 100vw
+        // Dynamic Total Width: 1 month = 33.3vw of viewport -> Exactly 3 months fill 1 screen width!
         const calcWidthVw = Math.max(300, (totalSpanDays / 91.25) * 100);
 
-        // 5. Assemble Final Container HTML
+        // 6. Assemble Final Container HTML
         timelineContainer.innerHTML = `
           <div style="display:flex; flex-direction:column; gap:20px; width:100%;">
             
@@ -5906,27 +5948,29 @@
               <div style="padding:14px 20px; border-bottom:1px solid rgba(255,255,255,0.06); display:flex; justify-content:space-between; align-items:center; background:rgba(0,0,0,0.2);">
                 <div style="display:flex; align-items:center; gap:10px;">
                   <h3 style="margin:0; font-size:16px; color:var(--accent);">🌐 全月シームレスガントチャート (${monthList[0].year}年${monthList[0].month}月 〜 ${monthList[monthList.length-1].year}年${monthList[monthList.length-1].month}月)</h3>
-                  <span style="font-size:11px; opacity:0.6;">(全期間出店: ${rangeEvents.length}件 ｜ 1画面＝約3ヶ月分 / 横スクロールで全月シームレス閲覧)</span>
+                  <span style="font-size:11px; opacity:0.6;">(左列固定 / 月日位置100%一致 / 破線連携 / 重複時のみ改行)</span>
                 </div>
-                <div style="font-size:11px; opacity:0.5;">横スクロールで12ヶ月全月を移動・確認可能</div>
+                <div style="font-size:11px; opacity:0.5;">スクロールしても左列カテゴリ固定 / 横スクロールで全月閲覧</div>
               </div>
 
               <!-- Gantt Scroll Container (Wide 100% / Auto-scroll) -->
-              <div id="gantt-main-scroll-box" class="gantt-scroll-container" style="width:100%; overflow-x:auto;">
+              <div id="gantt-main-scroll-box" class="gantt-scroll-container" style="width:100%; overflow-x:auto; position:relative;">
                 <div style="width:${calcWidthVw}vw; min-width:3200px;">
                   
-                  <!-- Month Top Banner -->
-                  <div style="display:flex; padding-left:130px; border-bottom:1px solid rgba(255,255,255,0.1);">
-                    ${monthHeaderBannerHtml}
-                  </div>
-
                   <!-- Day Grid Header -->
                   <div class="gantt-grid-header">
-                    <div style="width:130px; padding:10px 14px; font-size:11px; font-weight:bold; opacity:0.7; border-right:1px solid rgba(255,255,255,0.1); display:flex; align-items:center; background:rgba(15,15,20,0.95); flex-shrink:0;">
-                      レーン / カテゴリ
+                    <div class="gantt-grid-header-title" style="width:130px; padding:10px 14px; font-size:11px; font-weight:bold; opacity:0.9; border-right:1px solid rgba(255,255,255,0.1); display:flex; flex-direction:column; justify-content:center; background:#161620; flex-shrink:0;">
+                      <span>レーン / カテゴリ</span>
                     </div>
-                    <div style="display:flex; flex:1;">
-                      ${dayHeadersHtml}
+                    <div style="display:flex; flex-direction:column; flex:1;">
+                      <!-- Top Month Banner Row -->
+                      <div style="display:flex; border-bottom:1px solid rgba(255,255,255,0.1);">
+                        ${monthHeaderBannerHtml}
+                      </div>
+                      <!-- Day Number Row -->
+                      <div style="display:flex;">
+                        ${dayHeadersHtml}
+                      </div>
                     </div>
                   </div>
 
