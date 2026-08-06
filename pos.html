@@ -3853,18 +3853,15 @@
 // Deduplication Cleaner for Exhibition Plans (Smart Fuzzy Name & Date Integration)
     
 // Explicit Fix: Repair Kurima & Design Festa past vs future separation
-    // Explicit Fix: Ensure Kurima 54 (Completed) and Design Festa 63/64 are exact
+    // Explicit Fix: Ensure Design Festa 63 & Kurima 54 are guaranteed in Completed column with exact keys
     window.fixEventHistorySeparation = async () => {
       if (!auth.currentUser) return;
       try {
         const plans = { ...window.exhibitionPlansData };
+        const config = { ...eventConfigData };
 
-        // Remove any incorrect guess keys like 'kurima50'
-        delete plans['kurima50'];
-        delete plans['kurima_past'];
-
-        // Kurima 54 (Completed, ¥153,100 sales)
-        plans['kurima'] = {
+        // 1. Kurima 54 (Completed)
+        const kurimaObj = {
           name: 'クリエーターズマーケットvol.54',
           label: 'クリマ54',
           fullName: 'クリエーターズマーケットvol.54',
@@ -3874,34 +3871,30 @@
           prepDays: 30,
           updatedAt: Date.now()
         };
-        plans['kurima54'] = {
-          name: 'クリエーターズマーケットvol.54',
-          label: 'クリマ54',
-          fullName: 'クリエーターズマーケットvol.54',
-          date: '2026-05-05',
-          location: 'ポートメッセなごや',
-          status: 'completed',
-          prepDays: 30,
-          updatedAt: Date.now()
-        };
+        plans['kurima'] = { ...kurimaObj };
+        plans['kurima54'] = { ...kurimaObj };
+        config['kurima'] = { label: 'クリマ54', fullName: 'クリエーターズマーケットvol.54', isMarche: true };
 
-        // Design Festa 63 (Completed)
-        plans['designfesta63'] = {
-          name: 'デザインフェスタ vol.63',
+        // 2. Design Festa 63 (Completed) - Map BOTH 'designfesta' and 'designfesta63'
+        const df63Obj = {
+          name: 'デザインフェスタvol.63',
           label: 'デザフェス63',
-          fullName: 'デザインフェスタ vol.63',
-          date: '2026-05-18',
+          fullName: 'デザインフェスタvol.63',
+          date: '2026-05-23',
           location: '東京ビッグサイト',
           status: 'completed',
           prepDays: 30,
           updatedAt: Date.now()
         };
+        plans['designfesta'] = { ...df63Obj };
+        plans['designfesta63'] = { ...df63Obj };
+        config['designfesta'] = { label: 'デザフェス63', fullName: 'デザインフェスタvol.63', isMarche: true };
 
-        // Design Festa 64 (Scheduled)
+        // 3. Design Festa 64 (Future / Scheduled)
         plans['designfesta64'] = {
-          name: 'デザインフェスタ vol.64',
+          name: 'デザインフェスタvol.64',
           label: 'デザフェス64',
-          fullName: 'デザインフェスタ vol.64',
+          fullName: 'デザインフェスタvol.64',
           date: '2026-11-15',
           location: '東京ビッグサイト',
           status: 'scheduled',
@@ -3909,11 +3902,30 @@
           updatedAt: Date.now()
         };
 
+        // 4. HMJ (Completed)
+        const hmjObj = {
+          name: 'ハンドメイドインジャパンフェス 2026',
+          label: 'HMJ 2026',
+          fullName: 'ハンドメイドインジャパンフェス 2026',
+          date: '2026-07-11',
+          location: '東京ビッグサイト',
+          status: 'completed',
+          prepDays: 20,
+          updatedAt: Date.now()
+        };
+        plans['hmj'] = { ...hmjObj };
+        config['hmj'] = { label: 'HMJ 2026', fullName: 'ハンドメイドインジャパンフェス 2026', isMarche: true };
+
+        // Save to Firestore
+        window.exhibitionPlansData = plans;
+        eventConfigData = config;
+
         await setDoc(doc(db, "settings", "exhibition_plans"), plans);
-        console.log("Successfully repaired exact Kurima 54 and DesignFesta 63/64!");
-        if (typeof window.renderExhibitionView === 'function') {
-          window.renderExhibitionView();
-        }
+        await setDoc(doc(db, "settings", "event_config"), config, { merge: true });
+
+        console.log("Successfully forced Design Festa 63, Kurima 54 & HMJ to Completed!");
+        if (typeof window.renderExhibitionView === 'function') window.renderExhibitionView();
+        if (typeof buildTabs === 'function') buildTabs();
       } catch(e) {
         console.error("Fix Event History Error:", e);
       }
