@@ -27,16 +27,16 @@ jobs:
       - name: Setup Pages
         uses: actions/configure-pages@v5
 
-      - name: Upload artifact (Optimized & Fast)
+      - name: Create Web Deployment Directory
+        run: |
+          mkdir -p _public
+          cp -r pos.html index.html data.js images _public/ 2>/dev/null || true
+          if [ -f favicon.ico ]; then cp favicon.ico _public/; fi
+
+      - name: Upload artifact (Ultra Lightweight - Only Web Assets)
         uses: actions/upload-pages-artifact@v3
         with:
-          path: '.'
-          # Exclude heavy binary 3D models and uncompressed raw media to speed up deploy
-          pattern: |
-            !**/*.glb
-            !**/*.fbx
-            !**/*.psd
-            !**/.tmp.driveupload/**
+          path: '_public'
 
       - name: Deploy to GitHub Pages
         id: deployment
