@@ -2,6 +2,9 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
   <script>
     window.addEventListener('error', function(e) {
       alert("⚠️ JSエラーが発生しました:\n" + e.message + "\nファイル: " + e.filename + "\n行番号: " + e.lineno);
@@ -453,6 +456,7 @@
       </div>
       <div>
         <span id="user-email" style="font-size: 12px; opacity: 0.6; margin-right: 12px;"></span>
+        <button onclick="forceClearAppCache()" style="background:rgba(241,196,15,0.15); border:1px solid #f1c40f; color:#f1c40f; font-size:11px; padding:4px 10px; border-radius:6px; cursor:pointer; font-weight:bold; margin-right:8px; white-space:nowrap;">🧹 最新表示へ強制リセット</button>
         <button onclick="logout()" style="background:none; border:none; color:#e74c3c; cursor:pointer;">ログアウト</button>
       </div>
     </header>
