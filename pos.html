@@ -3809,7 +3809,21 @@
             updatedAt: Date.now()
           };
           await setDoc(doc(db, "settings", "event_config"), config, { merge: true });
-          alert(`「${newLabel}」の設定を更新しました。`);
+
+          // Also sync to exhibition_plans
+          if (window.exhibitionPlansData && window.exhibitionPlansData[key]) {
+            const plans = { ...window.exhibitionPlansData };
+            plans[key] = {
+              ...plans[key],
+              name: newFullName || newLabel,
+              fullName: newFullName || newLabel,
+              label: newLabel,
+              date: newDate || plans[key].date
+            };
+            await setDoc(doc(db, "settings", "exhibition_plans"), plans, { merge: true });
+          }
+
+          alert(`「${newFullName || newLabel}」の設定を更新しました。`);
           window.closeManageEventsModal();
         } catch (e) {
           console.error(e);
@@ -3839,100 +3853,73 @@
 // Deduplication Cleaner for Exhibition Plans (Smart Fuzzy Name & Date Integration)
     
 // Explicit Fix: Repair Kurima & Design Festa past vs future separation
+    // Explicit Fix: Ensure Kurima 54 (Completed) and Design Festa 63/64 are exact
     window.fixEventHistorySeparation = async () => {
       if (!auth.currentUser) return;
       try {
         const plans = { ...window.exhibitionPlansData };
-        let hasChanges = false;
 
-        // Repair Kurima past vs future
-        if (!plans['kurima50'] && !plans['kurima_past']) {
-          plans['kurima50'] = {
-            name: 'クリエーターズマーケットvol.50',
-            label: 'クリマ50',
-            fullName: 'クリエーターズマーケットvol.50',
-            date: '2024-06-22',
-            location: 'ポートメッセなごや',
-            status: 'completed',
-            prepDays: 30,
-            updatedAt: Date.now()
-          };
-          hasChanges = true;
-        }
+        // Remove any incorrect guess keys like 'kurima50'
+        delete plans['kurima50'];
+        delete plans['kurima_past'];
 
-        // Fix "名古屋クリマ (開催:未定)" if present, update to Kurima 50
-        if (plans['kurima']) {
-          plans['kurima50'] = {
-            ...plans['kurima'],
-            name: 'クリエーターズマーケットvol.50',
-            label: 'クリマ50',
-            fullName: 'クリエーターズマーケットvol.50',
-            date: '2024-06-22',
-            location: 'ポートメッセなごや',
-            status: 'completed'
-          };
-          delete plans['kurima'];
-          hasChanges = true;
-        }
+        // Kurima 54 (Completed, ¥153,100 sales)
+        plans['kurima'] = {
+          name: 'クリエーターズマーケットvol.54',
+          label: 'クリマ54',
+          fullName: 'クリエーターズマーケットvol.54',
+          date: '2026-05-05',
+          location: 'ポートメッセなごや',
+          status: 'completed',
+          prepDays: 30,
+          updatedAt: Date.now()
+        };
+        plans['kurima54'] = {
+          name: 'クリエーターズマーケットvol.54',
+          label: 'クリマ54',
+          fullName: 'クリエーターズマーケットvol.54',
+          date: '2026-05-05',
+          location: 'ポートメッセなごや',
+          status: 'completed',
+          prepDays: 30,
+          updatedAt: Date.now()
+        };
 
-        // Kurima 54 (Future)
-        if (!plans['kurima54']) {
-          plans['kurima54'] = {
-            name: 'クリエーターズマーケットvol.54',
-            label: 'クリマ54',
-            fullName: 'クリエーターズマーケットvol.54',
-            date: '2026-06-20',
-            location: 'ポートメッセなごや',
-            status: 'scheduled',
-            prepDays: 35,
-            updatedAt: Date.now()
-          };
-          hasChanges = true;
-        }
+        // Design Festa 63 (Completed)
+        plans['designfesta63'] = {
+          name: 'デザインフェスタ vol.63',
+          label: 'デザフェス63',
+          fullName: 'デザインフェスタ vol.63',
+          date: '2026-05-18',
+          location: '東京ビッグサイト',
+          status: 'completed',
+          prepDays: 30,
+          updatedAt: Date.now()
+        };
 
-        // Design Festa 63 (Past)
-        if (!plans['designfesta63']) {
-          plans['designfesta63'] = {
-            name: 'デザインフェスタ vol.63',
-            label: 'デザフェス63',
-            fullName: 'デザインフェスタ vol.63',
-            date: '2026-05-18',
-            location: '東京ビッグサイト',
-            status: 'completed',
-            prepDays: 30,
-            updatedAt: Date.now()
-          };
-          hasChanges = true;
-        }
+        // Design Festa 64 (Scheduled)
+        plans['designfesta64'] = {
+          name: 'デザインフェスタ vol.64',
+          label: 'デザフェス64',
+          fullName: 'デザインフェスタ vol.64',
+          date: '2026-11-15',
+          location: '東京ビッグサイト',
+          status: 'scheduled',
+          prepDays: 40,
+          updatedAt: Date.now()
+        };
 
-        // Design Festa 64 (Future)
-        if (!plans['designfesta64'] && !plans['designfesta_64']) {
-          plans['designfesta64'] = {
-            name: 'デザインフェスタ vol.64',
-            label: 'デザフェス64',
-            fullName: 'デザインフェスタ vol.64',
-            date: '2026-11-15',
-            location: '東京ビッグサイト',
-            status: 'scheduled',
-            prepDays: 40,
-            updatedAt: Date.now()
-          };
-          hasChanges = true;
-        }
-
-        if (hasChanges) {
-          await setDoc(doc(db, "settings", "exhibition_plans"), plans);
-          console.log("Successfully repaired Event History Separation (Kurima & DesignFesta)!");
-          if (typeof window.renderExhibitionView === 'function') {
-            window.renderExhibitionView();
-          }
+        await setDoc(doc(db, "settings", "exhibition_plans"), plans);
+        console.log("Successfully repaired exact Kurima 54 and DesignFesta 63/64!");
+        if (typeof window.renderExhibitionView === 'function') {
+          window.renderExhibitionView();
         }
       } catch(e) {
         console.error("Fix Event History Error:", e);
       }
     };
 
-        window.cleanDuplicateExhibitionPlans = async () => {
+    window.cleanDuplicateExhibitionPlans = async () => {
       if (!auth.currentUser) return;
       try {
         const rawPlans = { ...window.exhibitionPlansData };
