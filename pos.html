@@ -224,29 +224,49 @@
 
     .gantt-lane {
       display: flex;
-      flex-direction: column;
-      gap: 6px;
-      padding: 10px 0;
       border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      position: relative;
+      align-items: stretch;
+    }
+
+    .gantt-lane-header {
+      width: 130px;
+      padding: 10px 14px;
+      font-size: 12px;
+      font-weight: bold;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      border-right: 1px solid rgba(255, 255, 255, 0.05);
+      background: rgba(15, 15, 20, 0.4);
+    }
+
+    .gantt-track-container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      padding: 6px 0;
       position: relative;
     }
 
     .gantt-track-row {
       position: relative;
-      height: 38px;
+      height: 34px;
       width: 100%;
     }
 
     .gantt-bar-item {
       position: absolute;
-      top: 3px;
-      height: 32px;
-      border-radius: 8px;
+      top: 2px;
+      height: 30px;
+      border-radius: 6px;
       padding: 0 10px;
       display: flex;
       align-items: center;
       gap: 6px;
-      font-size: 12px;
+      font-size: 11px;
       font-weight: bold;
       color: #fff;
       cursor: pointer;
@@ -5430,13 +5450,11 @@
 
         // Active Month selection
         if (!window.activeTimelineYearMonth || !availableMonthsSet.has(window.activeTimelineYearMonth)) {
-          // Default to current month or first available event month
           window.activeTimelineYearMonth = availableMonthsSet.has(currentYearMonthStr) ? currentYearMonthStr : (sortedMonths[0] || currentYearMonthStr);
         }
 
         const [activeYear, activeMonth] = window.activeTimelineYearMonth.split('-').map(Number);
         const daysInMonth = new Date(activeYear, activeMonth, 0).getDate();
-        const firstDayOfWeek = new Date(activeYear, activeMonth - 1, 1).getDay(); // 0: Sun
 
         const dayNames = ['日', '月', '火', '水', '木', '金', '土'];
 
@@ -5459,7 +5477,6 @@
           try {
             const s = new Date(pr.startDate);
             const e = pr.endDate ? new Date(pr.endDate) : new Date(s);
-            // Check if promo overlaps with active month
             const mStart = new Date(activeYear, activeMonth - 1, 1);
             const mEnd = new Date(activeYear, activeMonth, 0, 23, 59, 59);
             if (e >= mStart && s <= mEnd) {
@@ -5475,9 +5492,7 @@
 
         // 2. Intelligent Conflict & Overlap Detection
         const conflicts = [];
-        const synergies = [];
 
-        // (A) Check event overlaps (same day or close days)
         for (let i = 0; i < monthEvents.length; i++) {
           for (let j = i + 1; j < monthEvents.length; j++) {
             const e1 = monthEvents[i];
@@ -5499,18 +5514,15 @@
           }
         }
 
-        // (B) Check Preparation overlaps & Conflicts with Promotions
         monthEvents.forEach(ev => {
           const prepDays = Number(ev.plan.prepDays) || 7;
           const prepStartDay = Math.max(1, ev.day - prepDays);
           const prepEndDay = ev.day;
 
-          // Check against active promotions
           monthPromos.forEach(pm => {
             const pStartDay = pm.startDate.getFullYear() === activeYear && (pm.startDate.getMonth() + 1) === activeMonth ? pm.startDate.getDate() : 1;
             const pEndDay = pm.endDate.getFullYear() === activeYear && (pm.endDate.getMonth() + 1) === activeMonth ? pm.endDate.getDate() : daysInMonth;
 
-            // Overlap between prep period and promotion
             if (Math.max(prepStartDay, pStartDay) <= Math.min(prepEndDay, pEndDay)) {
               conflicts.push({
                 type: 'info',
@@ -5520,7 +5532,6 @@
             }
           });
 
-          // Check application deadline warning
           if (ev.plan.deadline) {
             try {
               const dlDate = new Date(ev.plan.deadline);
@@ -5538,8 +5549,140 @@
           }
         });
 
-        // 3. Build UI Markup
-        // Top Control Bar
+        // 3. Build UI Sub-rows HTML
+        // Lane 1: Events Sub-rows (1 Row per event)
+        let eventSubRowsHtml = '';
+        if (window.timelineLanes.events) {
+          if (monthEvents.length === 0) {
+            eventSubRowsHtml = `<div class="gantt-track-row" style="display:flex; align-items:center; justify-content:center; opacity:0.3; font-size:11px;">この月の出店イベントはありません</div>`;
+          } else {
+            eventSubRowsHtml = monthEvents.map(ev => {
+              const startPct = ((ev.day - 1) / daysInMonth) * 100;
+              const widthPct = Math.max((1 / daysInMonth) * 100, 3.2);
+              const plan = ev.plan;
+
+              let barClass = 'gantt-bar-scheduled';
+              let statusLabel = '確定';
+              if (plan.status === 'considering') { barClass = 'gantt-bar-considering'; statusLabel = '検討'; }
+              else if (plan.status === 'completed') { barClass = 'gantt-bar-completed'; statusLabel = '完了'; }
+              else if (plan.status === 'canceled') { barClass = 'gantt-bar-canceled'; statusLabel = '見送り'; }
+
+              return `
+                <div class="gantt-track-row">
+                  <div class="gantt-bar-item ${barClass}" 
+                       style="left:${startPct}%; width:${widthPct}%;" 
+                       onclick="openExhibitionModal('${ev.key}')"
+                       title="${plan.name} (${activeMonth}/${ev.day})&#10;ステータス: ${statusLabel}&#10;場所: ${plan.location || '未定'}&#10;クリックで編集">
+                    <span>⛺</span>
+                    <span style="overflow:hidden; text-overflow:ellipsis;">${plan.name}</span>
+                  </div>
+                </div>
+              `;
+            }).join('');
+          }
+        }
+
+        // Lane 2: Prep Period Sub-rows (1 Row per event)
+        let prepSubRowsHtml = '';
+        if (window.timelineLanes.prep) {
+          if (monthEvents.length === 0) {
+            prepSubRowsHtml = `<div class="gantt-track-row" style="display:flex; align-items:center; justify-content:center; opacity:0.3; font-size:11px;">準備期間データなし</div>`;
+          } else {
+            prepSubRowsHtml = monthEvents.map(ev => {
+              const prepDays = Number(ev.plan.prepDays) || 7;
+              const startDay = Math.max(1, ev.day - prepDays);
+              const duration = ev.day - startDay;
+              if (duration <= 0) return '';
+              
+              const startPct = ((startDay - 1) / daysInMonth) * 100;
+              const widthPct = (duration / daysInMonth) * 100;
+
+              return `
+                <div class="gantt-track-row">
+                  <div class="gantt-bar-item gantt-bar-prep" 
+                       style="left:${startPct}%; width:${widthPct}%;"
+                       onclick="openExhibitionModal('${ev.key}')"
+                       title="「${ev.plan.name}」の制作・搬入準備期間 (${activeMonth}/${startDay}〜${activeMonth}/${ev.day})">
+                    <span>🔨</span>
+                    <span>制作・準備 (${prepDays}日間) - ${ev.plan.name}</span>
+                  </div>
+                </div>
+              `;
+            }).join('');
+            if (!prepSubRowsHtml.trim()) {
+              prepSubRowsHtml = `<div class="gantt-track-row" style="display:flex; align-items:center; justify-content:center; opacity:0.3; font-size:11px;">準備期間データなし</div>`;
+            }
+          }
+        }
+
+        // Lane 3: Promotions Sub-rows
+        let promoSubRowsHtml = '';
+        if (window.timelineLanes.promo) {
+          if (monthPromos.length === 0) {
+            promoSubRowsHtml = `<div class="gantt-track-row" style="display:flex; align-items:center; justify-content:center; opacity:0.3; font-size:11px;">この月のセール・企画はありません</div>`;
+          } else {
+            promoSubRowsHtml = monthPromos.map(pm => {
+              const pStartDay = pm.startDate.getFullYear() === activeYear && (pm.startDate.getMonth() + 1) === activeMonth ? pm.startDate.getDate() : 1;
+              const pEndDay = pm.endDate.getFullYear() === activeYear && (pm.endDate.getMonth() + 1) === activeMonth ? pm.endDate.getDate() : daysInMonth;
+              const duration = Math.max(1, (pEndDay - pStartDay) + 1);
+
+              const startPct = ((pStartDay - 1) / daysInMonth) * 100;
+              const widthPct = (duration / daysInMonth) * 100;
+
+              return `
+                <div class="gantt-track-row">
+                  <div class="gantt-bar-item gantt-bar-promo" 
+                       style="left:${startPct}%; width:${widthPct}%;"
+                       onclick="openPromotionModal(${pm.index})"
+                       title="💡 企画: ${pm.promo.title}&#10;期間: ${activeMonth}/${pStartDay}〜${activeMonth}/${pEndDay}&#10;クリックで編集">
+                    <span>💡</span>
+                    <span style="overflow:hidden; text-overflow:ellipsis;">${pm.promo.title}</span>
+                  </div>
+                </div>
+              `;
+            }).join('');
+          }
+        }
+
+        // Lane 4: Deadlines Sub-rows
+        let deadlineSubRowsHtml = '';
+        if (window.timelineLanes.deadlines) {
+          const deadlinesInMonth = [];
+          sortedKeys.forEach(k => {
+            const p = filteredPlans[k];
+            if (p.deadline) {
+              try {
+                const dl = new Date(p.deadline);
+                if (dl.getFullYear() === activeYear && (dl.getMonth() + 1) === activeMonth) {
+                  deadlinesInMonth.push({ key: k, plan: p, day: dl.getDate() });
+                }
+              } catch(e) {}
+            }
+          });
+
+          if (deadlinesInMonth.length === 0) {
+            deadlineSubRowsHtml = `<div class="gantt-track-row" style="display:flex; align-items:center; justify-content:center; opacity:0.3; font-size:11px;">この月の応募締切はありません</div>`;
+          } else {
+            deadlineSubRowsHtml = deadlinesInMonth.map(dl => {
+              const startPct = ((dl.day - 1) / daysInMonth) * 100;
+              const widthPct = Math.max((1 / daysInMonth) * 100, 3.2);
+
+              return `
+                <div class="gantt-track-row">
+                  <div class="gantt-bar-item" 
+                       style="left:${startPct}%; width:${widthPct}%; background:rgba(231,76,60,0.85); border:1px solid #e74c3c; color:#fff;"
+                       onclick="openExhibitionModal('${dl.key}')"
+                       title="⏳ 応募締切: ${dl.plan.name} (${activeMonth}/${dl.day})">
+                    <span>⏳</span>
+                    <span>締切: ${dl.plan.name}</span>
+                  </div>
+                </div>
+              `;
+            }).join('');
+          }
+        }
+
+        // Control bar options & badges
         const monthOptionsHtml = sortedMonths.map(m => {
           const [y, mo] = m.split('-');
           return `<option value="${m}" ${m === window.activeTimelineYearMonth ? 'selected' : ''}>📅 ${y}年 ${Number(mo)}月</option>`;
@@ -5567,7 +5710,6 @@
           `;
         }
 
-        // Render Day Header Columns
         let dayHeadersHtml = '';
         for (let d = 1; d <= daysInMonth; d++) {
           const dateObj = new Date(activeYear, activeMonth - 1, d);
@@ -5587,129 +5729,6 @@
           `;
         }
 
-        // Render Swimlanes
-        // Lane 1: Events
-        let eventBarsHtml = '';
-        if (window.timelineLanes.events) {
-          if (monthEvents.length === 0) {
-            eventBarsHtml = `<div style="position:absolute; inset:0; display:flex; align-items:center; justify-content:center; opacity:0.3; font-size:11px;">この月の出店イベントはありません</div>`;
-          } else {
-            monthEvents.forEach(ev => {
-              const startPct = ((ev.day - 1) / daysInMonth) * 100;
-              const widthPct = Math.max((1 / daysInMonth) * 100, 3.2); // minimum width for 1 day
-              const plan = ev.plan;
-
-              let barClass = 'gantt-bar-scheduled';
-              let statusLabel = '確定';
-              if (plan.status === 'considering') { barClass = 'gantt-bar-considering'; statusLabel = '検討'; }
-              else if (plan.status === 'completed') { barClass = 'gantt-bar-completed'; statusLabel = '完了'; }
-              else if (plan.status === 'canceled') { barClass = 'gantt-bar-canceled'; statusLabel = '見送り'; }
-
-              eventBarsHtml += `
-                <div class="gantt-bar-item ${barClass}" 
-                     style="left:${startPct}%; width:${widthPct}%;" 
-                     onclick="openExhibitionModal('${ev.key}')"
-                     title="${plan.name} (${activeMonth}/${ev.day})&#10;ステータス: ${statusLabel}&#10;場所: ${plan.location || '未定'}&#10;クリックで編集">
-                  <span>⛺</span>
-                  <span style="overflow:hidden; text-overflow:ellipsis;">${plan.name}</span>
-                </div>
-              `;
-            });
-          }
-        }
-
-        // Lane 2: Prep Period
-        let prepBarsHtml = '';
-        if (window.timelineLanes.prep) {
-          if (monthEvents.length === 0) {
-            prepBarsHtml = `<div style="position:absolute; inset:0; display:flex; align-items:center; justify-content:center; opacity:0.3; font-size:11px;">準備期間データなし</div>`;
-          } else {
-            monthEvents.forEach(ev => {
-              const prepDays = Number(ev.plan.prepDays) || 7;
-              const startDay = Math.max(1, ev.day - prepDays);
-              const duration = ev.day - startDay;
-              if (duration > 0) {
-                const startPct = ((startDay - 1) / daysInMonth) * 100;
-                const widthPct = (duration / daysInMonth) * 100;
-
-                prepBarsHtml += `
-                  <div class="gantt-bar-item gantt-bar-prep" 
-                       style="left:${startPct}%; width:${widthPct}%;"
-                       onclick="openExhibitionModal('${ev.key}')"
-                       title="「${ev.plan.name}」の制作・搬入準備期間 (${activeMonth}/${startDay}〜${activeMonth}/${ev.day})">
-                    <span>🔨</span>
-                    <span>制作・準備 (${prepDays}日間) - ${ev.plan.name}</span>
-                  </div>
-                `;
-              }
-            });
-          }
-        }
-
-        // Lane 3: Promotions
-        let promoBarsHtml = '';
-        if (window.timelineLanes.promo) {
-          if (monthPromos.length === 0) {
-            promoBarsHtml = `<div style="position:absolute; inset:0; display:flex; align-items:center; justify-content:center; opacity:0.3; font-size:11px;">この月のセール・企画はありません</div>`;
-          } else {
-            monthPromos.forEach(pm => {
-              const pStartDay = pm.startDate.getFullYear() === activeYear && (pm.startDate.getMonth() + 1) === activeMonth ? pm.startDate.getDate() : 1;
-              const pEndDay = pm.endDate.getFullYear() === activeYear && (pm.endDate.getMonth() + 1) === activeMonth ? pm.endDate.getDate() : daysInMonth;
-              const duration = Math.max(1, (pEndDay - pStartDay) + 1);
-
-              const startPct = ((pStartDay - 1) / daysInMonth) * 100;
-              const widthPct = (duration / daysInMonth) * 100;
-
-              promoBarsHtml += `
-                <div class="gantt-bar-item gantt-bar-promo" 
-                     style="left:${startPct}%; width:${widthPct}%;"
-                     onclick="openPromotionModal(${pm.index})"
-                     title="💡 企画: ${pm.promo.title}&#10;期間: ${activeMonth}/${pStartDay}〜${activeMonth}/${pEndDay}&#10;クリックで編集">
-                  <span>💡</span>
-                  <span style="overflow:hidden; text-overflow:ellipsis;">${pm.promo.title}</span>
-                </div>
-              `;
-            });
-          }
-        }
-
-        // Lane 4: Deadlines
-        let deadlineBarsHtml = '';
-        if (window.timelineLanes.deadlines) {
-          const deadlinesInMonth = [];
-          sortedKeys.forEach(k => {
-            const p = filteredPlans[k];
-            if (p.deadline) {
-              try {
-                const dl = new Date(p.deadline);
-                if (dl.getFullYear() === activeYear && (dl.getMonth() + 1) === activeMonth) {
-                  deadlinesInMonth.push({ key: k, plan: p, day: dl.getDate() });
-                }
-              } catch(e) {}
-            }
-          });
-
-          if (deadlinesInMonth.length === 0) {
-            deadlineBarsHtml = `<div style="position:absolute; inset:0; display:flex; align-items:center; justify-content:center; opacity:0.3; font-size:11px;">この月の応募締切はありません</div>`;
-          } else {
-            deadlinesInMonth.forEach(dl => {
-              const startPct = ((dl.day - 1) / daysInMonth) * 100;
-              const widthPct = Math.max((1 / daysInMonth) * 100, 3.2);
-
-              deadlineBarsHtml += `
-                <div class="gantt-bar-item" 
-                     style="left:${startPct}%; width:${widthPct}%; background:rgba(231,76,60,0.85); border:1px solid #e74c3c; color:#fff;"
-                     onclick="openExhibitionModal('${dl.key}')"
-                     title="⏳ 応募締切: ${dl.plan.name} (${activeMonth}/${dl.day})">
-                  <span>⏳</span>
-                  <span>締切: ${dl.plan.name}</span>
-                </div>
-              `;
-            });
-          }
-        }
-
-        // Build Conflicts Section HTML
         let conflictPanelHtml = '';
         if (conflicts.length > 0) {
           const conflictCards = conflicts.map(c => {
@@ -5742,7 +5761,6 @@
           `;
         }
 
-        // Render Decision Cards below Gantt
         const monthCardsHtml = monthEvents.map(ev => {
           const key = ev.key;
           const plan = ev.plan;
@@ -5797,7 +5815,6 @@
             
             <!-- Navigation Header & Filter Bar -->
             <div style="background:var(--panel-bg); border-radius:14px; padding:16px 20px; border:1px solid rgba(255,255,255,0.08); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:14px;">
-              <!-- Month Navigator -->
               <div style="display:flex; align-items:center; gap:8px;">
                 <button onclick="window.navTimelineMonth(-1)" ${!hasPrev ? 'disabled style="opacity:0.3;"' : ''} style="background:rgba(255,255,255,0.08); border:none; color:#fff; width:32px; height:32px; border-radius:8px; cursor:pointer; font-weight:bold;">◀</button>
                 <select onchange="window.setTimelineYearMonth(this.value)" style="background:#15151a; color:#fff; border:1px solid rgba(255,255,255,0.2); padding:6px 12px; border-radius:8px; font-size:14px; font-weight:bold; cursor:pointer;">
@@ -5807,12 +5824,10 @@
                 <button onclick="window.setTimelineYearMonth('${currentYearMonthStr}')" style="background:rgba(0,210,255,0.1); border:1px solid var(--accent); color:var(--accent); padding:6px 12px; border-radius:8px; font-size:11px; font-weight:bold; cursor:pointer;">今月へ</button>
               </div>
 
-              <!-- Conflict Status & Stats -->
               <div>
                 ${conflictSummaryBadge}
               </div>
 
-              <!-- Lane Filter Toggles -->
               <div style="display:flex; align-items:center; gap:10px; font-size:11px; flex-wrap:wrap;">
                 <span style="opacity:0.6;">表示レーン:</span>
                 <label style="display:flex; align-items:center; gap:4px; cursor:pointer;">
@@ -5829,7 +5844,7 @@
                 </label>
                 <label style="display:flex; align-items:center; gap:4px; cursor:pointer;">
                   <input type="checkbox" ${window.timelineLanes.deadlines ? 'checked' : ''} onchange="window.toggleTimelineLane('deadlines')">
-                  <span>⏳ 締切</span>
+                  <span>⏳ 応募締切</span>
                 </label>
               </div>
             </div>
@@ -5866,14 +5881,12 @@
                     <!-- Lane 1: Events -->
                     ${window.timelineLanes.events ? `
                       <div class="gantt-lane" style="background:rgba(255,255,255,0.01);">
-                        <div style="display:flex; align-items:center;">
-                          <div style="width:130px; padding:0 14px; font-size:12px; font-weight:bold; color:#2ecc71; flex-shrink:0; display:flex; align-items:center; gap:6px;">
-                            <span>⛺ 出店</span>
-                            <span style="font-size:10px; opacity:0.6;">(${monthEvents.length})</span>
-                          </div>
-                          <div class="gantt-track-row" style="flex:1;">
-                            ${eventBarsHtml}
-                          </div>
+                        <div class="gantt-lane-header" style="color:#2ecc71;">
+                          <span>⛺ 出店</span>
+                          <span style="font-size:10px; opacity:0.6;">(${monthEvents.length})</span>
+                        </div>
+                        <div class="gantt-track-container">
+                          ${eventSubRowsHtml}
                         </div>
                       </div>
                     ` : ''}
@@ -5881,13 +5894,11 @@
                     <!-- Lane 2: Prep Period -->
                     ${window.timelineLanes.prep ? `
                       <div class="gantt-lane" style="background:rgba(59,130,246,0.02);">
-                        <div style="display:flex; align-items:center;">
-                          <div style="width:130px; padding:0 14px; font-size:12px; font-weight:bold; color:#60a5fa; flex-shrink:0; display:flex; align-items:center; gap:6px;">
-                            <span>🔨 制作準備</span>
-                          </div>
-                          <div class="gantt-track-row" style="flex:1;">
-                            ${prepBarsHtml}
-                          </div>
+                        <div class="gantt-lane-header" style="color:#60a5fa;">
+                          <span>🔨 制作準備</span>
+                        </div>
+                        <div class="gantt-track-container">
+                          ${prepSubRowsHtml}
                         </div>
                       </div>
                     ` : ''}
@@ -5895,14 +5906,12 @@
                     <!-- Lane 3: Promotions -->
                     ${window.timelineLanes.promo ? `
                       <div class="gantt-lane" style="background:rgba(168,85,247,0.02);">
-                        <div style="display:flex; align-items:center;">
-                          <div style="width:130px; padding:0 14px; font-size:12px; font-weight:bold; color:#e0b0ff; flex-shrink:0; display:flex; align-items:center; gap:6px;">
-                            <span>💡 企画・セール</span>
-                            <span style="font-size:10px; opacity:0.6;">(${monthPromos.length})</span>
-                          </div>
-                          <div class="gantt-track-row" style="flex:1;">
-                            ${promoBarsHtml}
-                          </div>
+                        <div class="gantt-lane-header" style="color:#e0b0ff;">
+                          <span>💡 企画・セール</span>
+                          <span style="font-size:10px; opacity:0.6;">(${monthPromos.length})</span>
+                        </div>
+                        <div class="gantt-track-container">
+                          ${promoSubRowsHtml}
                         </div>
                       </div>
                     ` : ''}
@@ -5910,13 +5919,11 @@
                     <!-- Lane 4: Deadlines -->
                     ${window.timelineLanes.deadlines ? `
                       <div class="gantt-lane" style="background:rgba(231,76,60,0.02);">
-                        <div style="display:flex; align-items:center;">
-                          <div style="width:130px; padding:0 14px; font-size:12px; font-weight:bold; color:#f87171; flex-shrink:0; display:flex; align-items:center; gap:6px;">
-                            <span>⏳ 応募締切</span>
-                          </div>
-                          <div class="gantt-track-row" style="flex:1;">
-                            ${deadlineBarsHtml}
-                          </div>
+                        <div class="gantt-lane-header" style="color:#f87171;">
+                          <span>⏳ 応募締切</span>
+                        </div>
+                        <div class="gantt-track-container">
+                          ${deadlineSubRowsHtml}
                         </div>
                       </div>
                     ` : ''}
@@ -5948,6 +5955,7 @@
           </div>
         `;
       }
+
 
       // RENDER: Roadmap View
       else if (exhibitionViewMode === 'roadmap') {
