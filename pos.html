@@ -6566,8 +6566,29 @@
                       ${!isBuiltin ? `<button class="btn" style="background:rgba(231,76,60,0.2); padding:2px 5px; font-size:9px; color:var(--danger);" onclick="deleteExhibition('${key}')">削除</button>` : ''}
                     </div>
                   </div>
-                  <h5 style="margin:0 0 8px 0; color:#fff; font-size:14px; font-weight:bold; display:flex; align-items:center; flex-wrap:wrap;">
-                    ${plan.name} ${aiLabel}
+                  <h5 style="margin:0 0 8px 0; color:#fff; font-size:14px; font-weight:bold; display:flex; align-items:center; flex-wrap:wrap; gap:6px;">
+                    ${(() => {
+                      const cfg = (window.eventConfigData && window.eventConfigData[key]) || (window.EVENTS && window.EVENTS[key]) || {};
+                      let mainName = cfg.fullName || plan.fullName || plan.name || key;
+                      let shortBadge = cfg.label || plan.label || '';
+
+                      // Force clean stale old names like "名古屋クリマ" or "HMJ 7/11,12"
+                      if (key === 'kurima' || mainName.includes('名古屋クリマ')) {
+                        mainName = 'クリエーターズマーケットvol.54';
+                        shortBadge = 'クリマ54';
+                      }
+                      if (key === 'hmj' || mainName.includes('HMJ 7/11,12')) {
+                        mainName = 'ハンドメイドインジャパンフェス 2026';
+                        shortBadge = 'HMJ 26 7月';
+                      }
+                      if (key === 'designfesta' || key === 'designfesta63' || mainName.includes('デザフェス63')) {
+                        mainName = 'デザインフェスタvol.63';
+                        shortBadge = 'デザフェス63';
+                      }
+
+                      const badgeHtml = shortBadge ? `<span style="background:rgba(0,210,255,0.15); border:1px solid #00d2ff; color:#00d2ff; font-size:10px; padding:1px 6px; border-radius:4px; font-weight:normal; margin-left:4px;">略称: ${shortBadge}</span>` : '';
+                      return `<span>${mainName}</span>${badgeHtml}`;
+                    })()} ${aiLabel}
                   </h5>
                   <div style="font-size:11px; opacity:0.7; line-height:1.5;">
                     <div>📅 <strong>開催</strong>: ${plan.date || '未定'}</div>
