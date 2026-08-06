@@ -4043,6 +4043,7 @@
         
     // Flow Step 2: Transition from Exhibition Plan to Tab Registration
     window.openExhibitionToTabModal = (planKey) => {
+      window.currentTabModalPlanKey = planKey;
       const plans = window.exhibitionPlansData || {};
       const plan = plans[planKey] || {};
 
@@ -4114,12 +4115,39 @@
           fullName: fullNameInput || nameInput, 
           isMarche: isMarcheInput,
           status: 'hidden', 
-          date: dateInput || null 
+          date: dateInput || null,
+          daysCount: daysCountInput
         };
         await setDoc(doc(db, "settings", "event_config"), config, { merge: true });
+
+        // ★出店計画(exhibition_plans)側への双方向確定同期！
+        const planKey = window.currentTabModalPlanKey || idInput;
+        const plans = { ...(window.exhibitionPlansData || {}) };
+        const existingPlan = plans[planKey] || plans[idInput] || {};
+
+        const updatedPlanObj = {
+          ...existingPlan,
+          name: fullNameInput || nameInput,
+          fullName: fullNameInput || nameInput,
+          label: nameInput,
+          date: dateInput || existingPlan.date || '',
+          daysCount: daysCountInput,
+          status: existingPlan.status || 'scheduled',
+          updatedAt: Date.now()
+        };
+
+        plans[planKey] = updatedPlanObj;
+        plans[idInput] = updatedPlanObj;
+        window.exhibitionPlansData = plans;
+
+        await setDoc(doc(db, "settings", "exhibition_plans"), plans, { merge: true });
+
+        // 即時リマウント・描画実行
+        if (typeof window.renderExhibitionView === 'function') window.renderExhibitionView();
+        if (typeof buildTabs === 'function') buildTabs();
         
         document.getElementById('new-event-modal').style.display = 'none';
-        alert("新規イベントを追加しました。");
+        alert(`🎉 『${fullNameInput}』を出店決定イベントとして登録＆出店計画へ同期完了しました！`);
         switchEvent(idInput);
       } catch(e) {
         console.error(e);
