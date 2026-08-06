@@ -9,6 +9,18 @@
     window.addEventListener('unhandledrejection', function(e) {
       alert("⚠️ 非同期処理エラーが発生しました:\n" + e.reason);
     });
+  
+    // Auto-attach calendar showPicker() to all date inputs on click
+    document.addEventListener('click', (e) => {
+      if (e.target && e.target.tagName === 'INPUT' && e.target.type === 'date') {
+        try {
+          if (typeof e.target.showPicker === 'function') {
+            e.target.showPicker();
+          }
+        } catch(err) {}
+      }
+    });
+
   </script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Kanazawa Moataro POS System</title>
@@ -394,6 +406,25 @@
       z-index: 4;
     }
 
+  
+    /* Date Input UX Enhancement */
+    input[type="date"] {
+      color-scheme: dark;
+      cursor: pointer;
+    }
+    input[type="date"]::-webkit-calendar-picker-indicator {
+      filter: invert(1);
+      cursor: pointer;
+      opacity: 0.8;
+      padding: 4px;
+      transform: scale(1.2);
+      transition: transform 0.2s, opacity 0.2s;
+    }
+    input[type="date"]::-webkit-calendar-picker-indicator:hover {
+      opacity: 1;
+      transform: scale(1.35);
+    }
+
   </style>
 </head>
 <body>
@@ -776,7 +807,7 @@
         </div>
         <div style="margin-bottom:12px;">
           <label style="font-size:12px; opacity:0.7;">開催日 (スケジュール管理用)</label>
-          <input type="date" id="new-event-date" class="form-input" style="margin-top:4px; color-scheme:dark;">
+          <input type="date" id="new-event-date" class="form-input" onclick="try{this.showPicker()}catch(e){}" style="margin-top:4px; color-scheme:dark; cursor:pointer;">
         </div>
         <div style="margin-bottom:20px; display:flex; align-items:center; gap:8px;">
           <input type="checkbox" id="new-event-is-marche" style="width:16px; height:16px; cursor:pointer;" checked>
@@ -966,11 +997,11 @@
         <div style="margin-bottom:12px; display:grid; grid-template-columns:1fr 1fr; gap:10px;">
           <div>
             <label style="font-size:12px; opacity:0.7;">開催日</label>
-            <input type="date" id="exhibition-date" class="form-input" style="margin-top:4px;">
+            <input type="date" id="exhibition-date" class="form-input" onclick="try{this.showPicker()}catch(e){}" style="margin-top:4px; color-scheme:dark; cursor:pointer;">
           </div>
           <div>
             <label style="font-size:12px; opacity:0.7;">応募締切日</label>
-            <input type="date" id="exhibition-deadline" class="form-input" style="margin-top:4px;">
+            <input type="date" id="exhibition-deadline" class="form-input" onclick="try{this.showPicker()}catch(e){}" style="margin-top:4px; color-scheme:dark; cursor:pointer;">
           </div>
         </div>
         <div style="margin-bottom:12px; display:grid; grid-template-columns:1fr 1fr; gap:10px;">
@@ -1023,11 +1054,11 @@
         <div style="margin-bottom:12px; display:grid; grid-template-columns:1fr 1fr; gap:10px;">
           <div>
             <label style="font-size:12px; opacity:0.7;">製造開始日</label>
-            <input type="date" id="production-start-date" class="form-input" style="margin-top:4px;">
+            <input type="date" id="production-start-date" class="form-input" onclick="try{this.showPicker()}catch(e){}" style="margin-top:4px; color-scheme:dark; cursor:pointer;">
           </div>
           <div>
             <label style="font-size:12px; opacity:0.7;">製造完了日（予定）</label>
-            <input type="date" id="production-end-date" class="form-input" style="margin-top:4px;">
+            <input type="date" id="production-end-date" class="form-input" onclick="try{this.showPicker()}catch(e){}" style="margin-top:4px; color-scheme:dark; cursor:pointer;">
           </div>
         </div>
         <div style="margin-bottom:12px;">
@@ -1553,11 +1584,11 @@
               <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:12px;">
                 <div style="display:flex; flex-direction:column; gap:6px;">
                   <label style="font-size:12px; font-weight:bold; color:#ccc;">開始日</label>
-                  <input type="date" id="promo-start-date" class="form-input" style="background:rgba(0,0,0,0.3); color:#fff; border:1px solid rgba(255,255,255,0.15); padding:6px 10px; border-radius:6px; font-size:12px;">
+                  <input type="date" id="promo-start-date" class="form-input" onclick="try{this.showPicker()}catch(e){}" style="background:rgba(0,0,0,0.3); color:#fff; border:1px solid rgba(255,255,255,0.15); padding:6px 10px; border-radius:6px; font-size:12px; color-scheme:dark; cursor:pointer;">
                 </div>
                 <div style="display:flex; flex-direction:column; gap:6px;">
                   <label style="font-size:12px; font-weight:bold; color:#ccc;">終了日</label>
-                  <input type="date" id="promo-end-date" class="form-input" style="background:rgba(0,0,0,0.3); color:#fff; border:1px solid rgba(255,255,255,0.15); padding:6px 10px; border-radius:6px; font-size:12px;">
+                  <input type="date" id="promo-end-date" class="form-input" onclick="try{this.showPicker()}catch(e){}" style="background:rgba(0,0,0,0.3); color:#fff; border:1px solid rgba(255,255,255,0.15); padding:6px 10px; border-radius:6px; font-size:12px; color-scheme:dark; cursor:pointer;">
                 </div>
                 <div style="display:flex; flex-direction:column; gap:6px;">
                   <label style="font-size:12px; font-weight:bold; color:#ccc;">ステータス</label>
@@ -7064,7 +7095,26 @@
                 display: none;
               }
             }
-          </style>
+          
+    /* Date Input UX Enhancement */
+    input[type="date"] {
+      color-scheme: dark;
+      cursor: pointer;
+    }
+    input[type="date"]::-webkit-calendar-picker-indicator {
+      filter: invert(1);
+      cursor: pointer;
+      opacity: 0.8;
+      padding: 4px;
+      transform: scale(1.2);
+      transition: transform 0.2s, opacity 0.2s;
+    }
+    input[type="date"]::-webkit-calendar-picker-indicator:hover {
+      opacity: 1;
+      transform: scale(1.35);
+    }
+
+  </style>
         </head>
         <body>
           <div class="no-print" style="margin-bottom: 20px; text-align: right;">
