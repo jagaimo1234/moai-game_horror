@@ -443,6 +443,7 @@
         </div>
         <div style="display:flex; gap:8px; flex-shrink:0; align-items:center;">
           <button onclick="openNewEventModal()" style="background:rgba(0,210,255,0.1); border:1px solid #00d2ff; color:#00d2ff; padding:6px 12px; border-radius:20px; font-weight:bold; cursor:pointer; font-size:12px; white-space:nowrap;">➕ 追加</button>
+          <button onclick="openManageEventsModal()" style="background:rgba(155,89,182,0.15); border:1px solid #9b59b6; color:#e0b0ff; padding:6px 12px; border-radius:20px; font-weight:bold; cursor:pointer; font-size:12px; white-space:nowrap;">✏️ 編集・管理</button>
           <button onclick="openEditEventOrderModal()" style="background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.2); color:#fff; padding:6px 12px; border-radius:20px; font-weight:bold; cursor:pointer; font-size:12px; white-space:nowrap;">↕️ 並び替え</button>
         </div>
       </div>
@@ -712,6 +713,52 @@
     </div>
 
     <!-- New Event Modal -->
+    
+    <!-- Manage Events (Edit/Delete Existing Events) Modal -->
+    <div id="manage-events-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); backdrop-filter:blur(8px); z-index:9999; justify-content:center; align-items:center;">
+      <div style="background:var(--panel-bg); border:1px solid var(--accent); border-radius:16px; width:90%; max-width:600px; padding:24px; box-shadow:0 20px 50px rgba(0,0,0,0.8); max-height:90vh; overflow-y:auto; box-sizing:border-box;">
+        <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:12px; margin-bottom:16px;">
+          <h3 style="margin:0; font-size:16px; color:var(--accent); display:flex; align-items:center; gap:8px;">
+            ⚙️ イベントマスター編集・管理
+          </h3>
+          <button onclick="closeManageEventsModal()" style="background:none; border:none; color:#aaa; font-size:20px; cursor:pointer;">✕</button>
+        </div>
+        
+        <p style="font-size:12px; opacity:0.7; margin-bottom:16px;">
+          上部タブに表示されるイベントの名称変更・出店タイプ変更・削除ができます。
+        </p>
+
+        <div style="margin-bottom:14px;">
+          <label style="font-size:12px; opacity:0.8; font-weight:bold;">編集するイベントを選択</label>
+          <select id="manage-event-select" onchange="onSelectEventToManage(this.value)" class="form-select" style="margin-top:4px; width:100%;">
+          </select>
+        </div>
+
+        <div id="manage-event-form" style="display:none; flex-direction:column; gap:12px; border-top:1px solid rgba(255,255,255,0.08); padding-top:14px;">
+          <div>
+            <label style="font-size:11px; opacity:0.7;">イベント略称 (タブに表示される名称)</label>
+            <input type="text" id="edit-event-label" class="form-input" style="margin-top:4px; width:100%;" placeholder="例: デザフェス64">
+          </div>
+          <div>
+            <label style="font-size:11px; opacity:0.7;">正式名称</label>
+            <input type="text" id="edit-event-fullname" class="form-input" style="margin-top:4px; width:100%;" placeholder="例: デザインフェスタ vol.64">
+          </div>
+          <div>
+            <label style="font-size:11px; opacity:0.7;">開催日 / 会場メモ</label>
+            <input type="text" id="edit-event-date" class="form-input" style="margin-top:4px; width:100%;" placeholder="例: 2026-11-14">
+          </div>
+          <div style="display:flex; align-items:center; gap:8px;">
+            <input type="checkbox" id="edit-event-is-marche">
+            <label for="edit-event-is-marche" style="font-size:12px; cursor:pointer;">マルシェ・現場対面イベントとして扱う (オフの場合はネット通販/その他)</label>
+          </div>
+          <div style="display:flex; gap:10px; margin-top:10px;">
+            <button id="edit-event-save-btn" style="flex:2; background:var(--accent); color:#000; font-weight:bold; border:none; padding:10px; border-radius:8px; cursor:pointer;">💾 設定を保存</button>
+            <button id="edit-event-delete-btn" style="flex:1; background:rgba(231,76,60,0.2); border:1px solid #e74c3c; color:#ff6b6b; font-weight:bold; padding:10px; border-radius:8px; cursor:pointer;">🗑️ イベント削除</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <div id="new-event-modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.8); z-index:2000; align-items:center; justify-content:center; padding:20px;">
       <div style="background:var(--panel-bg); width:100%; max-width:400px; border-radius:12px; padding:20px; border:1px solid var(--border);">
         <h3 style="margin-bottom:15px;">新規イベント追加</h3>
@@ -1332,6 +1379,17 @@
     <!-- Exhibition View -->
 <section id="exhibition-view" class="view-section">
       <div class="scroll-container" style="padding:20px; box-sizing:border-box; width:100%;">
+        
+        <!-- Deduplication and Clean Tools -->
+        <div style="display:flex; justify-content:space-between; align-items:center; background:rgba(255,255,255,0.02); padding:10px 16px; border-radius:10px; border:1px solid rgba(255,255,255,0.05); margin-bottom:14px;">
+          <div style="font-size:12px; opacity:0.8; display:flex; align-items:center; gap:6px;">
+            <span>🧹 重複・データ整合性ツール: 同一イベントの重複登録を一発整理</span>
+          </div>
+          <button onclick="window.cleanDuplicateExhibitionPlans()" style="background:rgba(241,196,15,0.15); border:1px solid #f1c40f; color:#f1c40f; font-size:11px; font-weight:bold; padding:5px 12px; border-radius:6px; cursor:pointer;">
+            ✨ 重複イベントを自動整理・統合
+          </button>
+        </div>
+
         <!-- Header -->
         <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:2px solid var(--accent); padding-bottom:12px; margin-bottom:20px;">
           <h2 style="margin:0; display:flex; align-items:center; gap:10px;">⛺ 出店計画ダッシュボード</h2>
@@ -3690,6 +3748,152 @@
         config[currentEventKey] = { ...(config[currentEventKey] || {}), status };
         await setDoc(doc(db, "settings", "event_config"), config, { merge: true });
       } catch(e) { console.error(e); }
+    };
+
+    
+    // Manage Events Modal Logic
+    window.openManageEventsModal = () => {
+      const selectEl = document.getElementById('manage-event-select');
+      if (!selectEl) return;
+      selectEl.innerHTML = '<option value="">-- 選択してください --</option>';
+
+      const allEvents = window.getAllEvents ? window.getAllEvents(eventConfigData) : {};
+      Object.entries(allEvents).forEach(([key, ev]) => {
+        const opt = document.createElement('option');
+        opt.value = key;
+        opt.textContent = `${ev.label} (${key})`;
+        selectEl.appendChild(opt);
+      });
+
+      document.getElementById('manage-event-form').style.display = 'none';
+      document.getElementById('manage-events-modal').style.display = 'flex';
+    };
+
+    window.closeManageEventsModal = () => {
+      document.getElementById('manage-events-modal').style.display = 'none';
+    };
+
+    window.onSelectEventToManage = (key) => {
+      if (!key) {
+        document.getElementById('manage-event-form').style.display = 'none';
+        return;
+      }
+      const allEvents = window.getAllEvents ? window.getAllEvents(eventConfigData) : {};
+      const ev = allEvents[key] || {};
+
+      document.getElementById('edit-event-label').value = ev.label || '';
+      document.getElementById('edit-event-fullname').value = ev.fullName || ev.label || '';
+      document.getElementById('edit-event-date').value = ev.date || '';
+      document.getElementById('edit-event-is-marche').checked = (ev.isMarche !== false);
+
+      const saveBtn = document.getElementById('edit-event-save-btn');
+      const delBtn = document.getElementById('edit-event-delete-btn');
+
+      saveBtn.onclick = async () => {
+        if (!auth.currentUser) return;
+        const newLabel = document.getElementById('edit-event-label').value.trim();
+        const newFullName = document.getElementById('edit-event-fullname').value.trim();
+        const newDate = document.getElementById('edit-event-date').value.trim();
+        const isMarche = document.getElementById('edit-event-is-marche').checked;
+
+        if (!newLabel) { alert("イベント略称は必須です。"); return; }
+
+        try {
+          const config = { ...eventConfigData };
+          config[key] = {
+            ...(config[key] || {}),
+            label: newLabel,
+            fullName: newFullName,
+            date: newDate,
+            isMarche: isMarche,
+            updatedAt: Date.now()
+          };
+          await setDoc(doc(db, "settings", "event_config"), config, { merge: true });
+          alert(`「${newLabel}」の設定を更新しました。`);
+          window.closeManageEventsModal();
+        } catch (e) {
+          console.error(e);
+          alert("更新に失敗しました: " + e.message);
+        }
+      };
+
+      delBtn.onclick = async () => {
+        if (!auth.currentUser) return;
+        if (!confirm(`イベント「${ev.label}」を削除してもよろしいですか？`)) return;
+
+        try {
+          const config = { ...eventConfigData };
+          delete config[key];
+          await setDoc(doc(db, "settings", "event_config"), config);
+          alert(`イベント「${ev.label}」を削除しました。`);
+          window.closeManageEventsModal();
+        } catch (e) {
+          console.error(e);
+          alert("削除に失敗しました: " + e.message);
+        }
+      };
+
+      document.getElementById('manage-event-form').style.display = 'flex';
+    };
+
+    // Deduplication Cleaner for Exhibition Plans
+    window.cleanDuplicateExhibitionPlans = async () => {
+      if (!auth.currentUser) return;
+      try {
+        const rawPlans = { ...window.exhibitionPlansData };
+        const keys = Object.keys(rawPlans);
+        if (keys.length === 0) {
+          alert("整理対象の出店計画はありません。");
+          return;
+        }
+
+        const seenNames = new Map();
+        const cleanedPlans = {};
+        let removedCount = 0;
+
+        keys.forEach(k => {
+          const p = rawPlans[k];
+          if (!p || !p.name) return;
+
+          // Normalize name for checking duplicate (e.g., "金沢ハンドメイドマルシェ" vs "金沢ハンドメイドマルシェ2026")
+          const normName = strNormalize(p.name);
+          const dateStr = p.date ? String(p.date).substring(0, 7) : 'nodate';
+          const uniqueKey = `${normName}_${dateStr}`;
+
+          if (seenNames.has(uniqueKey)) {
+            // Duplicate found! Keep the one with higher status/more info
+            const existingKey = seenNames.get(uniqueKey);
+            const existingPlan = cleanedPlans[existingKey];
+
+            // If new item is scheduled/strong_intent and existing is considering, replace it
+            if ((p.status === 'scheduled' || p.status === 'strong_intent') && existingPlan.status !== 'scheduled') {
+              cleanedPlans[k] = p;
+              delete cleanedPlans[existingKey];
+              seenNames.set(uniqueKey, k);
+            }
+            removedCount++;
+          } else {
+            seenNames.set(uniqueKey, k);
+            cleanedPlans[k] = p;
+          }
+        });
+
+        if (removedCount === 0) {
+          alert("重複している出店計画はありません。データは全て正常です！");
+          return;
+        }
+
+        if (confirm(`重複している出店計画が ${removedCount} 件検出されました。統合・クレンジングを実行しますか？`)) {
+          await setDoc(doc(db, "settings", "exhibition_plans"), cleanedPlans);
+          alert(`重複計画 ${removedCount} 件を自動整理・クレンジング完了しました！`);
+          if (typeof window.renderExhibitionView === 'function') {
+            window.renderExhibitionView();
+          }
+        }
+      } catch (e) {
+        console.error("Clean Duplicates Error:", e);
+        alert("重複整理に失敗しました: " + e.message);
+      }
     };
 
     // New Event Modal Logic
