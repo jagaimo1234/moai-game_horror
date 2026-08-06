@@ -356,6 +356,25 @@
     .conflict-alert-card:hover {
       background: rgba(255, 255, 255, 0.04);
     }
+  
+    /* Full-width Override for Exhibition View & Gantt Timeline */
+    #exhibition-view .scroll-container {
+      max-width: 100% !important;
+      width: 100% !important;
+      margin: 0 !important;
+      padding: 12px 20px !important;
+      box-sizing: border-box !important;
+    }
+    #exhibition-timeline-container {
+      width: 100% !important;
+      max-width: 100% !important;
+    }
+    .gantt-board-card {
+      width: 100% !important;
+      max-width: 100% !important;
+      box-sizing: border-box !important;
+    }
+
   </style>
 </head>
 <body>
@@ -5407,7 +5426,7 @@
         }
       }
 
-      // RENDER: Advanced Visual Gantt Timeline & Intelligent Conflict Dashboard (3-Month Continuous Track)
+      // RENDER: Full-width Seamless Continuous Timeline (12-Month All-Month Continuous Track)
       else if (exhibitionViewMode === 'timeline') {
         timelineContainer.style.display = 'flex';
         timelineContainer.innerHTML = '';
@@ -5419,77 +5438,65 @@
 
         const promoPlans = getPromotionPlans ? getPromotionPlans() : [];
 
-        // 1. Collect all available Year-Months from Events & Promotions
-        const availableMonthsSet = new Set();
+        // 1. Collect and Build Full 12-Month Continuous Timeline
         const now = new Date();
-        const currentYearMonthStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
-        availableMonthsSet.add(currentYearMonthStr);
+        const currentYear = now.getFullYear();
+        const currentYearMonthStr = `${currentYear}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+
+        // Determine min and max year from data (or default to current year 1~12 months)
+        let minYear = currentYear;
+        let maxYear = currentYear;
 
         sortedKeys.forEach(k => {
           const p = filteredPlans[k];
-          if (p.date && p.status !== 'canceled') { // Exclude canceled from timeline range calculation
+          if (p.date && p.status !== 'canceled') {
             try {
               const d = new Date(p.date);
               if (!isNaN(d.getTime())) {
-                availableMonthsSet.add(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`);
+                minYear = Math.min(minYear, d.getFullYear());
+                maxYear = Math.max(maxYear, d.getFullYear());
               }
             } catch(e) {}
           }
         });
 
-        promoPlans.forEach(pr => {
-          if (pr.startDate) {
-            try {
-              const d = new Date(pr.startDate);
-              if (!isNaN(d.getTime())) {
-                availableMonthsSet.add(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`);
-              }
-            } catch(e) {}
-          }
-        });
-
-        const sortedMonths = Array.from(availableMonthsSet).sort();
-
-        // Active Start Month selection (Start of 3-month range)
-        if (!window.activeTimelineYearMonth || !availableMonthsSet.has(window.activeTimelineYearMonth)) {
-          window.activeTimelineYearMonth = availableMonthsSet.has(currentYearMonthStr) ? currentYearMonthStr : (sortedMonths[0] || currentYearMonthStr);
-        }
-
-        // Build 3-Month Range (m1, m2, m3)
-        const [startYear, startMonth] = window.activeTimelineYearMonth.split('-').map(Number);
-        
+        // Build continuous month list covering all years
         const monthList = [];
         let totalSpanDays = 0;
 
-        for (let i = 0; i < 3; i++) {
-          const dt = new Date(startYear, startMonth - 1 + i, 1);
-          const y = dt.getFullYear();
-          const m = dt.getMonth() + 1;
-          const days = new Date(y, m, 0).getDate();
-          const ymStr = `${y}-${String(m).padStart(2, '0')}`;
-          
-          monthList.push({
-            year: y,
-            month: m,
-            days: days,
-            yearMonthStr: ymStr,
-            startDayOffset: totalSpanDays
-          });
-          totalSpanDays += days;
+        for (let y = minYear; y <= maxYear; y++) {
+          for (let m = 1; m <= 12; m++) {
+            const days = new Date(y, m, 0).getDate();
+            const ymStr = `${y}-${String(m).padStart(2, '0')}`;
+            
+            monthList.push({
+              year: y,
+              month: m,
+              days: days,
+              yearMonthStr: ymStr,
+              startDayOffset: totalSpanDays
+            });
+            totalSpanDays += days;
+          }
         }
 
         const rangeStartDate = new Date(monthList[0].year, monthList[0].month - 1, 1);
-        const rangeEndDate = new Date(monthList[2].year, monthList[2].month, 0, 23, 59, 59);
+        const rangeEndDate = new Date(monthList[monthList.length - 1].year, monthList[monthList.length - 1].month, 0, 23, 59, 59);
 
         const dayNames = ['日', '月', '火', '水', '木', '金', '土'];
 
-        // Helper to convert Date to day index offset (0 ~ totalSpanDays - 1)
+        // Helper to convert Date to day index offset
         const getDayOffset = (dateObj) => {
           const diffMs = dateObj - rangeStartDate;
           return Math.floor(diffMs / (1000 * 60 * 60 * 24));
         };
 
-        // Filter events for this 3-month range (Excluding 'canceled')
+        // Active target month for jump/scroll
+        if (!window.activeTimelineYearMonth) {
+          window.activeTimelineYearMonth = currentYearMonthStr;
+        }
+
+        // Filter events (Excluding 'canceled')
         const rangeEvents = [];
         sortedKeys.forEach(k => {
           const p = filteredPlans[k];
@@ -5503,7 +5510,7 @@
           } catch(e) {}
         });
 
-        // Filter promotions for this 3-month range
+        // Filter promotions
         const rangePromos = [];
         promoPlans.forEach((pr, idx) => {
           if (!pr.startDate) return;
@@ -5523,7 +5530,7 @@
           window.timelineLanes = { events: true, prep: true, promo: true, deadlines: true };
         }
 
-        // 2. Intelligent Conflict & Overlap Detection (for 3-month range)
+        // 2. Intelligent Conflict & Overlap Detection
         const conflicts = [];
 
         for (let i = 0; i < rangeEvents.length; i++) {
@@ -5535,7 +5542,7 @@
               conflicts.push({
                 type: 'danger',
                 title: '同日イベント重複',
-                desc: `「${e1.plan.name}」と「${e2.plan.name}」が同じ日 (${e1.eventDate.getMonth()+1}/${e1.eventDate.getDate()}) に重複しています。物理的な両立にご注意ください。`
+                desc: `「${e1.plan.name}」と「${e2.plan.name}」が同じ日 (${e1.eventDate.getMonth()+1}/${e1.eventDate.getDate()}) に重複しています。`
               });
             } else if (diffDays <= 3) {
               conflicts.push({
@@ -5547,10 +5554,8 @@
           }
         }
 
-        // Check Prep Overlaps with Promos (Only for scheduled & strong_intent)
         rangeEvents.forEach(ev => {
           const status = ev.plan.status || 'considering';
-          // 制作準備バーを表示するのは 出店確定(scheduled) と 出店意思強め(strong_intent) のみ
           if (status === 'scheduled' || status === 'strong_intent') {
             const prepDays = Number(ev.plan.prepDays) || 7;
             const prepStartOffset = Math.max(0, ev.offset - prepDays);
@@ -5561,42 +5566,21 @@
                 conflicts.push({
                   type: 'info',
                   title: '制作準備とセール企画の同時進行',
-                  desc: `「${ev.plan.name}」の制作・搬入準備期間 と 企画「${pm.promo.title}」が重なっています。梱包発送とイベント制作の両立にご注意ください。`
+                  desc: `「${ev.plan.name}」の制作・搬入準備期間 と 企画「${pm.promo.title}」が重なっています。`
                 });
               }
             });
           }
-
-          if (ev.plan.deadline && status === 'considering') {
-            try {
-              const dlDate = new Date(ev.plan.deadline);
-              const today = new Date();
-              const diffDays = Math.ceil((dlDate - today) / (1000 * 60 * 60 * 24));
-              if (diffDays >= 0 && diffDays <= 7) {
-                conflicts.push({
-                  type: 'warning',
-                  title: '応募締切間近 (検討中)',
-                  desc: `「${ev.plan.name}」の応募締切 (${ev.plan.deadline}) まであと ${diffDays} 日です。`
-                });
-              }
-            } catch(e) {}
-          }
         });
 
-        // 3. Build UI Markup
-        // Top Month Navigator Options
-        const monthOptionsHtml = sortedMonths.map(m => {
-          const [y, mo] = m.split('-');
-          return `<option value="${m}" ${m === window.activeTimelineYearMonth ? 'selected' : ''}>📅 ${y}年 ${Number(mo)}月 〜 3ヶ月表示</option>`;
+        // 3. Build Header & Option Jump Controls
+        const monthOptionsHtml = monthList.map(mInfo => {
+          return `<option value="${mInfo.yearMonthStr}" ${mInfo.yearMonthStr === window.activeTimelineYearMonth ? 'selected' : ''}>📅 ${mInfo.year}年 ${mInfo.month}月へジャンプ</option>`;
         }).join('');
-
-        const currentMonthIdx = sortedMonths.indexOf(window.activeTimelineYearMonth);
-        const hasPrev = currentMonthIdx > 0;
-        const hasNext = currentMonthIdx < sortedMonths.length - 1;
 
         let conflictSummaryBadge = `
           <span style="background:rgba(46,204,113,0.15); border:1px solid #2ecc71; color:#2ecc71; padding:4px 10px; border-radius:20px; font-size:12px; font-weight:bold; display:flex; align-items:center; gap:4px;">
-            🟢 3ヶ月のスケジュール良好
+            🟢 全期間のスケジュール良好
           </span>
         `;
         if (conflicts.length > 0) {
@@ -5607,20 +5591,20 @@
           const badgeIcon = hasDanger ? '🚨' : '⚠️';
           conflictSummaryBadge = `
             <span style="background:${badgeBg}; border:1px solid ${badgeBorder}; color:${badgeColor}; padding:4px 12px; border-radius:20px; font-size:12px; font-weight:bold; display:flex; align-items:center; gap:6px; cursor:pointer;" onclick="document.getElementById('gantt-conflict-panel').scrollIntoView({behavior:'smooth'})">
-              ${badgeIcon} スケジュール干渉・注意 ${conflicts.length}件
+              ${badgeIcon} スケジュール注意 ${conflicts.length}件
             </span>
           `;
         }
 
-        // Render Day Header Columns & Month Section Dividers for 3 Months
+        // Render Day Header Columns & Month Section Dividers for All Months
         let dayHeadersHtml = '';
         let monthHeaderBannerHtml = '';
 
         monthList.forEach(mInfo => {
           const pctWidth = (mInfo.days / totalSpanDays) * 100;
           monthHeaderBannerHtml += `
-            <div style="width:${pctWidth}%; text-align:center; padding:6px; font-size:13px; font-weight:bold; color:var(--accent); border-right:2px solid rgba(255,255,255,0.2); background:rgba(0,210,255,0.05);">
-              🗓️ ${mInfo.year}年 ${mInfo.month}月 <span style="font-size:10px; opacity:0.6; font-weight:normal;">(${mInfo.days}日間)</span>
+            <div id="gantt-month-banner-${mInfo.yearMonthStr}" style="width:${pctWidth}%; text-align:center; padding:6px; font-size:13px; font-weight:bold; color:var(--accent); border-right:2px solid rgba(255,255,255,0.25); background:rgba(0,210,255,0.06); flex-shrink:0;">
+              🗓️ ${mInfo.year}年 ${mInfo.month}月 <span style="font-size:10px; opacity:0.6; font-weight:normal;">(${mInfo.days}日)</span>
             </div>
           `;
 
@@ -5644,17 +5628,17 @@
           }
         });
 
-        // 4. Build Swimlanes (Multi-row Sublane Architecture for 3-month span)
+        // 4. Build Swimlanes for All Months (Multi-row Sublane)
 
         // Lane 1: Events Sub-rows
         let eventSubRowsHtml = '';
         if (window.timelineLanes.events) {
           if (rangeEvents.length === 0) {
-            eventSubRowsHtml = `<div class="gantt-track-row" style="display:flex; align-items:center; justify-content:center; opacity:0.3; font-size:11px;">この3ヶ月間の出店イベント候補はありません</div>`;
+            eventSubRowsHtml = `<div class="gantt-track-row" style="display:flex; align-items:center; justify-content:center; opacity:0.3; font-size:11px;">登録された出店イベント候補はありません</div>`;
           } else {
             eventSubRowsHtml = rangeEvents.map(ev => {
               const startPct = (ev.offset / totalSpanDays) * 100;
-              const widthPct = Math.max((1 / totalSpanDays) * 100, 1.2);
+              const widthPct = Math.max((1 / totalSpanDays) * 100, 0.4);
               const plan = ev.plan;
               const status = plan.status || 'considering';
 
@@ -5663,7 +5647,7 @@
               let badgeIcon = '👑';
               
               if (status === 'strong_intent') {
-                barClass = 'gantt-bar-prep'; // Orange/Red gradient
+                barClass = 'gantt-bar-prep';
                 statusLabel = '意思強め';
                 badgeIcon = '🔥';
               } else if (status === 'considering') {
@@ -5685,7 +5669,7 @@
                   <div class="gantt-bar-item ${barClass}" 
                        style="left:${startPct}%; width:${widthPct}%;" 
                        onclick="openExhibitionModal('${ev.key}')"
-                       title="${plan.name} (${ev.eventDate.getMonth()+1}/${ev.eventDate.getDate()})&#10;ステータス: ${statusLabel}&#10;場所: ${plan.location || '未定'}&#10;クリックで詳細編集">
+                       title="${plan.name} (${ev.eventDate.getFullYear()}/${ev.eventDate.getMonth()+1}/${ev.eventDate.getDate()})&#10;ステータス: ${statusLabel}&#10;場所: ${plan.location || '未定'}">
                     <span>${badgeIcon}</span>
                     <span style="overflow:hidden; text-overflow:ellipsis;">${plan.name} [${statusLabel}]</span>
                   </div>
@@ -5695,14 +5679,13 @@
           }
         }
 
-        // Lane 2: Prep Period Sub-rows (Only for 'scheduled' & 'strong_intent')
+        // Lane 2: Prep Period Sub-rows (Only 'scheduled' & 'strong_intent')
         let prepSubRowsHtml = '';
         if (window.timelineLanes.prep) {
-          // Filter events that require preparation display
           const prepEvents = rangeEvents.filter(ev => ev.plan.status === 'scheduled' || ev.plan.status === 'strong_intent');
           
           if (prepEvents.length === 0) {
-            prepSubRowsHtml = `<div class="gantt-track-row" style="display:flex; align-items:center; justify-content:center; opacity:0.3; font-size:11px;">確定・本命イベントの準備期間はありません（検討中の準備バーは非表示）</div>`;
+            prepSubRowsHtml = `<div class="gantt-track-row" style="display:flex; align-items:center; justify-content:center; opacity:0.3; font-size:11px;">確定・本命イベントの制作準備期間はありません</div>`;
           } else {
             prepSubRowsHtml = prepEvents.map(ev => {
               const prepDays = Number(ev.plan.prepDays) || 7;
@@ -5732,7 +5715,7 @@
         let promoSubRowsHtml = '';
         if (window.timelineLanes.promo) {
           if (rangePromos.length === 0) {
-            promoSubRowsHtml = `<div class="gantt-track-row" style="display:flex; align-items:center; justify-content:center; opacity:0.3; font-size:11px;">この3ヶ月間のセール・企画はありません</div>`;
+            promoSubRowsHtml = `<div class="gantt-track-row" style="display:flex; align-items:center; justify-content:center; opacity:0.3; font-size:11px;">セール・企画はありません</div>`;
           } else {
             promoSubRowsHtml = rangePromos.map(pm => {
               const duration = Math.max(1, (pm.endOffset - pm.startOffset) + 1);
@@ -5744,7 +5727,7 @@
                   <div class="gantt-bar-item gantt-bar-promo" 
                        style="left:${startPct}%; width:${widthPct}%;"
                        onclick="openPromotionModal(${pm.index})"
-                       title="💡 企画: ${pm.promo.title}&#10;クリックで編集">
+                       title="💡 企画: ${pm.promo.title}">
                     <span>💡</span>
                     <span style="overflow:hidden; text-overflow:ellipsis;">${pm.promo.title}</span>
                   </div>
@@ -5771,11 +5754,11 @@
           });
 
           if (deadlinesInRange.length === 0) {
-            deadlineSubRowsHtml = `<div class="gantt-track-row" style="display:flex; align-items:center; justify-content:center; opacity:0.3; font-size:11px;">この3ヶ月間の応募締切はありません</div>`;
+            deadlineSubRowsHtml = `<div class="gantt-track-row" style="display:flex; align-items:center; justify-content:center; opacity:0.3; font-size:11px;">応募締切はありません</div>`;
           } else {
             deadlineSubRowsHtml = deadlinesInRange.map(dl => {
               const startPct = (dl.offset / totalSpanDays) * 100;
-              const widthPct = Math.max((1 / totalSpanDays) * 100, 1.2);
+              const widthPct = Math.max((1 / totalSpanDays) * 100, 0.4);
 
               return `
                 <div class="gantt-track-row">
@@ -5792,7 +5775,7 @@
           }
         }
 
-        // Build Conflicts Section HTML
+        // Conflicts Report Panel
         let conflictPanelHtml = '';
         if (conflicts.length > 0) {
           const conflictCards = conflicts.map(c => {
@@ -5813,7 +5796,7 @@
             <div id="gantt-conflict-panel" style="background:rgba(231,76,60,0.05); border:1px solid rgba(231,76,60,0.2); border-radius:12px; padding:16px; display:flex; flex-direction:column; gap:10px;">
               <div style="display:flex; justify-content:space-between; align-items:center;">
                 <h4 style="margin:0; font-size:14px; color:#ff7675; display:flex; align-items:center; gap:6px;">
-                  <span>🔍 3ヶ月過密・干渉診断レポート</span>
+                  <span>🔍 スケジュール干渉・過密診断レポート</span>
                   <span style="font-size:11px; background:#e74c3c; color:#fff; padding:1px 6px; border-radius:10px;">${conflicts.length}件</span>
                 </h4>
                 <span style="font-size:11px; opacity:0.6;">出店準備・セール企画の重複によるキャパオーバーを予防</span>
@@ -5825,7 +5808,7 @@
           `;
         }
 
-        // Render Decision Cards below Gantt for 3 Months
+        // Decision Cards List
         const rangeCardsHtml = rangeEvents.map(ev => {
           const key = ev.key;
           const plan = ev.plan;
@@ -5870,20 +5853,22 @@
           `;
         }).join('');
 
-        // 5. Assemble Final Container HTML (Full-width 100%)
+        // Dynamic Total Width calculation: 1 month is 33.3vw of viewport width (so 3 months fill 1 screen width exactly!)
+        // totalSpanDays / (average days in 3 months = ~91.25) * 100vw
+        const calcWidthVw = Math.max(300, (totalSpanDays / 91.25) * 100);
+
+        // 5. Assemble Final Container HTML
         timelineContainer.innerHTML = `
           <div style="display:flex; flex-direction:column; gap:20px; width:100%;">
             
             <!-- Navigation Header & Filter Bar -->
-            <div style="background:var(--panel-bg); border-radius:14px; padding:16px 20px; border:1px solid rgba(255,255,255,0.08); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:14px;">
+            <div style="background:var(--panel-bg); border-radius:14px; padding:16px 20px; border:1px solid rgba(255,255,255,0.08); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:14px; width:100%; box-sizing:border-box;">
               <!-- Month Range Navigator -->
               <div style="display:flex; align-items:center; gap:8px;">
-                <button onclick="window.navTimelineMonth(-1)" ${!hasPrev ? 'disabled style="opacity:0.3;"' : ''} style="background:rgba(255,255,255,0.08); border:none; color:#fff; width:32px; height:32px; border-radius:8px; cursor:pointer; font-weight:bold;">◀</button>
-                <select onchange="window.setTimelineYearMonth(this.value)" style="background:#15151a; color:#fff; border:1px solid rgba(255,255,255,0.2); padding:6px 12px; border-radius:8px; font-size:14px; font-weight:bold; cursor:pointer;">
+                <select id="gantt-month-jump-select" onchange="window.jumpToTimelineMonth(this.value)" style="background:#15151a; color:#fff; border:1px solid rgba(255,255,255,0.2); padding:6px 12px; border-radius:8px; font-size:14px; font-weight:bold; cursor:pointer;">
                   ${monthOptionsHtml}
                 </select>
-                <button onclick="window.navTimelineMonth(1)" ${!hasNext ? 'disabled style="opacity:0.3;"' : ''} style="background:rgba(255,255,255,0.08); border:none; color:#fff; width:32px; height:32px; border-radius:8px; cursor:pointer; font-weight:bold;">▶</button>
-                <button onclick="window.setTimelineYearMonth('${currentYearMonthStr}')" style="background:rgba(0,210,255,0.1); border:1px solid var(--accent); color:var(--accent); padding:6px 12px; border-radius:8px; font-size:11px; font-weight:bold; cursor:pointer;">今月から3ヶ月</button>
+                <button onclick="window.jumpToTimelineMonth('${currentYearMonthStr}')" style="background:rgba(0,210,255,0.1); border:1px solid var(--accent); color:var(--accent); padding:6px 12px; border-radius:8px; font-size:11px; font-weight:bold; cursor:pointer;">今月へジャンプ</button>
               </div>
 
               <!-- Conflict Status & Stats -->
@@ -5920,15 +5905,15 @@
             <div class="gantt-board-card" style="width:100%; box-sizing:border-box;">
               <div style="padding:14px 20px; border-bottom:1px solid rgba(255,255,255,0.06); display:flex; justify-content:space-between; align-items:center; background:rgba(0,0,0,0.2);">
                 <div style="display:flex; align-items:center; gap:10px;">
-                  <h3 style="margin:0; font-size:16px; color:var(--accent);">🌐 3ヶ月連続ガントチャート・タイムライン (${monthList[0].month}月〜${monthList[2].month}月)</h3>
-                  <span style="font-size:11px; opacity:0.6;">(出店候補: ${rangeEvents.length}件 ｜ 企画: ${rangePromos.length}件)</span>
+                  <h3 style="margin:0; font-size:16px; color:var(--accent);">🌐 全月シームレスガントチャート (${monthList[0].year}年${monthList[0].month}月 〜 ${monthList[monthList.length-1].year}年${monthList[monthList.length-1].month}月)</h3>
+                  <span style="font-size:11px; opacity:0.6;">(全期間出店: ${rangeEvents.length}件 ｜ 1画面＝約3ヶ月分 / 横スクロールで全月シームレス閲覧)</span>
                 </div>
-                <div style="font-size:11px; opacity:0.5;">「出ない」は自動非表示 / 検討中の準備バーはカットされスッキリ表示</div>
+                <div style="font-size:11px; opacity:0.5;">横スクロールで12ヶ月全月を移動・確認可能</div>
               </div>
 
-              <!-- Gantt Scroll Container (Wide 100%) -->
-              <div class="gantt-scroll-container" style="width:100%; overflow-x:auto;">
-                <div style="min-width:1800px; width:100%;">
+              <!-- Gantt Scroll Container (Wide 100% / Auto-scroll) -->
+              <div id="gantt-main-scroll-box" class="gantt-scroll-container" style="width:100%; overflow-x:auto;">
+                <div style="width:${calcWidthVw}vw; min-width:3200px;">
                   
                   <!-- Month Top Banner -->
                   <div style="display:flex; padding-left:130px; border-bottom:1px solid rgba(255,255,255,0.1);">
@@ -6003,11 +5988,11 @@
               </div>
             </div>
 
-            <!-- 3-Month Event Decision & Summary Cards -->
-            <div style="background:var(--panel-bg); border-radius:14px; padding:20px; border:1px solid rgba(255,255,255,0.06); display:flex; flex-direction:column; gap:14px;">
+            <!-- Event Decision Cards Board -->
+            <div style="background:var(--panel-bg); border-radius:14px; padding:20px; border:1px solid rgba(255,255,255,0.06); display:flex; flex-direction:column; gap:14px; width:100%; box-sizing:border-box;">
               <div style="display:flex; justify-content:space-between; align-items:center;">
                 <h4 style="margin:0; font-size:15px; color:#fff; display:flex; align-items:center; gap:6px;">
-                  <span>📋 3ヶ月間 (${monthList[0].month}月〜${monthList[2].month}月) の出店イベント意志決定ボード</span>
+                  <span>📋 全期間の出店イベント意思決定ボード</span>
                   <span style="font-size:11px; opacity:0.6;">(${rangeEvents.length}件)</span>
                 </h4>
                 <button class="btn btn-primary" onclick="openExhibitionModal()" style="font-size:11px; padding:6px 12px;">＋ 新規出店計画を追加</button>
@@ -6018,12 +6003,30 @@
                   ${rangeCardsHtml}
                 </div>
               ` : `
-                <div style="opacity:0.4; padding:30px; text-align:center; font-size:12px;">この3ヶ月間の出店計画はありません。「＋ 新規出店計画を追加」から登録してみましょう。</div>
+                <div style="opacity:0.4; padding:30px; text-align:center; font-size:12px;">登録された出店計画はありません。</div>
               `}
             </div>
 
           </div>
         `;
+
+        // Smooth Jump helper
+        window.jumpToTimelineMonth = (yearMonthStr) => {
+          window.activeTimelineYearMonth = yearMonthStr;
+          const targetEl = document.getElementById(`gantt-month-banner-${yearMonthStr}`);
+          const scrollBox = document.getElementById('gantt-main-scroll-box');
+          if (targetEl && scrollBox) {
+            const leftPos = targetEl.offsetLeft - 130;
+            scrollBox.scrollTo({ left: leftPos, behavior: 'smooth' });
+          }
+        };
+
+        // Scroll to active month on initial render
+        setTimeout(() => {
+          if (window.jumpToTimelineMonth && window.activeTimelineYearMonth) {
+            window.jumpToTimelineMonth(window.activeTimelineYearMonth);
+          }
+        }, 100);
       }
 
 
