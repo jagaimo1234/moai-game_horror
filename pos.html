@@ -3837,6 +3837,53 @@
     };
 
 // Deduplication Cleaner for Exhibition Plans (Smart Fuzzy Name & Date Integration)
+    
+    // Explicit Fix: Ensure Design Festa 63 (Completed) and Design Festa 64 (Scheduled) are separated with correct sales
+    window.fixDesignFestaSeparation = async () => {
+      if (!auth.currentUser) return;
+      try {
+        const plans = { ...window.exhibitionPlansData };
+
+        // Ensure Design Festa 63 exists in Completed column
+        plans['designfesta63'] = {
+          name: 'デザインフェスタ vol.63',
+          date: '2026-05-18',
+          location: '東京ビッグサイト',
+          status: 'completed',
+          prepDays: 30,
+          updatedAt: Date.now()
+        };
+
+        // Ensure Design Festa 64 exists in Scheduled column without past sales
+        if (!plans['designfesta64'] && !plans['designfesta_64']) {
+          plans['designfesta64'] = {
+            name: 'デザインフェスタ vol.64',
+            date: '2026-11-15',
+            location: '東京ビッグサイト',
+            status: 'scheduled',
+            prepDays: 40,
+            updatedAt: Date.now()
+          };
+        } else {
+          // If designfesta64 already exists, make sure its status is scheduled
+          const k64 = plans['designfesta64'] ? 'designfesta64' : 'designfesta_64';
+          plans[k64] = {
+            ...plans[k64],
+            name: 'デザインフェスタ vol.64',
+            status: 'scheduled'
+          };
+        }
+
+        await setDoc(doc(db, "settings", "exhibition_plans"), plans);
+        console.log("Successfully repaired Design Festa 63 & 64 separation!");
+        if (typeof window.renderExhibitionView === 'function') {
+          window.renderExhibitionView();
+        }
+      } catch(e) {
+        console.error("Fix Design Festa Error:", e);
+      }
+    };
+
     window.cleanDuplicateExhibitionPlans = async () => {
       if (!auth.currentUser) return;
       try {
@@ -3852,14 +3899,19 @@
         let removedCount = 0;
 
         // Smart Canonicalizer: Normalize fuzzy event names (e.g. "HMJ 7/11,12" -> "HMJ")
+// Smart Canonicalizer: Normalize fuzzy event names while preserving Vol/Edition distinction
         const getCanonicalName = (name) => {
           if (!name) return '';
           let str = name.toUpperCase().replace(/\s+/g, '');
-          if (str.includes('HMJ') || str.includes('HANDMADEINJAPAN')) return 'HMJ';
+          if (str.includes('HMJ') || str.includes('HANDMADEINJAPAN')) {
+            const dateMatch = str.match(/2026|7\/11|7月/);
+            return dateMatch ? 'HMJ_2026' : 'HMJ';
+          }
           if (str.includes('クリマ') || str.includes('CHAKURIMA')) return 'クリマ';
           if (str.includes('デザフェス') || str.includes('DESIGNFESTA')) {
-            const volMatch = str.match(/VOL\.?(\d+)|VOL(\d+)|(\d+)/);
-            return volMatch ? `デザフェス_VOL${volMatch[1]||volMatch[2]||volMatch[3]}` : 'デザフェス';
+            if (str.includes('63')) return 'デザフェス_VOL63';
+            if (str.includes('64')) return 'デザフェス_VOL64';
+            return 'デザフェス';
           }
           if (str.includes('金沢ハンドメイド')) return '金沢ハンドメイドマルシェ';
           return str;
@@ -5015,8 +5067,12 @@
     // Load and sync exhibition sales
     function syncExhibitionSales(eventId) {
       if (exhibitionSalesListeners[eventId]) return;
-      
-      const docRef = doc(db, "settings", "sales_" + eventId);
+
+      // Prevent future events (like designfesta64) from bleeding sales from past events (designfesta63)
+      let salesDocKey = eventId;
+      if (eventId === 'designfesta' || eventId === 'designfesta_63') salesDocKey = 'designfesta63';
+
+      const docRef = doc(db, "settings", "sales_" + salesDocKey);
       exhibitionSalesListeners[eventId] = onSnapshot(docRef, (snap) => {
         let total = 0;
         let qty = 0;
