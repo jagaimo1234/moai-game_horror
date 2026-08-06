@@ -3836,7 +3836,7 @@
       document.getElementById('manage-event-form').style.display = 'flex';
     };
 
-    // Deduplication Cleaner for Exhibition Plans
+// Deduplication Cleaner for Exhibition Plans (Smart Fuzzy Name & Date Integration)
     window.cleanDuplicateExhibitionPlans = async () => {
       if (!auth.currentUser) return;
       try {
@@ -3851,22 +3851,42 @@
         const cleanedPlans = {};
         let removedCount = 0;
 
+        // Smart Canonicalizer: Normalize fuzzy event names (e.g. "HMJ 7/11,12" -> "HMJ")
+        const getCanonicalName = (name) => {
+          if (!name) return '';
+          let str = name.toUpperCase().replace(/\s+/g, '');
+          if (str.includes('HMJ') || str.includes('HANDMADEINJAPAN')) return 'HMJ';
+          if (str.includes('クリマ') || str.includes('CHAKURIMA')) return 'クリマ';
+          if (str.includes('デザフェス') || str.includes('DESIGNFESTA')) {
+            const volMatch = str.match(/VOL\.?(\d+)|VOL(\d+)|(\d+)/);
+            return volMatch ? `デザフェス_VOL${volMatch[1]||volMatch[2]||volMatch[3]}` : 'デザフェス';
+          }
+          if (str.includes('金沢ハンドメイド')) return '金沢ハンドメイドマルシェ';
+          return str;
+        };
+
         keys.forEach(k => {
           const p = rawPlans[k];
           if (!p || !p.name) return;
 
-          // Normalize name for checking duplicate (e.g., "金沢ハンドメイドマルシェ" vs "金沢ハンドメイドマルシェ2026")
-          const normName = strNormalize(p.name);
+          const canonName = getCanonicalName(p.name);
           const dateStr = p.date ? String(p.date).substring(0, 7) : 'nodate';
-          const uniqueKey = `${normName}_${dateStr}`;
+          const uniqueKey = `${canonName}_${dateStr}`;
 
           if (seenNames.has(uniqueKey)) {
-            // Duplicate found! Keep the one with higher status/more info
             const existingKey = seenNames.get(uniqueKey);
             const existingPlan = cleanedPlans[existingKey];
 
-            // If new item is scheduled/strong_intent and existing is considering, replace it
-            if ((p.status === 'scheduled' || p.status === 'strong_intent') && existingPlan.status !== 'scheduled') {
+            // Priority: Keep scheduled / strong_intent over considering / candidate
+            const getPriority = (status) => {
+              if (status === 'scheduled') return 5;
+              if (status === 'strong_intent') return 4;
+              if (status === 'completed') return 3;
+              if (status === 'considering') return 2;
+              return 1;
+            };
+
+            if (getPriority(p.status) > getPriority(existingPlan.status)) {
               cleanedPlans[k] = p;
               delete cleanedPlans[existingKey];
               seenNames.set(uniqueKey, k);
@@ -3879,13 +3899,16 @@
         });
 
         if (removedCount === 0) {
-          alert("重複している出店計画はありません。データは全て正常です！");
+          alert("重複している出店計画はありません。タブと出店計画のデータは全て正常・同期されています！");
           return;
         }
 
-        if (confirm(`重複している出店計画が ${removedCount} 件検出されました。統合・クレンジングを実行しますか？`)) {
+        if (confirm(`表記揺れ・重複している出店計画が ${removedCount} 件検出されました。統合・クレンジングを実行しますか？`)) {
           await setDoc(doc(db, "settings", "exhibition_plans"), cleanedPlans);
-          alert(`重複計画 ${removedCount} 件を自動整理・クレンジング完了しました！`);
+          alert(`重複・表記揺れの計画 ${removedCount} 件を自動整理・一元化完了しました！`);
+          if (window.syncEventConfigWithExhibitionPlans) {
+            await window.syncEventConfigWithExhibitionPlans();
+          }
           if (typeof window.renderExhibitionView === 'function') {
             window.renderExhibitionView();
           }
@@ -3896,7 +3919,7 @@
       }
     };
 
-    // New Event Modal Logic
+        // New Event Modal Logic
     window.openNewEventModal = () => {
       document.getElementById('new-event-id').value = '';
       document.getElementById('new-event-name').value = '';
