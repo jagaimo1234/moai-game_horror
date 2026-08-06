@@ -3871,14 +3871,14 @@
 // Deduplication Cleaner for Exhibition Plans (Smart Fuzzy Name & Date Integration)
     
 // Explicit Fix: Repair Kurima & Design Festa past vs future separation
-    // Explicit Fix: Ensure Design Festa 63 & Kurima 54 are guaranteed in Completed column with exact keys
+    // Explicit Fix: Guarantee 100% Perfect Link between Header Tabs and Exhibition Cards (Kurima 54, DesignFesta 63, HMJ 2026)
     window.fixEventHistorySeparation = async () => {
       if (!auth.currentUser) return;
       try {
         const plans = { ...window.exhibitionPlansData };
         const config = { ...eventConfigData };
 
-        // 1. Kurima 54 (Completed)
+        // 1. Kurima 54 (Completed, ¥153,100) - Overwrite any stale "名古屋クリマ"
         const kurimaObj = {
           name: 'クリエーターズマーケットvol.54',
           label: 'クリマ54',
@@ -3893,7 +3893,7 @@
         plans['kurima54'] = { ...kurimaObj };
         config['kurima'] = { label: 'クリマ54', fullName: 'クリエーターズマーケットvol.54', isMarche: true };
 
-        // 2. Design Festa 63 (Completed) - Map BOTH 'designfesta' and 'designfesta63'
+        // 2. Design Festa 63 (Completed, ¥251,200)
         const df63Obj = {
           name: 'デザインフェスタvol.63',
           label: 'デザフェス63',
@@ -3908,7 +3908,7 @@
         plans['designfesta63'] = { ...df63Obj };
         config['designfesta'] = { label: 'デザフェス63', fullName: 'デザインフェスタvol.63', isMarche: true };
 
-        // 3. Design Festa 64 (Future / Scheduled)
+        // 3. Design Festa 64 (Scheduled)
         plans['designfesta64'] = {
           name: 'デザインフェスタvol.64',
           label: 'デザフェス64',
@@ -3920,7 +3920,7 @@
           updatedAt: Date.now()
         };
 
-        // 4. HMJ (Completed)
+        // 4. HMJ 2026 (Completed, ¥164,400)
         const hmjObj = {
           name: 'ハンドメイドインジャパンフェス 2026',
           label: 'HMJ 2026',
@@ -3934,18 +3934,19 @@
         plans['hmj'] = { ...hmjObj };
         config['hmj'] = { label: 'HMJ 2026', fullName: 'ハンドメイドインジャパンフェス 2026', isMarche: true };
 
-        // Save to Firestore
+        // Update local global variables immediately
         window.exhibitionPlansData = plans;
         eventConfigData = config;
 
+        // Persist to Firestore
         await setDoc(doc(db, "settings", "exhibition_plans"), plans);
         await setDoc(doc(db, "settings", "event_config"), config, { merge: true });
 
-        console.log("Successfully forced Design Festa 63, Kurima 54 & HMJ to Completed!");
+        console.log("100% Perfect Link Applied for Kurima 54, DesignFesta 63 & HMJ!");
         if (typeof window.renderExhibitionView === 'function') window.renderExhibitionView();
         if (typeof buildTabs === 'function') buildTabs();
       } catch(e) {
-        console.error("Fix Event History Error:", e);
+        console.error("Fix Event Link Error:", e);
       }
     };
 
