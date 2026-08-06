@@ -4036,7 +4036,37 @@
       }
     };
 
-        // New Event Modal Logic
+        
+    // Flow Step 2: Transition from Exhibition Plan to Tab Registration
+    window.openExhibitionToTabModal = (planKey) => {
+      const plans = window.exhibitionPlansData || {};
+      const plan = plans[planKey] || {};
+
+      // Auto generate ID if not set
+      const autoId = planKey || ('ev_' + Date.now());
+      document.getElementById('new-event-id').value = autoId;
+
+      const fullName = plan.fullName || plan.name || '';
+      document.getElementById('new-event-fullname').value = fullName;
+
+      // Auto generate short label
+      let shortLabel = plan.label || fullName;
+      if (shortLabel.includes('デザインフェスタ')) shortLabel = shortLabel.replace('デザインフェスタ', 'デザフェス');
+      if (shortLabel.includes('クリエーターズマーケット')) shortLabel = shortLabel.replace('クリエーターズマーケット', 'クリマ');
+      if (shortLabel.includes('ハンドメイドインジャパンフェス')) shortLabel = shortLabel.replace('ハンドメイドインジャパンフェス', 'HMJ');
+      document.getElementById('new-event-name').value = shortLabel;
+
+      if (plan.date) {
+        let dateStr = String(plan.date).split('T')[0];
+        dateStr = dateStr.replace(/[^0-9-]/g, '');
+        document.getElementById('new-event-date').value = dateStr;
+      }
+
+      document.getElementById('new-event-is-marche').checked = true;
+      document.getElementById('new-event-modal').style.display = 'flex';
+    };
+
+    // New Event Modal Logic
     window.openNewEventModal = () => {
       document.getElementById('new-event-id').value = '';
       document.getElementById('new-event-name').value = '';
@@ -4048,14 +4078,18 @@
 
     document.getElementById('new-event-save-btn').addEventListener('click', async () => {
       if (!auth.currentUser) return;
-      const idInput = document.getElementById('new-event-id').value.trim();
+      let idInput = document.getElementById('new-event-id').value.trim();
       const nameInput = document.getElementById('new-event-name').value.trim();
-      const fullNameInput = document.getElementById('new-event-fullname').value.trim();
+      const fullNameInput = document.getElementById('new-event-fullname').value.trim() || nameInput;
       const dateInput = document.getElementById('new-event-date').value;
+      const daysCountInput = Number(document.getElementById('new-event-days-count').value) || 1;
       const isMarcheInput = document.getElementById('new-event-is-marche').checked;
 
-      if (!idInput || !nameInput) {
-        alert("管理用IDとイベント略称は必須です。");
+      if (!idInput) {
+        idInput = 'ev_' + Date.now();
+      }
+      if (!nameInput) {
+        alert("イベント略称を入力してください。");
         return;
       }
       if (!/^[a-zA-Z0-9_]+$/.test(idInput)) {
