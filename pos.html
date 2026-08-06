@@ -3873,7 +3873,6 @@
 // Explicit Fix: Repair Kurima & Design Festa past vs future separation
     // Explicit Fix: Guarantee 100% Perfect Link between Header Tabs and Exhibition Cards (Kurima 54, DesignFesta 63, HMJ 2026)
     window.fixEventHistorySeparation = async () => {
-      if (!auth.currentUser) return;
       try {
         const plans = { ...window.exhibitionPlansData };
         const config = { ...eventConfigData };
@@ -5976,7 +5975,20 @@
           }
 
           // Pack Algorithm
-          function packItemsIntoRows(items) {
+          
+        // Display Layer Guard: Ensure stale names like "名古屋クリマ" are ALWAYS normalized to "クリエーターズマーケットvol.54"
+        const normalizePlanData = (plan) => {
+          if (!plan) return plan;
+          const p = { ...plan };
+          if (p.name === '名古屋クリマ' || p.label === '名古屋クリマ' || p.fullName === '名古屋クリマ') {
+            p.name = 'クリエーターズマーケットvol.54';
+            p.label = 'クリマ54';
+            p.fullName = 'クリエーターズマーケットvol.54';
+          }
+          return p;
+        };
+
+        function packItemsIntoRows(items) {
             const sorted = [...items].sort((a, b) => a.startOffset - b.startOffset);
             const rowEnds = [];
 
@@ -6069,7 +6081,7 @@
             eventSubRowsHtml = renderPackedLaneHtml(packedItems, rowCount, (ev) => {
               const startPct = (ev.startOffset / totalSpanDays) * 100;
               const widthPct = Math.max((1 / totalSpanDays) * 100, 0.5);
-              const plan = ev.plan;
+              const plan = normalizePlanData(ev.plan);
               const status = plan.status || 'considering';
 
               let barClass = 'gantt-bar-scheduled';
