@@ -1,0 +1,2812 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>MOAI IDEA GALLERY｜新作アイデア管理</title>
+  <style>
+    :root {
+      --bg-main: #0f1117;
+      --bg-surface: #181b24;
+      --bg-elevated: #222734;
+      --bg-chat: #13161f;
+      --text-main: #f8fafc;
+      --text-sub: #cbd5e1;
+      --text-muted: #94a3b8;
+      --accent: #38bdf8;
+      --accent-grad: linear-gradient(135deg, #38bdf8 0%, #6366f1 100%);
+      --line-green: #06c755;
+      --line-bg: #1a2230;
+      --x-blue: #1d9bf0;
+      --border: rgba(255, 255, 255, 0.09);
+      --border-strong: rgba(255, 255, 255, 0.18);
+      --shadow-lg: 0 20px 50px rgba(0, 0, 0, 0.6);
+      --radius-card: 18px;
+      --radius-lg: 22px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic", Meiryo, sans-serif;
+      background-color: var(--bg-main);
+      color: var(--text-main);
+      min-height: 100vh;
+      overflow-x: hidden;
+      line-height: 1.5;
+    }
+
+    /* =========================================================
+       1. Header & Top Bar
+       ========================================================= */
+    .app-header {
+      position: sticky;
+      top: 0;
+      z-index: 40;
+      background: rgba(15, 17, 23, 0.88);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border);
+      padding: 12px 20px;
+    }
+
+    .header-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .brand-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .brand-logo-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      background: var(--accent-grad);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 21px;
+      box-shadow: 0 4px 15px rgba(56, 189, 248, 0.25);
+      flex-shrink: 0;
+    }
+
+    .brand-titles {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .brand-title {
+      font-size: 1.08rem;
+      font-weight: 800;
+      letter-spacing: 0.03em;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+
+    .brand-badge {
+      font-size: 0.68rem;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 999px;
+      background: rgba(56, 189, 248, 0.15);
+      color: var(--accent);
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      white-space: nowrap;
+    }
+
+    .brand-subtitle {
+      font-size: 0.74rem;
+      color: var(--text-muted);
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .save-indicator {
+      font-size: 0.72rem;
+      color: #34d399;
+      background: rgba(16, 185, 129, 0.12);
+      border: 1px solid rgba(16, 185, 129, 0.25);
+      padding: 4px 9px;
+      border-radius: 999px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      white-space: nowrap;
+    }
+
+    .btn-add-idea {
+      background: var(--accent-grad);
+      color: #fff;
+      border: none;
+      padding: 9px 16px;
+      border-radius: 999px;
+      font-size: 0.86rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      box-shadow: 0 4px 16px rgba(56, 189, 248, 0.3);
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+      white-space: nowrap;
+    }
+
+    .btn-add-idea:active {
+      transform: scale(0.96);
+    }
+
+    .btn-icon-subtle {
+      background: var(--bg-surface);
+      color: var(--text-sub);
+      border: 1px solid var(--border);
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 0.95rem;
+      transition: background 0.15s, color 0.15s;
+    }
+
+    /* =========================================================
+       2. Controls Bar (Filter & Sort)
+       ========================================================= */
+    .controls-bar {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 12px 20px 6px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .filter-pills {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      overflow-x: auto;
+      padding-bottom: 4px;
+      scrollbar-width: none;
+      max-width: 100%;
+    }
+    .filter-pills::-webkit-scrollbar {
+      display: none;
+    }
+
+    .filter-pill {
+      background: var(--bg-surface);
+      color: var(--text-sub);
+      border: 1px solid var(--border);
+      padding: 6px 13px;
+      border-radius: 999px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.15s ease;
+    }
+
+    .filter-pill.active {
+      background: #fff;
+      color: #0f1117;
+      border-color: #fff;
+      font-weight: 700;
+    }
+
+    .sort-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-left: auto;
+    }
+
+    .sort-select {
+      background: var(--bg-surface);
+      color: var(--text-sub);
+      border: 1px solid var(--border);
+      padding: 6px 10px;
+      border-radius: 10px;
+      font-size: 0.78rem;
+      outline: none;
+      cursor: pointer;
+    }
+
+    /* =========================================================
+       3. Gallery Grid (Matching App / Instagram Tile Style)
+       ========================================================= */
+    .gallery-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 12px 20px 95px;
+    }
+
+    .tile-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 16px;
+    }
+
+    @media (max-width: 640px) {
+      .tile-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+      }
+      .gallery-container {
+        padding: 8px 12px 95px;
+      }
+      .controls-bar {
+        padding: 10px 12px 4px;
+      }
+      .app-header {
+        padding: 10px 12px;
+      }
+      .brand-subtitle,
+      .save-indicator {
+        display: none;
+      }
+      .btn-add-idea {
+        display: none;
+      }
+    }
+
+    .idea-tile {
+      position: relative;
+      aspect-ratio: 4 / 5;
+      border-radius: var(--radius-card);
+      overflow: hidden;
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      cursor: pointer;
+      transition: transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.2s ease, border-color 0.2s ease;
+      user-select: none;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.28);
+    }
+
+    .idea-tile:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 14px 32px rgba(0, 0, 0, 0.45);
+      border-color: rgba(56, 189, 248, 0.45);
+    }
+
+    .idea-tile:active {
+      transform: scale(0.98);
+    }
+
+    .tile-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      transition: transform 0.35s ease;
+    }
+
+    .tile-top-bar {
+      position: absolute;
+      top: 9px;
+      left: 9px;
+      right: 9px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      z-index: 2;
+      pointer-events: none;
+    }
+
+    .status-badge {
+      padding: 3px 9px;
+      border-radius: 999px;
+      font-size: 0.7rem;
+      font-weight: 700;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+    }
+
+    .status-idea {
+      background: rgba(15, 23, 42, 0.78);
+      color: #38bdf8;
+      border: 1px solid rgba(56, 189, 248, 0.35);
+    }
+    .status-considering {
+      background: rgba(15, 23, 42, 0.78);
+      color: #fbbf24;
+      border: 1px solid rgba(251, 191, 36, 0.35);
+    }
+    .status-prototyping {
+      background: rgba(15, 23, 42, 0.78);
+      color: #a855f7;
+      border: 1px solid rgba(168, 85, 247, 0.35);
+    }
+    .status-completed {
+      background: rgba(15, 23, 42, 0.78);
+      color: #34d399;
+      border: 1px solid rgba(52, 211, 153, 0.35);
+    }
+
+    .btn-fav-tile {
+      pointer-events: auto;
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      background: rgba(15, 23, 42, 0.65);
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(255,255,255,0.15);
+      color: rgba(255,255,255,0.6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.9rem;
+      cursor: pointer;
+    }
+
+    .btn-fav-tile.active {
+      color: #fbbf24;
+      background: rgba(15, 23, 42, 0.88);
+      border-color: rgba(251, 191, 36, 0.5);
+    }
+
+    .tile-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(
+        to top,
+        rgba(10, 12, 18, 0.95) 0%,
+        rgba(10, 12, 18, 0.68) 34%,
+        rgba(10, 12, 18, 0.04) 65%,
+        rgba(10, 12, 18, 0.25) 100%
+      );
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      padding: 12px;
+    }
+
+    .tile-title {
+      font-size: 1rem;
+      font-weight: 800;
+      color: #fff;
+      line-height: 1.25;
+      margin-bottom: 2px;
+      text-shadow: 0 2px 6px rgba(0,0,0,0.6);
+      display: -webkit-box;
+      -webkit-line-clamp: 1;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .tile-title.unnamed {
+      color: rgba(255, 255, 255, 0.65);
+      font-style: italic;
+      font-weight: 600;
+    }
+
+    .tile-subtitle {
+      font-size: 0.75rem;
+      color: var(--text-sub);
+      margin-bottom: 6px;
+      display: -webkit-box;
+      -webkit-line-clamp: 1;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .tile-latest-chat {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(6px);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 9px;
+      padding: 4px 8px;
+      font-size: 0.71rem;
+      color: #e2e8f0;
+      margin-bottom: 6px;
+      display: -webkit-box;
+      -webkit-line-clamp: 1;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .tile-meta-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 0.7rem;
+      color: var(--text-muted);
+    }
+
+    .tile-counts {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .tile-count-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      color: #e2e8f0;
+      font-weight: 600;
+    }
+
+    .idea-tile-add {
+      aspect-ratio: 4 / 5;
+      border-radius: var(--radius-card);
+      border: 2px dashed rgba(255, 255, 255, 0.16);
+      background: rgba(24, 27, 36, 0.45);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 16px;
+      text-align: center;
+      cursor: pointer;
+      color: var(--text-muted);
+      transition: all 0.2s ease;
+    }
+
+    .idea-tile-add:hover {
+      border-color: var(--accent);
+      background: rgba(56, 189, 248, 0.06);
+      color: #fff;
+    }
+
+    .idea-tile-add .plus-circle {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: rgba(56, 189, 248, 0.12);
+      color: var(--accent);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      font-weight: 700;
+    }
+
+    /* =========================================================
+       4. Detail & Chat Modal (Desktop Split / Mobile Tabbed)
+       ========================================================= */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 100;
+      background: rgba(5, 7, 12, 0.8);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 18px;
+    }
+
+    .modal-backdrop.open {
+      display: flex;
+      animation: fadeIn 0.16s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    .detail-sheet {
+      width: 100%;
+      max-width: 1060px;
+      height: min(90vh, 840px);
+      background: var(--bg-surface);
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-lg);
+      display: grid;
+      grid-template-columns: 390px 1fr;
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* Mobile top bar inside detail modal */
+    .mobile-detail-topbar {
+      display: none;
+      background: var(--bg-surface);
+      border-bottom: 1px solid var(--border);
+      padding: 10px 12px;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+
+    .mobile-idea-mini {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      min-width: 0;
+      flex: 1;
+    }
+
+    .mobile-idea-mini img {
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      object-fit: cover;
+      flex-shrink: 0;
+      border: 1px solid var(--border-strong);
+    }
+
+    .mobile-idea-mini-title {
+      font-weight: 800;
+      font-size: 0.92rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .mobile-pane-tabs {
+      display: flex;
+      background: var(--bg-main);
+      padding: 3px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+
+    .mobile-pane-tab {
+      background: transparent;
+      color: var(--text-muted);
+      border: none;
+      padding: 5px 11px;
+      border-radius: 999px;
+      font-size: 0.74rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .mobile-pane-tab.active {
+      background: var(--bg-elevated);
+      color: #fff;
+    }
+
+    @media (max-width: 820px) {
+      .modal-backdrop {
+        padding: 0;
+      }
+      .detail-sheet {
+        height: 100dvh;
+        max-width: 100%;
+        border-radius: 0;
+        border: none;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+      }
+      .mobile-detail-topbar {
+        display: flex;
+      }
+      .detail-left {
+        display: none !important;
+        flex: 1;
+        overflow-y: auto;
+        border-right: none !important;
+      }
+      .detail-left.mobile-active {
+        display: flex !important;
+      }
+      .detail-right {
+        display: none !important;
+        flex: 1;
+        height: auto !important;
+        min-height: 0 !important;
+      }
+      .detail-right.mobile-active {
+        display: flex !important;
+      }
+      .desktop-close-btn {
+        display: none !important;
+      }
+    }
+
+    /* Left Column: Visual & Idea Summary */
+    .detail-left {
+      background: var(--bg-main);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+    }
+
+    .detail-cover-wrap {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 4 / 3;
+      background: #090b10;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+
+    .detail-cover-img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      background: #090b10;
+      display: block;
+    }
+
+    .detail-cover-actions {
+      position: absolute;
+      top: 12px;
+      left: 12px;
+      right: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      pointer-events: none;
+    }
+
+    .btn-floating-dark {
+      pointer-events: auto;
+      background: rgba(15, 23, 42, 0.78);
+      backdrop-filter: blur(8px);
+      color: #fff;
+      border: 1px solid rgba(255,255,255,0.18);
+      padding: 6px 12px;
+      border-radius: 999px;
+      font-size: 0.76rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .sub-images-bar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 16px;
+      background: rgba(255,255,255,0.02);
+      border-bottom: 1px solid var(--border);
+      overflow-x: auto;
+      flex-shrink: 0;
+    }
+
+    .sub-thumb {
+      width: 46px;
+      height: 46px;
+      border-radius: 10px;
+      object-fit: cover;
+      cursor: pointer;
+      border: 2px solid transparent;
+      flex-shrink: 0;
+      opacity: 0.7;
+      transition: all 0.15s;
+    }
+
+    .sub-thumb.active {
+      border-color: var(--accent);
+      opacity: 1;
+    }
+
+    .btn-add-subimg {
+      width: 46px;
+      height: 46px;
+      border-radius: 10px;
+      border: 1px dashed var(--border-strong);
+      background: transparent;
+      color: var(--text-muted);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.65rem;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+
+    .detail-info-box {
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      flex: 1;
+    }
+
+    .info-status-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .status-select-pill {
+      background: var(--bg-elevated);
+      color: #fff;
+      border: 1px solid var(--border-strong);
+      padding: 6px 12px;
+      border-radius: 999px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      cursor: pointer;
+      outline: none;
+    }
+
+    .inline-input-title {
+      width: 100%;
+      background: transparent;
+      border: 1px solid transparent;
+      color: #fff;
+      font-size: 1.2rem;
+      font-weight: 800;
+      padding: 6px 8px;
+      margin: -6px -8px;
+      border-radius: 8px;
+      outline: none;
+    }
+    .inline-input-title:focus {
+      background: var(--bg-elevated);
+      border-color: var(--border-strong);
+    }
+
+    .inline-input-subtitle {
+      width: 100%;
+      background: transparent;
+      border: 1px solid transparent;
+      color: var(--accent);
+      font-size: 0.85rem;
+      font-weight: 600;
+      padding: 5px 8px;
+      margin: -5px -8px;
+      border-radius: 8px;
+      outline: none;
+    }
+    .inline-input-subtitle:focus {
+      background: var(--bg-elevated);
+      border-color: var(--border-strong);
+    }
+
+    .info-section-label {
+      font-size: 0.74rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      margin-top: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .inline-textarea-desc {
+      width: 100%;
+      min-height: 80px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      color: var(--text-sub);
+      font-size: 0.86rem;
+      line-height: 1.55;
+      padding: 10px 12px;
+      resize: vertical;
+      outline: none;
+      font-family: inherit;
+    }
+    .inline-textarea-desc:focus {
+      border-color: var(--accent);
+      background: var(--bg-elevated);
+      color: #fff;
+    }
+
+    .detail-delete-row {
+      margin-top: auto;
+      padding-top: 12px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.74rem;
+      color: var(--text-muted);
+    }
+
+    .btn-delete-idea {
+      background: transparent;
+      border: none;
+      color: #f87171;
+      font-size: 0.75rem;
+      cursor: pointer;
+      padding: 4px 8px;
+      border-radius: 6px;
+    }
+
+    /* =========================================================
+       5. Right Column: Dual-Mode Thread (LINE Chat & X Replies)
+       ========================================================= */
+    .detail-right {
+      display: flex;
+      flex-direction: column;
+      background: var(--bg-chat);
+      height: 100%;
+      overflow: hidden;
+    }
+
+    .chat-header {
+      padding: 10px 16px;
+      background: var(--bg-surface);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      flex-shrink: 0;
+      flex-wrap: wrap;
+    }
+
+    /* Mode Switcher: LINEやり取り風 vs Xリプ欄風 */
+    .mode-switcher {
+      display: flex;
+      background: var(--bg-main);
+      padding: 3px;
+      border-radius: 12px;
+      border: 1px solid var(--border-strong);
+      gap: 2px;
+    }
+
+    .mode-btn {
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      padding: 6px 12px;
+      border-radius: 9px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      transition: all 0.15s ease;
+      white-space: nowrap;
+    }
+
+    .mode-btn.active-line {
+      background: var(--line-green);
+      color: #fff;
+      box-shadow: 0 2px 10px rgba(6, 199, 85, 0.35);
+    }
+
+    .mode-btn.active-x {
+      background: #000;
+      color: #fff;
+      border: 1px solid rgba(255,255,255,0.22);
+      box-shadow: 0 2px 10px rgba(0,0,0,0.4);
+    }
+
+    .btn-close-modal {
+      background: var(--bg-elevated);
+      color: var(--text-sub);
+      border: 1px solid var(--border);
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      font-size: 0.95rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    /* Timeline Scroll Container */
+    .chat-timeline {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .chat-timeline.mode-line {
+      background: linear-gradient(180deg, #161f2c 0%, #111823 100%);
+    }
+
+    .chat-timeline.mode-x {
+      background: #000000;
+      padding: 0;
+      gap: 0;
+    }
+
+    /* ---------------------------------------------------------
+       MODE A: LINEのやり取り風 (Back-and-Forth Chat)
+       --------------------------------------------------------- */
+    .line-date-divider {
+      align-self: center;
+      background: rgba(0, 0, 0, 0.35);
+      color: #cbd5e1;
+      font-size: 0.7rem;
+      padding: 4px 12px;
+      border-radius: 999px;
+      margin: 4px 0;
+    }
+
+    .line-msg-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 9px;
+      max-width: 88%;
+      animation: popBubble 0.16s ease-out;
+    }
+
+    @keyframes popBubble {
+      from { opacity: 0; transform: translateY(5px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Left side: 🗿 相棒モアイ / 別視点 */
+    .line-msg-row.side-left {
+      align-self: flex-start;
+    }
+
+    /* Right side: 🧑 自分（制作者） */
+    .line-msg-row.side-right {
+      align-self: flex-end;
+      flex-direction: row-reverse;
+    }
+
+    .line-avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: #2b3548;
+      border: 1px solid rgba(255,255,255,0.15);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.15rem;
+      flex-shrink: 0;
+      cursor: pointer;
+      title: "タップで左右（発言者）を切り替え";
+    }
+
+    .line-msg-body {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    .line-speaker-name {
+      font-size: 0.68rem;
+      color: #94a3b8;
+      margin-left: 2px;
+    }
+
+    .line-bubble-wrap {
+      display: flex;
+      align-items: flex-end;
+      gap: 6px;
+    }
+
+    .line-msg-row.side-right .line-bubble-wrap {
+      flex-direction: row-reverse;
+    }
+
+    .line-bubble {
+      padding: 9px 13px;
+      font-size: 0.88rem;
+      line-height: 1.48;
+      word-break: break-word;
+      white-space: pre-wrap;
+      position: relative;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    }
+
+    .line-msg-row.side-left .line-bubble {
+      background: #263144;
+      color: #f8fafc;
+      border-radius: 4px 16px 16px 16px;
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .line-msg-row.side-right .line-bubble {
+      background: var(--line-green);
+      color: #052e16;
+      font-weight: 500;
+      border-radius: 16px 4px 16px 16px;
+    }
+
+    .line-meta {
+      display: flex;
+      flex-direction: column;
+      font-size: 0.65rem;
+      color: #94a3b8;
+      white-space: nowrap;
+      line-height: 1.25;
+      flex-shrink: 0;
+    }
+
+    .line-msg-row.side-right .line-meta {
+      align-items: flex-end;
+    }
+
+    .line-msg-actions {
+      display: flex;
+      gap: 4px;
+      margin-top: 2px;
+    }
+
+    .btn-mini-action {
+      background: rgba(255,255,255,0.07);
+      border: none;
+      color: #94a3b8;
+      font-size: 0.64rem;
+      padding: 2px 5px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .btn-mini-action:hover {
+      background: rgba(255,255,255,0.18);
+      color: #fff;
+    }
+
+    /* ---------------------------------------------------------
+       MODE B: 𝕏 (旧Twitter) のリプ欄風 (Thread & Reply Tree)
+       --------------------------------------------------------- */
+    .x-parent-post {
+      padding: 16px 18px 12px;
+      border-bottom: 1px solid #2f3336;
+      background: #000;
+    }
+
+    .x-post-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .x-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #1d9bf0 0%, #6366f1 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.25rem;
+      flex-shrink: 0;
+    }
+
+    .x-user-info {
+      display: flex;
+      flex-direction: column;
+      line-height: 1.25;
+    }
+
+    .x-display-name {
+      font-weight: 800;
+      font-size: 0.92rem;
+      color: #e7e9ea;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .x-verified {
+      color: var(--x-blue);
+      font-size: 0.85rem;
+    }
+
+    .x-handle {
+      font-size: 0.78rem;
+      color: #71767b;
+    }
+
+    .x-parent-title {
+      font-size: 1.08rem;
+      font-weight: 800;
+      color: #e7e9ea;
+      margin-bottom: 4px;
+    }
+
+    .x-parent-desc {
+      font-size: 0.9rem;
+      color: #e7e9ea;
+      white-space: pre-wrap;
+      margin-bottom: 10px;
+    }
+
+    .x-parent-media {
+      width: 100%;
+      max-height: 220px;
+      object-fit: cover;
+      border-radius: 14px;
+      border: 1px solid #2f3336;
+      margin-bottom: 10px;
+      display: block;
+    }
+
+    .x-parent-stats {
+      padding-top: 8px;
+      border-top: 1px solid #2f3336;
+      display: flex;
+      gap: 18px;
+      font-size: 0.76rem;
+      color: #71767b;
+    }
+
+    .x-parent-stats strong {
+      color: #e7e9ea;
+    }
+
+    /* X Reply Item */
+    .x-reply-item {
+      display: flex;
+      gap: 11px;
+      padding: 12px 18px;
+      border-bottom: 1px solid #2f3336;
+      background: #000;
+      position: relative;
+      animation: popBubble 0.16s ease-out;
+    }
+
+    .x-reply-left {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      flex-shrink: 0;
+    }
+
+    .x-thread-line {
+      width: 2px;
+      flex: 1;
+      background: #333639;
+      margin-top: 4px;
+      margin-bottom: -12px;
+    }
+
+    .x-reply-item:last-child .x-thread-line {
+      display: none;
+    }
+
+    .x-reply-content {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .x-reply-top {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin-bottom: 2px;
+    }
+
+    .x-reply-to {
+      font-size: 0.75rem;
+      color: #71767b;
+      margin-bottom: 4px;
+    }
+
+    .x-reply-to span {
+      color: var(--x-blue);
+    }
+
+    .x-reply-text {
+      font-size: 0.9rem;
+      color: #e7e9ea;
+      line-height: 1.48;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    .x-reply-actions {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      max-width: 300px;
+      margin-top: 8px;
+      color: #71767b;
+      font-size: 0.76rem;
+    }
+
+    .x-action-btn {
+      background: transparent;
+      border: none;
+      color: #71767b;
+      font-size: 0.76rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      cursor: pointer;
+      padding: 4px 6px;
+      border-radius: 999px;
+      transition: color 0.15s, background 0.15s;
+    }
+
+    .x-action-btn:hover {
+      color: var(--x-blue);
+      background: rgba(29, 155, 240, 0.1);
+    }
+
+    .x-action-btn.liked {
+      color: #f91880;
+    }
+
+    .chat-bubble-img {
+      max-width: 220px;
+      max-height: 220px;
+      border-radius: 12px;
+      display: block;
+      margin-top: 4px;
+      margin-bottom: 4px;
+      cursor: pointer;
+      border: 1px solid rgba(255,255,255,0.2);
+    }
+
+    /* =========================================================
+       6. Chat Input Area (With Speaker Switcher for Back-and-Forth)
+       ========================================================= */
+    .chat-input-area {
+      background: var(--bg-surface);
+      border-top: 1px solid var(--border);
+      padding: 10px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+
+    .speaker-toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .speaker-pills {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .speaker-pill {
+      background: var(--bg-main);
+      color: var(--text-muted);
+      border: 1px solid var(--border);
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 0.73rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      transition: all 0.15s;
+    }
+
+    .speaker-pill.active-self {
+      background: rgba(6, 199, 85, 0.16);
+      color: #4ade80;
+      border-color: rgba(6, 199, 85, 0.45);
+    }
+
+    .speaker-pill.active-moai {
+      background: rgba(56, 189, 248, 0.16);
+      color: #38bdf8;
+      border-color: rgba(56, 189, 248, 0.45);
+    }
+
+    .auto-alternate-label {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .chat-attach-preview {
+      display: none;
+      align-items: center;
+      gap: 10px;
+      background: var(--bg-elevated);
+      padding: 6px 10px;
+      border-radius: 10px;
+      width: fit-content;
+    }
+
+    .chat-attach-preview.active {
+      display: flex;
+    }
+
+    .chat-attach-preview img {
+      width: 42px;
+      height: 42px;
+      object-fit: cover;
+      border-radius: 6px;
+    }
+
+    .chat-input-row {
+      display: flex;
+      align-items: flex-end;
+      gap: 8px;
+    }
+
+    .btn-chat-attach {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      background: var(--bg-elevated);
+      color: var(--text-sub);
+      border: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.05rem;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+
+    .chat-textarea {
+      flex: 1;
+      background: var(--bg-main);
+      color: #fff;
+      border: 1px solid var(--border-strong);
+      border-radius: 20px;
+      padding: 9px 14px;
+      font-size: 0.88rem;
+      font-family: inherit;
+      line-height: 1.4;
+      max-height: 100px;
+      min-height: 38px;
+      resize: none;
+      outline: none;
+    }
+
+    .chat-textarea:focus {
+      border-color: var(--accent);
+    }
+
+    .btn-chat-send {
+      background: var(--accent-grad);
+      color: #fff;
+      border: none;
+      height: 38px;
+      padding: 0 16px;
+      border-radius: 999px;
+      font-weight: 700;
+      font-size: 0.84rem;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+
+    /* =========================================================
+       7. Quick Add Modal (Image-First Zero Friction)
+       ========================================================= */
+    .add-modal-card {
+      width: 100%;
+      max-width: 460px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-lg);
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      margin: 16px;
+    }
+
+    .dropzone-box {
+      border: 2px dashed rgba(56, 189, 248, 0.45);
+      background: rgba(56, 189, 248, 0.05);
+      border-radius: 16px;
+      min-height: 190px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 18px;
+      text-align: center;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .dropzone-preview-img {
+      max-width: 100%;
+      max-height: 200px;
+      border-radius: 12px;
+      object-fit: contain;
+      display: none;
+    }
+
+    .optional-fields {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .field-input {
+      width: 100%;
+      background: var(--bg-main);
+      border: 1px solid var(--border-strong);
+      color: #fff;
+      padding: 10px 14px;
+      border-radius: 12px;
+      font-size: 0.88rem;
+      outline: none;
+    }
+
+    .add-modal-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 2px;
+    }
+
+    .btn-secondary {
+      flex: 1;
+      background: var(--bg-elevated);
+      color: var(--text-sub);
+      border: 1px solid var(--border);
+      padding: 11px;
+      border-radius: 12px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .btn-primary-wide {
+      flex: 2;
+      background: var(--accent-grad);
+      color: #fff;
+      border: none;
+      padding: 11px;
+      border-radius: 12px;
+      font-size: 0.92rem;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    /* Mobile Floating Action Button */
+    .fab-add {
+      position: fixed;
+      right: 16px;
+      bottom: 20px;
+      z-index: 35;
+      background: var(--accent-grad);
+      color: #fff;
+      border: none;
+      padding: 13px 20px;
+      border-radius: 999px;
+      font-size: 0.92rem;
+      font-weight: 800;
+      box-shadow: 0 8px 25px rgba(56, 189, 248, 0.45);
+      display: none;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+    }
+
+    @media (max-width: 640px) {
+      .fab-add {
+        display: flex;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- =========================================================
+       Header
+       ========================================================= -->
+  <header class="app-header">
+    <div class="header-inner">
+      <div class="brand-group">
+        <div class="brand-logo-icon">🗿</div>
+        <div class="brand-titles">
+          <div class="brand-title">
+            <span>MOAI IDEA GALLERY</span>
+            <span class="brand-badge">Ver.1.1</span>
+          </div>
+          <div class="brand-subtitle">新作アイデアを視覚的に並べて、LINEやXのリプ欄感覚で思考を育てる場所</div>
+        </div>
+      </div>
+
+      <div class="header-actions">
+        <div id="saveBadge" class="save-indicator">
+          <span>✓</span>
+          <span id="saveBadgeText">自動保存済み</span>
+        </div>
+        <button id="btnOpenAddModal" class="btn-add-idea">
+          <span>＋</span>
+          <span>アイデア追加</span>
+        </button>
+        <button id="btnExportJson" class="btn-icon-subtle" title="バックアップ書き出し (JSON)">⬇</button>
+        <button id="btnResetSamples" class="btn-icon-subtle" title="初期サンプルを復元">🔄</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- =========================================================
+       Filter & Sort Controls
+       ========================================================= -->
+  <section class="controls-bar">
+    <div class="filter-pills" id="filterPills">
+      <button class="filter-pill active" data-filter="all">すべて</button>
+      <button class="filter-pill" data-filter="fav">⭐ お気に入り</button>
+      <button class="filter-pill" data-filter="idea">💡 思いつき</button>
+      <button class="filter-pill" data-filter="considering">🤔 検討中</button>
+      <button class="filter-pill" data-filter="prototyping">🛠️ 試作中</button>
+      <button class="filter-pill" data-filter="completed">✨ 完成</button>
+    </div>
+
+    <div class="sort-group">
+      <select id="sortSelect" class="sort-select" aria-label="並び替え">
+        <option value="updated">更新順（チャット・編集順）</option>
+        <option value="created">登録順（新しい順）</option>
+        <option value="favorite">お気に入り優先</option>
+      </select>
+    </div>
+  </section>
+
+  <!-- =========================================================
+       1. アイデア一覧画面（タイル表示）
+       ========================================================= -->
+  <main class="gallery-container">
+    <div id="tileGrid" class="tile-grid">
+      <!-- Populated by JS -->
+    </div>
+  </main>
+
+  <!-- Mobile Floating Button -->
+  <button id="btnFabAdd" class="fab-add">
+    <span>＋</span>
+    <span>アイデア追加</span>
+  </button>
+
+  <!-- =========================================================
+       2. アイデア追加モーダル（画像1枚で即仮登録OK）
+       ========================================================= -->
+  <div id="addModalBackdrop" class="modal-backdrop">
+    <div class="add-modal-card" onclick="event.stopPropagation()">
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <div>
+          <h2 style="font-size:1.05rem; font-weight:800;">＋ 新作アイデアを追加</h2>
+          <p style="font-size:0.75rem; color:var(--text-muted);">画像1枚選ぶだけで仮登録できます（名前や詳細は後からでOK）</p>
+        </div>
+        <button id="btnCloseAddModal" class="btn-close-modal">✕</button>
+      </div>
+
+      <div id="addDropzone" class="dropzone-box">
+        <img id="addPreviewImg" class="dropzone-preview-img" alt="プレビュー">
+        <div id="addDropzonePrompt">
+          <div style="font-size:2rem; margin-bottom:6px;">📸</div>
+          <div style="font-weight:700; font-size:0.92rem; color:#fff;">タップして画像を選択・撮影</div>
+          <div style="font-size:0.74rem; color:var(--text-muted); margin-top:4px;">名前を入力しなくてもそのまま登録できます</div>
+        </div>
+        <input type="file" id="addImageInput" accept="image/*" style="display:none;">
+      </div>
+
+      <div class="optional-fields">
+        <input type="text" id="addTitleInput" class="field-input" placeholder="アイデア名（省略OK・後から入力できます）">
+        <input type="text" id="addSubtitleInput" class="field-input" placeholder="ひとことメモ・テーマ（例：衣装バリエーション）">
+      </div>
+
+      <div class="add-modal-actions">
+        <button id="btnCancelAdd" class="btn-secondary">キャンセル</button>
+        <button id="btnSubmitAdd" class="btn-primary-wide">このまま登録する ✨</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- =========================================================
+       3. 詳細画面＆チャット画面（LINEやり取り風 ⇄ Xリプ欄風）
+       ========================================================= -->
+  <div id="detailModalBackdrop" class="modal-backdrop">
+    <div class="detail-sheet" onclick="event.stopPropagation()">
+
+      <!-- スマホ用の上部コンパクトバー（やり取り画面と基本情報画面をワンタップ切替） -->
+      <div class="mobile-detail-topbar">
+        <div class="mobile-idea-mini">
+          <img id="mobileMiniThumb" src="" alt="">
+          <div id="mobileMiniTitle" class="mobile-idea-mini-title">アイデア詳細</div>
+        </div>
+        <div class="mobile-pane-tabs">
+          <button id="tabMobileChat" class="mobile-pane-tab active" onclick="switchMobilePane('chat')">💬 やり取り</button>
+          <button id="tabMobileInfo" class="mobile-pane-tab" onclick="switchMobilePane('info')">📝 画像・詳細</button>
+        </div>
+        <button class="btn-close-modal" onclick="closeDetailModal()">✕</button>
+      </div>
+
+      <!-- Left Column: Visual & Editable Info -->
+      <div id="detailLeftPane" class="detail-left">
+        <div class="detail-cover-wrap">
+          <img id="detailCoverImg" class="detail-cover-img" src="" alt="アイデア画像">
+          <div class="detail-cover-actions">
+            <button id="btnChangeCover" class="btn-floating-dark">📷 カバー画像変更</button>
+            <input type="file" id="changeCoverInput" accept="image/*" style="display:none;">
+            <button id="btnDetailFav" class="btn-fav-tile" title="お気に入り">★</button>
+          </div>
+        </div>
+
+        <!-- Sub-images strip (複数画像対応) -->
+        <div id="subImagesBar" class="sub-images-bar"></div>
+        <input type="file" id="addSubImageInput" accept="image/*" multiple style="display:none;">
+
+        <div class="detail-info-box">
+          <div class="info-status-row">
+            <select id="detailStatusSelect" class="status-select-pill">
+              <option value="idea">💡 思いつき</option>
+              <option value="considering">🤔 検討中</option>
+              <option value="prototyping">🛠️ 試作中</option>
+              <option value="completed">✨ 完成</option>
+            </select>
+            <span id="detailCreatedDate" style="font-size:0.72rem; color:var(--text-muted);"></span>
+          </div>
+
+          <div>
+            <input type="text" id="detailTitleInput" class="inline-input-title" placeholder="アイデア名を入力...">
+          </div>
+          <div>
+            <input type="text" id="detailSubtitleInput" class="inline-input-subtitle" placeholder="サブタイトル・テーマを入力（例：衣装バリエーション）">
+          </div>
+
+          <div class="info-section-label">
+            <span>アイデア概要</span>
+            <span style="font-weight:400; font-size:0.7rem;">自動保存</span>
+          </div>
+          <textarea id="detailDescInput" class="inline-textarea-desc" placeholder="思いついた背景やコンセプト、仕様メモなどを自由に記入..."></textarea>
+
+          <div class="detail-delete-row">
+            <span>変更内容は自動で保存されます</span>
+            <button id="btnDeleteIdea" class="btn-delete-idea">🗑 アイデア削除</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Column: Dual-Mode Chat / Reply Thread -->
+      <div id="detailRightPane" class="detail-right mobile-active">
+        <div class="chat-header">
+          <div style="display:flex; align-items:center; gap:8px;">
+            <span style="font-weight:800; font-size:0.88rem;">アイデアの記録</span>
+            <span id="chatCountBadge" class="brand-badge">0件</span>
+          </div>
+
+          <!-- 表示モード切替：LINEのやり取り風 ⇄ Xのリプ欄風 -->
+          <div class="mode-switcher">
+            <button id="btnModeLine" class="mode-btn active-line" onclick="setThreadViewMode('line')">
+              <span>💬</span>
+              <span>LINEやり取り風</span>
+            </button>
+            <button id="btnModeX" class="mode-btn" onclick="setThreadViewMode('x')">
+              <span>𝕏</span>
+              <span>リプ欄風</span>
+            </button>
+          </div>
+
+          <button id="btnCloseDetailModal" class="btn-close-modal desktop-close-btn" title="閉じる">✕</button>
+        </div>
+
+        <div id="chatTimeline" class="chat-timeline mode-line">
+          <!-- Populated by JS -->
+        </div>
+
+        <div class="chat-input-area">
+          <!-- 発言者（左右の掛け合い）切替バー -->
+          <div class="speaker-toolbar">
+            <div class="speaker-pills">
+              <span style="font-size:0.7rem; color:var(--text-muted);">発言側:</span>
+              <button id="btnSpeakerSelf" class="speaker-pill active-self" onclick="setSpeakerSide('right')">
+                🧑 自分 (右)
+              </button>
+              <button id="btnSpeakerMoai" class="speaker-pill" onclick="setSpeakerSide('left')">
+                🗿 相棒モアイ・別視点 (左)
+              </button>
+            </div>
+            <label class="auto-alternate-label" title="送信するたびに自動で右(自分)と左(相棒モアイ)を交互に切り替えて会話感を出す">
+              <input type="checkbox" id="chkAutoAlternate" checked>
+              <span>送信ごとに左右交互でやり取り</span>
+            </label>
+          </div>
+
+          <div id="chatAttachPreview" class="chat-attach-preview">
+            <img id="chatAttachImg" src="" alt="添付画像">
+            <span style="font-size:0.75rem; color:var(--text-sub);">画像を添付</span>
+            <button id="btnClearChatAttach" class="btn-close-modal" style="width:24px; height:24px; font-size:0.75rem;">✕</button>
+          </div>
+
+          <div class="chat-input-row">
+            <button id="btnChatAttach" class="btn-chat-attach" title="検討途中の画像を投稿">📷</button>
+            <input type="file" id="chatImageInput" accept="image/*" style="display:none;">
+            <textarea id="chatTextarea" class="chat-textarea" rows="1" placeholder="思いついたことをメモ…"></textarea>
+            <button id="btnChatSend" class="btn-chat-send">送信</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // =========================================================
+    // 1. 初期サンプルデータ (LINEのやり取り＆Xリプ欄の両方で映える構成)
+    // =========================================================
+    const STATUS_MAP = {
+      idea:        { label: '💡 思いつき', cls: 'status-idea' },
+      considering: { label: '🤔 検討中',   cls: 'status-considering' },
+      prototyping: { label: '🛠️ 試作中',   cls: 'status-prototyping' },
+      completed:   { label: '✨ 完成',     cls: 'status-completed' }
+    };
+
+    function createPlaceholderDataUrl(title, subtitle, bg1, bg2, emoji) {
+      const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="600" height="750" viewBox="0 0 600 750">
+        <defs>
+          <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="${bg1}"/>
+            <stop offset="100%" stop-color="${bg2}"/>
+          </linearGradient>
+        </defs>
+        <rect width="600" height="750" fill="url(#g)"/>
+        <circle cx="300" cy="290" r="130" fill="rgba(255,255,255,0.08)"/>
+        <text x="300" y="330" font-size="120" text-anchor="middle">${emoji}</text>
+        <text x="300" y="500" font-size="34" font-family="sans-serif" font-weight="bold" fill="#ffffff" text-anchor="middle">${title}</text>
+        <text x="300" y="545" font-size="22" font-family="sans-serif" fill="rgba(255,255,255,0.75)" text-anchor="middle">${subtitle}</text>
+      </svg>`;
+      return 'data:image/svg+xml;utf8,' + encodeURIComponent(svg);
+    }
+
+    function getDefaultIdeas() {
+      return [
+        {
+          id: 'idea_hadagi_moai',
+          title: '肌着モアイ',
+          subtitle: '衣装バリエーション',
+          description: 'おすわりモアイに衣装を着せたシリーズ。色や仕草のバリエーションを考える。',
+          coverImage: 'images/kurima/osuwari_moai_pen.jpg',
+          fallbackImage: createPlaceholderDataUrl('肌着モアイ', '衣装バリエーション', '#1e3a8a', '#0f172a', '👕'),
+          subImages: [
+            'images/kurima/mini_osuwari_keychain.jpg'
+          ],
+          status: 'considering',
+          favorite: true,
+          createdAt: new Date('2026-10-20T21:35:00+09:00').getTime(),
+          updatedAt: new Date('2026-10-20T22:00:00+09:00').getTime(),
+          logs: [
+            {
+              id: 'log_1',
+              side: 'right',
+              text: '腕の角度を少し変えたら面白そう。',
+              liked: false,
+              createdAt: new Date('2026-10-20T21:40:00+09:00').getTime(),
+              displayTime: '10/20 21:40'
+            },
+            {
+              id: 'log_2',
+              side: 'left',
+              text: '衣装を別パーツにすれば、色違いも作れるかも。',
+              liked: true,
+              createdAt: new Date('2026-10-20T21:48:00+09:00').getTime(),
+              displayTime: '10/20 21:48'
+            },
+            {
+              id: 'log_3',
+              side: 'right',
+              text: 'まずは単色で試作してみよう。',
+              liked: false,
+              createdAt: new Date('2026-10-20T21:55:00+09:00').getTime(),
+              displayTime: '10/20 21:55'
+            },
+            {
+              id: 'log_4',
+              side: 'left',
+              text: 'いえい',
+              liked: true,
+              createdAt: new Date('2026-10-20T22:00:00+09:00').getTime(),
+              displayTime: '10/20 22:00'
+            }
+          ]
+        },
+        {
+          id: 'idea_elecrobo',
+          title: 'エレクロボ',
+          subtitle: 'ロボット新シリーズ',
+          description: 'モアイロボの新派生シリーズ。エレクトロ・メカ感を強調したシルエットや発光ギミック・新カラー展開を検討。',
+          coverImage: 'images/kurima/red_moairobo.jpg',
+          fallbackImage: createPlaceholderDataUrl('エレクロボ', 'ロボット新シリーズ', '#311042', '#0f172a', '🤖'),
+          subImages: [
+            'images/kurima/moai_robo_mk2_gray.jpg'
+          ],
+          status: 'idea',
+          favorite: true,
+          createdAt: new Date('2026-10-20T21:10:00+09:00').getTime(),
+          updatedAt: new Date('2026-10-20T21:32:00+09:00').getTime(),
+          logs: [
+            {
+              id: 'log_e1',
+              side: 'right',
+              text: 'モアイロボMark2とは違うメカディテールを入れてみたい。',
+              liked: false,
+              createdAt: new Date('2026-10-20T21:30:00+09:00').getTime(),
+              displayTime: '10/20 21:30'
+            },
+            {
+              id: 'log_e2',
+              side: 'left',
+              text: '胸部にクリアパーツやアンテナをつけるとエレクトロ感が出そう！',
+              liked: true,
+              createdAt: new Date('2026-10-20T21:32:00+09:00').getTime(),
+              displayTime: '10/20 21:32'
+            }
+          ]
+        },
+        {
+          id: 'idea_nesoberi_moai',
+          title: '寝そべりモアイ',
+          subtitle: 'ポーズの新展開',
+          description: 'ゴロンと寝そべった脱力系ポーズの新展開。デスクのモニター下や棚のフチに置けるサイズ感。',
+          coverImage: 'images/kurima/moai_robo_mk2/laying_01.png',
+          fallbackImage: createPlaceholderDataUrl('寝そべりモアイ', 'ポーズの新展開', '#064e3b', '#0f172a', '🛌'),
+          subImages: [],
+          status: 'idea',
+          favorite: false,
+          createdAt: new Date('2026-10-20T21:00:00+09:00').getTime(),
+          updatedAt: new Date('2026-10-20T21:22:00+09:00').getTime(),
+          logs: [
+            {
+              id: 'log_n1',
+              side: 'right',
+              text: '肘をついてテレビを見ているようなポーズも可愛いかも。',
+              liked: true,
+              createdAt: new Date('2026-10-20T21:20:00+09:00').getTime(),
+              displayTime: '10/20 21:20'
+            },
+            {
+              id: 'log_n2',
+              side: 'left',
+              text: 'スマホスタンドとしても使える角度にすると実用性も出そう🗿',
+              liked: false,
+              createdAt: new Date('2026-10-20T21:22:00+09:00').getTime(),
+              displayTime: '10/20 21:22'
+            }
+          ]
+        },
+        {
+          id: 'idea_hachimaki_moai',
+          title: 'ハチマキモアイ',
+          subtitle: '表情・小物の展開',
+          description: 'ハチマキや小物パーツでキャラクター性を広げるアイデア。応援グッズや受験・作業のお供に。',
+          coverImage: 'images/kurima/positive_moai_pen/positive_moai_hachimaki.png',
+          fallbackImage: createPlaceholderDataUrl('ハチマキモアイ', '表情・小物の展開', '#7c2d12', '#0f172a', '🔥'),
+          subImages: [
+            'images/kurima/positive_moai_pen.jpg'
+          ],
+          status: 'prototyping',
+          favorite: false,
+          createdAt: new Date('2026-10-20T20:50:00+09:00').getTime(),
+          updatedAt: new Date('2026-10-20T21:15:00+09:00').getTime(),
+          logs: [
+            {
+              id: 'log_h1',
+              side: 'right',
+              text: 'ハチマキの結び目を別パーツで差し替えられるようにするとバリエーション出しやすそう。',
+              liked: true,
+              createdAt: new Date('2026-10-20T21:15:00+09:00').getTime(),
+              displayTime: '10/20 21:15'
+            }
+          ]
+        }
+      ];
+    }
+
+    // =========================================================
+    // 2. IndexedDB + LocalStorage 永続保存エンジン
+    // =========================================================
+    const DB_NAME = 'MoaiIdeaGalleryDB';
+    const STORE_NAME = 'ideas_store';
+    const STORAGE_KEY = 'moai_ideas_v1';
+    const VIEW_MODE_KEY = 'moai_idea_thread_mode';
+
+    let ideas = [];
+    let currentFilter = 'all';
+    let currentSort = 'updated';
+    let activeIdeaId = null;
+    let activeImageIndex = -1;
+    let pendingAddImageData = null;
+    let pendingChatImageData = null;
+    let threadViewMode = localStorage.getItem(VIEW_MODE_KEY) || 'line'; // 'line' or 'x'
+    let currentSpeakerSide = 'right'; // 'right' (自分) or 'left' (相棒モアイ)
+
+    function openDB() {
+      return new Promise((resolve, reject) => {
+        const req = indexedDB.open(DB_NAME, 1);
+        req.onupgradeneeded = (e) => {
+          const db = e.target.result;
+          if (!db.objectStoreNames.contains(STORE_NAME)) {
+            db.createObjectStore(STORE_NAME);
+          }
+        };
+        req.onsuccess = () => resolve(req.result);
+        req.onerror = () => reject(req.error);
+      });
+    }
+
+    function normalizeLogsForInteraction(list) {
+      list.forEach(idea => {
+        if (Array.isArray(idea.logs)) {
+          idea.logs.forEach((log, idx) => {
+            if (!log.side) {
+              log.side = idx % 2 === 0 ? 'right' : 'left';
+            }
+          });
+        }
+      });
+    }
+
+    async function loadIdeasFromStorage() {
+      try {
+        const db = await openDB();
+        const data = await new Promise((resolve, reject) => {
+          const tx = db.transaction(STORE_NAME, 'readonly');
+          const req = tx.objectStore(STORE_NAME).get(STORAGE_KEY);
+          req.onsuccess = () => resolve(req.result);
+          req.onerror = () => reject(req.error);
+        });
+        if (Array.isArray(data) && data.length > 0) {
+          ideas = data;
+          normalizeLogsForInteraction(ideas);
+          return;
+        }
+      } catch (e) {
+        console.warn('IndexedDB read fallback:', e);
+      }
+
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (raw) {
+        try {
+          ideas = JSON.parse(raw);
+          normalizeLogsForInteraction(ideas);
+          return;
+        } catch (e) {}
+      }
+
+      ideas = getDefaultIdeas();
+      await saveIdeasToStorage();
+    }
+
+    async function saveIdeasToStorage() {
+      showSaveStatus('保存中...');
+      try {
+        const db = await openDB();
+        await new Promise((resolve, reject) => {
+          const tx = db.transaction(STORE_NAME, 'readwrite');
+          tx.objectStore(STORE_NAME).put(ideas, STORAGE_KEY);
+          tx.oncomplete = () => resolve();
+          tx.onerror = () => reject(tx.error);
+        });
+      } catch (e) {
+        try {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(ideas));
+        } catch (err) {}
+      }
+      showSaveStatus('自動保存済み');
+    }
+
+    let saveTimer = null;
+    function showSaveStatus(text) {
+      const el = document.getElementById('saveBadgeText');
+      if (el) el.textContent = text;
+      clearTimeout(saveTimer);
+      if (text !== '自動保存済み') {
+        saveTimer = setTimeout(() => {
+          if (el) el.textContent = '自動保存済み';
+        }, 600);
+      }
+    }
+
+    function readAndCompressImage(file, maxWidth = 1200) {
+      return new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const img = new Image();
+          img.onload = () => {
+            let w = img.width;
+            let h = img.height;
+            if (w > maxWidth || h > maxWidth) {
+              if (w > h) {
+                h = Math.round((h * maxWidth) / w);
+                w = maxWidth;
+              } else {
+                w = Math.round((w * maxWidth) / h);
+                h = maxWidth;
+              }
+            }
+            const canvas = document.createElement('canvas');
+            canvas.width = w;
+            canvas.height = h;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, w, h);
+            resolve(canvas.toDataURL('image/jpeg', 0.86));
+          };
+          img.onerror = () => resolve(e.target.result);
+          img.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+
+    function formatTimeLabel(ts) {
+      const d = new Date(ts);
+      const m = d.getMonth() + 1;
+      const day = d.getDate();
+      const hh = String(d.getHours()).padStart(2, '0');
+      const mm = String(d.getMinutes()).padStart(2, '0');
+      return `${m}/${day} ${hh}:${mm}`;
+    }
+
+    function escapeHtml(str) {
+      return String(str || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    // =========================================================
+    // 3. 一覧画面レンダリング（タイル表示）
+    // =========================================================
+    function renderGallery() {
+      const grid = document.getElementById('tileGrid');
+      let list = [...ideas];
+
+      if (currentFilter === 'fav') {
+        list = list.filter(item => item.favorite);
+      } else if (currentFilter !== 'all') {
+        list = list.filter(item => item.status === currentFilter);
+      }
+
+      list.sort((a, b) => {
+        if (currentSort === 'favorite') {
+          if (Boolean(b.favorite) !== Boolean(a.favorite)) {
+            return b.favorite ? 1 : -1;
+          }
+          return (b.updatedAt || 0) - (a.updatedAt || 0);
+        }
+        if (currentSort === 'created') {
+          return (b.createdAt || 0) - (a.createdAt || 0);
+        }
+        return (b.updatedAt || 0) - (a.updatedAt || 0);
+      });
+
+      const cardsHtml = list.map(item => {
+        const st = STATUS_MAP[item.status] || STATUS_MAP.idea;
+        const hasTitle = item.title && item.title.trim().length > 0;
+        const displayTitle = hasTitle ? escapeHtml(item.title) : '無題のアイデア';
+        const displaySubtitle = item.subtitle ? escapeHtml(item.subtitle) : 'タップして詳細・チャットを開く';
+        const logsCount = Array.isArray(item.logs) ? item.logs.length : 0;
+        const lastLog = logsCount > 0 ? item.logs[logsCount - 1] : null;
+        const totalImages = 1 + (Array.isArray(item.subImages) ? item.subImages.length : 0);
+        const fallbackSrc = item.fallbackImage || createPlaceholderDataUrl(item.title || 'MOAI IDEA', item.subtitle || '', '#1e293b', '#0f172a', '🗿');
+
+        return `
+          <article class="idea-tile" onclick="openDetailModal('${item.id}')">
+            <img
+              class="tile-img"
+              src="${escapeHtml(item.coverImage || fallbackSrc)}"
+              onerror="this.onerror=null; this.src='${fallbackSrc}';"
+              alt="${displayTitle}"
+              loading="lazy"
+            >
+            <div class="tile-top-bar">
+              <span class="status-badge ${st.cls}">${st.label}</span>
+              <button
+                class="btn-fav-tile ${item.favorite ? 'active' : ''}"
+                onclick="toggleFavoriteOnTile(event, '${item.id}')"
+                title="お気に入り切替"
+              >★</button>
+            </div>
+            <div class="tile-overlay">
+              <div class="tile-title ${hasTitle ? '' : 'unnamed'}">${displayTitle}</div>
+              <div class="tile-subtitle">${displaySubtitle}</div>
+              ${lastLog ? `<div class="tile-latest-chat">💬 ${escapeHtml(lastLog.text || '📷 画像メモ')}</div>` : ''}
+              <div class="tile-meta-row">
+                <div class="tile-counts">
+                  <span class="tile-count-pill">💬 ${logsCount}</span>
+                  ${totalImages > 1 ? `<span class="tile-count-pill">🖼️ ${totalImages}</span>` : ''}
+                </div>
+                <span>${formatTimeLabel(item.updatedAt || item.createdAt)}</span>
+              </div>
+            </div>
+          </article>
+        `;
+      }).join('');
+
+      const quickAddCard = `
+        <div class="idea-tile-add" onclick="openAddModal()">
+          <div class="plus-circle">＋</div>
+          <div style="font-weight:700; font-size:0.88rem; color:var(--text-sub);">アイデアを追加</div>
+          <div style="font-size:0.72rem;">画像1枚だけで即登録OK</div>
+        </div>
+      `;
+
+      grid.innerHTML = cardsHtml + quickAddCard;
+    }
+
+    async function toggleFavoriteOnTile(e, ideaId) {
+      e.stopPropagation();
+      const item = ideas.find(i => i.id === ideaId);
+      if (!item) return;
+      item.favorite = !item.favorite;
+      await saveIdeasToStorage();
+      renderGallery();
+    }
+
+    // =========================================================
+    // 4. アイデア追加モーダル
+    // =========================================================
+    function openAddModal(preloadedDataUrl = null) {
+      pendingAddImageData = preloadedDataUrl;
+      document.getElementById('addTitleInput').value = '';
+      document.getElementById('addSubtitleInput').value = '';
+      updateAddDropzoneUI();
+      document.getElementById('addModalBackdrop').classList.add('open');
+    }
+
+    function closeAddModal() {
+      document.getElementById('addModalBackdrop').classList.remove('open');
+      pendingAddImageData = null;
+    }
+
+    function updateAddDropzoneUI() {
+      const preview = document.getElementById('addPreviewImg');
+      const prompt = document.getElementById('addDropzonePrompt');
+      if (pendingAddImageData) {
+        preview.src = pendingAddImageData;
+        preview.style.display = 'block';
+        prompt.style.display = 'none';
+      } else {
+        preview.src = '';
+        preview.style.display = 'none';
+        prompt.style.display = 'block';
+      }
+    }
+
+    async function createNewIdea() {
+      const title = document.getElementById('addTitleInput').value.trim();
+      const subtitle = document.getElementById('addSubtitleInput').value.trim();
+      const now = Date.now();
+      const cover = pendingAddImageData || createPlaceholderDataUrl(
+        title || '新作モアイ案',
+        subtitle || 'Idea Sketch',
+        '#1e3a8a',
+        '#0f172a',
+        '🗿'
+      );
+
+      const newIdea = {
+        id: 'idea_' + now,
+        title: title,
+        subtitle: subtitle,
+        description: '',
+        coverImage: cover,
+        subImages: [],
+        status: 'idea',
+        favorite: false,
+        createdAt: now,
+        updatedAt: now,
+        logs: []
+      };
+
+      ideas.unshift(newIdea);
+      await saveIdeasToStorage();
+      closeAddModal();
+      renderGallery();
+    }
+
+    // =========================================================
+    // 5. 詳細＆チャット画面（LINEやり取り風 ⇄ Xリプ欄風）
+    // =========================================================
+    function setThreadViewMode(mode) {
+      threadViewMode = mode === 'x' ? 'x' : 'line';
+      localStorage.setItem(VIEW_MODE_KEY, threadViewMode);
+
+      const btnLine = document.getElementById('btnModeLine');
+      const btnX = document.getElementById('btnModeX');
+      const timeline = document.getElementById('chatTimeline');
+
+      btnLine.classList.toggle('active-line', threadViewMode === 'line');
+      btnX.classList.toggle('active-x', threadViewMode === 'x');
+      timeline.classList.toggle('mode-line', threadViewMode === 'line');
+      timeline.classList.toggle('mode-x', threadViewMode === 'x');
+
+      if (activeIdeaId) {
+        const item = ideas.find(i => i.id === activeIdeaId);
+        if (item) renderChatTimeline(item);
+      }
+    }
+
+    function setSpeakerSide(side) {
+      currentSpeakerSide = side === 'left' ? 'left' : 'right';
+      document.getElementById('btnSpeakerSelf').classList.toggle('active-self', currentSpeakerSide === 'right');
+      document.getElementById('btnSpeakerMoai').classList.toggle('active-moai', currentSpeakerSide === 'left');
+    }
+
+    function switchMobilePane(pane) {
+      const left = document.getElementById('detailLeftPane');
+      const right = document.getElementById('detailRightPane');
+      const tabChat = document.getElementById('tabMobileChat');
+      const tabInfo = document.getElementById('tabMobileInfo');
+
+      if (pane === 'info') {
+        left.classList.add('mobile-active');
+        right.classList.remove('mobile-active');
+        tabInfo.classList.add('active');
+        tabChat.classList.remove('active');
+      } else {
+        right.classList.add('mobile-active');
+        left.classList.remove('mobile-active');
+        tabChat.classList.add('active');
+        tabInfo.classList.remove('active');
+        setTimeout(scrollToChatBottom, 30);
+      }
+    }
+
+    function openDetailModal(ideaId) {
+      const item = ideas.find(i => i.id === ideaId);
+      if (!item) return;
+      activeIdeaId = ideaId;
+      activeImageIndex = -1;
+
+      // 次の発言サイドを直前のログの逆にしておくと、すぐ会話が繋がる
+      if (Array.isArray(item.logs) && item.logs.length > 0) {
+        const lastSide = item.logs[item.logs.length - 1].side || 'right';
+        setSpeakerSide(lastSide === 'right' ? 'left' : 'right');
+      } else {
+        setSpeakerSide('right');
+      }
+
+      switchMobilePane('chat');
+      setThreadViewMode(threadViewMode);
+      renderDetailLeft(item);
+      renderChatTimeline(item);
+
+      document.getElementById('detailModalBackdrop').classList.add('open');
+      setTimeout(scrollToChatBottom, 50);
+    }
+
+    function closeDetailModal() {
+      document.getElementById('detailModalBackdrop').classList.remove('open');
+      activeIdeaId = null;
+      clearChatAttachment();
+      renderGallery();
+    }
+
+    function renderDetailLeft(item) {
+      const fallbackSrc = item.fallbackImage || createPlaceholderDataUrl(item.title || 'MOAI IDEA', item.subtitle || '', '#1e293b', '#0f172a', '🗿');
+      const coverEl = document.getElementById('detailCoverImg');
+      const currentImgSrc = activeImageIndex === -1
+        ? (item.coverImage || fallbackSrc)
+        : (item.subImages[activeImageIndex] || item.coverImage || fallbackSrc);
+
+      coverEl.onerror = () => {
+        coverEl.onerror = null;
+        coverEl.src = fallbackSrc;
+      };
+      coverEl.src = currentImgSrc;
+
+      // モバイル上部バーのミニサムネ＆タイトル更新
+      const miniThumb = document.getElementById('mobileMiniThumb');
+      if (miniThumb) {
+        miniThumb.onerror = () => { miniThumb.onerror = null; miniThumb.src = fallbackSrc; };
+        miniThumb.src = item.coverImage || fallbackSrc;
+      }
+      const miniTitle = document.getElementById('mobileMiniTitle');
+      if (miniTitle) {
+        miniTitle.textContent = item.title || '無題のアイデア';
+      }
+
+      const favBtn = document.getElementById('btnDetailFav');
+      favBtn.classList.toggle('active', Boolean(item.favorite));
+
+      const subBar = document.getElementById('subImagesBar');
+      const subImgs = Array.isArray(item.subImages) ? item.subImages : [];
+      const mainThumbHtml = `
+        <img
+          class="sub-thumb ${activeImageIndex === -1 ? 'active' : ''}"
+          src="${escapeHtml(item.coverImage || fallbackSrc)}"
+          onerror="this.onerror=null; this.src='${fallbackSrc}';"
+          onclick="selectDetailImage(-1)"
+          title="メイン画像"
+        >
+      `;
+      const subThumbsHtml = subImgs.map((src, idx) => `
+        <img
+          class="sub-thumb ${activeImageIndex === idx ? 'active' : ''}"
+          src="${escapeHtml(src)}"
+          onclick="selectDetailImage(${idx})"
+          title="サブ画像 ${idx + 1}"
+        >
+      `).join('');
+
+      subBar.innerHTML = mainThumbHtml + subThumbsHtml + `
+        <button class="btn-add-subimg" onclick="document.getElementById('addSubImageInput').click()" title="別アングルや試作画像を追加">
+          <span style="font-size:0.95rem; font-weight:700;">＋</span>
+          <span>追加</span>
+        </button>
+      `;
+
+      document.getElementById('detailStatusSelect').value = item.status || 'idea';
+      document.getElementById('detailCreatedDate').textContent = '登録: ' + formatTimeLabel(item.createdAt);
+      document.getElementById('detailTitleInput').value = item.title || '';
+      document.getElementById('detailSubtitleInput').value = item.subtitle || '';
+      document.getElementById('detailDescInput').value = item.description || '';
+    }
+
+    function selectDetailImage(idx) {
+      const item = ideas.find(i => i.id === activeIdeaId);
+      if (!item) return;
+      activeImageIndex = idx;
+      renderDetailLeft(item);
+    }
+
+    // =========================================================
+    // 6. LINEやり取り風 ＆ Xリプ欄風 レンダリング
+    // =========================================================
+    function renderChatTimeline(item) {
+      const container = document.getElementById('chatTimeline');
+      const logs = Array.isArray(item.logs) ? item.logs : [];
+      document.getElementById('chatCountBadge').textContent = `${logs.length}件`;
+
+      if (threadViewMode === 'x') {
+        renderXReplyMode(container, item, logs);
+      } else {
+        renderLineChatMode(container, item, logs);
+      }
+    }
+
+    function renderLineChatMode(container, item, logs) {
+      const topicBanner = `
+        <div class="line-date-divider">
+          🗿 ${escapeHtml(item.title || '無題のアイデア')} ${item.subtitle ? '｜' + escapeHtml(item.subtitle) : ''}
+        </div>
+      `;
+
+      if (logs.length === 0) {
+        container.innerHTML = topicBanner + `
+          <div style="margin:auto; text-align:center; color:var(--text-muted); padding:30px 16px; max-width:310px;">
+            <div style="font-size:2rem; margin-bottom:6px;">💬</div>
+            <div style="font-weight:700; color:var(--text-sub); margin-bottom:4px;">LINEトーク風にアイデア出し</div>
+            <div style="font-size:0.76rem;">下の入力欄から送信すると、「🧑自分(右)」と「🗿相棒モアイ(左)」の掛け合い形式でアイデアを深掘りできます！</div>
+          </div>
+        `;
+        return;
+      }
+
+      const bubblesHtml = logs.map((log) => {
+        const side = log.side === 'left' ? 'left' : 'right';
+        const isLeft = side === 'left';
+        const timeText = log.displayTime || formatTimeLabel(log.createdAt);
+        return `
+          <div class="line-msg-row side-${side}">
+            <div class="line-avatar" onclick="flipLogSide('${log.id}')" title="タップで左右（発言者）を入れ替え">
+              ${isLeft ? '🗿' : '🧑'}
+            </div>
+            <div class="line-msg-body">
+              <div class="line-speaker-name" style="text-align:${isLeft ? 'left' : 'right'};">
+                ${isLeft ? '相棒モアイ（別視点）' : '自分（アイデア主）'}
+              </div>
+              <div class="line-bubble-wrap">
+                <div class="line-bubble">
+                  ${log.image ? `<img class="chat-bubble-img" src="${escapeHtml(log.image)}" onclick="promoteChatImageToSub('${log.id}')">` : ''}
+                  ${log.text ? `<div>${escapeHtml(log.text)}</div>` : ''}
+                </div>
+                <div class="line-meta">
+                  ${!isLeft ? '<span>既読</span>' : ''}
+                  <span>${escapeHtml(timeText)}</span>
+                  <div class="line-msg-actions">
+                    <button class="btn-mini-action" onclick="flipLogSide('${log.id}')" title="左右切替">⇄</button>
+                    <button class="btn-mini-action" onclick="deleteChatLog('${log.id}')" title="削除">✕</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      container.innerHTML = topicBanner + bubblesHtml;
+    }
+
+    function renderXReplyMode(container, item, logs) {
+      const fallbackSrc = item.fallbackImage || createPlaceholderDataUrl(item.title || 'MOAI IDEA', item.subtitle || '', '#1e293b', '#0f172a', '🗿');
+      const st = STATUS_MAP[item.status] || STATUS_MAP.idea;
+      const likesCount = logs.filter(l => l.liked).length + (item.favorite ? 1 : 0);
+
+      // 親ポスト（アイデア本体）
+      const parentPostHtml = `
+        <div class="x-parent-post">
+          <div class="x-post-header">
+            <div class="x-avatar">🗿</div>
+            <div class="x-user-info">
+              <div class="x-display-name">
+                <span>モアたろう｜MOAI LAB</span>
+                <span class="x-verified">✔</span>
+                <span class="status-badge ${st.cls}" style="font-size:0.65rem; padding:2px 7px;">${st.label}</span>
+              </div>
+              <div class="x-handle">@moataro_idea ・ ${formatTimeLabel(item.createdAt)}</div>
+            </div>
+          </div>
+          <div class="x-parent-title">${escapeHtml(item.title || '無題のアイデア')} ${item.subtitle ? `<span style="font-size:0.82rem; color:#38bdf8; font-weight:600;">#${escapeHtml(item.subtitle)}</span>` : ''}</div>
+          ${item.description ? `<div class="x-parent-desc">${escapeHtml(item.description)}</div>` : ''}
+          <img
+            class="x-parent-media"
+            src="${escapeHtml(item.coverImage || fallbackSrc)}"
+            onerror="this.onerror=null; this.src='${fallbackSrc}';"
+            alt=""
+          >
+          <div class="x-parent-stats">
+            <span><strong>${logs.length}</strong> 件のリプライ思考ログ</span>
+            <span><strong>${likesCount}</strong> 件のいいね（重要マーク）</span>
+          </div>
+        </div>
+      `;
+
+      if (logs.length === 0) {
+        container.innerHTML = parentPostHtml + `
+          <div style="text-align:center; color:#71767b; padding:32px 16px; font-size:0.82rem;">
+            まだリプライがありません。下の入力欄からこのアイデアにツリー形式で思考を繋げてみましょう！
+          </div>
+        `;
+        return;
+      }
+
+      const repliesHtml = logs.map((log) => {
+        const isLeft = log.side === 'left';
+        const timeText = log.displayTime || formatTimeLabel(log.createdAt);
+        const speakerName = isLeft ? 'モアイ相棒（客観ツッコミ）' : 'モアたろう｜MOAI LAB';
+        const speakerHandle = isLeft ? '@moai_partner' : '@moataro_idea';
+        const avatarEmoji = isLeft ? '🗿' : '🧑';
+
+        return `
+          <div class="x-reply-item">
+            <div class="x-reply-left">
+              <div class="x-avatar" style="width:36px; height:36px; font-size:1.05rem; cursor:pointer;" onclick="flipLogSide('${log.id}')" title="タップで発言者を切替">${avatarEmoji}</div>
+              <div class="x-thread-line"></div>
+            </div>
+            <div class="x-reply-content">
+              <div class="x-reply-top">
+                <span style="font-weight:700; font-size:0.86rem; color:#e7e9ea;">${speakerName}</span>
+                <span style="font-size:0.75rem; color:#71767b;">${speakerHandle} ・ ${escapeHtml(timeText)}</span>
+              </div>
+              <div class="x-reply-to">返信先: <span>@moataro_idea</span></div>
+              ${log.text ? `<div class="x-reply-text">${escapeHtml(log.text)}</div>` : ''}
+              ${log.image ? `<img class="chat-bubble-img" src="${escapeHtml(log.image)}" onclick="promoteChatImageToSub('${log.id}')">` : ''}
+              <div class="x-reply-actions">
+                <button class="x-action-btn" onclick="document.getElementById('chatTextarea').focus()" title="続けてリプを書く">💬 返信</button>
+                <button class="x-action-btn" onclick="flipLogSide('${log.id}')" title="発言者切替">🔁 視点切替</button>
+                <button class="x-action-btn ${log.liked ? 'liked' : ''}" onclick="toggleLogLike('${log.id}')" title="重要マーク（いいね）">
+                  ${log.liked ? '❤️ 重要' : '🤍 いいね'}
+                </button>
+                <button class="x-action-btn" onclick="deleteChatLog('${log.id}')" title="削除">🗑</button>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      container.innerHTML = parentPostHtml + repliesHtml;
+    }
+
+    async function flipLogSide(logId) {
+      const item = ideas.find(i => i.id === activeIdeaId);
+      if (!item || !Array.isArray(item.logs)) return;
+      const log = item.logs.find(l => l.id === logId);
+      if (!log) return;
+      log.side = log.side === 'left' ? 'right' : 'left';
+      await saveIdeasToStorage();
+      renderChatTimeline(item);
+    }
+
+    async function toggleLogLike(logId) {
+      const item = ideas.find(i => i.id === activeIdeaId);
+      if (!item || !Array.isArray(item.logs)) return;
+      const log = item.logs.find(l => l.id === logId);
+      if (!log) return;
+      log.liked = !log.liked;
+      await saveIdeasToStorage();
+      renderChatTimeline(item);
+    }
+
+    function scrollToChatBottom() {
+      const tl = document.getElementById('chatTimeline');
+      if (tl) tl.scrollTop = tl.scrollHeight;
+    }
+
+    async function sendChatMessage() {
+      if (!activeIdeaId) return;
+      const item = ideas.find(i => i.id === activeIdeaId);
+      if (!item) return;
+
+      const textarea = document.getElementById('chatTextarea');
+      const text = textarea.value.trim();
+      if (!text && !pendingChatImageData) return;
+
+      const now = Date.now();
+      const newLog = {
+        id: 'log_' + now + '_' + Math.random().toString(36).slice(2, 6),
+        side: currentSpeakerSide,
+        text: text,
+        image: pendingChatImageData || null,
+        liked: false,
+        createdAt: now,
+        displayTime: formatTimeLabel(now)
+      };
+
+      if (!Array.isArray(item.logs)) item.logs = [];
+      item.logs.push(newLog);
+      item.updatedAt = now;
+
+      if (pendingChatImageData) {
+        if (!Array.isArray(item.subImages)) item.subImages = [];
+        if (!item.subImages.includes(pendingChatImageData)) {
+          item.subImages.push(pendingChatImageData);
+        }
+      }
+
+      // 「送信ごとに左右交互でやり取り」がONなら、次の発言者を反対側に自動スイッチ！
+      const autoAlt = document.getElementById('chkAutoAlternate');
+      if (autoAlt && autoAlt.checked) {
+        setSpeakerSide(currentSpeakerSide === 'right' ? 'left' : 'right');
+      }
+
+      textarea.value = '';
+      textarea.style.height = 'auto';
+      clearChatAttachment();
+
+      await saveIdeasToStorage();
+      renderDetailLeft(item);
+      renderChatTimeline(item);
+      scrollToChatBottom();
+    }
+
+    async function deleteChatLog(logId) {
+      const item = ideas.find(i => i.id === activeIdeaId);
+      if (!item || !Array.isArray(item.logs)) return;
+      item.logs = item.logs.filter(l => l.id !== logId);
+      await saveIdeasToStorage();
+      renderChatTimeline(item);
+    }
+
+    function promoteChatImageToSub(logId) {
+      const item = ideas.find(i => i.id === activeIdeaId);
+      if (!item || !Array.isArray(item.logs)) return;
+      const log = item.logs.find(l => l.id === logId);
+      if (!log || !log.image) return;
+      if (!Array.isArray(item.subImages)) item.subImages = [];
+      let idx = item.subImages.indexOf(log.image);
+      if (idx === -1) {
+        item.subImages.push(log.image);
+        idx = item.subImages.length - 1;
+        saveIdeasToStorage();
+      }
+      activeImageIndex = idx;
+      renderDetailLeft(item);
+    }
+
+    function clearChatAttachment() {
+      pendingChatImageData = null;
+      document.getElementById('chatAttachPreview').classList.remove('active');
+      document.getElementById('chatImageInput').value = '';
+    }
+
+    // =========================================================
+    // 7. イベントリスナー設定
+    // =========================================================
+    window.addEventListener('DOMContentLoaded', async () => {
+      await loadIdeasFromStorage();
+      renderGallery();
+
+      document.querySelectorAll('#filterPills .filter-pill').forEach(btn => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('#filterPills .filter-pill').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          currentFilter = btn.dataset.filter;
+          renderGallery();
+        });
+      });
+
+      document.getElementById('sortSelect').addEventListener('change', (e) => {
+        currentSort = e.target.value;
+        renderGallery();
+      });
+
+      document.getElementById('btnOpenAddModal').addEventListener('click', () => openAddModal());
+      document.getElementById('btnFabAdd').addEventListener('click', () => openAddModal());
+      document.getElementById('btnCloseAddModal').addEventListener('click', closeAddModal);
+      document.getElementById('btnCancelAdd').addEventListener('click', closeAddModal);
+      document.getElementById('addModalBackdrop').addEventListener('click', closeAddModal);
+
+      const addDropzone = document.getElementById('addDropzone');
+      const addImageInput = document.getElementById('addImageInput');
+      addDropzone.addEventListener('click', () => addImageInput.click());
+      addImageInput.addEventListener('change', async (e) => {
+        if (e.target.files && e.target.files[0]) {
+          pendingAddImageData = await readAndCompressImage(e.target.files[0]);
+          updateAddDropzoneUI();
+        }
+      });
+
+      addDropzone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        addDropzone.classList.add('dragover');
+      });
+      addDropzone.addEventListener('dragleave', () => addDropzone.classList.remove('dragover'));
+      addDropzone.addEventListener('drop', async (e) => {
+        e.preventDefault();
+        addDropzone.classList.remove('dragover');
+        if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+          pendingAddImageData = await readAndCompressImage(e.dataTransfer.files[0]);
+          updateAddDropzoneUI();
+        }
+      });
+
+      document.getElementById('btnSubmitAdd').addEventListener('click', createNewIdea);
+
+      document.getElementById('btnCloseDetailModal').addEventListener('click', closeDetailModal);
+      document.getElementById('detailModalBackdrop').addEventListener('click', closeDetailModal);
+
+      const bindAutoSaveField = (elId, key) => {
+        const el = document.getElementById(elId);
+        el.addEventListener('input', async () => {
+          const item = ideas.find(i => i.id === activeIdeaId);
+          if (!item) return;
+          item[key] = el.value;
+          item.updatedAt = Date.now();
+          if (key === 'title') {
+            const miniTitle = document.getElementById('mobileMiniTitle');
+            if (miniTitle) miniTitle.textContent = item.title || '無題のアイデア';
+          }
+          if (threadViewMode === 'x') renderChatTimeline(item);
+          await saveIdeasToStorage();
+        });
+      };
+      bindAutoSaveField('detailTitleInput', 'title');
+      bindAutoSaveField('detailSubtitleInput', 'subtitle');
+      bindAutoSaveField('detailDescInput', 'description');
+
+      document.getElementById('detailStatusSelect').addEventListener('change', async (e) => {
+        const item = ideas.find(i => i.id === activeIdeaId);
+        if (!item) return;
+        item.status = e.target.value;
+        item.updatedAt = Date.now();
+        if (threadViewMode === 'x') renderChatTimeline(item);
+        await saveIdeasToStorage();
+      });
+
+      document.getElementById('btnDetailFav').addEventListener('click', async () => {
+        const item = ideas.find(i => i.id === activeIdeaId);
+        if (!item) return;
+        item.favorite = !item.favorite;
+        document.getElementById('btnDetailFav').classList.toggle('active', item.favorite);
+        if (threadViewMode === 'x') renderChatTimeline(item);
+        await saveIdeasToStorage();
+      });
+
+      document.getElementById('btnChangeCover').addEventListener('click', () => {
+        document.getElementById('changeCoverInput').click();
+      });
+      document.getElementById('changeCoverInput').addEventListener('change', async (e) => {
+        const item = ideas.find(i => i.id === activeIdeaId);
+        if (!item || !e.target.files || !e.target.files[0]) return;
+        item.coverImage = await readAndCompressImage(e.target.files[0]);
+        item.updatedAt = Date.now();
+        activeImageIndex = -1;
+        await saveIdeasToStorage();
+        renderDetailLeft(item);
+        if (threadViewMode === 'x') renderChatTimeline(item);
+      });
+
+      document.getElementById('addSubImageInput').addEventListener('change', async (e) => {
+        const item = ideas.find(i => i.id === activeIdeaId);
+        if (!item || !e.target.files) return;
+        if (!Array.isArray(item.subImages)) item.subImages = [];
+        for (const file of e.target.files) {
+          const dataUrl = await readAndCompressImage(file);
+          item.subImages.push(dataUrl);
+        }
+        item.updatedAt = Date.now();
+        activeImageIndex = item.subImages.length - 1;
+        await saveIdeasToStorage();
+        renderDetailLeft(item);
+      });
+
+      document.getElementById('btnDeleteIdea').addEventListener('click', async () => {
+        const item = ideas.find(i => i.id === activeIdeaId);
+        if (!item) return;
+        const name = item.title || 'このアイデア';
+        if (!confirm(`「${name}」を削除してもよろしいですか？`)) return;
+        ideas = ideas.filter(i => i.id !== activeIdeaId);
+        await saveIdeasToStorage();
+        closeDetailModal();
+      });
+
+      document.getElementById('btnChatSend').addEventListener('click', sendChatMessage);
+      const chatTextarea = document.getElementById('chatTextarea');
+      chatTextarea.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && !e.shiftKey && !e.isComposing) {
+          e.preventDefault();
+          sendChatMessage();
+        }
+      });
+      chatTextarea.addEventListener('input', () => {
+        chatTextarea.style.height = 'auto';
+        chatTextarea.style.height = Math.min(chatTextarea.scrollHeight, 100) + 'px';
+      });
+
+      document.getElementById('btnChatAttach').addEventListener('click', () => {
+        document.getElementById('chatImageInput').click();
+      });
+      document.getElementById('chatImageInput').addEventListener('change', async (e) => {
+        if (e.target.files && e.target.files[0]) {
+          pendingChatImageData = await readAndCompressImage(e.target.files[0]);
+          document.getElementById('chatAttachImg').src = pendingChatImageData;
+          document.getElementById('chatAttachPreview').classList.add('active');
+        }
+      });
+      document.getElementById('btnClearChatAttach').addEventListener('click', clearChatAttachment);
+
+      window.addEventListener('paste', async (e) => {
+        if (!e.clipboardData || !e.clipboardData.files || e.clipboardData.files.length === 0) return;
+        const file = e.clipboardData.files[0];
+        if (!file.type.startsWith('image/')) return;
+        const dataUrl = await readAndCompressImage(file);
+
+        if (activeIdeaId) {
+          pendingChatImageData = dataUrl;
+          document.getElementById('chatAttachImg').src = pendingChatImageData;
+          document.getElementById('chatAttachPreview').classList.add('active');
+        } else {
+          openAddModal(dataUrl);
+        }
+      });
+
+      document.getElementById('btnExportJson').addEventListener('click', () => {
+        const blob = new Blob([JSON.stringify(ideas, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `moai_ideas_backup_${new Date().toISOString().slice(0, 10)}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+      });
+
+      document.getElementById('btnResetSamples').addEventListener('click', async () => {
+        if (!confirm('初期サンプルデータ（肌着モアイ・エレクロボ・寝そべりモアイ・ハチマキモアイ）を復元しますか？')) return;
+        ideas = getDefaultIdeas();
+        await saveIdeasToStorage();
+        renderGallery();
+      });
+    });
+  </script>
+</body>
+</html>
