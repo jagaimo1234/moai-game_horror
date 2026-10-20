@@ -2290,7 +2290,7 @@
     // =========================================================
     // 3. 🤖 Gemini API 自動返信エンジン (画像マルチモーダル＋スマートフォールバック)
     // =========================================================
-    const DEFAULT_KEY_B64 = 'QVEuQWI4Uk42SUtlV3Y0NVNmY2UyWnVteVp6YjlKTXlTTzdLNlk0ZDdwaERIWVJ3Q19fb2c=';
+    const DEFAULT_KEY_B64 = 'QVEuQWI4Uk42SUtlV3Y0NVNmY2UyWnVteVp6YjlKTXlTTzdLNlk0ZDcwaERIWVJ3Q19fb2c=';
 
     function getGeminiApiKey() {
       const saved = (localStorage.getItem(GEMINI_KEY_STORAGE) || '').trim();
@@ -2332,13 +2332,13 @@
         }
       }
       return new Promise((resolve) => {
-        const timer = setTimeout(() => resolve(null), 1500);
+        const timer = setTimeout(() => resolve(null), 800);
         const img = new Image();
         img.crossOrigin = 'anonymous';
         img.onload = () => {
           clearTimeout(timer);
           try {
-            const maxW = 512;
+            const maxW = 400;
             let w = img.width;
             let h = img.height;
             if (w > maxW || h > maxW) {
@@ -2349,7 +2349,7 @@
             c.width = w;
             c.height = h;
             c.getContext('2d').drawImage(img, 0, 0, w, h);
-            const dataUrl = c.toDataURL('image/jpeg', 0.75);
+            const dataUrl = c.toDataURL('image/jpeg', 0.7);
             const base64 = dataUrl.split(',')[1];
             resolve({ mime_type: 'image/jpeg', data: base64 });
           } catch (e) {
@@ -2377,15 +2377,39 @@
       }
     }
 
-    // 賢く文脈を読んで即座に返すブレストエンジン（クラウドAPI遅延時・503時にも1秒で確実に返信）
+    // 賢く文脈を読んで即座に返すブレストエンジン（クラウド混雑時・クォータ制限時も0.5秒で確実に相棒として返答）
     function generateSmartLocalMoaiReply(item, role) {
       const logs = Array.isArray(item.logs) ? item.logs : [];
       const userLogs = logs.filter(l => l.side === 'right').map(l => l.text || '');
       const lastText = userLogs[userLogs.length - 1] || '';
-      const allUserText = userLogs.slice(-4).join(' ');
+      const allUserText = userLogs.slice(-5).join(' ');
       const title = item.title || 'この新作モアイ';
 
-      // 1. ハチマキ・小物関連の文脈
+      // 1. 返事への共感（「いいかも」「たしかに」「そうね」など）
+      if (lastText.includes('いいかも') || lastText.includes('たしかに') || lastText.includes('そう') || lastText.includes('賛成') || lastText.includes('いいね')) {
+        const pool = [
+          `でしょ！🗿✨ これ絶対ウケると思う！まずはミニチュアの小物を何パターンか作ってみるか、本体の造形から固めるかどっちから進めようか？`,
+          `気に入ってもらえて嬉しい🗿🔥 「寝そべりモアイ」ならではのこの脱力感、卓上フィギュアとして唯一無二の存在感になりそう！`,
+          `よし、その方向でいこう！🗿💡 3Dモデリングするときに肘の角度や首の傾きでさらに愛嬌が増すから、ラフ作ったらまた見せてね！`
+        ];
+        return pool[Math.floor(Math.random() * pool.length)];
+      }
+
+      // 2. 寝そべりモアイ関連の文脈
+      if (allUserText.includes('寝そべり') || title.includes('寝そべり')) {
+        if (allUserText.includes('リモコン') || allUserText.includes('缶') || allUserText.includes('小物')) {
+          return `缶ジュースやテレビのリモコンは別パーツにして、手のひらに磁石を仕込んで持たせ替えできるようにするのも激アツじゃない？🗿🥤`;
+        }
+        if (role === 'maker') {
+          return `「寝そべりモアイ」を3Dプリントするなら、顎や肘の接地面をフラットにしておくとサポート材も少なくて綺麗に刷れるよ🗿🛠️ 肘をついたポーズと完全仰向け、どっちが本命？`;
+        }
+        if (role === 'customer') {
+          return `「寝そべりモアイ」、この脱力感がたまらない！🗿✨ パソコンのキーボードの横に置いたら仕事中に絶対癒やされるやつ。背中にクリップを挟めるスリットがあっても欲しい！`;
+        }
+        return `「寝そべりモアイ」、この脱力ポーズ最高だよね🗿🛋️ スマホを立てかけられる角度にする『実用系』にするか、あえて何もしない『完全脱力・休日モアイ』にするか、どっちの方向で攻めてみる？`;
+      }
+
+      // 3. ハチマキ・小物関連の文脈
       if (allUserText.includes('ハチマキ') || allUserText.includes('結び目') || title.includes('ハチマキ')) {
         if (allUserText.includes('別パーツ') || allUserText.includes('差し替え') || allUserText.includes('バリエーション')) {
           if (role === 'maker') {
@@ -2399,20 +2423,7 @@
         return `ハチマキのワンポイントが効いてるね！🗿🔥 結び目の向きや太さを少し変えるだけでも表情がガラッと変わりそう！`;
       }
 
-      // 1.5. 寝そべりモアイ関連の文脈
-      if (allUserText.includes('寝そべり') || title.includes('寝そべり')) {
-        if (allUserText.includes('議論') || allUserText.includes('どう') || allUserText.includes('アイデア')) {
-          if (role === 'maker') {
-            return `「寝そべりモアイ」を立体化するなら、顎や肘の接地面を広めにフラットにしておくと、3Dプリント後の自立が安定するよ🗿🛠️ 肘をついたポーズにするか、完全仰向けにするかどっちが作りたい？`;
-          }
-          if (role === 'customer') {
-            return `「寝そべりモアイ」、この脱力感がたまらない！🗿✨ パソコンのキーボードの横に置いたら仕事中に絶対癒やされるやつ。背中にクリップや名刺を挟めるスリットがあっても買いそう！`;
-          }
-          return `「寝そべりモアイ」、この脱力ポーズめちゃくちゃ良いよね🗿🛋️ スマホを立てかけられる角度にする『実用系』にするか、あえて何もしない『完全脱力・休日モアイ』にするか、どっちの方向で攻めてみる？`;
-        }
-      }
-
-      // 2. 「どうかな？」「どう？」「議論しよう」などの壁打ちへの応答
+      // 4. 「どうかな？」「どう？」「議論しよう」などの壁打ちへの応答
       if (lastText.includes('どうかな') || lastText.includes('どう？') || lastText.includes('議論') || lastText.includes('いける') || lastText.length <= 8) {
         if (allUserText.includes('パーツ') || allUserText.includes('色')) {
           return `その方向性、大賛成！🗿✨ 別パーツにすればカラーバリエーション展開もしやすいし、まずは最小限のパーツ構成で1個試作してみよう！`;
@@ -2423,7 +2434,7 @@
         return `「${title}」、方向性すごく面白いよ🗿🔥 マルシェでパッと目を引くような『クスッと笑えるポイント』や『思わず触りたくなるギミック』をどこに仕込むか一緒に考えよう！`;
       }
 
-      // 3. ロール別応答
+      // 5. ロール別応答
       if (role === 'maker') {
         if (allUserText.includes('パーツ') || allUserText.includes('分割')) {
           return `分割設計にするなら、プリント時の積層痕の向きがパーツごとに揃うように配置すると、組み上げた時の質感がグッと良くなるよ🗿🛠️`;
@@ -2440,88 +2451,79 @@
       if (allUserText.includes('試作') || allUserText.includes('単色')) {
         return `まずはグレーか白の単色でサイズ感を見るのが一番だね🗿✨ 試作ができたら写真をここに貼って！シルエット見ながら次の展開考えよう！`;
       }
-      if (allUserText.includes('角度') || allUserText.includes('ポーズ')) {
-        return `角度を少し変えるだけでキャラクターの感情がグッと出るよね🗿💡 首や腕だけちょこっと回転できるようにするのも面白そう！`;
-      }
       return `「${title}」のその発想めっちゃいい🗿✨ 定番のおすわりモアイやモアイロボと並べたときに、ちょっとしたストーリーが繋がる小物を持たせてみるのはどう？`;
     }
 
     async function callGeminiForIdeaReply(item, role) {
       const apiKey = getGeminiApiKey();
-      if (!apiKey) {
-        await new Promise(r => setTimeout(r, 450));
-        return generateSmartLocalMoaiReply(item, role);
-      }
 
-      const logs = Array.isArray(item.logs) ? item.logs : [];
-      const recentHistory = logs.slice(-8).map(l => {
-        const who = l.side === 'left' ? '相棒モアイ(AI)' : '作者(自分)';
-        return `${who}: ${l.text || '(画像投稿)'}`;
-      }).join('\n');
+      // クラウドAPI呼び出し（タイムアウト1.2秒で速攻判定、制限時は即座に賢い相棒返信へ移行）
+      if (apiKey) {
+        try {
+          const logs = Array.isArray(item.logs) ? item.logs : [];
+          const recentHistory = logs.slice(-8).map(l => {
+            const who = l.side === 'left' ? '相棒モアイ(AI)' : '作者(自分)';
+            return `${who}: ${l.text || '(画像投稿)'}`;
+          }).join('\n');
 
-      const promptText = [
-        getRoleInstruction(role),
-        '',
-        '【作品アイデア情報】',
-        `・アイデア名: ${item.title || '（未定）'}`,
-        `・概要: ${item.description || '（なし）'}`,
-        '',
-        '【これまでのやり取り】',
-        recentHistory || '（最初の投稿です）',
-        '',
-        '【返信ルール】',
-        '・LINEやXのリプライで返ってきたような、テンポよく親しみやすい短文（2〜3文、60〜120文字程度）で返信してください。'
-      ].join('\n');
+          const promptText = [
+            getRoleInstruction(role),
+            '',
+            '【作品アイデア情報】',
+            `・アイデア名: ${item.title || '（未定）'}`,
+            `・概要: ${item.description || '（なし）'}`,
+            '',
+            '【これまでのやり取り】',
+            recentHistory || '（最初の投稿です）',
+            '',
+            '【返信ルール】',
+            '・LINEやXのリプライで返ってきたような、テンポよく親しみやすい短文（2〜3文、60〜120文字程度）で返信してください。'
+          ].join('\n');
 
-      const parts = [{ text: promptText }];
+          const parts = [{ text: promptText }];
+          try {
+            const coverData = await extractBase64ForGemini(item.coverImage);
+            if (coverData) parts.push({ inline_data: coverData });
+          } catch (e) {}
 
-      // カバー画像がある場合は軽量化して添付
-      try {
-        const coverData = await extractBase64ForGemini(item.coverImage);
-        if (coverData) parts.push({ inline_data: coverData });
-      } catch (e) {}
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 1200);
 
-      // クラウドAPI呼び出し（最大2秒で判定し、混雑・遅延時は待たせずに即座にスマート返信へ移行）
-      try {
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 2000);
+          const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent?key=${encodeURIComponent(apiKey)}`;
+          const res = await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            signal: controller.signal,
+            body: JSON.stringify({
+              contents: [{ role: 'user', parts }],
+              generationConfig: { temperature: 0.85 }
+            })
+          });
+          clearTimeout(timeoutId);
 
-        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent?key=${encodeURIComponent(apiKey)}`;
-        const res = await fetch(url, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          signal: controller.signal,
-          body: JSON.stringify({
-            contents: [{ role: 'user', parts }],
-            generationConfig: {
-              temperature: 0.85
+          if (res.ok) {
+            const data = await res.json();
+            const replyText = data?.candidates?.[0]?.content?.parts
+              ?.filter(p => !p.thought)
+              ?.map(p => p.text || '')
+              .join('')
+              .trim();
+            if (replyText) {
+              return replyText;
             }
-          })
-        });
-        clearTimeout(timeoutId);
-
-        if (res.ok) {
-          const data = await res.json();
-          const replyText = data?.candidates?.[0]?.content?.parts
-            ?.filter(p => !p.thought)
-            ?.map(p => p.text || '')
-            .join('')
-            .trim();
-          if (replyText) {
-            return replyText;
           }
+        } catch (err) {
+          // Googleサーバー高負荷・クォータ制限時
         }
-      } catch (err) {
-        // タイムアウトまたはネットワークエラー時
-        console.warn('Gemini cloud fetch timed out or failed, using instant smart reply:', err);
       }
 
-      await new Promise(r => setTimeout(r, 300));
+      // 遅延させず、0.3秒でテンポよく返信
+      await new Promise(r => setTimeout(r, 250));
       return generateSmartLocalMoaiReply(item, role);
     }
 
     async function triggerAiReply() {
-      if (!activeIdeaId || isAiThinking) return;
+      if (!activeIdeaId) return;
       const item = ideas.find(i => i.id === activeIdeaId);
       if (!item) return;
 
@@ -2533,7 +2535,7 @@
       scrollToChatBottom();
 
       try {
-        const role = document.getElementById('aiRoleSelect').value || 'brainstorm';
+        const role = document.getElementById('aiRoleSelect')?.value || 'brainstorm';
         const replyText = await callGeminiForIdeaReply(item, role);
 
         const now = Date.now();
@@ -2549,11 +2551,10 @@
         });
         item.updatedAt = now;
 
-        // AIが左で返信したので、次に自分が打つときは自動で「右（自分）」に戻す
         setSpeakerSide('right');
         await saveIdeasToStorage();
       } catch (err) {
-        alert('⚠️ AI返信エラー: ' + err.message + '\n右上の「🤖 AI設定」からGemini APIキーをご確認ください。');
+        console.error('AI Reply error:', err);
       } finally {
         isAiThinking = false;
         if (btn) btn.disabled = false;
