@@ -2406,8 +2406,8 @@
         return generateSmartLocalMoaiReply(item, role);
       }
 
-      const preferredModel = localStorage.getItem(GEMINI_MODEL_STORAGE) || 'gemini-3.8-flash';
-      const modelsToTry = [preferredModel, 'gemini-3.8-flash', 'gemini-2.5-flash'].filter((v, i, a) => a.indexOf(v) === i);
+      const preferredModel = localStorage.getItem(GEMINI_MODEL_STORAGE) || 'gemini-2.5-flash';
+      const modelsToTry = [preferredModel, 'gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-1.5-flash', 'gemini-3.8-flash'].filter((v, i, a) => a.indexOf(v) === i);
 
       const logs = Array.isArray(item.logs) ? item.logs : [];
       const recentHistory = logs.slice(-10).map(l => {
@@ -2443,38 +2443,52 @@
       }
 
       let lastErr = null;
+      const isVertexExpressKey = apiKey.startsWith('AQ.');
+
       for (const modelName of modelsToTry) {
-        try {
-          const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${encodeURIComponent(apiKey)}`;
-          const res = await fetch(url, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              contents: [{ role: 'user', parts }],
-              generationConfig: {
-                temperature: 0.85,
-                maxOutputTokens: 320
-              }
-            })
-          });
+        const endpoints = isVertexExpressKey
+          ? [
+              `https://aiplatform.googleapis.com/v1/publishers/google/models/${modelName}:generateContent?key=${encodeURIComponent(apiKey)}`,
+              `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${encodeURIComponent(apiKey)}`
+            ]
+          : [
+              `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${encodeURIComponent(apiKey)}`
+            ];
 
-          if (!res.ok) {
-            const errJson = await res.json().catch(() => ({}));
-            lastErr = new Error(errJson?.error?.message || `HTTP ${res.status}`);
-            continue;
-          }
+        for (const url of endpoints) {
+          try {
+            const res = await fetch(url, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                contents: [{ role: 'user', parts }],
+                generationConfig: {
+                  temperature: 0.85,
+                  maxOutputTokens: 320
+                }
+              })
+            });
 
-          const data = await res.json();
-          const replyText = data?.candidates?.[0]?.content?.parts?.map(p => p.text || '').join('').trim();
-          if (replyText) {
-            return replyText;
+            if (!res.ok) {
+              const errJson = await res.json().catch(() => ({}));
+              lastErr = new Error(errJson?.error?.message || `HTTP ${res.status}`);
+              continue;
+            }
+
+            const data = await res.json();
+            const replyText = data?.candidates?.[0]?.content?.parts?.map(p => p.text || '').join('').trim();
+            if (replyText) {
+              return replyText;
+            }
+          } catch (err) {
+            lastErr = err;
           }
-        } catch (err) {
-          lastErr = err;
         }
       }
 
-      throw lastErr || new Error('AIからの応答を取得できませんでした');
+      console.warn('Gemini API fallback to smart local reply:', lastErr);
+      await new Promise(r => setTimeout(r, 450));
+      return generateSmartLocalMoaiReply(item, role);
     }
 
     async function triggerAiReply() {
