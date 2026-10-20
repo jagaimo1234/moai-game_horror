@@ -2406,8 +2406,8 @@
         return generateSmartLocalMoaiReply(item, role);
       }
 
-      const preferredModel = localStorage.getItem(GEMINI_MODEL_STORAGE) || 'gemini-2.5-flash';
-      const modelsToTry = [preferredModel, 'gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-1.5-flash', 'gemini-3.8-flash'].filter((v, i, a) => a.indexOf(v) === i);
+      const preferredModel = localStorage.getItem(GEMINI_MODEL_STORAGE) || 'gemini-3.8-flash';
+      const modelsToTry = [preferredModel, 'gemini-3.8-flash', 'gemini-flash-latest', 'gemini-2.5-flash'].filter((v, i, a) => a.indexOf(v) === i);
 
       const logs = Array.isArray(item.logs) ? item.logs : [];
       const recentHistory = logs.slice(-10).map(l => {
@@ -2419,70 +2419,67 @@
         getRoleInstruction(role),
         '',
         '【作品アイデア情報】',
-        `・アイデア名: ${item.title || '（未定・考え中）'}`,
+        `・アイデア名: ${item.title || '（未定・添付画像を参照）'}`,
         `・サブタイトル/テーマ: ${item.subtitle || '（なし）'}`,
         `・概要: ${item.description || '（なし）'}`,
         `・現在のステータス: ${(STATUS_MAP[item.status] || STATUS_MAP.idea).label}`,
         '',
         '【これまでのやり取り（時系列）】',
-        recentHistory || '（まだ最初の投稿です。作品画像やタイトル・概要から自由にアイデアを広げてください）',
+        recentHistory || '（まだ最初の投稿です。添付された作品画像やタイトル・概要を観察して自由にアイデアを広げてください）',
         '',
         '【返信ルール】',
+        '・添付された画像がある場合は、その画像の見た目（造形・ポーズ・色・パーツ・雰囲気など）にも触れながら具体的にコメントしてください。',
         '・LINEやXのリプライでポンと返ってきたような、テンポよく読みやすい短文（2〜4文、80〜140文字程度）で返信してください。',
         '・マークダウンの見出し（#）や箇条書きの羅列は使わず、自然な会話文にしてください。'
       ].join('\n');
 
       const parts = [{ text: promptText }];
 
-      // 直近のチャット画像、またはカバー画像をマルチモーダル送信
+      // カバー画像と、直近のチャット添付画像の両方をマルチモーダルで送信
+      const coverData = await extractBase64ForGemini(item.coverImage);
+      if (coverData) {
+        parts.push({ inline_data: coverData });
+      }
       const lastImgLog = [...logs].reverse().find(l => l.image);
-      const imgSource = (lastImgLog && lastImgLog.image) || item.coverImage;
-      const imgData = await extractBase64ForGemini(imgSource);
-      if (imgData) {
-        parts.push({ inline_data: imgData });
+      if (lastImgLog && lastImgLog.image && lastImgLog.image !== item.coverImage) {
+        const chatImgData = await extractBase64ForGemini(lastImgLog.image);
+        if (chatImgData) {
+          parts.push({ inline_data: chatImgData });
+        }
       }
 
       let lastErr = null;
-      const isVertexExpressKey = apiKey.startsWith('AQ.');
-
       for (const modelName of modelsToTry) {
-        const endpoints = isVertexExpressKey
-          ? [
-              `https://aiplatform.googleapis.com/v1/publishers/google/models/${modelName}:generateContent?key=${encodeURIComponent(apiKey)}`,
-              `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${encodeURIComponent(apiKey)}`
-            ]
-          : [
-              `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${encodeURIComponent(apiKey)}`
-            ];
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${encodeURIComponent(apiKey)}`;
+        try {
+          const res = await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              contents: [{ role: 'user', parts }],
+              generationConfig: {
+                temperature: 0.85
+              }
+            })
+          });
 
-        for (const url of endpoints) {
-          try {
-            const res = await fetch(url, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                contents: [{ role: 'user', parts }],
-                generationConfig: {
-                  temperature: 0.85,
-                  maxOutputTokens: 320
-                }
-              })
-            });
-
-            if (!res.ok) {
-              const errJson = await res.json().catch(() => ({}));
-              lastErr = new Error(errJson?.error?.message || `HTTP ${res.status}`);
-              continue;
-            }
-
-            const data = await res.json();
-            const replyText = data?.candidates?.[0]?.content?.parts?.map(p => p.text || '').join('').trim();
-            if (replyText) {
-              return replyText;
-            }
-          } catch (err) {
-            lastErr = err;
+          if (!res.ok) {
+            const errJson = await res.json().catch(() => ({}));
+            lastErr = new Error(errJson?.error?.message || `HTTP ${res.status}`);
+            continue;
           }
+
+          const data = await res.json();
+          const replyText = data?.candidates?.[0]?.content?.parts
+            ?.filter(p => !p.thought)
+            ?.map(p => p.text || '')
+            .join('')
+            .trim();
+          if (replyText) {
+            return replyText;
+          }
+        } catch (err) {
+          lastErr = err;
         }
       }
 
