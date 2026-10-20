@@ -2399,15 +2399,28 @@
         return `ハチマキのワンポイントが効いてるね！🗿🔥 結び目の向きや太さを少し変えるだけでも表情がガラッと変わりそう！`;
       }
 
-      // 2. 「どうかな？」「どう？」「いける？」などの短い壁打ちへの応答
-      if (lastText.includes('どうかな') || lastText.includes('どう？') || lastText.includes('いける') || lastText.length <= 6) {
+      // 1.5. 寝そべりモアイ関連の文脈
+      if (allUserText.includes('寝そべり') || title.includes('寝そべり')) {
+        if (allUserText.includes('議論') || allUserText.includes('どう') || allUserText.includes('アイデア')) {
+          if (role === 'maker') {
+            return `「寝そべりモアイ」を立体化するなら、顎や肘の接地面を広めにフラットにしておくと、3Dプリント後の自立が安定するよ🗿🛠️ 肘をついたポーズにするか、完全仰向けにするかどっちが作りたい？`;
+          }
+          if (role === 'customer') {
+            return `「寝そべりモアイ」、この脱力感がたまらない！🗿✨ パソコンのキーボードの横に置いたら仕事中に絶対癒やされるやつ。背中にクリップや名刺を挟めるスリットがあっても買いそう！`;
+          }
+          return `「寝そべりモアイ」、この脱力ポーズめちゃくちゃ良いよね🗿🛋️ スマホを立てかけられる角度にする『実用系』にするか、あえて何もしない『完全脱力・休日モアイ』にするか、どっちの方向で攻めてみる？`;
+        }
+      }
+
+      // 2. 「どうかな？」「どう？」「議論しよう」などの壁打ちへの応答
+      if (lastText.includes('どうかな') || lastText.includes('どう？') || lastText.includes('議論') || lastText.includes('いける') || lastText.length <= 8) {
         if (allUserText.includes('パーツ') || allUserText.includes('色')) {
           return `その方向性、大賛成！🗿✨ 別パーツにすればカラーバリエーション展開もしやすいし、まずは最小限のパーツ構成で1個試作してみよう！`;
         }
         if (allUserText.includes('ポーズ') || allUserText.includes('角度')) {
           return `その角度、かなりグッとくると思う！🗿💡 ちょっとした傾きや視線のズレがモアイの哀愁や可愛さになるから、ぜひそのまま進めよう！`;
         }
-        return `うん、めちゃくちゃイイ感じ！🗿🔥 直感的に思いついたアイデアって一番ファンに刺さるから、まずは1つ形にしてみてデスクに置いてみよう！`;
+        return `「${title}」、方向性すごく面白いよ🗿🔥 マルシェでパッと目を引くような『クスッと笑えるポイント』や『思わず触りたくなるギミック』をどこに仕込むか一緒に考えよう！`;
       }
 
       // 3. ロール別応答
@@ -2468,10 +2481,10 @@
         if (coverData) parts.push({ inline_data: coverData });
       } catch (e) {}
 
-      // クラウドAPI呼び出し（最大3秒でタイムアウトさせ、遅延時は即座にローカル返信へフォールバック）
+      // クラウドAPI呼び出し（最大2秒で判定し、混雑・遅延時は待たせずに即座にスマート返信へ移行）
       try {
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 3500);
+        const timeoutId = setTimeout(() => controller.abort(), 2000);
 
         const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent?key=${encodeURIComponent(apiKey)}`;
         const res = await fetch(url, {
