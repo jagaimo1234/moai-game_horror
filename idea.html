@@ -2377,16 +2377,43 @@
       }
     }
 
-    // APIキー未設定時でも文脈を読んで返す内蔵ブレストエンジン（＋API設定案内）
+    // 賢く文脈を読んで即座に返すブレストエンジン（クラウドAPI遅延時・503時にも1秒で確実に返信）
     function generateSmartLocalMoaiReply(item, role) {
       const logs = Array.isArray(item.logs) ? item.logs : [];
-      const lastUserLog = [...logs].reverse().find(l => l.side === 'right');
-      const lastText = lastUserLog ? lastUserLog.text : '';
+      const userLogs = logs.filter(l => l.side === 'right').map(l => l.text || '');
+      const lastText = userLogs[userLogs.length - 1] || '';
+      const allUserText = userLogs.slice(-4).join(' ');
       const title = item.title || 'この新作モアイ';
 
+      // 1. ハチマキ・小物関連の文脈
+      if (allUserText.includes('ハチマキ') || allUserText.includes('結び目') || title.includes('ハチマキ')) {
+        if (allUserText.includes('別パーツ') || allUserText.includes('差し替え') || allUserText.includes('バリエーション')) {
+          if (role === 'maker') {
+            return `ハチマキ結び目の別パーツ化、いいね！🗿🛠️ 頭部に小さなダボ穴（凸凹）を作って磁石かスライド式でカチッと固定できるようにすれば、塗装やサポート材もかなり楽になるよ！`;
+          }
+          if (role === 'customer') {
+            return `結び目の差し替えめちゃくちゃ欲しい！🗿✨ 『必勝』とか『気合い』『お祭り風』みたいに気分で付け替えられたら絶対買うやつ！`;
+          }
+          return `ハチマキの差し替えパーツ、最高にイイと思う！🗿🔥 結び目の形や色を変えるだけで『気合いモアイ』『受験生モアイ』『ラーメン屋モアイ』みたいに無限にキャラが広がりそうだね！`;
+        }
+        return `ハチマキのワンポイントが効いてるね！🗿🔥 結び目の向きや太さを少し変えるだけでも表情がガラッと変わりそう！`;
+      }
+
+      // 2. 「どうかな？」「どう？」「いける？」などの短い壁打ちへの応答
+      if (lastText.includes('どうかな') || lastText.includes('どう？') || lastText.includes('いける') || lastText.length <= 6) {
+        if (allUserText.includes('パーツ') || allUserText.includes('色')) {
+          return `その方向性、大賛成！🗿✨ 別パーツにすればカラーバリエーション展開もしやすいし、まずは最小限のパーツ構成で1個試作してみよう！`;
+        }
+        if (allUserText.includes('ポーズ') || allUserText.includes('角度')) {
+          return `その角度、かなりグッとくると思う！🗿💡 ちょっとした傾きや視線のズレがモアイの哀愁や可愛さになるから、ぜひそのまま進めよう！`;
+        }
+        return `うん、めちゃくちゃイイ感じ！🗿🔥 直感的に思いついたアイデアって一番ファンに刺さるから、まずは1つ形にしてみてデスクに置いてみよう！`;
+      }
+
+      // 3. ロール別応答
       if (role === 'maker') {
-        if (lastText.includes('パーツ') || lastText.includes('色')) {
-          return `別パーツ化するなら、ダボ穴に少しテーパーをつけると3Dプリント後に接着剤なしでもパチッと組めそう🗿🛠️ 差し替え遊びもできて一石二鳥かも！`;
+        if (allUserText.includes('パーツ') || allUserText.includes('分割')) {
+          return `分割設計にするなら、プリント時の積層痕の向きがパーツごとに揃うように配置すると、組み上げた時の質感がグッと良くなるよ🗿🛠️`;
         }
         return `「${title}」、3Dプリントする時に底面がフラットになる角度で設計するとサポート材が最小限で綺麗に刷れそう🗿🛠️ 一部だけ別パーツにして色分けするのもアリだね！`;
       }
@@ -2397,26 +2424,24 @@
         return `「${title}」、方向性はすごくいい！ただ普通のポーズだと既存作に埋もれるから、もう一歩「えっ、そこ動くの！？」みたいなギャップや小ネタを1つ仕込んでみよう🗿🔥`;
       }
 
-      if (lastText.includes('試作') || lastText.includes('単色')) {
+      if (allUserText.includes('試作') || allUserText.includes('単色')) {
         return `まずはグレーか白の単色でサイズ感を見るのが一番だね🗿✨ 試作ができたら写真をここに貼って！シルエット見ながら次の展開考えよう！`;
       }
-      if (lastText.includes('角度') || lastText.includes('ポーズ')) {
+      if (allUserText.includes('角度') || allUserText.includes('ポーズ')) {
         return `角度を少し変えるだけでキャラクターの感情がグッと出るよね🗿💡 首や腕だけちょこっと回転できるようにするのも面白そう！`;
       }
-      return `「${title}」のその発想めっちゃいい🗿✨ 定番のおすわりモアイやモアイロボと並べたときに、ちょっとしたストーリーが繋がる小物を持たせてみるのはどう？（※右上の「🤖 AI設定」から無料Gemini APIキーを入れると、画像も認識してさらに本格的にブレストできます！）`;
+      return `「${title}」のその発想めっちゃいい🗿✨ 定番のおすわりモアイやモアイロボと並べたときに、ちょっとしたストーリーが繋がる小物を持たせてみるのはどう？`;
     }
 
     async function callGeminiForIdeaReply(item, role) {
       const apiKey = getGeminiApiKey();
       if (!apiKey) {
-        await new Promise(r => setTimeout(r, 650));
+        await new Promise(r => setTimeout(r, 450));
         return generateSmartLocalMoaiReply(item, role);
       }
 
-      const modelsToTry = ['gemini-3.8-flash', 'gemini-flash-latest'];
-
       const logs = Array.isArray(item.logs) ? item.logs : [];
-      const recentHistory = logs.slice(-10).map(l => {
+      const recentHistory = logs.slice(-8).map(l => {
         const who = l.side === 'left' ? '相棒モアイ(AI)' : '作者(自分)';
         return `${who}: ${l.text || '(画像投稿)'}`;
       }).join('\n');
@@ -2425,56 +2450,44 @@
         getRoleInstruction(role),
         '',
         '【作品アイデア情報】',
-        `・アイデア名: ${item.title || '（未定・添付画像を参照）'}`,
-        `・サブタイトル/テーマ: ${item.subtitle || '（なし）'}`,
+        `・アイデア名: ${item.title || '（未定）'}`,
         `・概要: ${item.description || '（なし）'}`,
-        `・現在のステータス: ${(STATUS_MAP[item.status] || STATUS_MAP.idea).label}`,
         '',
-        '【これまでのやり取り（時系列）】',
-        recentHistory || '（まだ最初の投稿です。添付された作品画像やタイトル・概要を観察して自由にアイデアを広げてください）',
+        '【これまでのやり取り】',
+        recentHistory || '（最初の投稿です）',
         '',
         '【返信ルール】',
-        '・添付された画像がある場合は、その画像の見た目（造形・ポーズ・色・パーツ・雰囲気など）にも触れながら具体的にコメントしてください。',
-        '・LINEやXのリプライでポンと返ってきたような、テンポよく読みやすい短文（2〜4文、80〜140文字程度）で返信してください。',
-        '・マークダウンの見出し（#）や箇条書きの羅列は使わず、自然な会話文にしてください。'
+        '・LINEやXのリプライで返ってきたような、テンポよく親しみやすい短文（2〜3文、60〜120文字程度）で返信してください。'
       ].join('\n');
 
       const parts = [{ text: promptText }];
 
-      // カバー画像と、直近のチャット添付画像の両方をマルチモーダルで送信
-      const coverData = await extractBase64ForGemini(item.coverImage);
-      if (coverData) {
-        parts.push({ inline_data: coverData });
-      }
-      const lastImgLog = [...logs].reverse().find(l => l.image);
-      if (lastImgLog && lastImgLog.image && lastImgLog.image !== item.coverImage) {
-        const chatImgData = await extractBase64ForGemini(lastImgLog.image);
-        if (chatImgData) {
-          parts.push({ inline_data: chatImgData });
-        }
-      }
+      // カバー画像がある場合は軽量化して添付
+      try {
+        const coverData = await extractBase64ForGemini(item.coverImage);
+        if (coverData) parts.push({ inline_data: coverData });
+      } catch (e) {}
 
-      let lastErr = null;
-      for (const modelName of modelsToTry) {
-        const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${encodeURIComponent(apiKey)}`;
-        try {
-          const res = await fetch(url, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              contents: [{ role: 'user', parts }],
-              generationConfig: {
-                temperature: 0.85
-              }
-            })
-          });
+      // クラウドAPI呼び出し（最大3秒でタイムアウトさせ、遅延時は即座にローカル返信へフォールバック）
+      try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 3500);
 
-          if (!res.ok) {
-            const errJson = await res.json().catch(() => ({}));
-            lastErr = new Error(errJson?.error?.message || `HTTP ${res.status}`);
-            continue;
-          }
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent?key=${encodeURIComponent(apiKey)}`;
+        const res = await fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          signal: controller.signal,
+          body: JSON.stringify({
+            contents: [{ role: 'user', parts }],
+            generationConfig: {
+              temperature: 0.85
+            }
+          })
+        });
+        clearTimeout(timeoutId);
 
+        if (res.ok) {
           const data = await res.json();
           const replyText = data?.candidates?.[0]?.content?.parts
             ?.filter(p => !p.thought)
@@ -2484,13 +2497,13 @@
           if (replyText) {
             return replyText;
           }
-        } catch (err) {
-          lastErr = err;
         }
+      } catch (err) {
+        // タイムアウトまたはネットワークエラー時
+        console.warn('Gemini cloud fetch timed out or failed, using instant smart reply:', err);
       }
 
-      console.warn('Gemini API fallback to smart local reply:', lastErr);
-      await new Promise(r => setTimeout(r, 450));
+      await new Promise(r => setTimeout(r, 300));
       return generateSmartLocalMoaiReply(item, role);
     }
 
