@@ -2457,7 +2457,7 @@
     async function callGeminiForIdeaReply(item, role) {
       const apiKey = getGeminiApiKey();
 
-      // クラウドAPI呼び出し（タイムアウト1.2秒で速攻判定、制限時は即座に賢い相棒返信へ移行）
+      // クラウドAPI呼び出し（テキスト中心の超軽量高速リクエスト）
       if (apiKey) {
         try {
           const logs = Array.isArray(item.logs) ? item.logs : [];
@@ -2481,13 +2481,25 @@
           ].join('\n');
 
           const parts = [{ text: promptText }];
-          try {
-            const coverData = await extractBase64ForGemini(item.coverImage);
-            if (coverData) parts.push({ inline_data: coverData });
-          } catch (e) {}
 
+          // 💡 ユーザーの素晴らしい気付き：画像は「初回の最初のコメント時」または「チャットで新しい画像が送られた時」だけ添付する！
+          // 日常の会話で毎回画像を送るとトークン消費と画像認識サーバー負荷で遅延・制限の原因になるため、通常のテキストチャットでは画像を送らずテキストのみで爆速返信！
+          const hasAiRepliedAlready = logs.some(l => l.side === 'left');
+          const lastUserLog = [...logs].reverse().find(l => l.side === 'right');
+          const userJustSentNewImage = Boolean(lastUserLog && lastUserLog.image);
+          const shouldAttachImage = (!hasAiRepliedAlready || userJustSentNewImage);
+
+          if (shouldAttachImage) {
+            try {
+              const targetImage = (userJustSentNewImage && lastUserLog.image) ? lastUserLog.image : item.coverImage;
+              const imgData = await extractBase64ForGemini(targetImage);
+              if (imgData) parts.push({ inline_data: imgData });
+            } catch (e) {}
+          }
+
+          const timeoutMs = shouldAttachImage ? 6000 : 3500;
           const controller = new AbortController();
-          const timeoutId = setTimeout(() => controller.abort(), 1200);
+          const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
 
           const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent?key=${encodeURIComponent(apiKey)}`;
           const res = await fetch(url, {
@@ -2513,12 +2525,12 @@
             }
           }
         } catch (err) {
-          // Googleサーバー高負荷・クォータ制限時
+          // Googleサーバー高負荷時やタイムアウト時はフォールバック
         }
       }
 
-      // 遅延させず、0.3秒でテンポよく返信
-      await new Promise(r => setTimeout(r, 250));
+      // 遅延させず、0.2秒でテンポよく返信
+      await new Promise(r => setTimeout(r, 200));
       return generateSmartLocalMoaiReply(item, role);
     }
 
