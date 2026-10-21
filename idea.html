@@ -1675,6 +1675,7 @@
           <div class="brand-title">
             <span>MOAI IDEA GALLERY</span>
             <span class="brand-badge">AIブレスト対応</span>
+            <span class="brand-badge" style="background:#059669; color:#fff; border-color:#10b981;">⚡ v2.2 (最新)</span>
           </div>
           <div class="brand-subtitle">新作アイデアを視覚的に並べて、AI相棒モアイとLINE/X感覚で育てる場所</div>
         </div>
@@ -1797,8 +1798,8 @@
 
         <label style="font-size:0.76rem; color:var(--text-sub); font-weight:700; margin-top:4px;">AIモデル</label>
         <select id="aiModelSelect" class="field-input" style="cursor:pointer;">
-          <option value="gemini-3.8-flash">gemini-3.8-flash（最新・推奨・画像認識対応）</option>
-          <option value="gemini-2.5-flash">gemini-2.5-flash（互換）</option>
+          <option value="gemini-3.1-flash-lite">gemini-3.1-flash-lite（⚡ 最速2秒応答・画像認識対応・推奨）</option>
+          <option value="gemini-3.8-flash">gemini-3.8-flash（高精度・思考型）</option>
         </select>
       </div>
 
@@ -2131,8 +2132,20 @@
     }
 
     // =========================================================
-    // 2. IndexedDB + LocalStorage 永続保存エンジン
+    // 2. IndexedDB + LocalStorage 永続保存エンジン & キャッシュ無効化
     // =========================================================
+    // 古いブラウザキャッシュ・Service Worker の強制クリア（URLパラメータなしでも最新版を保証）
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.getRegistrations().then(regs => {
+        for (const r of regs) r.unregister();
+      }).catch(() => {});
+    }
+    if ('caches' in window) {
+      caches.keys().then(names => {
+        for (const n of names) caches.delete(n);
+      }).catch(() => {});
+    }
+
     const DB_NAME = 'MoaiIdeaGalleryDB';
     const STORE_NAME = 'ideas_store';
     const STORAGE_KEY = 'moai_ideas_v1';
@@ -2140,6 +2153,12 @@
     const GEMINI_KEY_STORAGE = 'moai_idea_gemini_api_key';
     const GEMINI_MODEL_STORAGE = 'moai_idea_gemini_model';
     const AI_AUTO_STORAGE = 'moai_idea_ai_auto';
+
+    // 以前のセッションで古い・遅いモデルがlocalStorageに残っている場合は自動で最新の最速モデルに刷新
+    const currentSavedModel = localStorage.getItem(GEMINI_MODEL_STORAGE);
+    if (!currentSavedModel || currentSavedModel === 'gemini-3.8-flash' || currentSavedModel === 'gemini-2.5-flash') {
+      localStorage.setItem(GEMINI_MODEL_STORAGE, 'gemini-3.1-flash-lite');
+    }
 
     let ideas = [];
     let currentFilter = 'all';
@@ -2291,6 +2310,7 @@
     // 3. 🤖 Gemini API 自動返信エンジン (画像マルチモーダル＋スマートフォールバック)
     // =========================================================
     const DEFAULT_KEY_B64 = 'QVEuQWI4Uk42SUtlV3Y0NVNmY2UyWnVteVp6YjlKTXlTTzdLNlk0ZDcwaERIWVJ3Q19fb2c=';
+    const DEFAULT_MODEL = 'gemini-3.1-flash-lite'; // ⚡ 2秒で超高速・安定稼働する最新軽量モデル
 
     function getGeminiApiKey() {
       const saved = (localStorage.getItem(GEMINI_KEY_STORAGE) || '').trim();
@@ -2300,6 +2320,10 @@
       } catch (e) {
         return '';
       }
+    }
+
+    function getSelectedModel() {
+      return localStorage.getItem(GEMINI_MODEL_STORAGE) || DEFAULT_MODEL;
     }
 
     function updateAiStatusIndicator() {
@@ -2312,8 +2336,7 @@
 
     function openAiModal() {
       document.getElementById('aiApiKeyInput').value = getGeminiApiKey();
-      const savedModel = localStorage.getItem(GEMINI_MODEL_STORAGE) || 'gemini-3.8-flash';
-      document.getElementById('aiModelSelect').value = savedModel;
+      document.getElementById('aiModelSelect').value = getSelectedModel();
       document.getElementById('aiModalBackdrop').classList.add('open');
     }
 
@@ -2497,11 +2520,12 @@
             } catch (e) {}
           }
 
-          const timeoutMs = shouldAttachImage ? 6000 : 3500;
+          const selectedModel = getSelectedModel();
+          const timeoutMs = shouldAttachImage ? 12000 : 8000;
           const controller = new AbortController();
           const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
 
-          const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent?key=${encodeURIComponent(apiKey)}`;
+          const url = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(selectedModel)}:generateContent?key=${encodeURIComponent(apiKey)}`;
           const res = await fetch(url, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
