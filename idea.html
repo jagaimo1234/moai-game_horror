@@ -1675,7 +1675,7 @@
           <div class="brand-title">
             <span>MOAI IDEA GALLERY</span>
             <span class="brand-badge">AIブレスト対応</span>
-            <span class="brand-badge" style="background:#059669; color:#fff; border-color:#10b981;">⚡ v2.2 (最新)</span>
+            <span class="brand-badge" style="background:#059669; color:#fff; border-color:#10b981;">⚡ v2.3 (最新)</span>
           </div>
           <div class="brand-subtitle">新作アイデアを視覚的に並べて、AI相棒モアイとLINE/X感覚で育てる場所</div>
         </div>
@@ -2400,81 +2400,90 @@
       }
     }
 
-    // 賢く文脈を読んで即座に返すブレストエンジン（クラウド混雑時・クォータ制限時も0.5秒で確実に相棒として返答）
+    // 賢く文脈を読んで即座に返すブレストエンジン（既出チェック付きで絶対に同じ返信を繰り返さない）
     function generateSmartLocalMoaiReply(item, role) {
       const logs = Array.isArray(item.logs) ? item.logs : [];
       const userLogs = logs.filter(l => l.side === 'right').map(l => l.text || '');
+      const aiLogs = logs.filter(l => l.side === 'left').map(l => l.text || '');
       const lastText = userLogs[userLogs.length - 1] || '';
-      const allUserText = userLogs.slice(-5).join(' ');
+      const allUserText = userLogs.slice(-6).join(' ');
       const title = item.title || 'この新作モアイ';
 
-      // 1. 返事への共感（「いいかも」「たしかに」「そうね」など）
-      if (lastText.includes('いいかも') || lastText.includes('たしかに') || lastText.includes('そう') || lastText.includes('賛成') || lastText.includes('いいね')) {
-        const pool = [
-          `でしょ！🗿✨ これ絶対ウケると思う！まずはミニチュアの小物を何パターンか作ってみるか、本体の造形から固めるかどっちから進めようか？`,
-          `気に入ってもらえて嬉しい🗿🔥 「寝そべりモアイ」ならではのこの脱力感、卓上フィギュアとして唯一無二の存在感になりそう！`,
-          `よし、その方向でいこう！🗿💡 3Dモデリングするときに肘の角度や首の傾きでさらに愛嬌が増すから、ラフ作ったらまた見せてね！`
+      // 既に出したAI返信と重複しないように選ぶヘルパー
+      const pickFresh = (candidates) => {
+        const fresh = candidates.filter(c => !aiLogs.some(existing => existing.includes(c.slice(0, 20))));
+        const targetList = fresh.length > 0 ? fresh : candidates;
+        return targetList[Math.floor(Math.random() * targetList.length)];
+      };
+
+      // 1. エレクトロボ関連の文脈
+      if (allUserText.includes('エレクトロボ') || title.includes('エレクトロボ') || allUserText.includes('ロボ')) {
+        const electroPool = [
+          `「エレクトロボ」なら、背中にあえて『大きなゼンマイネジ』を別パーツで背負わせるのはどう？🗿⚙️ 昔のブリキ玩具っぽさが出て絶対かわいいよ！`,
+          `頭のアンテナを真鍮線か細めの別パーツにして、少しだけナナメに生やすと一気にレトロフューチャー感が増すと思う！🗿⚡`,
+          `胸のパネルに小さなメーターやスリットのモールドを入れて、レジンやスミ入れで光ってる風に見せるギミックはどう？🗿🤖`,
+          `手のひらに小さなネオジム磁石を仕込んで、ミニスパナやボルトを持たせ替えできるようにしたら男心くすぐられまくりじゃない？🗿🛠️`,
+          `カラー展開はどうする？王道のビンテージシルバーか、それとも70年代レトロ風にマスタードイエローやスモーキーブルーで塗るか迷うね🗿🎨`,
+          `マルシェ用なら、一回り小さい『チビエレクトロボ』を作って親子セットで並べたら絶対二度見されるよ！🗿✨`
         ];
-        return pool[Math.floor(Math.random() * pool.length)];
+        return pickFresh(electroPool);
       }
 
       // 2. 寝そべりモアイ関連の文脈
       if (allUserText.includes('寝そべり') || title.includes('寝そべり')) {
-        if (allUserText.includes('リモコン') || allUserText.includes('缶') || allUserText.includes('小物')) {
-          return `缶ジュースやテレビのリモコンは別パーツにして、手のひらに磁石を仕込んで持たせ替えできるようにするのも激アツじゃない？🗿🥤`;
-        }
+        const lieDownPool = [
+          `「寝そべりモアイ」、この脱力感がたまらない！🗿🛋️ 缶ジュースやテレビのリモコンを手の横に添えられる小皿を一緒に作るのどう？`,
+          `肘をついて横向きに寝そべるポーズか、完全に仰向けでお腹丸出しで寝るポーズ、どっちの方向で攻めてみたい？🗿💤`,
+          `背中に細いスリットを入れて、ショップカードや名刺を挟める『ぐうたらカードスタンド』にする実用系ギミックもウケそう！🗿🃏`,
+          `3Dプリント時の接地面をフラットにしておけばサポート材も最小限で綺麗に刷れるよ🗿🛠️ まずはグレー単色でシルエット見てみる？`
+        ];
+        return pickFresh(lieDownPool);
+      }
+
+      // 3. ハチマキモアイ関連の文脈
+      if (allUserText.includes('ハチマキ') || title.includes('ハチマキ')) {
+        const hachimakiPool = [
+          `ハチマキの結び目を別パーツにして、スライド式でカチッと差し替えられるようにしたら塗装も量産もめっちゃ楽になるよ！🗿🔥`,
+          `結び目のバリエーションで『必勝ハチマキ』『ラーメン屋風』『ねじりハチマキ』とか付け替えられたらコレクター心を刺激しそう！🗿✨`,
+          `額のハチマキ部分に文字を刻印できるようにして、受験生応援グッズやイベント限定版にするアイデアはどう？🗿✏️`
+        ];
+        return pickFresh(hachimakiPool);
+      }
+
+      // 4. 「どうしようか」「どうかな」「どう？」「アイデア」などへの返答
+      if (lastText.includes('どうしよう') || lastText.includes('どう') || lastText.includes('アイデア') || lastText.includes('次') || lastText.length <= 8) {
         if (role === 'maker') {
-          return `「寝そべりモアイ」を3Dプリントするなら、顎や肘の接地面をフラットにしておくとサポート材も少なくて綺麗に刷れるよ🗿🛠️ 肘をついたポーズと完全仰向け、どっちが本命？`;
+          const makerPool = [
+            `まずは本体を何分割にするか決めようか🗿🛠️ 頭部・胴体・小物を別パーツにして接着する構成にするとサポート材も少なくて綺麗に仕上がるよ！`,
+            `3Dプリンターで刷る時の積層痕の向きを考えて、一番見せたい正面が滑らかに出る角度でデータを作っていこう🗿📐`,
+            `試作第1号は小さめの60%スケールくらいでサクッと単色プリントして、手触りや重心を確認してみるのがおすすめ！🗿✨`
+          ];
+          return pickFresh(makerPool);
         }
         if (role === 'customer') {
-          return `「寝そべりモアイ」、この脱力感がたまらない！🗿✨ パソコンのキーボードの横に置いたら仕事中に絶対癒やされるやつ。背中にクリップを挟めるスリットがあっても欲しい！`;
+          const customerPool = [
+            `マルシェのお客さん目線だと、手のひらサイズでずっしり感があるやつが一番刺さるよ！🗿✨ デスクのPC横にちょこんと置きたい！`,
+            `2個並べたときにストーリーが生まれる『相棒モアイ』とのセット販売があると、思わず両方買っちゃいそう🗿🎁`,
+            `パッケージにもこだわって、昭和のレトロな紙箱風のパッケージに入れて売ったら世界観最高じゃない？🗿📦`
+          ];
+          return pickFresh(customerPool);
         }
-        return `「寝そべりモアイ」、この脱力ポーズ最高だよね🗿🛋️ スマホを立てかけられる角度にする『実用系』にするか、あえて何もしない『完全脱力・休日モアイ』にするか、どっちの方向で攻めてみる？`;
+
+        const generalPool = [
+          `まずは「可動ギミック」をつけるか、「置物としてのシルエット」を極めるか、どっちを優先して進めてみようか？🗿💡`,
+          `卓上でペン立てやクリップ置きになる『実用モアイ』にするか、完全な『アート・インテリアモアイ』にするか、どっちがワクワクする？🗿✨`,
+          `パーツ分割を工夫して、頭や腕の角度を少し変えて表情づけできるようにしてみるのも面白そうじゃない？🗿🔥`
+        ];
+        return pickFresh(generalPool);
       }
 
-      // 3. ハチマキ・小物関連の文脈
-      if (allUserText.includes('ハチマキ') || allUserText.includes('結び目') || title.includes('ハチマキ')) {
-        if (allUserText.includes('別パーツ') || allUserText.includes('差し替え') || allUserText.includes('バリエーション')) {
-          if (role === 'maker') {
-            return `ハチマキ結び目の別パーツ化、いいね！🗿🛠️ 頭部に小さなダボ穴（凸凹）を作って磁石かスライド式でカチッと固定できるようにすれば、塗装やサポート材もかなり楽になるよ！`;
-          }
-          if (role === 'customer') {
-            return `結び目の差し替えめちゃくちゃ欲しい！🗿✨ 『必勝』とか『気合い』『お祭り風』みたいに気分で付け替えられたら絶対買うやつ！`;
-          }
-          return `ハチマキの差し替えパーツ、最高にイイと思う！🗿🔥 結び目の形や色を変えるだけで『気合いモアイ』『受験生モアイ』『ラーメン屋モアイ』みたいに無限にキャラが広がりそうだね！`;
-        }
-        return `ハチマキのワンポイントが効いてるね！🗿🔥 結び目の向きや太さを少し変えるだけでも表情がガラッと変わりそう！`;
-      }
-
-      // 4. 「どうかな？」「どう？」「議論しよう」などの壁打ちへの応答
-      if (lastText.includes('どうかな') || lastText.includes('どう？') || lastText.includes('議論') || lastText.includes('いける') || lastText.length <= 8) {
-        if (allUserText.includes('パーツ') || allUserText.includes('色')) {
-          return `その方向性、大賛成！🗿✨ 別パーツにすればカラーバリエーション展開もしやすいし、まずは最小限のパーツ構成で1個試作してみよう！`;
-        }
-        if (allUserText.includes('ポーズ') || allUserText.includes('角度')) {
-          return `その角度、かなりグッとくると思う！🗿💡 ちょっとした傾きや視線のズレがモアイの哀愁や可愛さになるから、ぜひそのまま進めよう！`;
-        }
-        return `「${title}」、方向性すごく面白いよ🗿🔥 マルシェでパッと目を引くような『クスッと笑えるポイント』や『思わず触りたくなるギミック』をどこに仕込むか一緒に考えよう！`;
-      }
-
-      // 5. ロール別応答
-      if (role === 'maker') {
-        if (allUserText.includes('パーツ') || allUserText.includes('分割')) {
-          return `分割設計にするなら、プリント時の積層痕の向きがパーツごとに揃うように配置すると、組み上げた時の質感がグッと良くなるよ🗿🛠️`;
-        }
-        return `「${title}」、3Dプリントする時に底面がフラットになる角度で設計するとサポート材が最小限で綺麗に刷れそう🗿🛠️ 一部だけ別パーツにして色分けするのもアリだね！`;
-      }
-      if (role === 'customer') {
-        return `マルシェの棚に「${title}」が並んでたら絶対二度見する🗿✨ デスクの横に置いたときのサイズ感や、2体並べたときのセット感があるとさらに欲しくなりそう！`;
-      }
-      if (role === 'critic') {
-        return `「${title}」、方向性はすごくいい！ただ普通のポーズだと既存作に埋もれるから、もう一歩「えっ、そこ動くの！？」みたいなギャップや小ネタを1つ仕込んでみよう🗿🔥`;
-      }
-
-      if (allUserText.includes('試作') || allUserText.includes('単色')) {
-        return `まずはグレーか白の単色でサイズ感を見るのが一番だね🗿✨ 試作ができたら写真をここに貼って！シルエット見ながら次の展開考えよう！`;
-      }
-      return `「${title}」のその発想めっちゃいい🗿✨ 定番のおすわりモアイやモアイロボと並べたときに、ちょっとしたストーリーが繋がる小物を持たせてみるのはどう？`;
+      // 5. 汎用ブレストプール
+      const defaultPool = [
+        `「${title}」、その発想すごく面白いよ！🗿✨ 定番のおすわりモアイと並べたときに一際目を引く仕掛けを1つ入れてみよう！`,
+        `まずはラフな3Dデータか粘土でざっくり形を作ってみない？🗿🛠️ シルエットが見えたらさらに具体的な小ネタが浮かんできそう！`,
+        `マルシェでのお客さんの反応を想像するとニヤニヤが止まらないね🗿🔥 カラーバリエーションも何パターンか考えてみよう！`
+      ];
+      return pickFresh(defaultPool);
     }
 
     async function callGeminiForIdeaReply(item, role) {
