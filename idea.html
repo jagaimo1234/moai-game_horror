@@ -715,6 +715,7 @@
       }
       .mobile-detail-topbar {
         display: flex;
+        padding: 8px 12px;
       }
       .detail-left {
         display: none !important;
@@ -736,6 +737,23 @@
       }
       .desktop-close-btn {
         display: none !important;
+      }
+
+      /* スマホ時のチャット画面フルスクリーン最適化 */
+      .chat-header {
+        padding: 8px 12px;
+        min-height: unset;
+      }
+      .chat-timeline {
+        padding: 12px 10px;
+        gap: 10px;
+      }
+      .chat-input-area {
+        padding: 8px 10px;
+        gap: 6px;
+      }
+      .line-bubble {
+        max-width: 85%;
       }
     }
 
@@ -1629,10 +1647,67 @@
       border-radius: 6px;
     }
 
+    /* 折りたたみ式チャット設定ドロワー (通常時は非表示でフル画面化) */
+    .chat-options-drawer {
+      display: none;
+      flex-direction: column;
+      gap: 8px;
+      padding: 10px 12px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      margin-bottom: 4px;
+      animation: slideDrawerDown 0.2s ease-out;
+    }
+
+    .chat-options-drawer.open {
+      display: flex;
+    }
+
+    @keyframes slideDrawerDown {
+      from {
+        opacity: 0;
+        transform: translateY(8px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
     .chat-input-row {
       display: flex;
       align-items: flex-end;
-      gap: 8px;
+      gap: 6px;
+    }
+
+    .btn-toggle-options {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      background: var(--bg-elevated);
+      color: var(--text-sub);
+      border: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.05rem;
+      cursor: pointer;
+      flex-shrink: 0;
+      transition: all 0.15s ease;
+    }
+
+    .btn-toggle-options:hover {
+      background: var(--bg-surface);
+      color: var(--accent);
+      border-color: var(--accent);
+    }
+
+    .btn-toggle-options.active {
+      background: rgba(168, 85, 247, 0.18);
+      color: #c084fc;
+      border-color: #a855f7;
+      transform: rotate(45deg);
     }
 
     .btn-chat-attach {
@@ -1652,8 +1727,8 @@
 
     .chat-textarea {
       flex: 1;
-      background: var(--bg-main);
-      color: #fff;
+      background: var(--bg-input);
+      color: var(--text-main);
       border: 1px solid var(--border-strong);
       border-radius: 20px;
       padding: 9px 14px;
@@ -1668,6 +1743,27 @@
 
     .chat-textarea:focus {
       border-color: var(--accent);
+    }
+
+    .btn-quick-ai {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      background: var(--ai-grad);
+      color: #fff;
+      border: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.15rem;
+      cursor: pointer;
+      flex-shrink: 0;
+      box-shadow: 0 2px 8px rgba(168, 85, 247, 0.35);
+      transition: transform 0.12s;
+    }
+
+    .btn-quick-ai:active {
+      transform: scale(0.92);
     }
 
     .btn-chat-send {
@@ -1826,7 +1922,7 @@
           <div class="brand-title">
             <span>MOAI IDEA GALLERY</span>
             <span class="brand-badge">AIブレスト対応</span>
-            <span class="brand-badge" style="background:#059669; color:#fff; border-color:#10b981;">⚡ v2.5 (最新)</span>
+            <span class="brand-badge" style="background:#059669; color:#fff; border-color:#10b981;">⚡ v2.6 (最新)</span>
           </div>
           <div class="brand-subtitle">新作アイデアを視覚的に並べて、AI相棒モアイとLINE/X感覚で育てる場所</div>
         </div>
@@ -2134,52 +2230,63 @@
         </div>
 
         <div class="chat-input-area">
-          <!-- 🤖 AI相棒モアイ 自動返信コントロールバー -->
-          <div class="ai-partner-bar">
-            <div class="ai-partner-left">
-              <label class="ai-toggle-label" title="ONにすると、あなたが送信した直後に相棒モアイ(AI)が自動で返信してくれます">
-                <input type="checkbox" id="chkAiAutoReply" checked>
-                <span>🤖 AI自動返信</span>
-              </label>
-              <select id="aiRoleSelect" class="ai-role-select" title="相棒モアイの返信スタイル">
-                <option value="brainstorm">✨ 褒め＆アイデア広げ役</option>
-                <option value="maker">🛠️ 3Dプリント・造形視点</option>
-                <option value="customer">🎪 マルシェお客さん視点</option>
-                <option value="critic">🔥 辛口プロデューサー視点</option>
-              </select>
-            </div>
-            <button id="btnAiReplyNow" class="btn-ai-reply-now" onclick="triggerAiReply()" title="今の流れを読んで相棒モアイに1件返信してもらう">
-              <span>🗿</span>
-              <span>AIに返信してもらう</span>
-            </button>
-          </div>
-
-          <!-- 手動時の発言者切替バー -->
-          <div class="speaker-toolbar">
-            <div class="speaker-pills">
-              <span style="font-size:0.68rem; color:var(--text-muted);">自分の投稿位置:</span>
-              <button id="btnSpeakerSelf" class="speaker-pill active-self" onclick="setSpeakerSide('right')">
-                🧑 自分 (右)
-              </button>
-              <button id="btnSpeakerMoai" class="speaker-pill" onclick="setSpeakerSide('left')">
-                🗿 相棒モアイ (左)
-              </button>
-            </div>
-            <button onclick="openAiModal()" style="background:none; border:none; color:#c084fc; font-size:0.7rem; cursor:pointer; text-decoration:underline;">
-              🔑 APIキー設定
-            </button>
-          </div>
-
+          <!-- 添付プレビュー（添付時のみ） -->
           <div id="chatAttachPreview" class="chat-attach-preview">
             <img id="chatAttachImg" src="" alt="添付画像">
             <span style="font-size:0.75rem; color:var(--text-sub);">画像を添付</span>
             <button id="btnClearChatAttach" class="btn-close-modal" style="width:24px; height:24px; font-size:0.75rem;">✕</button>
           </div>
 
+          <!-- ⚙️ 折りたたみ式オプション設定ドロワー（通常時は非表示でフル画面化） -->
+          <div id="chatOptionsDrawer" class="chat-options-drawer">
+            <!-- 🤖 AI相棒モアイ 自動返信コントロールバー -->
+            <div class="ai-partner-bar">
+              <div class="ai-partner-left">
+                <label class="ai-toggle-label" title="ONにすると、あなたが送信した直後に相棒モアイ(AI)が自動で返信してくれます">
+                  <input type="checkbox" id="chkAiAutoReply" checked>
+                  <span>🤖 AI自動返信</span>
+                </label>
+                <select id="aiRoleSelect" class="ai-role-select" title="相棒モアイの返信スタイル">
+                  <option value="brainstorm">✨ 褒め＆アイデア広げ役</option>
+                  <option value="maker">🛠️ 3Dプリント・造形視点</option>
+                  <option value="customer">🎪 マルシェお客さん視点</option>
+                  <option value="critic">🔥 辛口プロデューサー視点</option>
+                </select>
+              </div>
+              <button id="btnAiReplyNow" class="btn-ai-reply-now" onclick="triggerAiReply()" title="今の流れを読んで相棒モアイに1件返信してもらう">
+                <span>🗿</span>
+                <span>AIに今すぐ返信してもらう</span>
+              </button>
+            </div>
+
+            <!-- 手動時の発言者切替バー -->
+            <div class="speaker-toolbar">
+              <div class="speaker-pills">
+                <span style="font-size:0.68rem; color:var(--text-muted);">投稿位置:</span>
+                <button id="btnSpeakerSelf" class="speaker-pill active-self" onclick="setSpeakerSide('right')">
+                  🧑 自分 (右)
+                </button>
+                <button id="btnSpeakerMoai" class="speaker-pill" onclick="setSpeakerSide('left')">
+                  🗿 相棒モアイ (左)
+                </button>
+              </div>
+              <button onclick="openAiModal()" style="background:none; border:none; color:#c084fc; font-size:0.7rem; cursor:pointer; text-decoration:underline;">
+                🔑 APIキー設定
+              </button>
+            </div>
+          </div>
+
+          <!-- メイン入力行（通常時はこの1行のみでスッキリ・画面広々！） -->
           <div class="chat-input-row">
-            <button id="btnChatAttach" class="btn-chat-attach" title="検討途中の画像を投稿">📷</button>
+            <button id="btnToggleChatOptions" class="btn-toggle-options" title="AI設定や発言者位置の設定を開く">
+              ⚙️
+            </button>
+            <button id="btnChatAttach" class="btn-chat-attach" title="画像を添付">📷</button>
             <input type="file" id="chatImageInput" accept="image/*" style="display:none;">
             <textarea id="chatTextarea" class="chat-textarea" rows="1" placeholder="思いついたことをメモ…"></textarea>
+            <button id="btnQuickAiReply" class="btn-quick-ai" onclick="triggerAiReply()" title="相棒モアイに返信をもらう">
+              🗿
+            </button>
             <button id="btnChatSend" class="btn-chat-send">送信</button>
           </div>
         </div>
@@ -3506,6 +3613,14 @@
         isAiThinking = false;
         await triggerAiReply();
       }
+
+      // 送信完了時に設定ドロワーが開いていたら閉じて画面をフルに保つ
+      const chatOptionsDrawer = document.getElementById('chatOptionsDrawer');
+      const btnToggleOptions = document.getElementById('btnToggleChatOptions');
+      if (chatOptionsDrawer && chatOptionsDrawer.classList.contains('open')) {
+        chatOptionsDrawer.classList.remove('open');
+        if (btnToggleOptions) btnToggleOptions.classList.remove('active');
+      }
     }
 
     async function deleteChatLog(logId) {
@@ -3723,6 +3838,17 @@
         await saveIdeasToStorage();
         closeDetailModal();
       });
+
+      // チャット下部オプション（AI自動返信・投稿位置等）の開閉トグル
+      const btnToggleOptions = document.getElementById('btnToggleChatOptions');
+      const chatOptionsDrawer = document.getElementById('chatOptionsDrawer');
+      if (btnToggleOptions && chatOptionsDrawer) {
+        btnToggleOptions.addEventListener('click', () => {
+          const isOpen = chatOptionsDrawer.classList.toggle('open');
+          btnToggleOptions.classList.toggle('active', isOpen);
+          scrollToChatBottom();
+        });
+      }
 
       document.getElementById('btnChatSend').addEventListener('click', sendChatMessage);
       const chatTextarea = document.getElementById('chatTextarea');
