@@ -8,7 +8,30 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>MOAI IDEA GALLERY｜新作アイデア管理</title>
   <style>
-    :root, [data-theme="dark"] {
+    :root, [data-theme="light"] {
+      --bg-main: #f8fafc;
+      --bg-surface: #ffffff;
+      --bg-elevated: #f1f5f9;
+      --bg-chat: #f8fafc;
+      --bg-header: rgba(255, 255, 255, 0.96);
+      --bg-input: #ffffff;
+      --text-main: #0f172a;
+      --text-sub: #334155;
+      --text-muted: #64748b;
+      --accent: #ff2d55;
+      --accent-grad: linear-gradient(135deg, #ff2d55 0%, #ff6b81 100%);
+      --ai-grad: linear-gradient(135deg, #a855f7 0%, #ec4899 100%);
+      --line-green: #06c755;
+      --line-bg: #e2e8f0;
+      --x-blue: #1d9bf0;
+      --border: rgba(0, 0, 0, 0.08);
+      --border-strong: rgba(0, 0, 0, 0.16);
+      --shadow-lg: 0 16px 36px rgba(0, 0, 0, 0.06);
+      --radius-card: 18px;
+      --radius-lg: 22px;
+    }
+
+    [data-theme="dark"] {
       --bg-main: #0f1117;
       --bg-surface: #181b24;
       --bg-elevated: #222734;
@@ -27,25 +50,6 @@
       --border: rgba(255, 255, 255, 0.09);
       --border-strong: rgba(255, 255, 255, 0.18);
       --shadow-lg: 0 20px 50px rgba(0, 0, 0, 0.6);
-      --radius-card: 18px;
-      --radius-lg: 22px;
-    }
-
-    [data-theme="light"] {
-      --bg-main: #f1f5f9;
-      --bg-surface: #ffffff;
-      --bg-elevated: #e2e8f0;
-      --bg-chat: #f8fafc;
-      --bg-header: rgba(255, 255, 255, 0.92);
-      --bg-input: #f8fafc;
-      --text-main: #0f172a;
-      --text-sub: #334155;
-      --text-muted: #64748b;
-      --accent: #0284c7;
-      --border: rgba(0, 0, 0, 0.09);
-      --border-strong: rgba(0, 0, 0, 0.18);
-      --shadow-lg: 0 20px 40px rgba(0, 0, 0, 0.08);
-      --line-bg: #e2e8f0;
     }
 
     [data-theme="warm"] {
@@ -346,39 +350,410 @@
     /* =========================================================
        3. Gallery Grid (Matching App / Instagram Tile Style)
        ========================================================= */
-    .gallery-container {
-      max-width: 1200px;
+    /* =========================================================
+       Omiai Style UI Components (マッチングアプリ風デザイン)
+       ========================================================= */
+    .omiai-header {
+      position: sticky;
+      top: 0;
+      z-index: 40;
+      background: var(--bg-surface);
+      border-bottom: 1px solid var(--border);
+      padding: 6px 16px;
+      transition: background 0.2s ease;
+    }
+
+    .omiai-header-inner {
+      max-width: 600px;
       margin: 0 auto;
-      padding: 12px 20px 95px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 44px;
+    }
+
+    .omiai-header-left {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-weight: 800;
+      font-size: 1.15rem;
+      cursor: pointer;
+      color: var(--text-main);
+    }
+
+    .omiai-like-icon {
+      font-size: 1.25rem;
+      display: inline-block;
+      transform: translateY(-1px);
+    }
+
+    .omiai-like-count {
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: var(--text-main);
+    }
+
+    .omiai-logo-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .omiai-logo-text {
+      font-family: -apple-system, BlinkMacSystemFont, "Hiragino Kaku Gothic ProN", sans-serif;
+      font-size: 1.55rem;
+      font-weight: 900;
+      letter-spacing: -0.04em;
+      color: var(--text-main);
+      line-height: 1;
+    }
+
+    .omiai-header-right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .omiai-icon-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-main);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 6px;
+      border-radius: 50%;
+      transition: background 0.15s;
+    }
+
+    .omiai-icon-btn:hover {
+      background: var(--bg-elevated);
+    }
+
+    /* Omiai Horizontal Sub-Tabs */
+    .omiai-tab-bar {
+      background: var(--bg-surface);
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 56px;
+      z-index: 39;
+    }
+
+    .omiai-tab-scroll {
+      max-width: 600px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      gap: 0;
+      overflow-x: auto;
+      scrollbar-width: none;
+      padding: 0 4px;
+    }
+    .omiai-tab-scroll::-webkit-scrollbar {
+      display: none;
+    }
+
+    .omiai-tab-item {
+      background: transparent;
+      border: none;
+      border-bottom: 2.5px solid transparent;
+      padding: 10px 12px;
+      font-size: 0.84rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      cursor: pointer;
+      white-space: nowrap;
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      transition: color 0.15s;
+    }
+
+    .omiai-tab-item.active {
+      color: var(--text-main);
+      font-weight: 800;
+      border-bottom-color: var(--text-main);
+    }
+
+    .omiai-tab-item .yellow-dot {
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: #eab308;
+      display: inline-block;
+    }
+
+    /* Omiai 2-Column Grid & Card */
+    .gallery-container {
+      max-width: 620px;
+      margin: 0 auto;
+      padding: 12px 10px 100px;
     }
 
     .tile-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-      gap: 16px;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 14px 10px;
     }
 
-    @media (max-width: 640px) {
-      .tile-grid {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 10px;
-      }
-      .gallery-container {
-        padding: 8px 12px 95px;
-      }
-      .controls-bar {
-        padding: 10px 12px 4px;
-      }
-      .app-header {
-        padding: 10px 12px;
-      }
-      .brand-subtitle,
-      .save-indicator {
-        display: none;
-      }
-      .btn-add-idea {
-        display: none;
-      }
+    .omiai-card {
+      display: flex;
+      flex-direction: column;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .omiai-card-photo-wrap {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 1 / 1.18;
+      border-radius: 18px;
+      overflow: hidden;
+      background: var(--bg-elevated);
+      box-shadow: 0 3px 12px rgba(0, 0, 0, 0.08);
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    .omiai-card:active .omiai-card-photo-wrap {
+      transform: scale(0.97);
+    }
+
+    .omiai-card-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    /* Red Circle NEW badge (Omiai signature) */
+    .omiai-badge-new {
+      position: absolute;
+      top: 8px;
+      left: 8px;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: #ff2d55;
+      color: #fff;
+      font-size: 0.62rem;
+      font-weight: 900;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      letter-spacing: 0.02em;
+      box-shadow: 0 2px 8px rgba(255, 45, 85, 0.45);
+      z-index: 2;
+    }
+
+    .omiai-card-fav {
+      position: absolute;
+      bottom: 8px;
+      right: 8px;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: rgba(0, 0, 0, 0.45);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      color: #fff;
+      font-size: 0.85rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      z-index: 2;
+      transition: transform 0.12s;
+    }
+
+    .omiai-card-fav.active {
+      background: rgba(255, 45, 85, 0.9);
+      border-color: #ff2d55;
+    }
+
+    /* Bottom text info (🟢 30歳 東京 / 👍? 📷3 ♡80%) */
+    .omiai-card-bottom {
+      padding: 6px 2px 2px;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .omiai-card-profile {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 0.88rem;
+      font-weight: 800;
+      color: var(--text-main);
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+
+    .online-indicator-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #22c55e;
+      flex-shrink: 0;
+      box-shadow: 0 0 5px #22c55e;
+    }
+
+    .omiai-card-name {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .omiai-card-area {
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--text-sub);
+      flex-shrink: 0;
+    }
+
+    .omiai-card-stats {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    /* Omiai Card Add Tile */
+    .omiai-card-add {
+      display: flex;
+      flex-direction: column;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .omiai-card-add-box {
+      width: 100%;
+      aspect-ratio: 1 / 1.18;
+      border-radius: 18px;
+      border: 2px dashed var(--border-strong);
+      background: var(--bg-surface);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      color: var(--text-sub);
+      transition: all 0.15s ease;
+    }
+
+    .omiai-card-add:hover .omiai-card-add-box {
+      border-color: #ff2d55;
+      background: rgba(255, 45, 85, 0.04);
+    }
+
+    .omiai-add-plus {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: #ff2d55;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      font-weight: 400;
+      box-shadow: 0 4px 12px rgba(255, 45, 85, 0.35);
+    }
+
+    /* Omiai Fixed Bottom Navigation Bar (5 tabs) */
+    .omiai-bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 56px;
+      background: var(--bg-surface);
+      border-top: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-around;
+      z-index: 50;
+      box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.05);
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    .omiai-nav-btn {
+      flex: 1;
+      height: 100%;
+      background: transparent;
+      border: none;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 2px;
+      color: var(--text-muted);
+      cursor: pointer;
+      position: relative;
+      user-select: none;
+      transition: color 0.15s;
+    }
+
+    .omiai-nav-btn.active {
+      color: var(--text-main);
+    }
+
+    .omiai-nav-btn span {
+      font-size: 0.62rem;
+      font-weight: 700;
+    }
+
+    .omiai-nav-icon {
+      width: 22px;
+      height: 22px;
+    }
+
+    .omiai-nav-badge-wrap {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .omiai-red-badge {
+      position: absolute;
+      top: -5px;
+      right: -8px;
+      background: #ff2d55;
+      color: #fff;
+      font-size: 0.6rem;
+      font-weight: 900;
+      padding: 1px 4px;
+      border-radius: 999px;
+      min-width: 15px;
+      text-align: center;
+      line-height: 1.2;
+    }
+
+    .omiai-nav-add-circle {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      background: #ff2d55;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.35rem;
+      font-weight: 400;
+      box-shadow: 0 3px 10px rgba(255, 45, 85, 0.4);
+      margin-top: -6px;
     }
 
     .idea-tile {
@@ -1912,72 +2287,89 @@
 <body>
 
   <!-- =========================================================
-       Header
+       Omiai Style Header & Top Bar
        ========================================================= -->
-  <header class="app-header">
-    <div class="header-inner">
-      <div class="brand-group">
-        <div class="brand-logo-icon">🗿</div>
-        <div class="brand-titles">
-          <div class="brand-title">
-            <span>MOAI IDEA GALLERY</span>
-            <span class="brand-badge">AIブレスト対応</span>
-            <span class="brand-badge" style="background:#059669; color:#fff; border-color:#10b981;">⚡ v2.6 (最新)</span>
-          </div>
-          <div class="brand-subtitle">新作アイデアを視覚的に並べて、AI相棒モアイとLINE/X感覚で育てる場所</div>
-        </div>
+  <header class="omiai-header">
+    <div class="omiai-header-inner">
+      <div class="omiai-header-left" onclick="filterByFavorites()" title="お気に入りアイデア一覧">
+        <span class="omiai-like-icon">👍</span>
+        <span id="headerFavCount" class="omiai-like-count">0</span>
       </div>
-
-      <div class="header-actions">
-        <div id="saveBadge" class="save-indicator">
-          <span>✓</span>
-          <span id="saveBadgeText">自動保存済み</span>
-        </div>
-        <button id="btnOpenAiSettings" class="btn-ai-settings" title="Gemini APIキー設定">
-          <span id="aiKeyDot" class="ai-key-dot"></span>
-          <span>🤖 AI設定</span>
+      <div class="omiai-logo-wrap" onclick="resetGalleryFilter()">
+        <span class="omiai-logo-text">Omiai</span>
+        <span style="font-size:0.6rem; color:var(--text-muted); font-weight:700; letter-spacing:0.1em; margin-top:-2px;">MOAI LAB ⚡v2.7</span>
+      </div>
+      <div class="omiai-header-right">
+        <button id="btnOpenThemeModal" class="omiai-icon-btn" title="背景色・テーマを変更 (🎨)">🎨</button>
+        <button id="btnOpenAiSettings" class="omiai-icon-btn" title="AI設定">🤖</button>
+        <button id="btnFilterToggle" class="omiai-icon-btn" onclick="openAddModal()" title="新規アイデア追加">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
         </button>
-        <button id="btnOpenAddModal" class="btn-add-idea">
-          <span>＋</span>
-          <span>アイデア追加</span>
-        </button>
-        <button id="btnOpenThemeModal" class="btn-icon-subtle" title="背景色・テーマを変更 (🎨)" style="font-size:1.05rem;">🎨</button>
-        <button id="btnExportJson" class="btn-icon-subtle" title="バックアップ書き出し (JSON)">⬇</button>
-        <button id="btnResetSamples" class="btn-icon-subtle" title="初期サンプルを復元">🔄</button>
       </div>
     </div>
   </header>
 
-  <!-- =========================================================
-       Filter & Sort Controls
-       ========================================================= -->
-  <section class="controls-bar">
-    <div class="filter-pills" id="filterPills">
-      <button class="filter-pill active" data-filter="all">すべて</button>
-      <button class="filter-pill" data-filter="fav">⭐ お気に入り</button>
-      <button class="filter-pill" data-filter="idea">💡 思いつき</button>
-      <button class="filter-pill" data-filter="considering">🤔 検討中</button>
-      <button class="filter-pill" data-filter="prototyping">🛠️ 試作中</button>
-      <button class="filter-pill" data-filter="completed">✨ 完成</button>
+  <!-- Omiai Style Horizontal Tabs -->
+  <nav class="omiai-tab-bar">
+    <div class="omiai-tab-scroll" id="omiaiTabs">
+      <button class="omiai-tab-item" data-sort="favorite" data-filter="all">
+        <span class="yellow-dot"></span>いいね多い順
+      </button>
+      <button class="omiai-tab-item" data-sort="updated" data-filter="all">
+        <span class="yellow-dot"></span>ログイン順
+      </button>
+      <button class="omiai-tab-item active" data-sort="recommended" data-filter="all">
+        おすすめ順
+      </button>
+      <button class="omiai-tab-item" data-sort="created" data-filter="idea">
+        <span class="yellow-dot"></span>新メンバー
+      </button>
+      <button class="omiai-tab-item" data-sort="updated" data-filter="prototyping">
+        試作中
+      </button>
+      <button class="omiai-tab-item" data-sort="updated" data-filter="completed">
+        完成
+      </button>
     </div>
-
-    <div class="sort-group">
-      <select id="sortSelect" class="sort-select" aria-label="並び替え">
-        <option value="updated">更新順（チャット・編集順）</option>
-        <option value="created">登録順（新しい順）</option>
-        <option value="favorite">お気に入り優先</option>
-      </select>
-    </div>
-  </section>
+  </nav>
 
   <!-- =========================================================
-       1. アイデア一覧画面（タイル表示）
+       1. アイデア一覧画面（Omiai風 2列タイル表示）
        ========================================================= -->
   <main class="gallery-container">
     <div id="tileGrid" class="tile-grid">
       <!-- Populated by JS -->
     </div>
   </main>
+
+  <!-- =========================================================
+       Omiai Style Fixed Bottom Navigation Bar (下部固定ナビ)
+       ========================================================= -->
+  <nav class="omiai-bottom-nav">
+    <button class="omiai-nav-btn active" id="navBtnSearch" onclick="onBottomNavClick('search')">
+      <svg class="omiai-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+      <span>さがす</span>
+    </button>
+    <button class="omiai-nav-btn" id="navBtnFav" onclick="onBottomNavClick('fav')">
+      <svg class="omiai-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"></path></svg>
+      <span>いいね</span>
+    </button>
+    <button class="omiai-nav-btn" id="navBtnAdd" onclick="openAddModal()">
+      <div class="omiai-nav-add-circle">＋</div>
+      <span style="color:#ff2d55; font-weight:800;">追加</span>
+    </button>
+    <button class="omiai-nav-btn" id="navBtnChat" onclick="onBottomNavClick('chat')">
+      <div class="omiai-nav-badge-wrap">
+        <svg class="omiai-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+        <span id="bottomNavChatBadge" class="omiai-red-badge">4</span>
+      </div>
+      <span>やり取り</span>
+    </button>
+    <button class="omiai-nav-btn" id="navBtnMenu" onclick="openThemeModal()">
+      <svg class="omiai-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+      <span>設定</span>
+    </button>
+  </nav>
 
   <!-- Mobile Floating Button -->
   <button id="btnFabAdd" class="fab-add">
@@ -2501,11 +2893,11 @@
     }
 
     // =========================================================
-    // テーマ・背景色 管理エンジン
+    // テーマ・背景色 管理エンジン（Omiai風のクリーンホワイトがデフォルト）
     // =========================================================
     function initTheme() {
-      const savedTheme = localStorage.getItem(THEME_STORAGE) || 'dark';
-      const savedCustomBg = localStorage.getItem(CUSTOM_BG_STORAGE) || '#0f1117';
+      const savedTheme = localStorage.getItem(THEME_STORAGE) || 'light';
+      const savedCustomBg = localStorage.getItem(CUSTOM_BG_STORAGE) || '#f1f5f9';
       applyTheme(savedTheme, savedCustomBg);
     }
 
@@ -3075,11 +3467,78 @@
     }
 
     // =========================================================
+    // 3.8 Omiai スタイル用 ナビゲーション・フィルター操作
+    // =========================================================
+    function filterByFavorites() {
+      currentFilter = currentFilter === 'fav' ? 'all' : 'fav';
+      currentSort = 'favorite';
+      updateOmiaiTabSelection();
+      renderGallery();
+    }
+
+    function resetGalleryFilter() {
+      currentFilter = 'all';
+      currentSort = 'recommended';
+      updateOmiaiTabSelection();
+      renderGallery();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function updateOmiaiTabSelection() {
+      document.querySelectorAll('#omiaiTabs .omiai-tab-item').forEach(btn => {
+        const bFilter = btn.dataset.filter;
+        const bSort = btn.dataset.sort;
+        const isActive = (bFilter === currentFilter && bSort === currentSort) ||
+                         (bFilter === 'all' && currentFilter === 'all' && bSort === currentSort);
+        btn.classList.toggle('active', isActive);
+      });
+    }
+
+    function onBottomNavClick(navKey) {
+      document.querySelectorAll('.omiai-bottom-nav .omiai-nav-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.getAttribute('data-nav') === navKey);
+      });
+
+      if (navKey === 'search') {
+        currentFilter = 'all';
+        currentSort = 'recommended';
+        updateOmiaiTabSelection();
+        renderGallery();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      } else if (navKey === 'fav') {
+        currentFilter = 'fav';
+        currentSort = 'favorite';
+        updateOmiaiTabSelection();
+        renderGallery();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      } else if (navKey === 'chat') {
+        // 直近チャットのあるアイデアを開く
+        const withChats = ideas.filter(i => Array.isArray(i.logs) && i.logs.length > 0);
+        if (withChats.length > 0) {
+          openDetailModal(withChats[0].id);
+        } else if (ideas.length > 0) {
+          openDetailModal(ideas[0].id);
+        }
+      } else if (navKey === 'menu') {
+        openThemeModal();
+      }
+    }
+
+    // =========================================================
     // 4. 一覧画面レンダリング（タイル表示）
     // =========================================================
     function renderGallery() {
       const grid = document.getElementById('tileGrid');
       let list = [...ideas];
+
+      // お気に入り数・チャット総数の更新
+      const favCount = ideas.filter(i => i.favorite).length;
+      const favCountEl = document.getElementById('headerFavCount');
+      if (favCountEl) favCountEl.textContent = favCount;
+
+      const totalChats = ideas.reduce((acc, cur) => acc + (Array.isArray(cur.logs) ? cur.logs.length : 0), 0);
+      const chatBadgeEl = document.getElementById('bottomNavChatBadge');
+      if (chatBadgeEl) chatBadgeEl.textContent = totalChats > 99 ? '99+' : totalChats;
 
       if (currentFilter === 'fav') {
         list = list.filter(item => item.favorite);
@@ -3097,46 +3556,57 @@
         if (currentSort === 'created') {
           return (b.createdAt || 0) - (a.createdAt || 0);
         }
+        if (currentSort === 'recommended') {
+          // おすすめ順：お気に入り ＋ 直近チャットが活発なものを上位
+          const scoreA = (a.favorite ? 100 : 0) + (Array.isArray(a.logs) ? a.logs.length * 5 : 0);
+          const scoreB = (b.favorite ? 100 : 0) + (Array.isArray(b.logs) ? b.logs.length * 5 : 0);
+          return scoreB - scoreA || (b.updatedAt || 0) - (a.updatedAt || 0);
+        }
         return (b.updatedAt || 0) - (a.updatedAt || 0);
       });
 
-      const cardsHtml = list.map(item => {
-        const st = STATUS_MAP[item.status] || STATUS_MAP.idea;
+      const cardsHtml = list.map((item, idx) => {
         const hasTitle = item.title && item.title.trim().length > 0;
-        const displayTitle = hasTitle ? escapeHtml(item.title) : '無題のアイデア';
-        const displaySubtitle = item.subtitle ? escapeHtml(item.subtitle) : 'タップして詳細・チャットを開く';
+        const displayTitle = hasTitle ? escapeHtml(item.title) : '無題のモアイ';
+        const displaySubtitle = item.subtitle ? escapeHtml(item.subtitle) : '金沢';
         const logsCount = Array.isArray(item.logs) ? item.logs.length : 0;
-        const lastLog = logsCount > 0 ? item.logs[logsCount - 1] : null;
         const totalImages = 1 + (Array.isArray(item.subImages) ? item.subImages.length : 0);
         const fallbackSrc = item.fallbackImage || createPlaceholderDataUrl(item.title || 'MOAI IDEA', item.subtitle || '', '#1e293b', '#0f172a', '🗿');
 
+        // Omiai風：最初の数件または新着に「NEW」の赤い丸バッジを表示
+        const isNew = item.status === 'idea' || idx % 2 === 0;
+        // マッチ度（♡ 80%風の擬似モアイマッチ度）
+        const matchPercent = 65 + ((item.id.charCodeAt(item.id.length - 1) || 7) * 4) % 31;
+
         return `
-          <article class="idea-tile" onclick="openDetailModal('${item.id}')">
-            <img
-              class="tile-img"
-              src="${escapeHtml(item.coverImage || fallbackSrc)}"
-              onerror="this.onerror=null; this.src='${fallbackSrc}';"
-              alt="${displayTitle}"
-              loading="lazy"
-            >
-            <div class="tile-top-bar">
-              <span class="status-badge ${st.cls}">${st.label}</span>
+          <article class="omiai-card" onclick="openDetailModal('${item.id}')">
+            <div class="omiai-card-photo-wrap">
+              <img
+                class="omiai-card-img"
+                src="${escapeHtml(item.coverImage || fallbackSrc)}"
+                onerror="this.onerror=null; this.src='${fallbackSrc}';"
+                alt="${displayTitle}"
+                loading="lazy"
+              >
+              ${isNew ? `<span class="omiai-badge-new">NEW</span>` : ''}
               <button
-                class="btn-fav-tile ${item.favorite ? 'active' : ''}"
+                class="omiai-card-fav ${item.favorite ? 'active' : ''}"
                 onclick="toggleFavoriteOnTile(event, '${item.id}')"
-                title="お気に入り切替"
-              >★</button>
+                title="いいね！"
+              >
+                ${item.favorite ? '❤️' : '🤍'}
+              </button>
             </div>
-            <div class="tile-overlay">
-              <div class="tile-title ${hasTitle ? '' : 'unnamed'}">${displayTitle}</div>
-              <div class="tile-subtitle">${displaySubtitle}</div>
-              ${lastLog ? `<div class="tile-latest-chat">💬 ${escapeHtml(lastLog.text || '📷 画像メモ')}</div>` : ''}
-              <div class="tile-meta-row">
-                <div class="tile-counts">
-                  <span class="tile-count-pill">💬 ${logsCount}</span>
-                  ${totalImages > 1 ? `<span class="tile-count-pill">🖼️ ${totalImages}</span>` : ''}
-                </div>
-                <span>${formatTimeLabel(item.updatedAt || item.createdAt)}</span>
+            <div class="omiai-card-bottom">
+              <div class="omiai-card-profile">
+                <span class="online-indicator-dot" title="オンライン"></span>
+                <span class="omiai-card-name">${displayTitle}</span>
+                <span class="omiai-card-area">${displaySubtitle}</span>
+              </div>
+              <div class="omiai-card-stats">
+                <span>👍 ${item.favorite ? 1 : '?'}</span>
+                <span>📷 ${totalImages}</span>
+                <span>♡ ${matchPercent}%</span>
               </div>
             </div>
           </article>
@@ -3144,10 +3614,12 @@
       }).join('');
 
       const quickAddCard = `
-        <div class="idea-tile-add" onclick="openAddModal()">
-          <div class="plus-circle">＋</div>
-          <div style="font-weight:700; font-size:0.88rem; color:var(--text-sub);">アイデアを追加</div>
-          <div style="font-size:0.72rem;">画像1枚だけで即登録OK</div>
+        <div class="omiai-card-add" onclick="openAddModal()">
+          <div class="omiai-card-add-box">
+            <div class="omiai-add-plus">＋</div>
+            <div style="font-weight:800; font-size:0.86rem; color:var(--text-main);">新規アイデア</div>
+            <div style="font-size:0.7rem; color:var(--text-muted);">写真1枚で即登録</div>
+          </div>
         </div>
       `;
 
@@ -3715,18 +4187,15 @@
         closeThemeModal();
       });
 
-      document.querySelectorAll('#filterPills .filter-pill').forEach(btn => {
+      // Omiai サブタブバーの切替イベント
+      document.querySelectorAll('#omiaiTabs .omiai-tab-item').forEach(btn => {
         btn.addEventListener('click', () => {
-          document.querySelectorAll('#filterPills .filter-pill').forEach(b => b.classList.remove('active'));
+          document.querySelectorAll('#omiaiTabs .omiai-tab-item').forEach(b => b.classList.remove('active'));
           btn.classList.add('active');
-          currentFilter = btn.dataset.filter;
+          if (btn.dataset.filter) currentFilter = btn.dataset.filter;
+          if (btn.dataset.sort) currentSort = btn.dataset.sort;
           renderGallery();
         });
-      });
-
-      document.getElementById('sortSelect').addEventListener('change', (e) => {
-        currentSort = e.target.value;
-        renderGallery();
       });
 
       document.getElementById('btnOpenAddModal').addEventListener('click', () => openAddModal());
