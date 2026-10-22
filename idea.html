@@ -353,14 +353,25 @@
     /* =========================================================
        Omiai Style UI Components (マッチングアプリ風デザイン)
        ========================================================= */
-    .omiai-header {
+    .omiai-sticky-top-wrap {
       position: sticky;
       top: 0;
-      z-index: 40;
+      left: 0;
+      right: 0;
+      width: 100%;
+      box-sizing: border-box;
+      z-index: 45;
       background: var(--bg-surface);
       border-bottom: 1px solid var(--border);
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
+      transition: background 0.2s ease, border-color 0.2s ease;
+    }
+
+    .omiai-header {
+      width: 100%;
+      box-sizing: border-box;
       padding: 6px 16px;
-      transition: background 0.2s ease;
+      background: transparent;
     }
 
     .omiai-header-inner {
@@ -370,9 +381,12 @@
       align-items: center;
       justify-content: space-between;
       height: 44px;
+      width: 100%;
+      box-sizing: border-box;
     }
 
     .omiai-header-left {
+      min-width: 44px;
       display: flex;
       align-items: center;
       gap: 5px;
@@ -395,27 +409,39 @@
     }
 
     .omiai-logo-wrap {
+      flex: 1;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
       cursor: pointer;
       user-select: none;
+      text-align: center;
     }
 
     .omiai-logo-text {
       font-family: -apple-system, BlinkMacSystemFont, "Hiragino Kaku Gothic ProN", sans-serif;
-      font-size: 1.55rem;
+      font-size: 1.6rem;
       font-weight: 900;
       letter-spacing: -0.04em;
       color: var(--text-main);
       line-height: 1;
     }
 
+    .omiai-logo-sub {
+      font-size: 0.6rem;
+      color: var(--text-muted);
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      margin-top: 1px;
+    }
+
     .omiai-header-right {
+      min-width: 44px;
       display: flex;
       align-items: center;
-      gap: 10px;
+      justify-content: flex-end;
+      gap: 8px;
     }
 
     .omiai-icon-btn {
@@ -437,22 +463,24 @@
 
     /* Omiai Horizontal Sub-Tabs */
     .omiai-tab-bar {
-      background: var(--bg-surface);
-      border-bottom: 1px solid var(--border);
-      position: sticky;
-      top: 56px;
-      z-index: 39;
+      width: 100%;
+      box-sizing: border-box;
+      background: transparent;
+      border-top: 1px solid var(--border);
     }
 
     .omiai-tab-scroll {
       max-width: 600px;
+      width: 100%;
+      box-sizing: border-box;
       margin: 0 auto;
       display: flex;
       align-items: center;
       gap: 0;
       overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
       scrollbar-width: none;
-      padding: 0 4px;
+      padding: 0 8px;
     }
     .omiai-tab-scroll::-webkit-scrollbar {
       display: none;
@@ -462,7 +490,7 @@
       background: transparent;
       border: none;
       border-bottom: 2.5px solid transparent;
-      padding: 10px 12px;
+      padding: 8px 12px 9px;
       font-size: 0.84rem;
       font-weight: 600;
       color: var(--text-muted);
@@ -473,6 +501,7 @@
       align-items: center;
       gap: 4px;
       transition: color 0.15s;
+      flex-shrink: 0;
     }
 
     .omiai-tab-item.active {
@@ -491,15 +520,19 @@
 
     /* Omiai 2-Column Grid & Card */
     .gallery-container {
-      max-width: 620px;
+      max-width: 600px;
+      width: 100%;
+      box-sizing: border-box;
       margin: 0 auto;
-      padding: 12px 10px 100px;
+      padding: 14px 10px calc(100px + env(safe-area-inset-bottom));
     }
 
     .tile-grid {
       display: grid;
-      grid-template-columns: repeat(2, 1fr);
+      grid-template-columns: repeat(2, minmax(0, 1fr));
       gap: 14px 10px;
+      width: 100%;
+      box-sizing: border-box;
     }
 
     .omiai-card {
@@ -582,24 +615,28 @@
       padding: 6px 2px 2px;
       display: flex;
       flex-direction: column;
-      gap: 2px;
+      gap: 3px;
+      min-height: 44px;
+      box-sizing: border-box;
+      min-width: 0;
     }
 
     .omiai-card-profile {
       display: flex;
       align-items: center;
       gap: 5px;
-      font-size: 0.88rem;
+      font-size: 0.86rem;
       font-weight: 800;
       color: var(--text-main);
       overflow: hidden;
       white-space: nowrap;
       text-overflow: ellipsis;
+      min-width: 0;
     }
 
     .online-indicator-dot {
-      width: 8px;
-      height: 8px;
+      width: 7px;
+      height: 7px;
       border-radius: 50%;
       background: #22c55e;
       flex-shrink: 0;
@@ -610,13 +647,19 @@
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
+      flex: 1;
+      min-width: 0;
     }
 
     .omiai-card-area {
-      font-size: 0.78rem;
+      font-size: 0.76rem;
       font-weight: 600;
       color: var(--text-sub);
       flex-shrink: 0;
+      max-width: 65px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
     }
 
     .omiai-card-stats {
@@ -626,6 +669,7 @@
       font-size: 0.72rem;
       color: var(--text-muted);
       font-weight: 600;
+      white-space: nowrap;
     }
 
     /* Omiai Card Add Tile */
@@ -676,7 +720,8 @@
       bottom: 0;
       left: 0;
       right: 0;
-      height: 56px;
+      height: calc(56px + env(safe-area-inset-bottom));
+      padding-bottom: env(safe-area-inset-bottom);
       background: var(--bg-surface);
       border-top: 1px solid var(--border);
       display: flex;
@@ -686,6 +731,9 @@
       box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.05);
       max-width: 600px;
       margin: 0 auto;
+      width: 100%;
+      box-sizing: border-box;
+      transition: background 0.2s ease, border-color 0.2s ease;
     }
 
     .omiai-nav-btn {
@@ -2279,7 +2327,7 @@
 
     @media (max-width: 640px) {
       .fab-add {
-        display: flex;
+        display: none !important;
       }
     }
   </style>
@@ -2287,51 +2335,51 @@
 <body>
 
   <!-- =========================================================
-       Omiai Style Header & Top Bar
+       Omoai Style Header & Top Bar (上部固定バー)
        ========================================================= -->
-  <header class="omiai-header">
-    <div class="omiai-header-inner">
-      <div class="omiai-header-left" onclick="filterByFavorites()" title="お気に入りアイデア一覧">
-        <span class="omiai-like-icon">👍</span>
-        <span id="headerFavCount" class="omiai-like-count">0</span>
+  <div class="omiai-sticky-top-wrap">
+    <header class="omiai-header">
+      <div class="omiai-header-inner">
+        <div class="omiai-header-left" onclick="filterByFavorites()" title="お気に入りアイデア一覧">
+          <span class="omiai-like-icon">👍</span>
+          <span id="headerFavCount" class="omiai-like-count">0</span>
+        </div>
+        <div class="omiai-logo-wrap" onclick="resetGalleryFilter()">
+          <span class="omiai-logo-text">Omoai</span>
+          <span class="omiai-logo-sub">MOAI LAB ⚡v2.8</span>
+        </div>
+        <div class="omiai-header-right">
+          <button id="btnFilterToggle" class="omiai-icon-btn" onclick="openAddModal()" title="新規アイデア追加">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+          </button>
+        </div>
       </div>
-      <div class="omiai-logo-wrap" onclick="resetGalleryFilter()">
-        <span class="omiai-logo-text">Omiai</span>
-        <span style="font-size:0.6rem; color:var(--text-muted); font-weight:700; letter-spacing:0.1em; margin-top:-2px;">MOAI LAB ⚡v2.7</span>
-      </div>
-      <div class="omiai-header-right">
-        <button id="btnOpenThemeModal" class="omiai-icon-btn" title="背景色・テーマを変更 (🎨)">🎨</button>
-        <button id="btnOpenAiSettings" class="omiai-icon-btn" title="AI設定">🤖</button>
-        <button id="btnFilterToggle" class="omiai-icon-btn" onclick="openAddModal()" title="新規アイデア追加">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+    </header>
+
+    <!-- Omiai Style Horizontal Tabs -->
+    <nav class="omiai-tab-bar">
+      <div class="omiai-tab-scroll" id="omiaiTabs">
+        <button class="omiai-tab-item" data-sort="favorite" data-filter="all">
+          <span class="yellow-dot"></span>いいね多い順
+        </button>
+        <button class="omiai-tab-item" data-sort="updated" data-filter="all">
+          <span class="yellow-dot"></span>ログイン順
+        </button>
+        <button class="omiai-tab-item active" data-sort="recommended" data-filter="all">
+          おすすめ順
+        </button>
+        <button class="omiai-tab-item" data-sort="created" data-filter="idea">
+          <span class="yellow-dot"></span>新メンバー
+        </button>
+        <button class="omiai-tab-item" data-sort="updated" data-filter="prototyping">
+          試作中
+        </button>
+        <button class="omiai-tab-item" data-sort="updated" data-filter="completed">
+          完成
         </button>
       </div>
-    </div>
-  </header>
-
-  <!-- Omiai Style Horizontal Tabs -->
-  <nav class="omiai-tab-bar">
-    <div class="omiai-tab-scroll" id="omiaiTabs">
-      <button class="omiai-tab-item" data-sort="favorite" data-filter="all">
-        <span class="yellow-dot"></span>いいね多い順
-      </button>
-      <button class="omiai-tab-item" data-sort="updated" data-filter="all">
-        <span class="yellow-dot"></span>ログイン順
-      </button>
-      <button class="omiai-tab-item active" data-sort="recommended" data-filter="all">
-        おすすめ順
-      </button>
-      <button class="omiai-tab-item" data-sort="created" data-filter="idea">
-        <span class="yellow-dot"></span>新メンバー
-      </button>
-      <button class="omiai-tab-item" data-sort="updated" data-filter="prototyping">
-        試作中
-      </button>
-      <button class="omiai-tab-item" data-sort="updated" data-filter="completed">
-        完成
-      </button>
-    </div>
-  </nav>
+    </nav>
+  </div>
 
   <!-- =========================================================
        1. アイデア一覧画面（Omiai風 2列タイル表示）
@@ -2524,6 +2572,17 @@
             <div style="font-size:0.7rem; color:var(--text-muted);">カラーパレットから好きな色を直接指定</div>
           </div>
           <button id="btnApplyCustomColor" class="btn-secondary" style="padding:6px 14px; font-size:0.78rem;">この色にする</button>
+        </div>
+      </div>
+
+      <!-- 設定メニュー（AI設定 & サンプルリセット） -->
+      <div style="margin-top:16px; padding-top:14px; border-top:1px solid var(--border); display:flex; flex-direction:column; gap:10px;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <div>
+            <div style="font-size:0.85rem; font-weight:700; color:var(--text-main);">🤖 AI返信・APIキー設定</div>
+            <div style="font-size:0.72rem; color:var(--text-muted);">Gemini APIキーやモデルの切り替え</div>
+          </div>
+          <button class="btn-secondary" onclick="closeThemeModal(); openAiModal();" style="padding:6px 14px; font-size:0.78rem;">設定を開く</button>
         </div>
       </div>
     </div>
@@ -4143,7 +4202,8 @@
       });
 
       // AI設定モーダル
-      document.getElementById('btnOpenAiSettings').addEventListener('click', openAiModal);
+      const btnOpenAi = document.getElementById('btnOpenAiSettings');
+      if (btnOpenAi) btnOpenAi.addEventListener('click', openAiModal);
       document.getElementById('btnCloseAiModal').addEventListener('click', closeAiModal);
       document.getElementById('aiModalBackdrop').addEventListener('click', closeAiModal);
 
@@ -4163,7 +4223,8 @@
       });
 
       // テーマ（背景色）設定モーダル
-      document.getElementById('btnOpenThemeModal').addEventListener('click', openThemeModal);
+      const btnOpenTheme = document.getElementById('btnOpenThemeModal');
+      if (btnOpenTheme) btnOpenTheme.addEventListener('click', openThemeModal);
       document.getElementById('btnCloseThemeModal').addEventListener('click', closeThemeModal);
       document.getElementById('themeModalBackdrop').addEventListener('click', closeThemeModal);
 
