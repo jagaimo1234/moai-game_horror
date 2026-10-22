@@ -108,6 +108,7 @@
       margin: 0;
       padding: 0;
       -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
     }
 
     body {
@@ -2394,26 +2395,26 @@
        Omiai Style Fixed Bottom Navigation Bar (下部固定ナビ)
        ========================================================= -->
   <nav class="omiai-bottom-nav">
-    <button class="omiai-nav-btn active" id="navBtnSearch" onclick="onBottomNavClick('search')">
+    <button class="omiai-nav-btn active" id="navBtnSearch" data-nav="search" onclick="onBottomNavClick('search')">
       <svg class="omiai-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
       <span>さがす</span>
     </button>
-    <button class="omiai-nav-btn" id="navBtnFav" onclick="onBottomNavClick('fav')">
+    <button class="omiai-nav-btn" id="navBtnFav" data-nav="fav" onclick="onBottomNavClick('fav')">
       <svg class="omiai-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"></path></svg>
       <span>いいね</span>
     </button>
-    <button class="omiai-nav-btn" id="navBtnAdd" onclick="openAddModal()">
+    <button class="omiai-nav-btn" id="navBtnAdd" data-nav="add" onclick="openAddModal()">
       <div class="omiai-nav-add-circle">＋</div>
       <span style="color:#ff2d55; font-weight:800;">追加</span>
     </button>
-    <button class="omiai-nav-btn" id="navBtnChat" onclick="onBottomNavClick('chat')">
+    <button class="omiai-nav-btn" id="navBtnChat" data-nav="chat" onclick="onBottomNavClick('chat')">
       <div class="omiai-nav-badge-wrap">
         <svg class="omiai-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
-        <span id="bottomNavChatBadge" class="omiai-red-badge">4</span>
+        <span id="bottomNavChatBadge" class="omiai-red-badge">0</span>
       </div>
       <span>やり取り</span>
     </button>
-    <button class="omiai-nav-btn" id="navBtnMenu" onclick="openThemeModal()">
+    <button class="omiai-nav-btn" id="navBtnMenu" data-nav="menu" onclick="onBottomNavClick('menu')">
       <svg class="omiai-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
       <span>設定</span>
     </button>
@@ -2576,13 +2577,27 @@
       </div>
 
       <!-- 設定メニュー（AI設定 & サンプルリセット） -->
-      <div style="margin-top:16px; padding-top:14px; border-top:1px solid var(--border); display:flex; flex-direction:column; gap:10px;">
+      <div style="margin-top:16px; padding-top:14px; border-top:1px solid var(--border); display:flex; flex-direction:column; gap:12px;">
         <div style="display:flex; justify-content:space-between; align-items:center;">
           <div>
             <div style="font-size:0.85rem; font-weight:700; color:var(--text-main);">🤖 AI返信・APIキー設定</div>
             <div style="font-size:0.72rem; color:var(--text-muted);">Gemini APIキーやモデルの切り替え</div>
           </div>
           <button class="btn-secondary" onclick="closeThemeModal(); openAiModal();" style="padding:6px 14px; font-size:0.78rem;">設定を開く</button>
+        </div>
+        <div style="display:flex; justify-content:space-between; align-items:center; padding-top:8px; border-top:1px dashed var(--border);">
+          <div>
+            <div style="font-size:0.85rem; font-weight:700; color:var(--text-main);">📥 データバックアップ</div>
+            <div style="font-size:0.72rem; color:var(--text-muted);">現在のアイデアをJSONファイルに保存</div>
+          </div>
+          <button id="btnExportJson" class="btn-secondary" style="padding:6px 14px; font-size:0.78rem;">保存</button>
+        </div>
+        <div style="display:flex; justify-content:space-between; align-items:center; padding-top:8px; border-top:1px dashed var(--border);">
+          <div>
+            <div style="font-size:0.85rem; font-weight:700; color:var(--text-main);">🔄 初期サンプル復元</div>
+            <div style="font-size:0.72rem; color:var(--text-muted);">初期サンプルアイデアを復元</div>
+          </div>
+          <button id="btnResetSamples" class="btn-secondary" style="padding:6px 14px; font-size:0.78rem; color:#ef4444;">復元</button>
         </div>
       </div>
     </div>
@@ -4193,40 +4208,50 @@
       updateAiStatusIndicator();
       renderGallery();
 
-      const savedAuto = localStorage.getItem(AI_AUTO_STORAGE);
-      if (savedAuto !== null) {
-        document.getElementById('chkAiAutoReply').checked = savedAuto === '1';
+      function safeOn(id, event, fn) {
+        const el = document.getElementById(id);
+        if (el) el.addEventListener(event, fn);
+        return el;
       }
-      document.getElementById('chkAiAutoReply').addEventListener('change', (e) => {
-        localStorage.setItem(AI_AUTO_STORAGE, e.target.checked ? '1' : '0');
-      });
+
+      const chkAi = document.getElementById('chkAiAutoReply');
+      if (chkAi) {
+        const savedAuto = localStorage.getItem(AI_AUTO_STORAGE);
+        if (savedAuto !== null) {
+          chkAi.checked = savedAuto === '1';
+        }
+        chkAi.addEventListener('change', (e) => {
+          localStorage.setItem(AI_AUTO_STORAGE, e.target.checked ? '1' : '0');
+        });
+      }
 
       // AI設定モーダル
-      const btnOpenAi = document.getElementById('btnOpenAiSettings');
-      if (btnOpenAi) btnOpenAi.addEventListener('click', openAiModal);
-      document.getElementById('btnCloseAiModal').addEventListener('click', closeAiModal);
-      document.getElementById('aiModalBackdrop').addEventListener('click', closeAiModal);
+      safeOn('btnOpenAiSettings', 'click', openAiModal);
+      safeOn('btnCloseAiModal', 'click', closeAiModal);
+      safeOn('aiModalBackdrop', 'click', closeAiModal);
 
-      document.getElementById('btnSaveAiKey').addEventListener('click', () => {
-        const keyVal = document.getElementById('aiApiKeyInput').value.trim();
-        const modelVal = document.getElementById('aiModelSelect').value;
+      safeOn('btnSaveAiKey', 'click', () => {
+        const keyEl = document.getElementById('aiApiKeyInput');
+        const modelEl = document.getElementById('aiModelSelect');
+        const keyVal = keyEl ? keyEl.value.trim() : '';
+        const modelVal = modelEl ? modelEl.value : 'gemini-3-flash-preview';
         localStorage.setItem(GEMINI_KEY_STORAGE, keyVal);
         localStorage.setItem(GEMINI_MODEL_STORAGE, modelVal);
         updateAiStatusIndicator();
         closeAiModal();
       });
 
-      document.getElementById('btnClearAiKey').addEventListener('click', () => {
+      safeOn('btnClearAiKey', 'click', () => {
         localStorage.removeItem(GEMINI_KEY_STORAGE);
-        document.getElementById('aiApiKeyInput').value = '';
+        const keyEl = document.getElementById('aiApiKeyInput');
+        if (keyEl) keyEl.value = '';
         updateAiStatusIndicator();
       });
 
       // テーマ（背景色）設定モーダル
-      const btnOpenTheme = document.getElementById('btnOpenThemeModal');
-      if (btnOpenTheme) btnOpenTheme.addEventListener('click', openThemeModal);
-      document.getElementById('btnCloseThemeModal').addEventListener('click', closeThemeModal);
-      document.getElementById('themeModalBackdrop').addEventListener('click', closeThemeModal);
+      safeOn('btnOpenThemeModal', 'click', openThemeModal);
+      safeOn('btnCloseThemeModal', 'click', closeThemeModal);
+      safeOn('themeModalBackdrop', 'click', closeThemeModal);
 
       document.querySelectorAll('.theme-card-option').forEach(btn => {
         btn.addEventListener('click', () => {
@@ -4242,13 +4267,13 @@
           if (customColorHex) customColorHex.textContent = e.target.value;
         });
       }
-      document.getElementById('btnApplyCustomColor').addEventListener('click', () => {
+      safeOn('btnApplyCustomColor', 'click', () => {
         const hex = customColorInput ? customColorInput.value : '#0f1117';
         applyTheme('custom', hex);
         closeThemeModal();
       });
 
-      // Omiai サブタブバーの切替イベント
+      // Omoai サブタブバーの切替イベント
       document.querySelectorAll('#omiaiTabs .omiai-tab-item').forEach(btn => {
         btn.addEventListener('click', () => {
           document.querySelectorAll('#omiaiTabs .omiai-tab-item').forEach(b => b.classList.remove('active'));
@@ -4259,43 +4284,49 @@
         });
       });
 
-      document.getElementById('btnOpenAddModal').addEventListener('click', () => openAddModal());
-      document.getElementById('btnFabAdd').addEventListener('click', () => openAddModal());
-      document.getElementById('btnCloseAddModal').addEventListener('click', closeAddModal);
-      document.getElementById('btnCancelAdd').addEventListener('click', closeAddModal);
-      document.getElementById('addModalBackdrop').addEventListener('click', closeAddModal);
+      // アイデア追加
+      safeOn('btnOpenAddModal', 'click', () => openAddModal());
+      safeOn('btnFilterToggle', 'click', () => openAddModal());
+      safeOn('btnFabAdd', 'click', () => openAddModal());
+      safeOn('btnCloseAddModal', 'click', closeAddModal);
+      safeOn('btnCancelAdd', 'click', closeAddModal);
+      safeOn('addModalBackdrop', 'click', closeAddModal);
 
       const addDropzone = document.getElementById('addDropzone');
       const addImageInput = document.getElementById('addImageInput');
-      addDropzone.addEventListener('click', () => addImageInput.click());
-      addImageInput.addEventListener('change', async (e) => {
-        if (e.target.files && e.target.files[0]) {
-          pendingAddImageData = await readAndCompressImage(e.target.files[0]);
-          updateAddDropzoneUI();
-        }
-      });
+      if (addDropzone && addImageInput) {
+        addDropzone.addEventListener('click', () => addImageInput.click());
+        addImageInput.addEventListener('change', async (e) => {
+          if (e.target.files && e.target.files[0]) {
+            pendingAddImageData = await readAndCompressImage(e.target.files[0]);
+            updateAddDropzoneUI();
+          }
+        });
 
-      addDropzone.addEventListener('dragover', (e) => {
-        e.preventDefault();
-        addDropzone.classList.add('dragover');
-      });
-      addDropzone.addEventListener('dragleave', () => addDropzone.classList.remove('dragover'));
-      addDropzone.addEventListener('drop', async (e) => {
-        e.preventDefault();
-        addDropzone.classList.remove('dragover');
-        if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-          pendingAddImageData = await readAndCompressImage(e.dataTransfer.files[0]);
-          updateAddDropzoneUI();
-        }
-      });
+        addDropzone.addEventListener('dragover', (e) => {
+          e.preventDefault();
+          addDropzone.classList.add('dragover');
+        });
+        addDropzone.addEventListener('dragleave', () => addDropzone.classList.remove('dragover'));
+        addDropzone.addEventListener('drop', async (e) => {
+          e.preventDefault();
+          addDropzone.classList.remove('dragover');
+          if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+            pendingAddImageData = await readAndCompressImage(e.dataTransfer.files[0]);
+            updateAddDropzoneUI();
+          }
+        });
+      }
 
-      document.getElementById('btnSubmitAdd').addEventListener('click', createNewIdea);
+      safeOn('btnSubmitAdd', 'click', createNewIdea);
 
-      document.getElementById('btnCloseDetailModal').addEventListener('click', closeDetailModal);
-      document.getElementById('detailModalBackdrop').addEventListener('click', closeDetailModal);
+      // 詳細モーダル
+      safeOn('btnCloseDetailModal', 'click', closeDetailModal);
+      safeOn('detailModalBackdrop', 'click', closeDetailModal);
 
       const bindAutoSaveField = (elId, key) => {
         const el = document.getElementById(elId);
+        if (!el) return;
         el.addEventListener('input', async () => {
           const item = ideas.find(i => i.id === activeIdeaId);
           if (!item) return;
@@ -4313,7 +4344,7 @@
       bindAutoSaveField('detailSubtitleInput', 'subtitle');
       bindAutoSaveField('detailDescInput', 'description');
 
-      document.getElementById('detailStatusSelect').addEventListener('change', async (e) => {
+      safeOn('detailStatusSelect', 'change', async (e) => {
         const item = ideas.find(i => i.id === activeIdeaId);
         if (!item) return;
         item.status = e.target.value;
@@ -4322,19 +4353,21 @@
         await saveIdeasToStorage();
       });
 
-      document.getElementById('btnDetailFav').addEventListener('click', async () => {
+      safeOn('btnDetailFav', 'click', async () => {
         const item = ideas.find(i => i.id === activeIdeaId);
         if (!item) return;
         item.favorite = !item.favorite;
-        document.getElementById('btnDetailFav').classList.toggle('active', item.favorite);
+        const favEl = document.getElementById('btnDetailFav');
+        if (favEl) favEl.classList.toggle('active', item.favorite);
         if (threadViewMode === 'x') renderChatTimeline(item);
         await saveIdeasToStorage();
       });
 
-      document.getElementById('btnChangeCover').addEventListener('click', () => {
-        document.getElementById('changeCoverInput').click();
+      safeOn('btnChangeCover', 'click', () => {
+        const input = document.getElementById('changeCoverInput');
+        if (input) input.click();
       });
-      document.getElementById('changeCoverInput').addEventListener('change', async (e) => {
+      safeOn('changeCoverInput', 'change', async (e) => {
         const item = ideas.find(i => i.id === activeIdeaId);
         if (!item || !e.target.files || !e.target.files[0]) return;
         item.coverImage = await readAndCompressImage(e.target.files[0]);
@@ -4345,7 +4378,7 @@
         if (threadViewMode === 'x') renderChatTimeline(item);
       });
 
-      document.getElementById('addSubImageInput').addEventListener('change', async (e) => {
+      safeOn('addSubImageInput', 'change', async (e) => {
         const item = ideas.find(i => i.id === activeIdeaId);
         if (!item || !e.target.files) return;
         if (!Array.isArray(item.subImages)) item.subImages = [];
@@ -4359,7 +4392,7 @@
         renderDetailLeft(item);
       });
 
-      document.getElementById('btnDeleteIdea').addEventListener('click', async () => {
+      safeOn('btnDeleteIdea', 'click', async () => {
         const item = ideas.find(i => i.id === activeIdeaId);
         if (!item) return;
         const name = item.title || 'このアイデア';
@@ -4380,30 +4413,35 @@
         });
       }
 
-      document.getElementById('btnChatSend').addEventListener('click', sendChatMessage);
+      safeOn('btnChatSend', 'click', sendChatMessage);
       const chatTextarea = document.getElementById('chatTextarea');
-      chatTextarea.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter' && !e.shiftKey && !e.isComposing) {
-          e.preventDefault();
-          sendChatMessage();
-        }
-      });
-      chatTextarea.addEventListener('input', () => {
-        chatTextarea.style.height = 'auto';
-        chatTextarea.style.height = Math.min(chatTextarea.scrollHeight, 100) + 'px';
-      });
+      if (chatTextarea) {
+        chatTextarea.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter' && !e.shiftKey && !e.isComposing) {
+            e.preventDefault();
+            sendChatMessage();
+          }
+        });
+        chatTextarea.addEventListener('input', () => {
+          chatTextarea.style.height = 'auto';
+          chatTextarea.style.height = Math.min(chatTextarea.scrollHeight, 100) + 'px';
+        });
+      }
 
-      document.getElementById('btnChatAttach').addEventListener('click', () => {
-        document.getElementById('chatImageInput').click();
+      safeOn('btnChatAttach', 'click', () => {
+        const fileInput = document.getElementById('chatImageInput');
+        if (fileInput) fileInput.click();
       });
-      document.getElementById('chatImageInput').addEventListener('change', async (e) => {
+      safeOn('chatImageInput', 'change', async (e) => {
         if (e.target.files && e.target.files[0]) {
           pendingChatImageData = await readAndCompressImage(e.target.files[0]);
-          document.getElementById('chatAttachImg').src = pendingChatImageData;
-          document.getElementById('chatAttachPreview').classList.add('active');
+          const imgEl = document.getElementById('chatAttachImg');
+          const prevEl = document.getElementById('chatAttachPreview');
+          if (imgEl) imgEl.src = pendingChatImageData;
+          if (prevEl) prevEl.classList.add('active');
         }
       });
-      document.getElementById('btnClearChatAttach').addEventListener('click', clearChatAttachment);
+      safeOn('btnClearChatAttach', 'click', clearChatAttachment);
 
       window.addEventListener('paste', async (e) => {
         if (!e.clipboardData || !e.clipboardData.files || e.clipboardData.files.length === 0) return;
@@ -4413,14 +4451,16 @@
 
         if (activeIdeaId) {
           pendingChatImageData = dataUrl;
-          document.getElementById('chatAttachImg').src = pendingChatImageData;
-          document.getElementById('chatAttachPreview').classList.add('active');
+          const imgEl = document.getElementById('chatAttachImg');
+          const prevEl = document.getElementById('chatAttachPreview');
+          if (imgEl) imgEl.src = pendingChatImageData;
+          if (prevEl) prevEl.classList.add('active');
         } else {
           openAddModal(dataUrl);
         }
       });
 
-      document.getElementById('btnExportJson').addEventListener('click', () => {
+      safeOn('btnExportJson', 'click', () => {
         const blob = new Blob([JSON.stringify(ideas, null, 2)], { type: 'application/json' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
@@ -4430,7 +4470,7 @@
         URL.revokeObjectURL(url);
       });
 
-      document.getElementById('btnResetSamples').addEventListener('click', async () => {
+      safeOn('btnResetSamples', 'click', async () => {
         if (!confirm('初期サンプルデータ（肌着モアイ・エレクロボ・寝そべりモアイ・ハチマキモアイ）を復元しますか？')) return;
         ideas = getDefaultIdeas();
         await saveIdeasToStorage();
