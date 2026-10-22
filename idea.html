@@ -8,11 +8,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>MOAI IDEA GALLERY｜新作アイデア管理</title>
   <style>
-    :root {
+    :root, [data-theme="dark"] {
       --bg-main: #0f1117;
       --bg-surface: #181b24;
       --bg-elevated: #222734;
       --bg-chat: #13161f;
+      --bg-header: rgba(15, 17, 23, 0.9);
+      --bg-input: #12151e;
       --text-main: #f8fafc;
       --text-sub: #cbd5e1;
       --text-muted: #94a3b8;
@@ -29,6 +31,74 @@
       --radius-lg: 22px;
     }
 
+    [data-theme="light"] {
+      --bg-main: #f1f5f9;
+      --bg-surface: #ffffff;
+      --bg-elevated: #e2e8f0;
+      --bg-chat: #f8fafc;
+      --bg-header: rgba(255, 255, 255, 0.92);
+      --bg-input: #f8fafc;
+      --text-main: #0f172a;
+      --text-sub: #334155;
+      --text-muted: #64748b;
+      --accent: #0284c7;
+      --border: rgba(0, 0, 0, 0.09);
+      --border-strong: rgba(0, 0, 0, 0.18);
+      --shadow-lg: 0 20px 40px rgba(0, 0, 0, 0.08);
+      --line-bg: #e2e8f0;
+    }
+
+    [data-theme="warm"] {
+      --bg-main: #f6f3ed;
+      --bg-surface: #fffdf9;
+      --bg-elevated: #eae3d5;
+      --bg-chat: #fbf9f4;
+      --bg-header: rgba(246, 243, 237, 0.94);
+      --bg-input: #fffdfa;
+      --text-main: #2e261f;
+      --text-sub: #5c4e40;
+      --text-muted: #857463;
+      --accent: #d97706;
+      --border: rgba(92, 78, 64, 0.12);
+      --border-strong: rgba(92, 78, 64, 0.22);
+      --shadow-lg: 0 20px 40px rgba(60, 45, 30, 0.08);
+      --line-bg: #eae3d5;
+    }
+
+    [data-theme="stone"] {
+      --bg-main: #1f2228;
+      --bg-surface: #292d36;
+      --bg-elevated: #363c48;
+      --bg-chat: #232730;
+      --bg-header: rgba(31, 34, 40, 0.92);
+      --bg-input: #232730;
+      --text-main: #f3f4f6;
+      --text-sub: #d1d5db;
+      --text-muted: #9ca3af;
+      --accent: #38bdf8;
+      --border: rgba(255, 255, 255, 0.1);
+      --border-strong: rgba(255, 255, 255, 0.2);
+      --shadow-lg: 0 20px 50px rgba(0, 0, 0, 0.5);
+      --line-bg: #292d36;
+    }
+
+    [data-theme="navy"] {
+      --bg-main: #0a0f1d;
+      --bg-surface: #11182c;
+      --bg-elevated: #1e2842;
+      --bg-chat: #0e1526;
+      --bg-header: rgba(10, 15, 29, 0.92);
+      --bg-input: #0e1526;
+      --text-main: #f1f5f9;
+      --text-sub: #cbd5e1;
+      --text-muted: #818cf8;
+      --accent: #6366f1;
+      --border: rgba(99, 102, 241, 0.15);
+      --border-strong: rgba(99, 102, 241, 0.28);
+      --shadow-lg: 0 20px 50px rgba(0, 0, 0, 0.7);
+      --line-bg: #11182c;
+    }
+
     * {
       box-sizing: border-box;
       margin: 0;
@@ -43,6 +113,7 @@
       min-height: 100vh;
       overflow-x: hidden;
       line-height: 1.5;
+      transition: background-color 0.25s ease, color 0.25s ease;
     }
 
     /* =========================================================
@@ -52,11 +123,12 @@
       position: sticky;
       top: 0;
       z-index: 40;
-      background: rgba(15, 17, 23, 0.88);
+      background: var(--bg-header);
       backdrop-filter: blur(16px);
       -webkit-backdrop-filter: blur(16px);
       border-bottom: 1px solid var(--border);
       padding: 12px 20px;
+      transition: background 0.25s ease, border-color 0.25s ease;
     }
 
     .header-inner {
@@ -964,7 +1036,86 @@
     }
 
     .chat-timeline.mode-line {
-      background: linear-gradient(180deg, #161f2c 0%, #111823 100%);
+      background: var(--line-bg);
+    }
+
+    /* =========================================================
+       Theme Settings UI (背景テーマ設定モーダル)
+       ========================================================= */
+    .theme-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 9px;
+      margin-top: 14px;
+    }
+
+    .theme-card-option {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 14px;
+      border-radius: 14px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      cursor: pointer;
+      text-align: left;
+      transition: all 0.15s ease;
+      width: 100%;
+      color: var(--text-main);
+    }
+
+    .theme-card-option:hover {
+      border-color: var(--accent);
+      background: var(--bg-elevated);
+    }
+
+    .theme-card-option.active {
+      border-color: var(--accent);
+      background: rgba(56, 189, 248, 0.09);
+      box-shadow: 0 0 0 1px var(--accent);
+    }
+
+    .theme-color-swatch {
+      width: 32px;
+      height: 32px;
+      border-radius: 10px;
+      flex-shrink: 0;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+    }
+
+    .theme-info {
+      flex: 1;
+    }
+
+    .theme-name {
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .theme-desc {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+    }
+
+    .theme-check {
+      font-size: 1.05rem;
+      color: var(--accent);
+      opacity: 0;
+      font-weight: 800;
+      transition: opacity 0.15s;
+    }
+
+    .theme-card-option.active .theme-check {
+      opacity: 1;
+    }
+
+    .custom-color-box {
+      margin-top: 14px;
+      padding: 12px 14px;
+      border-radius: 14px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
     }
 
     .chat-timeline.mode-x {
@@ -1675,7 +1826,7 @@
           <div class="brand-title">
             <span>MOAI IDEA GALLERY</span>
             <span class="brand-badge">AIブレスト対応</span>
-            <span class="brand-badge" style="background:#059669; color:#fff; border-color:#10b981;">⚡ v2.4 (最新)</span>
+            <span class="brand-badge" style="background:#059669; color:#fff; border-color:#10b981;">⚡ v2.5 (最新)</span>
           </div>
           <div class="brand-subtitle">新作アイデアを視覚的に並べて、AI相棒モアイとLINE/X感覚で育てる場所</div>
         </div>
@@ -1694,6 +1845,7 @@
           <span>＋</span>
           <span>アイデア追加</span>
         </button>
+        <button id="btnOpenThemeModal" class="btn-icon-subtle" title="背景色・テーマを変更 (🎨)" style="font-size:1.05rem;">🎨</button>
         <button id="btnExportJson" class="btn-icon-subtle" title="バックアップ書き出し (JSON)">⬇</button>
         <button id="btnResetSamples" class="btn-icon-subtle" title="初期サンプルを復元">🔄</button>
       </div>
@@ -1807,6 +1959,84 @@
       <div class="add-modal-actions">
         <button id="btnClearAiKey" class="btn-secondary">キーを消去</button>
         <button id="btnSaveAiKey" class="btn-primary-wide" style="background:var(--ai-grad);">保存してAIを有効化 ✨</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- =========================================================
+       2.6 🎨 背景色・テーマ選択モーダル
+       ========================================================= -->
+  <div id="themeModalBackdrop" class="modal-backdrop">
+    <div class="add-modal-card" style="max-width: 440px;" onclick="event.stopPropagation()">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+        <div>
+          <h2 style="font-size:1.05rem; font-weight:800;">🎨 背景テーマの選択</h2>
+          <p style="font-size:0.75rem; color:var(--text-muted);">気分や作業環境に合わせて背景色を自由に切り替えられます</p>
+        </div>
+        <button id="btnCloseThemeModal" class="btn-close-modal">✕</button>
+      </div>
+
+      <!-- プリセット選択グリッド -->
+      <div class="theme-grid">
+        <button class="theme-card-option" data-theme-val="dark">
+          <div class="theme-color-swatch" style="background:#0f1117; border:1px solid #334155;"></div>
+          <div class="theme-info">
+            <div class="theme-name">🌑 ダーク（標準）</div>
+            <div class="theme-desc">目に優しいサイバーダーク</div>
+          </div>
+          <span class="theme-check">✓</span>
+        </button>
+
+        <button class="theme-card-option" data-theme-val="light">
+          <div class="theme-color-swatch" style="background:#f1f5f9; border:1px solid #cbd5e1;"></div>
+          <div class="theme-info">
+            <div class="theme-name">☀️ クリーンライト</div>
+            <div class="theme-desc">明るく見やすいホワイト</div>
+          </div>
+          <span class="theme-check">✓</span>
+        </button>
+
+        <button class="theme-card-option" data-theme-val="warm">
+          <div class="theme-color-swatch" style="background:#f6f3ed; border:1px solid #d6cebe;"></div>
+          <div class="theme-info">
+            <div class="theme-name">🪵 クラフトアイボリー</div>
+            <div class="theme-desc">マルシェ・木工に馴染む温かみ</div>
+          </div>
+          <span class="theme-check">✓</span>
+        </button>
+
+        <button class="theme-card-option" data-theme-val="stone">
+          <div class="theme-color-swatch" style="background:#1f2228; border:1px solid #4b5563;"></div>
+          <div class="theme-info">
+            <div class="theme-name">🗿 ストーンモアイ</div>
+            <div class="theme-desc">石像らしい重厚なマットグレー</div>
+          </div>
+          <span class="theme-check">✓</span>
+        </button>
+
+        <button class="theme-card-option" data-theme-val="navy">
+          <div class="theme-color-swatch" style="background:#0a0f1d; border:1px solid #3b82f6;"></div>
+          <div class="theme-info">
+            <div class="theme-name">🌌 ディープネイビー</div>
+            <div class="theme-desc">洗練された深いミッドナイトブルー</div>
+          </div>
+          <span class="theme-check">✓</span>
+        </button>
+      </div>
+
+      <!-- 自由カラーピッカー -->
+      <div class="custom-color-box">
+        <label style="font-size:0.78rem; font-weight:700; color:var(--text-sub); display:block; margin-bottom:8px;">
+          自由な色（カスタム背景色）
+        </label>
+        <div style="display:flex; align-items:center; gap:12px;">
+          <input type="color" id="themeCustomColorInput" value="#0f1117" style="width:44px; height:38px; border:none; border-radius:8px; cursor:pointer; background:none;">
+          <div style="flex:1;">
+            <div id="themeCustomColorHex" style="font-size:0.85rem; font-family:monospace; font-weight:700; color:var(--text-main);">#0f1117</div>
+            <div style="font-size:0.7rem; color:var(--text-muted);">カラーパレットから好きな色を直接指定</div>
+          </div>
+          <button id="btnApplyCustomColor" class="btn-secondary" style="padding:6px 14px; font-size:0.78rem;">この色にする</button>
+        </div>
       </div>
     </div>
   </div>
@@ -2154,11 +2384,117 @@
     const GEMINI_KEY_STORAGE = 'moai_idea_gemini_api_key';
     const GEMINI_MODEL_STORAGE = 'moai_idea_gemini_model';
     const AI_AUTO_STORAGE = 'moai_idea_ai_auto';
+    const THEME_STORAGE = 'moai_idea_theme_key';
+    const CUSTOM_BG_STORAGE = 'moai_idea_custom_bg_color';
 
     // 以前のセッションで古い・遅い・503のモデルがlocalStorageに残っている場合は自動で現在最速稼働中のgemini-3-flash-previewに刷新
     const currentSavedModel = localStorage.getItem(GEMINI_MODEL_STORAGE);
     if (!currentSavedModel || currentSavedModel === 'gemini-3.1-flash-lite' || currentSavedModel === 'gemini-3.8-flash' || currentSavedModel === 'gemini-2.5-flash') {
       localStorage.setItem(GEMINI_MODEL_STORAGE, 'gemini-3-flash-preview');
+    }
+
+    // =========================================================
+    // テーマ・背景色 管理エンジン
+    // =========================================================
+    function initTheme() {
+      const savedTheme = localStorage.getItem(THEME_STORAGE) || 'dark';
+      const savedCustomBg = localStorage.getItem(CUSTOM_BG_STORAGE) || '#0f1117';
+      applyTheme(savedTheme, savedCustomBg);
+    }
+
+    function applyTheme(themeKey, customBgHex = null) {
+      const htmlEl = document.documentElement;
+      htmlEl.setAttribute('data-theme', themeKey);
+
+      if (themeKey === 'custom' && customBgHex) {
+        htmlEl.style.setProperty('--bg-main', customBgHex);
+        const brightness = getBrightness(customBgHex);
+        const isDark = brightness < 135;
+        if (isDark) {
+          htmlEl.style.setProperty('--bg-surface', adjustHexColor(customBgHex, 16));
+          htmlEl.style.setProperty('--bg-elevated', adjustHexColor(customBgHex, 32));
+          htmlEl.style.setProperty('--bg-chat', adjustHexColor(customBgHex, 8));
+          htmlEl.style.setProperty('--bg-header', customBgHex + 'e6');
+          htmlEl.style.setProperty('--bg-input', adjustHexColor(customBgHex, 8));
+          htmlEl.style.setProperty('--text-main', '#f8fafc');
+          htmlEl.style.setProperty('--text-sub', '#cbd5e1');
+          htmlEl.style.setProperty('--text-muted', '#94a3b8');
+          htmlEl.style.setProperty('--border', 'rgba(255,255,255,0.12)');
+          htmlEl.style.setProperty('--line-bg', adjustHexColor(customBgHex, 16));
+        } else {
+          htmlEl.style.setProperty('--bg-surface', '#ffffff');
+          htmlEl.style.setProperty('--bg-elevated', adjustHexColor(customBgHex, -18));
+          htmlEl.style.setProperty('--bg-chat', adjustHexColor(customBgHex, -8));
+          htmlEl.style.setProperty('--bg-header', customBgHex + 'f2');
+          htmlEl.style.setProperty('--bg-input', '#ffffff');
+          htmlEl.style.setProperty('--text-main', '#0f172a');
+          htmlEl.style.setProperty('--text-sub', '#334155');
+          htmlEl.style.setProperty('--text-muted', '#64748b');
+          htmlEl.style.setProperty('--border', 'rgba(0,0,0,0.1)');
+          htmlEl.style.setProperty('--line-bg', adjustHexColor(customBgHex, -12));
+        }
+      } else {
+        htmlEl.style.removeProperty('--bg-main');
+        htmlEl.style.removeProperty('--bg-surface');
+        htmlEl.style.removeProperty('--bg-elevated');
+        htmlEl.style.removeProperty('--bg-chat');
+        htmlEl.style.removeProperty('--bg-header');
+        htmlEl.style.removeProperty('--bg-input');
+        htmlEl.style.removeProperty('--text-main');
+        htmlEl.style.removeProperty('--text-sub');
+        htmlEl.style.removeProperty('--text-muted');
+        htmlEl.style.removeProperty('--border');
+        htmlEl.style.removeProperty('--line-bg');
+      }
+
+      localStorage.setItem(THEME_STORAGE, themeKey);
+      if (customBgHex) localStorage.setItem(CUSTOM_BG_STORAGE, customBgHex);
+
+      document.querySelectorAll('.theme-card-option').forEach(btn => {
+        btn.classList.toggle('active', btn.getAttribute('data-theme-val') === themeKey);
+      });
+      if (customBgHex) {
+        const picker = document.getElementById('themeCustomColorInput');
+        const hexText = document.getElementById('themeCustomColorHex');
+        if (picker) picker.value = customBgHex;
+        if (hexText) hexText.textContent = customBgHex;
+      }
+    }
+
+    function getBrightness(hex) {
+      hex = hex.replace('#', '');
+      if (hex.length === 3) hex = hex.split('').map(c => c+c).join('');
+      const r = parseInt(hex.substr(0, 2), 16) || 0;
+      const g = parseInt(hex.substr(2, 2), 16) || 0;
+      const b = parseInt(hex.substr(4, 2), 16) || 0;
+      return (r * 299 + g * 587 + b * 114) / 1000;
+    }
+
+    function adjustHexColor(hex, amount) {
+      hex = hex.replace('#', '');
+      if (hex.length === 3) hex = hex.split('').map(c => c+c).join('');
+      let num = parseInt(hex, 16);
+      let r = Math.min(255, Math.max(0, (num >> 16) + amount));
+      let g = Math.min(255, Math.max(0, ((num >> 8) & 0x00FF) + amount));
+      let b = Math.min(255, Math.max(0, (num & 0x0000FF) + amount));
+      return '#' + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
+    }
+
+    function openThemeModal() {
+      const savedTheme = localStorage.getItem(THEME_STORAGE) || 'dark';
+      const savedCustomBg = localStorage.getItem(CUSTOM_BG_STORAGE) || '#0f1117';
+      const picker = document.getElementById('themeCustomColorInput');
+      const hexText = document.getElementById('themeCustomColorHex');
+      if (picker) picker.value = savedCustomBg;
+      if (hexText) hexText.textContent = savedCustomBg;
+      document.querySelectorAll('.theme-card-option').forEach(btn => {
+        btn.classList.toggle('active', btn.getAttribute('data-theme-val') === savedTheme);
+      });
+      document.getElementById('themeModalBackdrop').classList.add('open');
+    }
+
+    function closeThemeModal() {
+      document.getElementById('themeModalBackdrop').classList.remove('open');
     }
 
     let ideas = [];
@@ -3206,6 +3542,7 @@
     // 7. イベントリスナー設定
     // =========================================================
     window.addEventListener('DOMContentLoaded', async () => {
+      initTheme();
       await loadIdeasFromStorage();
       updateAiStatusIndicator();
       renderGallery();
@@ -3236,6 +3573,31 @@
         localStorage.removeItem(GEMINI_KEY_STORAGE);
         document.getElementById('aiApiKeyInput').value = '';
         updateAiStatusIndicator();
+      });
+
+      // テーマ（背景色）設定モーダル
+      document.getElementById('btnOpenThemeModal').addEventListener('click', openThemeModal);
+      document.getElementById('btnCloseThemeModal').addEventListener('click', closeThemeModal);
+      document.getElementById('themeModalBackdrop').addEventListener('click', closeThemeModal);
+
+      document.querySelectorAll('.theme-card-option').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const themeVal = btn.getAttribute('data-theme-val');
+          applyTheme(themeVal);
+        });
+      });
+
+      const customColorInput = document.getElementById('themeCustomColorInput');
+      const customColorHex = document.getElementById('themeCustomColorHex');
+      if (customColorInput) {
+        customColorInput.addEventListener('input', (e) => {
+          if (customColorHex) customColorHex.textContent = e.target.value;
+        });
+      }
+      document.getElementById('btnApplyCustomColor').addEventListener('click', () => {
+        const hex = customColorInput ? customColorInput.value : '#0f1117';
+        applyTheme('custom', hex);
+        closeThemeModal();
       });
 
       document.querySelectorAll('#filterPills .filter-pill').forEach(btn => {
