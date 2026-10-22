@@ -884,6 +884,57 @@
       line-height: 1.2;
     }
 
+    /* =========================================================
+       Playful Category Badges (彼氏・本命・様子見・遊び)
+       ========================================================= */
+    .omiai-status-pill {
+      position: absolute;
+      bottom: 8px;
+      left: 8px;
+      padding: 2.5px 8px;
+      border-radius: 999px;
+      font-size: 0.64rem;
+      font-weight: 800;
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      z-index: 2;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.28);
+      color: #fff;
+      letter-spacing: 0.02em;
+    }
+
+    .talk-status-tag {
+      display: inline-flex;
+      align-items: center;
+      padding: 1.5px 6px;
+      border-radius: 6px;
+      font-size: 0.65rem;
+      font-weight: 800;
+      color: #fff;
+      letter-spacing: 0.02em;
+      flex-shrink: 0;
+    }
+
+    .pill-boyfriend {
+      background: rgba(139, 92, 246, 0.92);
+      border: 1px solid rgba(216, 180, 254, 0.5);
+    }
+    .pill-honmei {
+      background: rgba(255, 45, 85, 0.92);
+      border: 1px solid rgba(254, 205, 211, 0.5);
+    }
+    .pill-yousumi {
+      background: rgba(245, 158, 11, 0.92);
+      border: 1px solid rgba(253, 230, 138, 0.5);
+    }
+    .pill-asobi {
+      background: rgba(6, 182, 212, 0.92);
+      border: 1px solid rgba(165, 243, 252, 0.5);
+    }
+
     /* Omiai Fixed Bottom Navigation Bar (5 tabs) */
     .omiai-bottom-nav {
       position: fixed;
@@ -2542,26 +2593,50 @@
       </div>
     </header>
 
-    <!-- Omiai Style Horizontal Tabs -->
-    <nav class="omiai-tab-bar">
+    <!-- 1. 作品ギャラリー用サブタブバー（トップ画面） -->
+    <nav class="omiai-tab-bar" id="galleryTabBar">
       <div class="omiai-tab-scroll" id="omiaiTabs">
-        <button class="omiai-tab-item" data-sort="favorite" data-filter="all">
-          <span class="yellow-dot"></span>いいね多い順
-        </button>
-        <button class="omiai-tab-item" data-sort="updated" data-filter="all">
-          <span class="yellow-dot"></span>ログイン順
-        </button>
         <button class="omiai-tab-item active" data-sort="recommended" data-filter="all">
-          おすすめ順
+          すべて
         </button>
-        <button class="omiai-tab-item" data-sort="created" data-filter="idea">
-          <span class="yellow-dot"></span>新メンバー
+        <button class="omiai-tab-item" data-sort="updated" data-filter="honmei">
+          <span class="yellow-dot" style="background:#ff2d55;"></span>❤️ 本命
         </button>
-        <button class="omiai-tab-item" data-sort="updated" data-filter="prototyping">
-          試作中
+        <button class="omiai-tab-item" data-sort="updated" data-filter="boyfriend">
+          <span class="yellow-dot" style="background:#8b5cf6;"></span>💍 彼氏
         </button>
-        <button class="omiai-tab-item" data-sort="updated" data-filter="completed">
-          完成
+        <button class="omiai-tab-item" data-sort="updated" data-filter="yousumi">
+          <span class="yellow-dot" style="background:#f59e0b;"></span>👀 様子見
+        </button>
+        <button class="omiai-tab-item" data-sort="updated" data-filter="asobi">
+          <span class="yellow-dot" style="background:#06b6d4;"></span>🎲 遊び
+        </button>
+        <button class="omiai-tab-item" data-sort="favorite" data-filter="all">
+          👍 いいね順
+        </button>
+        <button class="omiai-tab-item" data-sort="created" data-filter="all">
+          ✨ 新着順
+        </button>
+      </div>
+    </nav>
+
+    <!-- 2. トーク・メッセージ用サブタブバー（やり取り画面） -->
+    <nav class="omiai-tab-bar" id="talkTabBar" style="display:none;">
+      <div class="omiai-tab-scroll" id="talkTabs">
+        <button class="omiai-tab-item active" data-talk-filter="all" onclick="onTalkTabClick('all')">
+          すべて
+        </button>
+        <button class="omiai-tab-item" data-talk-filter="honmei" onclick="onTalkTabClick('honmei')">
+          <span class="yellow-dot" style="background:#ff2d55;"></span>❤️ 本命
+        </button>
+        <button class="omiai-tab-item" data-talk-filter="boyfriend" onclick="onTalkTabClick('boyfriend')">
+          <span class="yellow-dot" style="background:#8b5cf6;"></span>💍 彼氏
+        </button>
+        <button class="omiai-tab-item" data-talk-filter="yousumi" onclick="onTalkTabClick('yousumi')">
+          <span class="yellow-dot" style="background:#f59e0b;"></span>👀 様子見
+        </button>
+        <button class="omiai-tab-item" data-talk-filter="asobi" onclick="onTalkTabClick('asobi')">
+          <span class="yellow-dot" style="background:#06b6d4;"></span>🎲 遊び
         </button>
       </div>
     </nav>
@@ -2641,6 +2716,15 @@
       </div>
 
       <div class="optional-fields">
+        <div style="display:flex; align-items:center; gap:8px; background:var(--bg-main); border:1px solid var(--border-strong); border-radius:12px; padding:6px 12px;">
+          <span style="font-size:0.78rem; font-weight:700; color:var(--text-sub); white-space:nowrap;">カテゴリー:</span>
+          <select id="addStatusSelect" style="flex:1; background:transparent; border:none; color:var(--text-main); font-size:0.86rem; font-weight:700; outline:none; cursor:pointer;">
+            <option value="honmei">❤️ 本命（完成間近・力入れたい）</option>
+            <option value="boyfriend">💍 彼氏（完成・相棒）</option>
+            <option value="yousumi">👀 様子見（探り中・検討中）</option>
+            <option value="asobi" selected>🎲 遊び（構想・思いつき）</option>
+          </select>
+        </div>
         <input type="text" id="addTitleInput" class="field-input" placeholder="アイデア名（省略OK・後から入力できます）">
         <input type="text" id="addSubtitleInput" class="field-input" placeholder="ひとことメモ・テーマ（例：衣装バリエーション）">
       </div>
@@ -2831,10 +2915,10 @@
         <div class="detail-info-box">
           <div class="info-status-row">
             <select id="detailStatusSelect" class="status-select-pill">
-              <option value="idea">💡 思いつき</option>
-              <option value="considering">🤔 検討中</option>
-              <option value="prototyping">🛠️ 試作中</option>
-              <option value="completed">✨ 完成</option>
+              <option value="honmei">❤️ 本命（完成間近・力入れたい）</option>
+              <option value="boyfriend">💍 彼氏（完成・相棒）</option>
+              <option value="yousumi">👀 様子見（探り中・検討中）</option>
+              <option value="asobi">🎲 遊び（構想・思いつき）</option>
             </select>
             <span id="detailCreatedDate" style="font-size:0.72rem; color:var(--text-muted);"></span>
           </div>
@@ -2955,11 +3039,65 @@
     // =========================================================
     // 1. 初期サンプルデータ
     // =========================================================
+    const STATUS_CONFIG = {
+      honmei: {
+        id: 'honmei',
+        label: '❤️ 本命（完成間近）',
+        short: '本命',
+        badge: '❤️ 本命',
+        cls: 'pill-honmei',
+        desc: '力入れたい・実現させたい完成間近の最優先モアイ'
+      },
+      boyfriend: {
+        id: 'boyfriend',
+        label: '💍 彼氏（完成）',
+        short: '彼氏',
+        badge: '💍 彼氏',
+        cls: 'pill-boyfriend',
+        desc: '完成！いつでも出展・販売OKな相棒モアイ'
+      },
+      yousumi: {
+        id: 'yousumi',
+        label: '👀 様子見（検討中）',
+        short: '様子見',
+        badge: '👀 様子見',
+        cls: 'pill-yousumi',
+        desc: '試作・探り中、どう展開するか様子見'
+      },
+      asobi: {
+        id: 'asobi',
+        label: '🎲 遊び（構想）',
+        short: '遊び',
+        badge: '🎲 遊び',
+        cls: 'pill-asobi',
+        desc: '思いつき・構想レベルの自由な遊び'
+      }
+    };
+
+    function normalizeStatus(st) {
+      if (!st) return 'asobi';
+      if (st === 'honmei' || st === 'prototyping') return 'honmei';
+      if (st === 'boyfriend' || st === 'completed') return 'boyfriend';
+      if (st === 'yousumi' || st === 'considering') return 'yousumi';
+      if (st === 'asobi' || st === 'idea') return 'asobi';
+      return 'asobi';
+    }
+
+    function getStatusInfo(st) {
+      const key = normalizeStatus(st);
+      return STATUS_CONFIG[key] || STATUS_CONFIG.asobi;
+    }
+
     const STATUS_MAP = {
-      idea:        { label: '💡 思いつき', cls: 'status-idea' },
-      considering: { label: '🤔 検討中',   cls: 'status-considering' },
-      prototyping: { label: '🛠️ 試作中',   cls: 'status-prototyping' },
-      completed:   { label: '✨ 完成',     cls: 'status-completed' }
+      honmei:      { label: '❤️ 本命（完成間近）', cls: 'pill-honmei' },
+      boyfriend:   { label: '💍 彼氏（完成）',     cls: 'pill-boyfriend' },
+      yousumi:     { label: '👀 様子見（検討中）', cls: 'pill-yousumi' },
+      asobi:       { label: '🎲 遊び（構想）',     cls: 'pill-asobi' },
+      // 互換性エイリアス
+      prototyping: { label: '❤️ 本命（完成間近）', cls: 'pill-honmei' },
+      completed:   { label: '💍 彼氏（完成）',     cls: 'pill-boyfriend' },
+      considering: { label: '👀 様子見（検討中）', cls: 'pill-yousumi' },
+      idea:        { label: '🎲 遊び（構想）',     cls: 'pill-asobi' }
     };
 
     function createPlaceholderDataUrl(title, subtitle, bg1, bg2, emoji) {
@@ -2991,7 +3129,7 @@
           subImages: [
             'images/kurima/mini_osuwari_keychain.jpg'
           ],
-          status: 'considering',
+          status: 'honmei',
           favorite: true,
           createdAt: new Date('2026-10-20T21:35:00+09:00').getTime(),
           updatedAt: new Date('2026-10-20T22:00:00+09:00').getTime(),
@@ -3042,7 +3180,7 @@
           subImages: [
             'images/kurima/moai_robo_mk2_gray.jpg'
           ],
-          status: 'idea',
+          status: 'boyfriend',
           favorite: true,
           createdAt: new Date('2026-10-20T21:10:00+09:00').getTime(),
           updatedAt: new Date('2026-10-20T21:32:00+09:00').getTime(),
@@ -3074,7 +3212,7 @@
           coverImage: 'images/kurima/moai_robo_mk2/laying_01.png',
           fallbackImage: createPlaceholderDataUrl('寝そべりモアイ', 'ポーズの新展開', '#064e3b', '#0f172a', '🛌'),
           subImages: [],
-          status: 'idea',
+          status: 'yousumi',
           favorite: false,
           createdAt: new Date('2026-10-20T21:00:00+09:00').getTime(),
           updatedAt: new Date('2026-10-20T21:22:00+09:00').getTime(),
@@ -3108,7 +3246,7 @@
           subImages: [
             'images/kurima/positive_moai_pen.jpg'
           ],
-          status: 'prototyping',
+          status: 'asobi',
           favorite: false,
           createdAt: new Date('2026-10-20T20:50:00+09:00').getTime(),
           updatedAt: new Date('2026-10-20T21:15:00+09:00').getTime(),
@@ -3753,13 +3891,14 @@
       document.querySelectorAll('#omiaiTabs .omiai-tab-item').forEach(btn => {
         const bFilter = btn.dataset.filter;
         const bSort = btn.dataset.sort;
-        const isActive = (bFilter === currentFilter && bSort === currentSort) ||
+        const isActive = (bFilter === currentFilter && (bSort === currentSort || currentFilter !== 'all')) ||
                          (bFilter === 'all' && currentFilter === 'all' && bSort === currentSort);
         btn.classList.toggle('active', isActive);
       });
     }
 
     let currentNav = 'search';
+    let currentTalkFilter = 'all';
     let talkSortMode = 'recent'; // 'recent' or 'unread'
 
     function formatTalkTime(ts) {
@@ -3784,6 +3923,14 @@
       renderTalkList();
     }
 
+    function onTalkTabClick(category) {
+      currentTalkFilter = category;
+      document.querySelectorAll('#talkTabs .omiai-tab-item').forEach(btn => {
+        btn.classList.toggle('active', btn.getAttribute('data-talk-filter') === category);
+      });
+      renderTalkList();
+    }
+
     function renderTalkList() {
       const container = document.getElementById('talkListContainer');
       if (!container) return;
@@ -3799,8 +3946,28 @@
         return;
       }
 
+      // Filter talk items by playful category
+      let list = [...ideas];
+      if (currentTalkFilter !== 'all') {
+        list = list.filter(item => normalizeStatus(item.status) === currentTalkFilter);
+      }
+
+      if (list.length === 0) {
+        const catInfo = STATUS_CONFIG[currentTalkFilter];
+        const catName = catInfo ? catInfo.short : 'このカテゴリー';
+        container.innerHTML = `
+          <div style="padding: 48px 20px; text-align: center; color: var(--text-muted);">
+            <div style="font-size: 2.2rem; margin-bottom: 10px;">🗿💬</div>
+            <div style="font-weight: 800; font-size: 0.95rem; color: var(--text-main);">「${catName}」のトークはありません</div>
+            <div style="font-size: 0.78rem; margin-top: 4px; color: var(--text-muted);">作品詳細からカテゴリーを「${catName}」に変更するか、「すべて」で他の作品をご覧ください</div>
+            <button class="btn-secondary" onclick="onTalkTabClick('all')" style="margin-top:14px; padding:6px 16px; font-size:0.8rem;">すべて表示に戻す</button>
+          </div>
+        `;
+        return;
+      }
+
       // Sort talk items
-      const list = [...ideas].sort((a, b) => {
+      list.sort((a, b) => {
         const logsA = Array.isArray(a.logs) ? a.logs : [];
         const logsB = Array.isArray(b.logs) ? b.logs : [];
         const timeA = logsA.length > 0 ? (logsA[logsA.length - 1].time || a.updatedAt || 0) : (a.updatedAt || a.createdAt || 0);
@@ -3825,9 +3992,10 @@
         const lastLog = hasLogs ? logs[logs.length - 1] : null;
         const lastTime = lastLog ? lastLog.time : (item.updatedAt || item.createdAt);
         const timeStr = formatTalkTime(lastTime);
+        const st = getStatusInfo(item.status);
 
         // Omiai風：新着または上位アイテムに「NEW」リボンバッジ
-        const isNew = item.status === 'idea' || idx === 1 || idx === 2;
+        const isNew = normalizeStatus(item.status) === 'asobi' || idx === 1 || idx === 2;
 
         let msgHtml = '';
         if (!hasLogs) {
@@ -3862,6 +4030,7 @@
               <div class="talk-item-header">
                 <div class="talk-item-title-wrap">
                   <span class="talk-item-title">${title}</span>
+                  <span class="talk-status-tag ${st.cls}">${st.badge}</span>
                   <span class="talk-item-subtitle">${subtitle}</span>
                 </div>
                 <button class="talk-item-more-btn" onclick="event.stopPropagation(); openDetailModal('${item.id}')" title="詳細を開く">•••</button>
@@ -3890,14 +4059,16 @@
       const talkView = document.getElementById('talkListContainer');
       const galleryHeader = document.getElementById('galleryHeaderInner');
       const talkHeader = document.getElementById('talkHeaderInner');
-      const tabBar = document.querySelector('.omiai-tab-bar');
+      const galleryTabBar = document.getElementById('galleryTabBar');
+      const talkTabBar = document.getElementById('talkTabBar');
 
       if (navKey === 'search') {
         if (galleryView) galleryView.style.display = 'grid';
         if (talkView) talkView.style.display = 'none';
         if (galleryHeader) galleryHeader.style.display = 'flex';
         if (talkHeader) talkHeader.style.display = 'none';
-        if (tabBar) tabBar.style.display = 'block';
+        if (galleryTabBar) galleryTabBar.style.display = 'block';
+        if (talkTabBar) talkTabBar.style.display = 'none';
 
         currentFilter = 'all';
         currentSort = 'recommended';
@@ -3909,7 +4080,8 @@
         if (talkView) talkView.style.display = 'none';
         if (galleryHeader) galleryHeader.style.display = 'flex';
         if (talkHeader) talkHeader.style.display = 'none';
-        if (tabBar) tabBar.style.display = 'block';
+        if (galleryTabBar) galleryTabBar.style.display = 'block';
+        if (talkTabBar) talkTabBar.style.display = 'none';
 
         currentFilter = 'fav';
         currentSort = 'favorite';
@@ -3922,7 +4094,8 @@
         if (talkView) talkView.style.display = 'block';
         if (galleryHeader) galleryHeader.style.display = 'none';
         if (talkHeader) talkHeader.style.display = 'flex';
-        if (tabBar) tabBar.style.display = 'none';
+        if (galleryTabBar) galleryTabBar.style.display = 'none';
+        if (talkTabBar) talkTabBar.style.display = 'block';
 
         renderTalkList();
         window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -3945,12 +4118,15 @@
 
       const totalChats = ideas.reduce((acc, cur) => acc + (Array.isArray(cur.logs) ? cur.logs.length : 0), 0);
       const chatBadgeEl = document.getElementById('bottomNavChatBadge');
-      if (chatBadgeEl) chatBadgeEl.textContent = totalChats > 99 ? '99+' : totalChats;
+      if (chatBadgeEl) {
+        chatBadgeEl.textContent = totalChats > 99 ? '99+' : totalChats;
+        chatBadgeEl.style.display = totalChats > 0 ? 'inline-block' : 'none';
+      }
 
       if (currentFilter === 'fav') {
         list = list.filter(item => item.favorite);
       } else if (currentFilter !== 'all') {
-        list = list.filter(item => item.status === currentFilter);
+        list = list.filter(item => normalizeStatus(item.status) === currentFilter);
       }
 
       list.sort((a, b) => {
@@ -3964,9 +4140,13 @@
           return (b.createdAt || 0) - (a.createdAt || 0);
         }
         if (currentSort === 'recommended') {
-          // おすすめ順：お気に入り ＋ 直近チャットが活発なものを上位
-          const scoreA = (a.favorite ? 100 : 0) + (Array.isArray(a.logs) ? a.logs.length * 5 : 0);
-          const scoreB = (b.favorite ? 100 : 0) + (Array.isArray(b.logs) ? b.logs.length * 5 : 0);
+          // おすすめ順：本命/彼氏を上位、お気に入り・直近チャットが活発なものを優先
+          const normA = normalizeStatus(a.status);
+          const normB = normalizeStatus(b.status);
+          const weightA = normA === 'honmei' ? 50 : (normA === 'boyfriend' ? 40 : (normA === 'yousumi' ? 20 : 10));
+          const weightB = normB === 'honmei' ? 50 : (normB === 'boyfriend' ? 40 : (normB === 'yousumi' ? 20 : 10));
+          const scoreA = weightA + (a.favorite ? 100 : 0) + (Array.isArray(a.logs) ? a.logs.length * 5 : 0);
+          const scoreB = weightB + (b.favorite ? 100 : 0) + (Array.isArray(b.logs) ? b.logs.length * 5 : 0);
           return scoreB - scoreA || (b.updatedAt || 0) - (a.updatedAt || 0);
         }
         return (b.updatedAt || 0) - (a.updatedAt || 0);
@@ -3979,9 +4159,10 @@
         const logsCount = Array.isArray(item.logs) ? item.logs.length : 0;
         const totalImages = 1 + (Array.isArray(item.subImages) ? item.subImages.length : 0);
         const fallbackSrc = item.fallbackImage || createPlaceholderDataUrl(item.title || 'MOAI IDEA', item.subtitle || '', '#1e293b', '#0f172a', '🗿');
+        const st = getStatusInfo(item.status);
 
         // Omiai風：最初の数件または新着に「NEW」の赤い丸バッジを表示
-        const isNew = item.status === 'idea' || idx % 2 === 0;
+        const isNew = normalizeStatus(item.status) === 'asobi' || idx % 2 === 0;
         // マッチ度（♡ 80%風の擬似モアイマッチ度）
         const matchPercent = 65 + ((item.id.charCodeAt(item.id.length - 1) || 7) * 4) % 31;
 
@@ -3996,6 +4177,7 @@
                 loading="lazy"
               >
               ${isNew ? `<span class="omiai-badge-new">NEW</span>` : ''}
+              <span class="omiai-status-pill ${st.cls}">${st.badge}</span>
               <button
                 class="omiai-card-fav ${item.favorite ? 'active' : ''}"
                 onclick="toggleFavoriteOnTile(event, '${item.id}')"
@@ -4049,6 +4231,8 @@
       pendingAddImageData = preloadedDataUrl;
       document.getElementById('addTitleInput').value = '';
       document.getElementById('addSubtitleInput').value = '';
+      const statusSelect = document.getElementById('addStatusSelect');
+      if (statusSelect) statusSelect.value = 'asobi';
       updateAddDropzoneUI();
       document.getElementById('addModalBackdrop').classList.add('open');
     }
@@ -4075,6 +4259,8 @@
     async function createNewIdea() {
       const title = document.getElementById('addTitleInput').value.trim();
       const subtitle = document.getElementById('addSubtitleInput').value.trim();
+      const statusEl = document.getElementById('addStatusSelect');
+      const statusVal = statusEl ? (statusEl.value || 'asobi') : 'asobi';
       const now = Date.now();
       const cover = pendingAddImageData || createPlaceholderDataUrl(
         title || '新作モアイ案',
@@ -4091,7 +4277,7 @@
         description: '',
         coverImage: cover,
         subImages: [],
-        status: 'idea',
+        status: statusVal,
         favorite: false,
         createdAt: now,
         updatedAt: now,
