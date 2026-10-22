@@ -715,6 +715,175 @@
       box-shadow: 0 4px 12px rgba(255, 45, 85, 0.35);
     }
 
+    /* =========================================================
+       Omiai Style Talk / Message List (作品別トーク一覧)
+       ========================================================= */
+    .talk-list-container {
+      width: 100%;
+      background: var(--bg-surface);
+      border-radius: var(--radius-card);
+      overflow: hidden;
+      border: 1px solid var(--border);
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+      margin-bottom: 20px;
+    }
+
+    .talk-item-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 13px 14px;
+      border-bottom: 1px solid var(--border);
+      cursor: pointer;
+      user-select: none;
+      transition: background-color 0.15s ease;
+      touch-action: manipulation;
+      position: relative;
+    }
+
+    .talk-item-row:last-child {
+      border-bottom: none;
+    }
+
+    .talk-item-row:active {
+      background: var(--bg-elevated);
+    }
+
+    .talk-avatar-wrap {
+      position: relative;
+      width: 54px;
+      height: 54px;
+      flex-shrink: 0;
+    }
+
+    .talk-avatar-img {
+      width: 54px;
+      height: 54px;
+      border-radius: 50%;
+      object-fit: cover;
+      background: var(--bg-elevated);
+      display: block;
+      border: 1px solid var(--border);
+    }
+
+    /* Omiai signature diagonal NEW ribbon tag on top-left of avatar */
+    .talk-avatar-new {
+      position: absolute;
+      top: -2px;
+      left: -4px;
+      background: #ff2d55;
+      color: #fff;
+      font-size: 0.52rem;
+      font-weight: 900;
+      padding: 1px 4px;
+      border-radius: 3px;
+      letter-spacing: 0.04em;
+      box-shadow: 0 2px 6px rgba(255, 45, 85, 0.45);
+      transform: rotate(-10deg);
+      z-index: 2;
+    }
+
+    .talk-item-content {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    .talk-item-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .talk-item-title-wrap {
+      display: flex;
+      align-items: baseline;
+      gap: 6px;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+
+    .talk-item-title {
+      font-size: 0.95rem;
+      font-weight: 800;
+      color: var(--text-main);
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+
+    .talk-item-subtitle {
+      font-size: 0.82rem;
+      font-weight: 500;
+      color: var(--text-sub);
+      flex-shrink: 0;
+    }
+
+    .talk-item-more-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-size: 1.15rem;
+      line-height: 1;
+      padding: 2px 4px;
+      cursor: pointer;
+      border-radius: 4px;
+      letter-spacing: 0.08em;
+      flex-shrink: 0;
+    }
+
+    .talk-item-msg-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.85rem;
+      line-height: 1.35;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+
+    .talk-badge-unread {
+      background: #ff3b30;
+      color: #fff;
+      font-size: 0.62rem;
+      font-weight: 800;
+      padding: 1px 5px;
+      border-radius: 4px;
+      flex-shrink: 0;
+      letter-spacing: 0.02em;
+    }
+
+    .talk-preview-text {
+      color: var(--text-sub);
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      flex: 1;
+    }
+
+    .talk-preview-none {
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    .talk-preview-matched {
+      color: #ff2d55;
+      font-weight: 800;
+      letter-spacing: 0.02em;
+    }
+
+    .talk-item-time {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      font-weight: 500;
+      line-height: 1.2;
+    }
+
     /* Omiai Fixed Bottom Navigation Bar (5 tabs) */
     .omiai-bottom-nav {
       position: fixed;
@@ -2340,7 +2509,8 @@
        ========================================================= -->
   <div class="omiai-sticky-top-wrap">
     <header class="omiai-header">
-      <div class="omiai-header-inner">
+      <!-- 1. 作品ギャラリー用ヘッダー -->
+      <div class="omiai-header-inner" id="galleryHeaderInner">
         <div class="omiai-header-left" onclick="filterByFavorites()" title="お気に入りアイデア一覧">
           <span class="omiai-like-icon">👍</span>
           <span id="headerFavCount" class="omiai-like-count">0</span>
@@ -2352,6 +2522,21 @@
         <div class="omiai-header-right">
           <button id="btnFilterToggle" class="omiai-icon-btn" onclick="openAddModal()" title="新規アイデア追加">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- 2. メッセージ・トーク一覧用ヘッダー（Omiaiスクリーンショット再現） -->
+      <div class="omiai-header-inner" id="talkHeaderInner" style="display:none;">
+        <div class="omiai-header-left" style="visibility:hidden; width:44px;">
+          <span>💬</span>
+        </div>
+        <div class="omiai-logo-wrap">
+          <span style="font-size:1.18rem; font-weight:800; color:var(--text-main); letter-spacing:-0.01em;">メッセージ</span>
+        </div>
+        <div class="omiai-header-right" style="width:44px;">
+          <button id="btnTalkSortFilter" class="omiai-icon-btn" onclick="toggleTalkSort()" title="並び替え">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round"><line x1="4" y1="6" x2="16" y2="6"></line><line x1="4" y1="12" x2="12" y2="12"></line><line x1="4" y1="18" x2="8" y2="18"></line><polyline points="15 15 18 18 21 15"></polyline><line x1="18" y1="9" x2="18" y2="18"></line></svg>
           </button>
         </div>
       </div>
@@ -2383,10 +2568,16 @@
   </div>
 
   <!-- =========================================================
-       1. アイデア一覧画面（Omiai風 2列タイル表示）
+       1. アイデア一覧画面（Omiai風 2列タイル表示）＆ トーク一覧画面
        ========================================================= -->
   <main class="gallery-container">
+    <!-- 作品ギャラリー（2列カード） -->
     <div id="tileGrid" class="tile-grid">
+      <!-- Populated by JS -->
+    </div>
+
+    <!-- 各作品のトーク一覧（Omiai風 メッセージ一覧） -->
+    <div id="talkListContainer" class="talk-list-container" style="display:none;">
       <!-- Populated by JS -->
     </div>
   </main>
@@ -3568,31 +3759,173 @@
       });
     }
 
+    let currentNav = 'search';
+    let talkSortMode = 'recent'; // 'recent' or 'unread'
+
+    function formatTalkTime(ts) {
+      if (!ts) return '';
+      const now = Date.now();
+      const diffSec = Math.floor((now - ts) / 1000);
+      if (diffSec < 60) return 'たった今';
+      if (diffSec < 3600) return `${Math.floor(diffSec / 60)}分前`;
+      const d = new Date(ts);
+      const nowD = new Date(now);
+      const isToday = d.toDateString() === nowD.toDateString();
+      const hh = String(d.getHours()).padStart(2, '0');
+      const mm = String(d.getMinutes()).padStart(2, '0');
+      if (isToday) return `${hh}:${mm}`;
+      const isYesterday = new Date(now - 86400000).toDateString() === d.toDateString();
+      if (isYesterday) return `昨日 ${hh}:${mm}`;
+      return `${d.getMonth() + 1}/${d.getDate()}`;
+    }
+
+    function toggleTalkSort() {
+      talkSortMode = talkSortMode === 'recent' ? 'unread' : 'recent';
+      renderTalkList();
+    }
+
+    function renderTalkList() {
+      const container = document.getElementById('talkListContainer');
+      if (!container) return;
+
+      if (!ideas || ideas.length === 0) {
+        container.innerHTML = `
+          <div style="padding: 48px 20px; text-align: center; color: var(--text-muted);">
+            <div style="font-size: 2.4rem; margin-bottom: 10px;">🗿💬</div>
+            <div style="font-weight: 800; font-size: 0.95rem; color: var(--text-main);">トークがまだありません</div>
+            <div style="font-size: 0.78rem; margin-top: 4px;">新しいアイデアを追加すると、相棒モアイとのトークが始まります</div>
+          </div>
+        `;
+        return;
+      }
+
+      // Sort talk items
+      const list = [...ideas].sort((a, b) => {
+        const logsA = Array.isArray(a.logs) ? a.logs : [];
+        const logsB = Array.isArray(b.logs) ? b.logs : [];
+        const timeA = logsA.length > 0 ? (logsA[logsA.length - 1].time || a.updatedAt || 0) : (a.updatedAt || a.createdAt || 0);
+        const timeB = logsB.length > 0 ? (logsB[logsB.length - 1].time || b.updatedAt || 0) : (b.updatedAt || b.createdAt || 0);
+
+        if (talkSortMode === 'unread') {
+          const unreadA = logsA.length > 0 && logsA[logsA.length - 1].side === 'right' ? 1 : 0;
+          const unreadB = logsB.length > 0 && logsB[logsB.length - 1].side === 'right' ? 1 : 0;
+          if (unreadB !== unreadA) return unreadB - unreadA;
+        }
+        return timeB - timeA;
+      });
+
+      const rowsHtml = list.map((item, idx) => {
+        const title = item.title && item.title.trim().length > 0 ? escapeHtml(item.title) : '無題のモアイ';
+        const subtitle = item.subtitle ? escapeHtml(item.subtitle) : '金沢';
+        const fallbackSrc = item.fallbackImage || createPlaceholderDataUrl(item.title || 'MOAI', item.subtitle || '', '#1e293b', '#0f172a', '🗿');
+        const imgSrc = escapeHtml(item.coverImage || fallbackSrc);
+
+        const logs = Array.isArray(item.logs) ? item.logs : [];
+        const hasLogs = logs.length > 0;
+        const lastLog = hasLogs ? logs[logs.length - 1] : null;
+        const lastTime = lastLog ? lastLog.time : (item.updatedAt || item.createdAt);
+        const timeStr = formatTalkTime(lastTime);
+
+        // Omiai風：新着または上位アイテムに「NEW」リボンバッジ
+        const isNew = item.status === 'idea' || idx === 1 || idx === 2;
+
+        let msgHtml = '';
+        if (!hasLogs) {
+          if (isNew) {
+            msgHtml = `<span class="talk-preview-matched">マッチングが成立しました！</span>`;
+          } else {
+            msgHtml = `<span class="talk-preview-none">メッセージ交換をしていません</span>`;
+          }
+        } else {
+          const isUserLast = lastLog.side === 'right';
+          const logText = lastLog.text ? escapeHtml(lastLog.text) : (lastLog.image ? '📷 画像を送信しました' : 'メッセージ');
+          if (isUserLast) {
+            msgHtml = `<span class="talk-badge-unread">未返信</span><span class="talk-preview-text">${logText}</span>`;
+          } else {
+            msgHtml = `<span class="talk-preview-text">${logText}</span>`;
+          }
+        }
+
+        return `
+          <div class="talk-item-row" onclick="openDetailModal('${item.id}')">
+            <div class="talk-avatar-wrap">
+              <img
+                class="talk-avatar-img"
+                src="${imgSrc}"
+                onerror="this.onerror=null; this.src='${fallbackSrc}';"
+                alt="${title}"
+                loading="lazy"
+              >
+              ${isNew ? `<span class="talk-avatar-new">NEW</span>` : ''}
+            </div>
+            <div class="talk-item-content">
+              <div class="talk-item-header">
+                <div class="talk-item-title-wrap">
+                  <span class="talk-item-title">${title}</span>
+                  <span class="talk-item-subtitle">${subtitle}</span>
+                </div>
+                <button class="talk-item-more-btn" onclick="event.stopPropagation(); openDetailModal('${item.id}')" title="詳細を開く">•••</button>
+              </div>
+              <div class="talk-item-msg-row">
+                ${msgHtml}
+              </div>
+              <div class="talk-item-time">
+                ${timeStr}
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      container.innerHTML = rowsHtml;
+    }
+
     function onBottomNavClick(navKey) {
+      currentNav = navKey;
       document.querySelectorAll('.omiai-bottom-nav .omiai-nav-btn').forEach(btn => {
         btn.classList.toggle('active', btn.getAttribute('data-nav') === navKey);
       });
 
+      const galleryView = document.getElementById('tileGrid');
+      const talkView = document.getElementById('talkListContainer');
+      const galleryHeader = document.getElementById('galleryHeaderInner');
+      const talkHeader = document.getElementById('talkHeaderInner');
+      const tabBar = document.querySelector('.omiai-tab-bar');
+
       if (navKey === 'search') {
+        if (galleryView) galleryView.style.display = 'grid';
+        if (talkView) talkView.style.display = 'none';
+        if (galleryHeader) galleryHeader.style.display = 'flex';
+        if (talkHeader) talkHeader.style.display = 'none';
+        if (tabBar) tabBar.style.display = 'block';
+
         currentFilter = 'all';
         currentSort = 'recommended';
         updateOmiaiTabSelection();
         renderGallery();
         window.scrollTo({ top: 0, behavior: 'smooth' });
       } else if (navKey === 'fav') {
+        if (galleryView) galleryView.style.display = 'grid';
+        if (talkView) talkView.style.display = 'none';
+        if (galleryHeader) galleryHeader.style.display = 'flex';
+        if (talkHeader) talkHeader.style.display = 'none';
+        if (tabBar) tabBar.style.display = 'block';
+
         currentFilter = 'fav';
         currentSort = 'favorite';
         updateOmiaiTabSelection();
         renderGallery();
         window.scrollTo({ top: 0, behavior: 'smooth' });
       } else if (navKey === 'chat') {
-        // 直近チャットのあるアイデアを開く
-        const withChats = ideas.filter(i => Array.isArray(i.logs) && i.logs.length > 0);
-        if (withChats.length > 0) {
-          openDetailModal(withChats[0].id);
-        } else if (ideas.length > 0) {
-          openDetailModal(ideas[0].id);
-        }
+        // Omiai メッセージ一覧画面を表示（各作品のトーク一覧）
+        if (galleryView) galleryView.style.display = 'none';
+        if (talkView) talkView.style.display = 'block';
+        if (galleryHeader) galleryHeader.style.display = 'none';
+        if (talkHeader) talkHeader.style.display = 'flex';
+        if (tabBar) tabBar.style.display = 'none';
+
+        renderTalkList();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
       } else if (navKey === 'menu') {
         openThemeModal();
       }
@@ -3840,6 +4173,9 @@
       activeIdeaId = null;
       clearChatAttachment();
       renderGallery();
+      if (currentNav === 'chat') {
+        renderTalkList();
+      }
     }
 
     function renderDetailLeft(item) {
