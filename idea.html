@@ -2551,7 +2551,102 @@
         display: none !important;
       }
     }
+
+    /* =========================================================
+       8. 端末間データ共有 (Sync Modal & Badges)
+       ========================================================= */
+    .sync-tab-nav {
+      display: flex;
+      gap: 6px;
+      background: var(--bg-main);
+      padding: 4px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+    }
+    .sync-tab-btn {
+      flex: 1;
+      padding: 7px 8px;
+      font-size: 0.76rem;
+      font-weight: 700;
+      color: var(--text-sub);
+      background: transparent;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      white-space: nowrap;
+      text-align: center;
+    }
+    .sync-tab-btn.active {
+      background: var(--bg-surface);
+      color: #38bdf8;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+    }
+    .sync-card-box {
+      background: var(--bg-main);
+      border: 1px solid var(--border-strong);
+      border-radius: 12px;
+      padding: 14px;
+    }
+    .btn-cloud-login {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      padding: 10px 16px;
+      border-radius: 10px;
+      border: 1px solid #4285F4;
+      background: rgba(66, 133, 244, 0.12);
+      color: #93c5fd;
+      font-size: 0.86rem;
+      font-weight: 800;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-cloud-login:hover {
+      background: rgba(66, 133, 244, 0.24);
+    }
+    .sync-online-dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: #10b981;
+      box-shadow: 0 0 8px #10b981;
+      display: inline-block;
+    }
+    .sync-dot-badge {
+      position: absolute;
+      top: 5px;
+      right: 5px;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #10b981;
+      box-shadow: 0 0 6px #10b981;
+      pointer-events: none;
+    }
+    .p2p-sub-tab {
+      flex: 1;
+      padding: 6px 12px;
+      font-size: 0.76rem;
+      font-weight: 700;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--text-sub);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .p2p-sub-tab.active {
+      background: rgba(56, 189, 248, 0.15);
+      border-color: #38bdf8;
+      color: #38bdf8;
+    }
   </style>
+  <!-- QR Code & P2P WebRTC for zero-login direct sync -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
 </head>
 <body>
 
@@ -2570,7 +2665,13 @@
           <span class="omiai-logo-text">Omoai</span>
           <span class="omiai-logo-sub">MOAI LAB ⚡v2.8</span>
         </div>
-        <div class="omiai-header-right">
+        <div class="omiai-header-right" style="display:flex; align-items:center; gap:6px;">
+          <button id="btnOpenSyncModal" class="omiai-icon-btn" onclick="openSyncModal()" title="端末間データ共有・クラウド同期" style="position:relative;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"/>
+            </svg>
+            <span id="syncStatusBadge" class="sync-dot-badge" style="display:none;" title="クラウド同期中"></span>
+          </button>
           <button id="btnFilterToggle" class="omiai-icon-btn" onclick="openAddModal()" title="新規アイデア追加">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
           </button>
@@ -2585,7 +2686,13 @@
         <div class="omiai-logo-wrap">
           <span style="font-size:1.18rem; font-weight:800; color:var(--text-main); letter-spacing:-0.01em;">メッセージ</span>
         </div>
-        <div class="omiai-header-right" style="width:44px;">
+        <div class="omiai-header-right" style="display:flex; align-items:center; gap:6px;">
+          <button id="btnOpenSyncModalTalk" class="omiai-icon-btn" onclick="openSyncModal()" title="端末間データ共有・クラウド同期" style="position:relative;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"/>
+            </svg>
+            <span id="syncStatusBadgeTalk" class="sync-dot-badge" style="display:none;" title="クラウド同期中"></span>
+          </button>
           <button id="btnTalkSortFilter" class="omiai-icon-btn" onclick="toggleTalkSort()" title="並び替え">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round"><line x1="4" y1="6" x2="16" y2="6"></line><line x1="4" y1="12" x2="12" y2="12"></line><line x1="4" y1="18" x2="8" y2="18"></line><polyline points="15 15 18 18 21 15"></polyline><line x1="18" y1="9" x2="18" y2="18"></line></svg>
           </button>
@@ -2855,6 +2962,13 @@
       <div style="margin-top:16px; padding-top:14px; border-top:1px solid var(--border); display:flex; flex-direction:column; gap:12px;">
         <div style="display:flex; justify-content:space-between; align-items:center;">
           <div>
+            <div style="font-size:0.85rem; font-weight:700; color:var(--text-main);">📲 端末間データ共有</div>
+            <div style="font-size:0.72rem; color:var(--text-muted);">クラウド自動同期・QRコード直接送信・ファイル共有</div>
+          </div>
+          <button class="btn-secondary" onclick="closeThemeModal(); openSyncModal();" style="padding:6px 14px; font-size:0.78rem; border-color:#06b6d4; color:#06b6d4; font-weight:700;">共有を開く</button>
+        </div>
+        <div style="display:flex; justify-content:space-between; align-items:center; padding-top:8px; border-top:1px dashed var(--border);">
+          <div>
             <div style="font-size:0.85rem; font-weight:700; color:var(--text-main);">🤖 AI返信・APIキー設定</div>
             <div style="font-size:0.72rem; color:var(--text-muted);">Gemini APIキーやモデルの切り替え</div>
           </div>
@@ -2875,6 +2989,211 @@
           <button id="btnResetSamples" class="btn-secondary" style="padding:6px 14px; font-size:0.78rem; color:#ef4444;">復元</button>
         </div>
       </div>
+    </div>
+  </div>
+
+  <!-- =========================================================
+       2.7 📲 端末間データ共有モーダル (Cloud Sync / P2P QR / File Sync)
+       ========================================================= -->
+  <div id="syncModalBackdrop" class="modal-backdrop">
+    <div class="add-modal-card" style="max-width: 480px; max-height: 90vh; overflow-y: auto;" onclick="event.stopPropagation()">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+        <div>
+          <h2 style="font-size:1.1rem; font-weight:800; display:flex; align-items:center; gap:6px;">
+            <span>📲</span> 端末間データ共有
+          </h2>
+          <p style="font-size:0.75rem; color:var(--text-muted); margin-top:2px;">
+            スマホとPCでモアイのアイデアを同期・共有
+          </p>
+        </div>
+        <button id="btnCloseSyncModal" class="btn-close-modal" onclick="closeSyncModal()">✕</button>
+      </div>
+
+      <!-- モーダル内タブ切り替えバー -->
+      <div class="sync-tab-nav">
+        <button class="sync-tab-btn active" id="tabBtnCloudSync" onclick="switchSyncTab('cloud')">
+          ☁️ クラウド同期
+        </button>
+        <button class="sync-tab-btn" id="tabBtnQrSync" onclick="switchSyncTab('qr')">
+          📱 QRコード送信
+        </button>
+        <button class="sync-tab-btn" id="tabBtnFileSync" onclick="switchSyncTab('file')">
+          📂 ファイル共有
+        </button>
+      </div>
+
+      <!-- Tab 1: ☁️ クラウド自動同期 (Firebase Google Login) -->
+      <div id="syncPanelCloud" class="sync-panel-content">
+        <!-- 未ログイン時 -->
+        <div id="cloudLoggedOutView" style="display:block;">
+          <div class="sync-card-box">
+            <div style="font-size:0.88rem; font-weight:800; color:var(--text-main); margin-bottom:6px;">
+              🌐 Googleアカウントで自動同期
+            </div>
+            <div style="font-size:0.75rem; color:var(--text-muted); line-height:1.5;">
+              ログインすると、スマホ・PC間で同じアイデア帳がクラウド経由で自動同期されます。外出先での追加も即座にPCへ反映！
+            </div>
+            <div style="margin-top:12px;">
+              <button id="btnGoogleLogin" class="btn-cloud-login" onclick="loginWithGoogle()">
+                <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/></svg>
+                Googleでログインして同期
+              </button>
+            </div>
+            <div style="font-size:0.7rem; color:var(--text-muted); margin-top:8px;">
+              ※ pos.html や catalog.html と同じGoogleアカウントでそのまま同期できます。
+            </div>
+          </div>
+        </div>
+
+        <!-- ログイン中 -->
+        <div id="cloudLoggedInView" style="display:none;">
+          <div class="sync-card-box">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <div style="display:flex; align-items:center; gap:8px;">
+                <span class="sync-online-dot"></span>
+                <div>
+                  <div style="font-size:0.78rem; font-weight:800; color:#10b981;">クラウド同期中</div>
+                  <div id="cloudUserEmail" style="font-size:0.74rem; color:var(--text-main); font-weight:600;">user@gmail.com</div>
+                </div>
+              </div>
+              <button onclick="logoutGoogle()" class="btn-secondary" style="padding:4px 10px; font-size:0.72rem;">ログアウト</button>
+            </div>
+
+            <div style="margin-top:12px; padding-top:10px; border-top:1px dashed var(--border); font-size:0.74rem; color:var(--text-muted); display:flex; justify-content:space-between; align-items:center;">
+              <span>最終同期: <span id="cloudLastSyncTime">--:--</span></span>
+              <span id="cloudIdeaCountBadge" style="font-weight:700; color:var(--text-main);">0 件</span>
+            </div>
+
+            <div style="margin-top:12px; display:flex; gap:8px;">
+              <button class="btn-primary" onclick="syncNowWithCloud()" style="flex:1; padding:8px 12px; font-size:0.8rem; font-weight:700;">
+                🔄 今すぐクラウドと同期
+              </button>
+            </div>
+
+            <div style="margin-top:8px; display:flex; gap:8px;">
+              <button class="btn-secondary" onclick="forcePushToCloud()" style="flex:1; padding:6px 10px; font-size:0.74rem;">
+                ☁️ クラウドへ保存
+              </button>
+              <button class="btn-secondary" onclick="forcePullFromCloud()" style="flex:1; padding:6px 10px; font-size:0.74rem;">
+                📥 クラウドから再取得
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab 2: 📱 QRコード直接送信 (P2P WebRTC / PeerJS) -->
+      <div id="syncPanelQr" class="sync-panel-content" style="display:none;">
+        <div style="display:flex; gap:6px; margin-bottom:12px;">
+          <button id="btnP2pModeSend" class="p2p-sub-tab active" onclick="switchP2pMode('send')">
+            📤 スマホへ送る
+          </button>
+          <button id="btnP2pModeReceive" class="p2p-sub-tab" onclick="switchP2pMode('receive')">
+            📥 PCから受け取る
+          </button>
+        </div>
+
+        <!-- 送信モード -->
+        <div id="p2pSendSection">
+          <div class="sync-card-box" style="text-align:center;">
+            <div style="font-size:0.85rem; font-weight:800; color:var(--text-main); margin-bottom:4px;">
+              カメラで読み取るだけで直接転送！
+            </div>
+            <div style="font-size:0.72rem; color:var(--text-muted); margin-bottom:12px;">
+              スマホのカメラで下記のQRコードをスキャンしてください。<br>ログイン不要でアイデアが直接転送されます。
+            </div>
+
+            <div id="p2pQrWrapper" style="display:inline-flex; padding:12px; background:#ffffff; border-radius:12px; margin-bottom:10px; min-width:200px; min-height:200px; justify-content:center; align-items:center;">
+              <div id="p2pQrContainer"></div>
+            </div>
+
+            <div style="font-size:0.78rem; font-weight:700; color:var(--text-sub); margin-bottom:4px;">
+              または転送コードを入力:
+            </div>
+            <div style="display:flex; justify-content:center; align-items:center; gap:8px;">
+              <div id="p2pSendCodeDisplay" style="font-size:1.15rem; font-weight:900; letter-spacing:0.12em; color:#38bdf8; font-family:monospace; background:rgba(56,189,248,0.12); padding:4px 14px; border-radius:8px; border:1px solid rgba(56,189,248,0.3);">
+                生成中...
+              </div>
+              <button onclick="copyP2pCode()" class="btn-secondary" style="padding:4px 10px; font-size:0.72rem;">コピー</button>
+            </div>
+
+            <div id="p2pSendStatus" style="font-size:0.74rem; color:var(--text-muted); margin-top:12px; font-weight:600;">
+              ⏳ 接続コードを発行しています...
+            </div>
+          </div>
+        </div>
+
+        <!-- 受信モード -->
+        <div id="p2pReceiveSection" style="display:none;">
+          <div class="sync-card-box">
+            <div style="font-size:0.85rem; font-weight:800; color:var(--text-main); margin-bottom:4px;">
+              相手端末のコードを入力
+            </div>
+            <div style="font-size:0.72rem; color:var(--text-muted); margin-bottom:12px;">
+              送信側の画面に表示された転送コードを入力して「受信」を押してください。
+            </div>
+
+            <div style="display:flex; gap:8px;">
+              <input type="text" id="p2pInputCode" placeholder="例: A3F89C" style="flex:1; padding:8px 12px; border-radius:8px; border:1px solid var(--border-strong); background:var(--bg-main); color:var(--text-main); font-size:0.95rem; font-family:monospace; font-weight:800; text-transform:uppercase;">
+              <button class="btn-primary" onclick="startP2pReceive()" style="padding:8px 16px; font-size:0.82rem; font-weight:700;">
+                📥 受信開始
+              </button>
+            </div>
+
+            <div style="margin-top:12px; display:flex; align-items:center; gap:8px;">
+              <label style="font-size:0.74rem; color:var(--text-sub); display:flex; align-items:center; gap:6px; cursor:pointer;">
+                <input type="checkbox" id="chkP2pMerge" checked style="cursor:pointer;">
+                <span>既存のアイデアと合体する（マージ保存）</span>
+              </label>
+            </div>
+
+            <div id="p2pReceiveStatus" style="font-size:0.74rem; color:var(--text-muted); margin-top:10px; font-weight:600;">
+              コードを入力して受信ボタンを押してください
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab 3: 📂 ファイル共有 (JSON インポート＆エクスポート) -->
+      <div id="syncPanelFile" class="sync-panel-content" style="display:none;">
+        <div class="sync-card-box" style="margin-bottom:10px;">
+          <div style="font-size:0.85rem; font-weight:800; color:var(--text-main);">
+            💾 バックアップファイルの保存 (エクスポート)
+          </div>
+          <div style="font-size:0.72rem; color:var(--text-muted); margin-top:4px;">
+            全アイデア（画像・チャット履歴含む）を1つのJSONファイルとして端末にダウンロードします。
+          </div>
+          <div style="margin-top:10px;">
+            <button class="btn-secondary" onclick="exportIdeasBackup()" style="width:100%; padding:8px 14px; font-size:0.8rem; font-weight:700;">
+              💾 JSONファイルを保存する
+            </button>
+          </div>
+        </div>
+
+        <div class="sync-card-box">
+          <div style="font-size:0.85rem; font-weight:800; color:var(--text-main);">
+            📂 バックアップファイルの読み込み (インポート)
+          </div>
+          <div style="font-size:0.72rem; color:var(--text-muted); margin-top:4px;">
+            AirDropやLINE、Googleドライブ等で送ったJSONファイルを読み込んでアイデアを復元します。
+          </div>
+          <input type="file" id="syncFileInput" accept=".json,application/json" style="display:none;" onchange="handleFileImport(event)">
+          <div style="margin-top:10px; display:flex; gap:8px;">
+            <button class="btn-primary" onclick="document.getElementById('syncFileInput').click()" style="flex:1; padding:8px 14px; font-size:0.8rem; font-weight:700;">
+              📂 JSONファイルを選択して読み込む
+            </button>
+          </div>
+          <div style="margin-top:10px; display:flex; align-items:center; gap:8px;">
+            <label style="font-size:0.74rem; color:var(--text-sub); display:flex; align-items:center; gap:6px; cursor:pointer;">
+              <input type="checkbox" id="chkFileMerge" checked style="cursor:pointer;">
+              <span>既存のアイデアと合体する（マージ追加）</span>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- 状態メッセージトースト表示領域 -->
+      <div id="syncToastArea" style="min-height:22px; font-size:0.74rem; text-align:center; font-weight:700; color:var(--text-sub);"></div>
     </div>
   </div>
 
@@ -3034,6 +3353,112 @@
       </div>
     </div>
   </div>
+
+  <!-- =========================================================
+       Firebase Cloud Sync (Google Login & Firestore)
+       ========================================================= -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+    import { getFirestore, doc, onSnapshot, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+    import { getAuth, signInWithPopup, signInWithRedirect, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDSeS6TQHnjVM7ZIrywt3cz16iPPdmh62A",
+      authDomain: "moai-catalog.firebaseapp.com",
+      projectId: "moai-catalog",
+      storageBucket: "moai-catalog.firebasestorage.app",
+      messagingSenderId: "421468245254",
+      appId: "1:421468245254:web:c49e0846d2015820d8a287"
+    };
+
+    const app = initializeApp(firebaseConfig, "omoaiCloudApp");
+    const db = getFirestore(app);
+    const auth = getAuth(app);
+    const provider = new GoogleAuthProvider();
+
+    let unsubIdeas = null;
+    let currentUser = null;
+    let isSavingToCloud = false;
+    let lastCloudUpdatedAt = 0;
+
+    window.omoaiCloud = {
+      isLoggedIn: () => !!currentUser,
+      getUser: () => currentUser,
+      login: async () => {
+        try {
+          const res = await signInWithPopup(auth, provider);
+          return res.user;
+        } catch (e) {
+          if (e.code === 'auth/popup-blocked') {
+            await signInWithRedirect(auth, provider);
+          } else {
+            throw e;
+          }
+        }
+      },
+      logout: async () => {
+        if (unsubIdeas) { unsubIdeas(); unsubIdeas = null; }
+        await signOut(auth);
+      },
+      saveIdeas: async (ideasList) => {
+        if (!currentUser) return false;
+        try {
+          isSavingToCloud = true;
+          const now = Date.now();
+          lastCloudUpdatedAt = now;
+          await setDoc(doc(db, "settings", "moai_ideas"), {
+            ideas: ideasList,
+            updatedAt: now,
+            updatedBy: currentUser.email || currentUser.displayName || 'user'
+          }, { merge: true });
+          return true;
+        } catch (e) {
+          console.error("Cloud save error:", e);
+          throw e;
+        } finally {
+          setTimeout(() => { isSavingToCloud = false; }, 800);
+        }
+      },
+      fetchIdeas: async () => {
+        if (!currentUser) return null;
+        const snap = await getDoc(doc(db, "settings", "moai_ideas"));
+        if (snap.exists()) {
+          const data = snap.data();
+          if (Array.isArray(data.ideas)) {
+            lastCloudUpdatedAt = data.updatedAt || 0;
+            return data.ideas;
+          }
+        }
+        return null;
+      }
+    };
+
+    onAuthStateChanged(auth, async (user) => {
+      currentUser = user;
+      if (typeof window.onCloudAuthStateChanged === 'function') {
+        window.onCloudAuthStateChanged(user);
+      }
+      if (user) {
+        if (unsubIdeas) unsubIdeas();
+        unsubIdeas = onSnapshot(doc(db, "settings", "moai_ideas"), (snap) => {
+          if (isSavingToCloud) return;
+          if (snap.exists()) {
+            const data = snap.data();
+            if (Array.isArray(data.ideas) && (data.updatedAt || 0) > lastCloudUpdatedAt) {
+              lastCloudUpdatedAt = data.updatedAt || 0;
+              if (typeof window.onRemoteIdeasReceived === 'function') {
+                window.onRemoteIdeasReceived(data.ideas, data.updatedAt);
+              }
+            }
+          }
+        }, (err) => {
+          console.warn("Cloud snapshot error:", err);
+        });
+      } else {
+        if (unsubIdeas) { unsubIdeas(); unsubIdeas = null; }
+      }
+    });
+  </script>
 
   <script>
     // =========================================================
@@ -3483,6 +3908,7 @@
         } catch (err) {}
       }
       showSaveStatus('自動保存済み');
+      debouncedCloudSave();
     }
 
     let saveTimer = null;
@@ -3495,6 +3921,490 @@
           if (el) el.textContent = '自動保存済み';
         }, 600);
       }
+    }
+
+    // =========================================================
+    // 3.7 📲 端末間データ共有 (Cloud Sync / P2P QR / File Sync)
+    // =========================================================
+    let cloudSaveTimer = null;
+    function debouncedCloudSave() {
+      if (cloudSaveTimer) clearTimeout(cloudSaveTimer);
+      cloudSaveTimer = setTimeout(async () => {
+        try {
+          if (window.omoaiCloud && window.omoaiCloud.isLoggedIn()) {
+            await window.omoaiCloud.saveIdeas(ideas);
+            updateCloudSyncStatusUI();
+          }
+        } catch (e) {
+          console.warn('Auto cloud save error:', e);
+        }
+      }, 1500);
+    }
+
+    function mergeIdeasLists(baseList, incomingList) {
+      if (!Array.isArray(incomingList)) return baseList;
+      const map = new Map();
+      (baseList || []).forEach(item => {
+        if (item && item.id) map.set(item.id, { ...item });
+      });
+
+      incomingList.forEach(item => {
+        if (!item || !item.id) return;
+        if (!map.has(item.id)) {
+          map.set(item.id, { ...item });
+        } else {
+          const existing = map.get(item.id);
+          const timeExisting = existing.updatedAt || existing.createdAt || 0;
+          const timeIncoming = item.updatedAt || item.createdAt || 0;
+
+          // Merge logs seamlessly
+          const existingLogs = Array.isArray(existing.logs) ? existing.logs : [];
+          const incomingLogs = Array.isArray(item.logs) ? item.logs : [];
+          const logMap = new Map();
+          existingLogs.forEach(l => { if (l && l.id) logMap.set(l.id, l); });
+          incomingLogs.forEach(l => { if (l && l.id) logMap.set(l.id, l); });
+          const mergedLogs = Array.from(logMap.values()).sort((a, b) => (a.time || 0) - (b.time || 0));
+
+          if (timeIncoming >= timeExisting) {
+            map.set(item.id, {
+              ...existing,
+              ...item,
+              logs: mergedLogs.length > 0 ? mergedLogs : (incomingLogs.length > 0 ? incomingLogs : existingLogs)
+            });
+          } else {
+            map.set(item.id, {
+              ...item,
+              ...existing,
+              logs: mergedLogs.length > 0 ? mergedLogs : existingLogs
+            });
+          }
+        }
+      });
+
+      return Array.from(map.values()).sort((a, b) => (b.updatedAt || b.createdAt || 0) - (a.updatedAt || a.createdAt || 0));
+    }
+
+    function updateCloudSyncStatusUI() {
+      const lastSyncEl = document.getElementById('cloudLastSyncTime');
+      if (lastSyncEl) {
+        const d = new Date();
+        const hh = String(d.getHours()).padStart(2, '0');
+        const mm = String(d.getMinutes()).padStart(2, '0');
+        lastSyncEl.textContent = `${hh}:${mm}`;
+      }
+      const badgeEl = document.getElementById('cloudIdeaCountBadge');
+      if (badgeEl) badgeEl.textContent = `${ideas.length} 件`;
+
+      const dot1 = document.getElementById('syncStatusBadge');
+      const dot2 = document.getElementById('syncStatusBadgeTalk');
+      const isLogged = window.omoaiCloud && window.omoaiCloud.isLoggedIn();
+      if (dot1) dot1.style.display = isLogged ? 'inline-block' : 'none';
+      if (dot2) dot2.style.display = isLogged ? 'inline-block' : 'none';
+    }
+
+    window.onCloudAuthStateChanged = (user) => {
+      const loggedInView = document.getElementById('cloudLoggedInView');
+      const loggedOutView = document.getElementById('cloudLoggedOutView');
+      const userEmail = document.getElementById('cloudUserEmail');
+
+      if (user) {
+        if (loggedInView) loggedInView.style.display = 'block';
+        if (loggedOutView) loggedOutView.style.display = 'none';
+        if (userEmail) userEmail.textContent = user.email || user.displayName || 'Googleアカウント';
+        updateCloudSyncStatusUI();
+      } else {
+        if (loggedInView) loggedInView.style.display = 'none';
+        if (loggedOutView) loggedOutView.style.display = 'block';
+        updateCloudSyncStatusUI();
+      }
+    };
+
+    window.onRemoteIdeasReceived = async (remoteIdeas, updatedAt) => {
+      if (!Array.isArray(remoteIdeas) || remoteIdeas.length === 0) return;
+      console.log('Remote ideas received from cloud:', remoteIdeas.length);
+      ideas = mergeIdeasLists(ideas, remoteIdeas);
+      try {
+        const db = await openDB();
+        await new Promise((resolve, reject) => {
+          const tx = db.transaction(STORE_NAME, 'readwrite');
+          tx.objectStore(STORE_NAME).put(ideas, STORAGE_KEY);
+          tx.oncomplete = () => resolve();
+          tx.onerror = () => reject(tx.error);
+        });
+      } catch (e) {
+        try { localStorage.setItem(STORAGE_KEY, JSON.stringify(ideas)); } catch (err) {}
+      }
+      renderGallery();
+      renderTalkList();
+      updateCloudSyncStatusUI();
+      showSyncToast(`☁️ クラウドから最新データを受信しました (${remoteIdeas.length}件)`);
+    };
+
+    async function loginWithGoogle() {
+      if (!window.omoaiCloud) {
+        alert('クラウドモジュールの読み込み中です。少し待ってから再度お試しください。');
+        return;
+      }
+      try {
+        showSyncToast('🌐 Googleログイン中...', 5000);
+        const user = await window.omoaiCloud.login();
+        showSyncToast('✅ ログインしました: ' + (user.email || user.displayName || ''));
+        await syncNowWithCloud();
+      } catch (e) {
+        console.error('Google login error:', e);
+        alert('ログインに失敗しました: ' + (e.message || 'キャンセルされました'));
+      }
+    }
+
+    async function logoutGoogle() {
+      if (!window.omoaiCloud) return;
+      if (!confirm('クラウド同期からログアウトしますか？（端末のデータはそのまま残ります）')) return;
+      await window.omoaiCloud.logout();
+      showSyncToast('ログアウトしました');
+    }
+
+    async function syncNowWithCloud() {
+      if (!window.omoaiCloud || !window.omoaiCloud.isLoggedIn()) {
+        alert('Googleアカウントにログインしてください');
+        return;
+      }
+      showSyncToast('☁️ クラウドと同期中...', 5000);
+      try {
+        const remote = await window.omoaiCloud.fetchIdeas();
+        if (Array.isArray(remote) && remote.length > 0) {
+          ideas = mergeIdeasLists(ideas, remote);
+        }
+        await window.omoaiCloud.saveIdeas(ideas);
+        await saveIdeasToStorage();
+        renderGallery();
+        renderTalkList();
+        updateCloudSyncStatusUI();
+        showSyncToast(`✅ 双方向同期が完了しました (${ideas.length}件)`);
+      } catch (e) {
+        console.error('Cloud sync error:', e);
+        showSyncToast('⚠️ 同期エラー: ' + (e.message || '接続に失敗しました'));
+      }
+    }
+
+    async function forcePushToCloud() {
+      if (!window.omoaiCloud || !window.omoaiCloud.isLoggedIn()) return;
+      if (!confirm(`現在の端末のアイデア (${ideas.length}件) でクラウドを上書き保存しますか？`)) return;
+      try {
+        await window.omoaiCloud.saveIdeas(ideas);
+        updateCloudSyncStatusUI();
+        showSyncToast('✅ クラウドへ保存しました');
+      } catch (e) {
+        alert('保存エラー: ' + e.message);
+      }
+    }
+
+    async function forcePullFromCloud() {
+      if (!window.omoaiCloud || !window.omoaiCloud.isLoggedIn()) return;
+      if (!confirm('クラウドの最新データを取得してこの端末に反映しますか？')) return;
+      try {
+        const remote = await window.omoaiCloud.fetchIdeas();
+        if (!remote || remote.length === 0) {
+          alert('クラウドに保存されたアイデアがありません。');
+          return;
+        }
+        ideas = mergeIdeasLists(ideas, remote);
+        await saveIdeasToStorage();
+        renderGallery();
+        renderTalkList();
+        updateCloudSyncStatusUI();
+        showSyncToast(`✅ クラウドから取得しました (${ideas.length}件)`);
+      } catch (e) {
+        alert('取得エラー: ' + e.message);
+      }
+    }
+
+    // Modal & Tabs
+    function openSyncModal() {
+      const el = document.getElementById('syncModalBackdrop');
+      if (el) el.classList.add('open');
+      updateCloudSyncStatusUI();
+      switchSyncTab('cloud');
+    }
+
+    function closeSyncModal() {
+      const el = document.getElementById('syncModalBackdrop');
+      if (el) el.classList.remove('open');
+    }
+
+    function switchSyncTab(tabKey) {
+      const tabs = ['cloud', 'qr', 'file'];
+      tabs.forEach(t => {
+        const btn = document.getElementById('tabBtn' + t.charAt(0).toUpperCase() + t.slice(1) + 'Sync');
+        const panel = document.getElementById('syncPanel' + t.charAt(0).toUpperCase() + t.slice(1));
+        if (btn) btn.classList.toggle('active', t === tabKey);
+        if (panel) panel.style.display = t === tabKey ? 'block' : 'none';
+      });
+
+      if (tabKey === 'qr') {
+        initP2pSender();
+      }
+    }
+
+    function switchP2pMode(mode) {
+      const btnSend = document.getElementById('btnP2pModeSend');
+      const btnReceive = document.getElementById('btnP2pModeReceive');
+      const secSend = document.getElementById('p2pSendSection');
+      const secReceive = document.getElementById('p2pReceiveSection');
+
+      if (btnSend) btnSend.classList.toggle('active', mode === 'send');
+      if (btnReceive) btnReceive.classList.toggle('active', mode === 'receive');
+      if (secSend) secSend.style.display = mode === 'send' ? 'block' : 'none';
+      if (secReceive) secReceive.style.display = mode === 'receive' ? 'block' : 'none';
+
+      if (mode === 'send') {
+        initP2pSender();
+      }
+    }
+
+    // P2P WebRTC / PeerJS Direct Sync
+    let p2pPeer = null;
+    let p2pActiveConn = null;
+    let p2pMyCode = null;
+
+    function initP2pSender() {
+      if (p2pPeer && !p2pPeer.destroyed) {
+        updateP2pSendUI();
+        return;
+      }
+      const statusEl = document.getElementById('p2pSendStatus');
+      const codeEl = document.getElementById('p2pSendCodeDisplay');
+      if (statusEl) statusEl.textContent = '⏳ 転送準備中...';
+      if (codeEl) codeEl.textContent = '...';
+
+      if (typeof Peer === 'undefined') {
+        if (statusEl) statusEl.textContent = '⚠️ P2Pモジュールの読み込みに失敗しました。';
+        return;
+      }
+
+      const randomHex = Math.random().toString(36).substring(2, 8).toUpperCase();
+      p2pMyCode = randomHex;
+      const peerId = 'omoai-' + randomHex;
+
+      try {
+        p2pPeer = new Peer(peerId);
+
+        p2pPeer.on('open', () => {
+          updateP2pSendUI();
+        });
+
+        p2pPeer.on('connection', (conn) => {
+          p2pActiveConn = conn;
+          const status = document.getElementById('p2pSendStatus');
+          if (status) status.innerHTML = '📲 スマホと接続しました！<br>データを転送中...';
+
+          conn.on('open', () => {
+            conn.send({
+              type: 'OMOAI_SYNC_DATA',
+              ideas: ideas,
+              timestamp: Date.now()
+            });
+          });
+
+          conn.on('data', (data) => {
+            if (data && data.type === 'OMOAI_SYNC_ACK') {
+              if (status) status.innerHTML = '✅ <b>送信完了！</b><br>スマホ側で保存されました 🎉';
+              showSyncToast('✅ スマホへのデータ送信が完了しました！');
+            }
+          });
+        });
+
+        p2pPeer.on('error', (err) => {
+          console.warn('P2P Peer error:', err);
+          const status = document.getElementById('p2pSendStatus');
+          if (status) status.textContent = '⚠️ 接続待機中 (再試行中...)';
+        });
+      } catch (e) {
+        console.error('Peer init error:', e);
+      }
+    }
+
+    function updateP2pSendUI() {
+      const codeEl = document.getElementById('p2pSendCodeDisplay');
+      if (codeEl && p2pMyCode) codeEl.textContent = p2pMyCode;
+      const statusEl = document.getElementById('p2pSendStatus');
+      if (statusEl) statusEl.innerHTML = '● <b>待機中</b><br>スマホのカメラでQRコードを読み取ってください';
+
+      const qrContainer = document.getElementById('p2pQrContainer');
+      if (qrContainer && window.QRCode && p2pMyCode) {
+        qrContainer.innerHTML = '';
+        const baseUrl = window.location.origin + window.location.pathname;
+        const syncUrl = `${baseUrl}?sync_from=${encodeURIComponent(p2pMyCode)}`;
+        try {
+          new QRCode(qrContainer, {
+            text: syncUrl,
+            width: 190,
+            height: 190,
+            colorDark: '#000000',
+            colorLight: '#ffffff',
+            correctLevel: QRCode.CorrectLevel.M
+          });
+        } catch (e) {
+          console.warn('QRCode render error:', e);
+        }
+      }
+    }
+
+    function copyP2pCode() {
+      if (!p2pMyCode) return;
+      navigator.clipboard.writeText(p2pMyCode).then(() => {
+        showSyncToast('📋 転送コードをコピーしました: ' + p2pMyCode);
+      }).catch(() => {
+        prompt('転送コード:', p2pMyCode);
+      });
+    }
+
+    function startP2pReceive() {
+      const input = document.getElementById('p2pInputCode');
+      const code = input ? input.value.trim().toUpperCase() : '';
+      if (!code) {
+        alert('転送コード（英数字6桁）を入力してください');
+        return;
+      }
+      connectAndReceiveP2p(code);
+    }
+
+    function connectAndReceiveP2p(code) {
+      const statusEl = document.getElementById('p2pReceiveStatus');
+      if (statusEl) statusEl.textContent = '⏳ 送信元に接続中... (' + code + ')';
+
+      if (typeof Peer === 'undefined') {
+        if (statusEl) statusEl.textContent = '⚠️ P2Pモジュールが利用できません';
+        return;
+      }
+
+      const targetPeerId = 'omoai-' + code.toUpperCase().trim();
+      const receiverPeer = new Peer();
+
+      receiverPeer.on('open', () => {
+        const conn = receiverPeer.connect(targetPeerId);
+        conn.on('open', () => {
+          if (statusEl) statusEl.textContent = '📲 接続完了！データを受信中...';
+        });
+
+        conn.on('data', async (payload) => {
+          if (payload && payload.type === 'OMOAI_SYNC_DATA' && Array.isArray(payload.ideas)) {
+            const shouldMerge = document.getElementById('chkP2pMerge') ? document.getElementById('chkP2pMerge').checked : true;
+            if (shouldMerge) {
+              ideas = mergeIdeasLists(ideas, payload.ideas);
+            } else {
+              ideas = payload.ideas;
+            }
+            await saveIdeasToStorage();
+            renderGallery();
+            renderTalkList();
+
+            try { conn.send({ type: 'OMOAI_SYNC_ACK' }); } catch (e) {}
+
+            if (statusEl) statusEl.innerHTML = `✅ <b>受信完了！</b><br>${payload.ideas.length}件のアイデアを受信・保存しました！🎉`;
+            showSyncToast(`🎉 ${payload.ideas.length}件のアイデアを受信・保存しました！`);
+          }
+        });
+
+        conn.on('error', (err) => {
+          if (statusEl) statusEl.textContent = '⚠️ 接続エラー: コードを確認してください';
+        });
+      });
+
+      receiverPeer.on('error', (err) => {
+        if (statusEl) statusEl.textContent = '⚠️ 受信エラー: 相手端末が見つかりません';
+      });
+    }
+
+    async function checkUrlSyncParam() {
+      const params = new URLSearchParams(window.location.search);
+      const syncFrom = params.get('sync_from');
+      if (!syncFrom) return;
+
+      try {
+        history.replaceState({}, '', window.location.pathname);
+      } catch (e) {}
+
+      showSyncToast('📲 送信元端末に接続しています...', 8000);
+      openSyncModal();
+      switchSyncTab('qr');
+      switchP2pMode('receive');
+      const inputCode = document.getElementById('p2pInputCode');
+      if (inputCode) inputCode.value = syncFrom.toUpperCase();
+
+      connectAndReceiveP2p(syncFrom.toUpperCase());
+    }
+
+    // File Backup & Import
+    function exportIdeasBackup() {
+      const blob = new Blob([JSON.stringify(ideas, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `moai_ideas_backup_${new Date().toISOString().slice(0, 10)}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+      showSyncToast('💾 バックアップファイルを保存しました');
+    }
+
+    function handleFileImport(e) {
+      const file = e.target.files && e.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = async (ev) => {
+        try {
+          const text = ev.target.result;
+          const parsed = JSON.parse(text);
+          const importedList = Array.isArray(parsed) ? parsed : (parsed && Array.isArray(parsed.ideas) ? parsed.ideas : null);
+
+          if (!importedList || importedList.length === 0) {
+            alert('JSONファイル内にアイデアデータが見つかりませんでした。');
+            return;
+          }
+
+          const shouldMerge = document.getElementById('chkFileMerge') ? document.getElementById('chkFileMerge').checked : true;
+          if (shouldMerge) {
+            ideas = mergeIdeasLists(ideas, importedList);
+          } else {
+            if (!confirm(`全${importedList.length}件のアイデアで既存のデータをすべて上書きしますか？`)) return;
+            ideas = importedList;
+          }
+
+          await saveIdeasToStorage();
+          renderGallery();
+          renderTalkList();
+          showSyncToast(`✅ ${importedList.length}件のアイデアをインポートしました！`);
+          alert(`✅ ${importedList.length}件のアイデアを正常に読み込み・保存しました！`);
+        } catch (err) {
+          console.error('JSON import error:', err);
+          alert('ファイルの読み込みに失敗しました: 正しいバックアップJSONファイルを選択してください。');
+        } finally {
+          e.target.value = '';
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    let syncToastTimer = null;
+    function showSyncToast(msg, duration = 3500) {
+      let toast = document.getElementById('appGlobalToast');
+      if (!toast) {
+        toast = document.createElement('div');
+        toast.id = 'appGlobalToast';
+        toast.style.cssText = 'position:fixed; top:20px; left:50%; transform:translateX(-50%); z-index:99999; background:rgba(15,23,42,0.94); color:#38bdf8; border:1px solid #38bdf8; padding:8px 18px; border-radius:999px; font-size:0.82rem; font-weight:700; box-shadow:0 8px 24px rgba(0,0,0,0.5); pointer-events:none; transition:opacity 0.3s; opacity:0;';
+        document.body.appendChild(toast);
+      }
+      toast.textContent = msg;
+      toast.style.opacity = '1';
+
+      const modalToast = document.getElementById('syncToastArea');
+      if (modalToast) modalToast.textContent = msg;
+
+      if (syncToastTimer) clearTimeout(syncToastTimer);
+      syncToastTimer = setTimeout(() => {
+        if (toast) toast.style.opacity = '0';
+        if (modalToast && modalToast.textContent === msg) modalToast.textContent = '';
+      }, duration);
     }
 
     function readAndCompressImage(file, maxWidth = 1200) {
@@ -4982,15 +5892,19 @@
         }
       });
 
-      safeOn('btnExportJson', 'click', () => {
-        const blob = new Blob([JSON.stringify(ideas, null, 2)], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `moai_ideas_backup_${new Date().toISOString().slice(0, 10)}.json`;
-        a.click();
-        URL.revokeObjectURL(url);
-      });
+      // 端末間データ共有
+      safeOn('btnOpenSyncModal', 'click', openSyncModal);
+      safeOn('btnOpenSyncModalTalk', 'click', openSyncModal);
+      safeOn('btnCloseSyncModal', 'click', closeSyncModal);
+      safeOn('syncModalBackdrop', 'click', closeSyncModal);
+      safeOn('btnExportJson', 'click', exportIdeasBackup);
+
+      // URLパラメータ ?sync_from=... の自動同期チェック
+      checkUrlSyncParam();
+
+      if (window.omoaiCloud && window.omoaiCloud.isLoggedIn()) {
+        updateCloudSyncStatusUI();
+      }
 
       safeOn('btnResetSamples', 'click', async () => {
         if (!confirm('初期サンプルデータ（肌着モアイ・エレクロボ・寝そべりモアイ・ハチマキモアイ）を復元しますか？')) return;
