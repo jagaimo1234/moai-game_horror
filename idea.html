@@ -3355,11 +3355,11 @@
   </div>
 
   <!-- =========================================================
-       Firebase Cloud Sync (Google Login & Firestore)
+       Firebase Cloud Sync (Google Login & Firestore with Auto-Chunking)
        ========================================================= -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-    import { getFirestore, doc, onSnapshot, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+    import { getFirestore, doc, onSnapshot, setDoc, getDoc, writeBatch } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
     import { getAuth, signInWithPopup, signInWithRedirect, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
 
     const firebaseConfig = {
@@ -3380,6 +3380,52 @@
     let currentUser = null;
     let isSavingToCloud = false;
     let lastCloudUpdatedAt = 0;
+
+    // Helper: Split ideas into safe chunks <= 550KB to respect Firestore 1MB document limit
+    function splitIdeasIntoSafeChunks(ideasList, maxBytes = 550000) {
+      if (!Array.isArray(ideasList) || ideasList.length === 0) return [];
+      const chunks = [];
+      let currentChunk = [];
+      let currentChunkBytes = 0;
+
+      for (const item of ideasList) {
+        let itemBytes = 0;
+        try {
+          itemBytes = new Blob([JSON.stringify(item)]).size;
+        } catch (e) {
+          itemBytes = JSON.stringify(item).length * 2;
+        }
+
+        if (currentChunk.length > 0 && currentChunkBytes + itemBytes > maxBytes) {
+          chunks.push(currentChunk);
+          currentChunk = [item];
+          currentChunkBytes = itemBytes;
+        } else {
+          currentChunk.push(item);
+          currentChunkBytes += itemBytes;
+        }
+      }
+
+      if (currentChunk.length > 0) {
+        chunks.push(currentChunk);
+      }
+      return chunks;
+    }
+
+    async function loadAllChunks(chunkCount) {
+      const promises = [];
+      for (let i = 0; i < chunkCount; i++) {
+        promises.push(getDoc(doc(db, "settings", `moai_ideas_chunk_${i}`)));
+      }
+      const snaps = await Promise.all(promises);
+      let combined = [];
+      for (const s of snaps) {
+        if (s.exists() && Array.isArray(s.data().ideas)) {
+          combined = combined.concat(s.data().ideas);
+        }
+      }
+      return combined;
+    }
 
     window.omoaiCloud = {
       isLoggedIn: () => !!currentUser,
@@ -3406,11 +3452,40 @@
           isSavingToCloud = true;
           const now = Date.now();
           lastCloudUpdatedAt = now;
-          await setDoc(doc(db, "settings", "moai_ideas"), {
-            ideas: ideasList,
+
+          // Split ideas into chunks under 550KB each
+          const chunks = splitIdeasIntoSafeChunks(ideasList, 550000);
+          const chunkCount = chunks.length;
+
+          const batch = writeBatch(db);
+
+          // 1. Write metadata
+          batch.set(doc(db, "settings", "moai_ideas_meta"), {
+            chunkCount: chunkCount,
+            totalCount: ideasList.length,
             updatedAt: now,
             updatedBy: currentUser.email || currentUser.displayName || 'user'
-          }, { merge: true });
+          });
+
+          // 2. Write each chunk
+          chunks.forEach((chunk, idx) => {
+            batch.set(doc(db, "settings", `moai_ideas_chunk_${idx}`), {
+              ideas: chunk,
+              chunkIndex: idx,
+              updatedAt: now
+            });
+          });
+
+          // Also clean up or write a small summary in legacy single doc to prevent size errors
+          batch.set(doc(db, "settings", "moai_ideas"), {
+            chunked: true,
+            chunkCount: chunkCount,
+            totalCount: ideasList.length,
+            updatedAt: now,
+            updatedBy: currentUser.email || currentUser.displayName || 'user'
+          }, { merge: false });
+
+          await batch.commit();
           return true;
         } catch (e) {
           console.error("Cloud save error:", e);
@@ -3421,15 +3496,30 @@
       },
       fetchIdeas: async () => {
         if (!currentUser) return null;
-        const snap = await getDoc(doc(db, "settings", "moai_ideas"));
-        if (snap.exists()) {
-          const data = snap.data();
-          if (Array.isArray(data.ideas)) {
-            lastCloudUpdatedAt = data.updatedAt || 0;
-            return data.ideas;
+        try {
+          const metaSnap = await getDoc(doc(db, "settings", "moai_ideas_meta"));
+          if (metaSnap.exists()) {
+            const meta = metaSnap.data();
+            const chunkCount = meta.chunkCount || 1;
+            lastCloudUpdatedAt = meta.updatedAt || 0;
+            const combined = await loadAllChunks(chunkCount);
+            return combined;
           }
+
+          // Legacy single doc fallback
+          const legacySnap = await getDoc(doc(db, "settings", "moai_ideas"));
+          if (legacySnap.exists()) {
+            const data = legacySnap.data();
+            if (Array.isArray(data.ideas)) {
+              lastCloudUpdatedAt = data.updatedAt || 0;
+              return data.ideas;
+            }
+          }
+          return null;
+        } catch (err) {
+          console.error("Fetch ideas error:", err);
+          throw err;
         }
-        return null;
       }
     };
 
@@ -3440,14 +3530,21 @@
       }
       if (user) {
         if (unsubIdeas) unsubIdeas();
-        unsubIdeas = onSnapshot(doc(db, "settings", "moai_ideas"), (snap) => {
+
+        // Listen to metadata changes in real-time
+        unsubIdeas = onSnapshot(doc(db, "settings", "moai_ideas_meta"), async (snap) => {
           if (isSavingToCloud) return;
           if (snap.exists()) {
-            const data = snap.data();
-            if (Array.isArray(data.ideas) && (data.updatedAt || 0) > lastCloudUpdatedAt) {
-              lastCloudUpdatedAt = data.updatedAt || 0;
-              if (typeof window.onRemoteIdeasReceived === 'function') {
-                window.onRemoteIdeasReceived(data.ideas, data.updatedAt);
+            const meta = snap.data();
+            if ((meta.updatedAt || 0) > lastCloudUpdatedAt) {
+              lastCloudUpdatedAt = meta.updatedAt || 0;
+              try {
+                const combined = await loadAllChunks(meta.chunkCount || 1);
+                if (combined.length > 0 && typeof window.onRemoteIdeasReceived === 'function') {
+                  window.onRemoteIdeasReceived(combined, meta.updatedAt);
+                }
+              } catch (e) {
+                console.warn("Chunk real-time load error:", e);
               }
             }
           }
@@ -4407,7 +4504,7 @@
       }, duration);
     }
 
-    function readAndCompressImage(file, maxWidth = 1200) {
+    function readAndCompressImage(file, maxWidth = 960) {
       return new Promise((resolve) => {
         const reader = new FileReader();
         reader.onload = (e) => {
@@ -4429,7 +4526,7 @@
             canvas.height = h;
             const ctx = canvas.getContext('2d');
             ctx.drawImage(img, 0, 0, w, h);
-            resolve(canvas.toDataURL('image/jpeg', 0.86));
+            resolve(canvas.toDataURL('image/jpeg', 0.78));
           };
           img.onerror = () => resolve(e.target.result);
           img.src = e.target.result;
