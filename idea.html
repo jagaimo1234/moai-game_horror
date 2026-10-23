@@ -2873,6 +2873,36 @@
           <option value="gemini-robotics-er-2-preview">gemini-robotics-er-2-preview（超高速バックアップ）</option>
           <option value="gemini-3.1-flash-lite">gemini-3.1-flash-lite（軽量）</option>
         </select>
+
+        <div style="margin-top:12px; padding-top:10px; border-top:1px dashed var(--border);">
+          <label style="font-size:0.76rem; color:var(--text-sub); font-weight:700;">🎭 相棒モアイの性格・スタイル</label>
+          <select id="aiModalPersonalitySelect" class="field-input" style="cursor:pointer; margin-top:4px;">
+            <option value="brainstorm">🗿 陽気な相棒モアイ (標準・褒め＆発想広げ)</option>
+            <option value="maker">🛠️ 3Dプリンター職人モアイ (造形・分割・サポート材)</option>
+            <option value="customer">🎁 マルシェの熱狂ファン (客目線・セット買い)</option>
+            <option value="critic">🧐 辛口プロデューサー (鋭いツッコミ・改善案)</option>
+            <option value="passionate">🔥 熱血情熱モアイ (パッション全開・モチベUP)</option>
+            <option value="calm">🌸 おっとり癒やしモアイ (優しく肯定・のんびり)</option>
+            <option value="tsundere">🕶️ ツンデレモアイ (ツンツンしつつ本気アドバイス)</option>
+            <option value="kanazawa">🏯 金沢弁モアイ (はよ作ってみまっし！)</option>
+          </select>
+        </div>
+
+        <div style="margin-top:8px;">
+          <label style="font-size:0.76rem; color:var(--text-sub); font-weight:700;">✍️ 口調・キャラクターのこだわり（自由入力）</label>
+          <input type="text" id="aiCustomPromptInput" class="field-input" placeholder="例: 語尾に「〜モア」をつけて / 関西弁でツッコミを入れて など" style="margin-top:4px;">
+          <div style="font-size:0.7rem; color:var(--text-muted); margin-top:3px;">
+            ※ あなた好みの話し方や特徴を自由に指示できます
+          </div>
+        </div>
+
+        <div style="margin-top:8px;">
+          <label style="font-size:0.76rem; color:var(--text-sub); font-weight:700;">📏 返信の長さ</label>
+          <select id="aiLengthSelect" class="field-input" style="cursor:pointer; margin-top:4px;">
+            <option value="short">💬 サクッと短文（LINE風・2〜3文・60〜120文字）</option>
+            <option value="detailed">📝 じっくり具体的（3〜5文・150〜250文字）</option>
+          </select>
+        </div>
       </div>
 
       <div class="add-modal-actions">
@@ -3307,10 +3337,14 @@
                   <span>🤖 AI自動返信</span>
                 </label>
                 <select id="aiRoleSelect" class="ai-role-select" title="相棒モアイの返信スタイル">
-                  <option value="brainstorm">✨ 褒め＆アイデア広げ役</option>
-                  <option value="maker">🛠️ 3Dプリント・造形視点</option>
-                  <option value="customer">🎪 マルシェお客さん視点</option>
-                  <option value="critic">🔥 辛口プロデューサー視点</option>
+                  <option value="brainstorm">🗿 陽気な相棒</option>
+                  <option value="maker">🛠️ 3D職人視点</option>
+                  <option value="customer">🎁 ファン客目線</option>
+                  <option value="critic">🧐 辛口プロデューサー</option>
+                  <option value="passionate">🔥 熱血情熱</option>
+                  <option value="calm">🌸 おっとり癒やし</option>
+                  <option value="tsundere">🕶️ ツンデレ</option>
+                  <option value="kanazawa">🏯 金沢弁</option>
                 </select>
               </div>
               <button id="btnAiReplyNow" class="btn-ai-reply-now" onclick="triggerAiReply()" title="今の流れを読んで相棒モアイに1件返信してもらう">
@@ -4583,6 +4617,20 @@
     function openAiModal() {
       document.getElementById('aiApiKeyInput').value = getGeminiApiKey();
       document.getElementById('aiModelSelect').value = getSelectedModel();
+
+      const personality = localStorage.getItem('moai_ai_personality') || 'brainstorm';
+      const customPrompt = localStorage.getItem('moai_ai_custom_prompt') || '';
+      const length = localStorage.getItem('moai_ai_length') || 'short';
+
+      const pSelect = document.getElementById('aiModalPersonalitySelect');
+      if (pSelect) pSelect.value = personality;
+
+      const pInput = document.getElementById('aiCustomPromptInput');
+      if (pInput) pInput.value = customPrompt;
+
+      const lSelect = document.getElementById('aiLengthSelect');
+      if (lSelect) lSelect.value = length;
+
       document.getElementById('aiModalBackdrop').classList.add('open');
     }
 
@@ -4634,16 +4682,42 @@
     }
 
     function getRoleInstruction(role) {
+      const customPrompt = localStorage.getItem('moai_ai_custom_prompt') || '';
+      let baseInstruction = '';
+
       switch (role) {
         case 'maker':
-          return 'あなたは3Dプリンター造形やフィギュア設計に詳しい「相棒モアイ🗿」です。パーツ分割、色分け、サポート材の減らし方、強度、組み立てやすさ、ギミックなどの制作視点から、短く具体的にアイデアを1〜2個提案してください。';
+          baseInstruction = 'あなたは3Dプリンター造形やフィギュア設計に詳しい職人肌の「相棒モアイ🗿🛠️」です。パーツ分割、積層痕の向き、サポート材の減らし方、強度、組み立てやすさ、可動ギミックなどの制作・工学的視点から、短く具体的にアイデアを提案してください。';
+          break;
         case 'customer':
-          return 'あなたはデザインフェスタやクリエイターズマーケットなどのマルシェでブースを訪れた「モアイファンのお客さん🗿」です。思わず手に取りたくなるポイント、デスクに置いたときの可愛さ、ネーミングやカラー展開のアイデアを短く楽しく返信してください。';
+          baseInstruction = 'あなたはデザインフェスタやクリエイターズマーケットなどのマルシェでブースを訪れた「モアイ大ファンのお客さん🗿🎁」です。「これ絶対欲しい！」「デスクのPC横に置きたい！」と思わず手に取りたくなるポイント、ネーミングや色展開、セット買いしたくなる仕掛けを楽しく褒めちぎってください。';
+          break;
         case 'critic':
-          return 'あなたは愛のある「辛口プロデューサーモアイ🗿」です。「ここをもっと尖らせよう！」「他と被らないこういう仕掛けはどう？」と、作品の魅力を一段引き上げる鋭いツッコミと改善案を短く返信してください。';
+          baseInstruction = 'あなたは愛のある「辛口プロデューサーモアイ🗿🧐」です。「ここをもっと尖らせよう！」「量産性や価格設定はどうする？」「他と被らないこういう仕掛けはどう？」と、作品の魅力を一段引き上げる鋭いツッコミと改善案を返信してください。';
+          break;
+        case 'passionate':
+          baseInstruction = 'あなたは情熱的でテンションMAXの「熱血モアイ🗿🔥」です。「うおおお！そのアイデア熱すぎるぜ！」「俺たちのモアイ魂が燃え上がってきた！」と全力のパッションと勢いで作者のモチベーションを最高潮に高めてください！';
+          break;
+        case 'calm':
+          baseInstruction = 'あなたは穏やかで温かい「おっとり癒やし系モアイ🗿🌸」です。「ふふ、素敵なアイデアですね〜」「焦らずのんびり、納得いく形にしましょ〜」と、優しくふんわり包み込むような温かい口調で作者を肯定し癒やしてください。';
+          break;
+        case 'tsundere':
+          baseInstruction = 'あなたはツンデレな「相棒モアイ🗿🕶️」です。「べ、別にあなたのアイデアを褒めてるわけじゃないんだからね！」「…でもまあ、その発想は悪くないんじゃない？」「ちゃんと最後まで完成させなさいよね！」とツンツンしつつも本気でアドバイスしてください。';
+          break;
+        case 'kanazawa':
+          baseInstruction = 'あなたは金沢生まれの「金沢弁モアイ🗿🏯」です。「えらい良いねか！」「金沢の風情にもぴったりやわ〜」「はよ3Dプリントしてみまっし！」と親しみやすい金沢弁で楽しくアドバイスしてください。';
+          break;
+        case 'brainstorm':
         default:
-          return 'あなたはモアイ活動（Kanazawa Moataro）の頼れる「相棒モアイ🗿」です。作者の思いつきを肯定しつつ、「さらにこうしたら面白そう！」「こんなバリエーションや小物はどう？」と発想を広げる返信を、LINEやXのリプのように親しみやすい口調で短く（2〜4文程度で）返してください。';
+          baseInstruction = 'あなたはモアイ活動（Kanazawa Moataro）の頼れる「相棒モアイ🗿」です。作者の思いつきを肯定しつつ、「さらにこうしたら面白そう！」「こんなバリエーションや小物はどう？」と発想を広げる返信を、LINEやXのリプのように親しみやすい口調で返してください。';
+          break;
       }
+
+      if (customPrompt.trim()) {
+        baseInstruction += `\n【特別な口調・特徴のこだわり指示】\n${customPrompt.trim()}`;
+      }
+
+      return baseInstruction;
     }
 
     // 賢く文脈を読んで即座に返すブレストエンジン（既出チェック＋会話受け止め付き）
@@ -4724,6 +4798,46 @@
           ];
           return pickFresh(customerPool);
         }
+        if (role === 'critic') {
+          const criticPool = [
+            `愛があるから言うけど、まだ定番のモアイの枠を出てない気がする🗿🧐 もう1箇所『えっ、そこが開くの！？』みたいな変態ギミックを足してみない？`,
+            `デザインは良いけど、量産したときのサポート材除去や塗装の手間を考えてる？🗿📐 そこをクリアできる構造にブラッシュアップしよう！`,
+            `マルシェで一瞬で足を止めてもらうための『一言キャッチコピー』は何にする？作品名も含めて尖らせていこう！🗿🔥`
+          ];
+          return pickFresh(criticPool);
+        }
+        if (role === 'tsundere') {
+          const tsunderePool = [
+            `べ、別にアンタのアイデアを褒めてるわけじゃないんだからね！🗿// でも…その発想は悪くないんじゃない？ちゃんと最後まで完成させなさいよね！`,
+            `ふん、まあまあ面白いアイデアじゃない。🗿✨ 私がアドバイスしてあげてもいいけど…感謝しなさいよね！まずはパーツ分割からよ！`,
+            `なによ、私の意見が聞きたいの？…しょうがないわね🗿💨 マルシェで出すなら、もっと色分けにこだわった方がいいんじゃない？`
+          ];
+          return pickFresh(tsunderePool);
+        }
+        if (role === 'passionate') {
+          const passionatePool = [
+            `うおおおお！そのアイデア熱すぎるぜ！🗿🔥 俺たちのモアイ魂が燃え上がってきた！今すぐ3Dモデリングに取りかかろうぜ！`,
+            `最高だ！マジで天才的な発想だぜ！🗿🔥 細かいことは後回しにして、まずは勢いで試作1号をプリントしてみよう！`,
+            `マルシェの会場で主役になる未来が見えたぜ！🗿🔥 パッション全開で限界突破モアイを生み出すぞ！`
+          ];
+          return pickFresh(passionatePool);
+        }
+        if (role === 'calm') {
+          const calmPool = [
+            `ふふ、とっても素敵なアイデアですね〜🗿🌸 焦らずのんびり、納得のいく形にしていきましょ〜`,
+            `眺めているだけで心がほっこりしますね🗿🍵 飾る人が優しい気持ちになれるような、温かい色合いで作ってみるのはいかがでしょう？`,
+            `いいですねぇ〜🗿✨ 一歩ずつ進めていけば、きっと大好きな相棒になりますよ〜`
+          ];
+          return pickFresh(calmPool);
+        }
+        if (role === 'kanazawa') {
+          const kanazawaPool = [
+            `えらい良いねか！🗿🏯 金沢の風情にもぴったりやわ〜。ひがし茶屋街に置いても映えそうやね！`,
+            `あんた、なかなかのアイデアマンやねか！🗿✨ はよ3Dプリンターでプリントしてみまっし！楽しみにしとるよ！`,
+            `金沢箔を貼ったり、和風のカラーにしてもおもしろそうやねぇ🗿🍵 じわじわ人気出そうやわ！`
+          ];
+          return pickFresh(kanazawaPool);
+        }
 
         const generalPool = [
           `まずは「可動ギミック」をつけるか、「置物としてのシルエット」を極めるか、どっちを優先して進めてみようか？🗿💡`,
@@ -4754,6 +4868,11 @@
             return `${who}: ${l.text || '(画像投稿)'}`;
           }).join('\n');
 
+          const lengthMode = localStorage.getItem('moai_ai_length') || 'short';
+          const lengthRule = lengthMode === 'detailed'
+            ? '・3〜5文、150〜250文字程度で、具体的で充実したアイデアやアドバイスを提案してください。'
+            : '・LINEやXのリプライで返ってきたような、テンポよく親しみやすい短文（2〜3文、60〜120文字程度）で返信してください。';
+
           const promptText = [
             getRoleInstruction(role),
             '',
@@ -4765,7 +4884,7 @@
             recentHistory || '（最初の投稿です）',
             '',
             '【返信ルール】',
-            '・LINEやXのリプライで返ってきたような、テンポよく親しみやすい短文（2〜3文、60〜120文字程度）で返信してください。'
+            lengthRule
           ].join('\n');
 
           const parts = [{ text: promptText }];
@@ -5759,15 +5878,43 @@
       safeOn('btnCloseAiModal', 'click', closeAiModal);
       safeOn('aiModalBackdrop', 'click', closeAiModal);
 
+      // AI役柄・性格の初期ロード
+      const savedPersonality = localStorage.getItem('moai_ai_personality') || 'brainstorm';
+      const aiRoleEl = document.getElementById('aiRoleSelect');
+      if (aiRoleEl) {
+        aiRoleEl.value = savedPersonality;
+        aiRoleEl.addEventListener('change', (e) => {
+          localStorage.setItem('moai_ai_personality', e.target.value);
+          const pSelect = document.getElementById('aiModalPersonalitySelect');
+          if (pSelect) pSelect.value = e.target.value;
+          showSyncToast('🎭 相棒モアイの性格を切り替えました');
+        });
+      }
+
       safeOn('btnSaveAiKey', 'click', () => {
         const keyEl = document.getElementById('aiApiKeyInput');
         const modelEl = document.getElementById('aiModelSelect');
+        const pSelect = document.getElementById('aiModalPersonalitySelect');
+        const pInput = document.getElementById('aiCustomPromptInput');
+        const lSelect = document.getElementById('aiLengthSelect');
+
         const keyVal = keyEl ? keyEl.value.trim() : '';
         const modelVal = modelEl ? modelEl.value : 'gemini-3-flash-preview';
+        const pVal = pSelect ? pSelect.value : 'brainstorm';
+        const promptVal = pInput ? pInput.value.trim() : '';
+        const lVal = lSelect ? lSelect.value : 'short';
+
         localStorage.setItem(GEMINI_KEY_STORAGE, keyVal);
         localStorage.setItem(GEMINI_MODEL_STORAGE, modelVal);
+        localStorage.setItem('moai_ai_personality', pVal);
+        localStorage.setItem('moai_ai_custom_prompt', promptVal);
+        localStorage.setItem('moai_ai_length', lVal);
+
+        if (aiRoleEl) aiRoleEl.value = pVal;
+
         updateAiStatusIndicator();
         closeAiModal();
+        showSyncToast('✅ AI設定・性格を保存しました！');
       });
 
       safeOn('btnClearAiKey', 'click', () => {
@@ -5775,6 +5922,7 @@
         const keyEl = document.getElementById('aiApiKeyInput');
         if (keyEl) keyEl.value = '';
         updateAiStatusIndicator();
+        showSyncToast('キーを消去しました');
       });
 
       // テーマ（背景色）設定モーダル
