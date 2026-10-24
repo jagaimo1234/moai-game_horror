@@ -358,6 +358,101 @@
       100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
     }
 
+    /* === 🎨 Product Variants (SKU) & Multi-Event Aggregation UI === */
+    .variant-badge-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: rgba(0, 210, 255, 0.14);
+      border: 1px solid rgba(0, 210, 255, 0.45);
+      color: var(--accent);
+      font-size: 11px;
+      font-weight: bold;
+      padding: 2px 8px;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .variant-badge-pill:hover {
+      background: rgba(0, 210, 255, 0.28);
+      transform: translateY(-1px);
+    }
+    .sku-sublist-box {
+      margin-top: 10px;
+      padding: 10px;
+      background: rgba(0, 0, 0, 0.35);
+      border: 1px solid rgba(0, 210, 255, 0.2);
+      border-left: 3px solid var(--accent);
+      border-radius: 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .sku-row-card {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 6px;
+      padding: 8px 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .multi-agg-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+    .multi-agg-table th {
+      background: rgba(15, 15, 22, 0.96);
+      color: rgba(255, 255, 255, 0.85);
+      padding: 10px 8px;
+      border-bottom: 2px solid rgba(0, 210, 255, 0.35);
+      text-align: right;
+      white-space: nowrap;
+      position: sticky;
+      top: 0;
+      z-index: 5;
+    }
+    .multi-agg-table th:first-child {
+      text-align: left;
+    }
+    .multi-agg-table td {
+      padding: 9px 8px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      text-align: right;
+      vertical-align: middle;
+    }
+    .multi-agg-table td:first-child {
+      text-align: left;
+    }
+    .multi-agg-parent-row {
+      background: rgba(255, 255, 255, 0.03);
+      font-weight: bold;
+    }
+    .multi-agg-parent-row:hover {
+      background: rgba(255, 255, 255, 0.06);
+    }
+    .multi-agg-sku-row {
+      background: rgba(0, 0, 0, 0.25);
+      font-size: 12px;
+      color: rgba(255, 255, 255, 0.88);
+    }
+    .multi-agg-sku-row td:first-child {
+      padding-left: 28px;
+      border-left: 3px solid rgba(0, 210, 255, 0.4);
+    }
+    @media (max-width: 768px) {
+      #settings-view .scroll-container {
+        padding: 12px !important;
+      }
+      .multi-agg-table {
+        font-size: 12px;
+      }
+      .multi-agg-table th, .multi-agg-table td {
+        padding: 7px 6px;
+      }
+    }
+
     .conflict-alert-card {
       background: rgba(20, 20, 26, 0.7);
       border-radius: 12px;
@@ -933,12 +1028,17 @@
         <input type="hidden" id="work-detail-id">
 
         <!-- Work Header Preview -->
-        <div style="display:flex; gap:16px; align-items:center; background:rgba(0,0,0,0.3); padding:12px; border-radius:8px; margin-bottom:20px;">
-          <img id="work-detail-img-preview" src="" style="width:70px; height:70px; object-fit:cover; border-radius:6px; background:#222;">
-          <div>
-            <div id="work-detail-title-preview" style="font-weight:bold; font-size:16px; color:white; margin-bottom:4px;"></div>
-            <div id="work-detail-id-preview" style="font-size:11px; opacity:0.6; font-family:monospace;"></div>
+        <div style="display:flex; gap:16px; align-items:center; justify-content:space-between; background:rgba(0,0,0,0.3); padding:12px; border-radius:8px; margin-bottom:20px; flex-wrap:wrap;">
+          <div style="display:flex; gap:16px; align-items:center;">
+            <img id="work-detail-img-preview" src="" style="width:70px; height:70px; object-fit:cover; border-radius:6px; background:#222;">
+            <div>
+              <div id="work-detail-title-preview" style="font-weight:bold; font-size:16px; color:white; margin-bottom:4px;"></div>
+              <div id="work-detail-id-preview" style="font-size:11px; opacity:0.6; font-family:monospace;"></div>
+            </div>
           </div>
+          <button type="button" class="btn" onclick="openVariantManagerModal(document.getElementById('work-detail-id').value)" style="background:rgba(0,210,255,0.15); border:1px solid var(--accent); color:var(--accent); font-size:12px; padding:8px 14px; font-weight:bold;">
+            🎨 バリエーション管理
+          </button>
         </div>
 
         <!-- Inputs Grid -->
@@ -986,6 +1086,87 @@
         <div style="display:flex; justify-content:flex-end; gap:10px;">
           <button class="btn" style="background:#444; color:white;" onclick="document.getElementById('work-detail-modal').style.display='none'">キャンセル</button>
           <button class="btn btn-primary" onclick="saveWorkDetail()" style="padding:8px 24px;">保存して登録済みにする</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Variant (SKU) Manager Modal -->
+    <div id="variant-manager-modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); z-index:2200; align-items:center; justify-content:center; padding:16px;">
+      <div style="background:var(--panel-bg); width:100%; max-width:640px; border-radius:14px; padding:22px; border:1px solid var(--accent); max-height:92vh; display:flex; flex-direction:column; box-shadow:0 15px 40px rgba(0,0,0,0.85);">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:10px;">
+          <h3 style="color:var(--accent); font-size:17px; margin:0; display:flex; align-items:center; gap:8px;">
+            🎨 商品バリエーション（SKU）管理
+          </h3>
+          <button style="background:none; border:none; color:white; font-size:20px; cursor:pointer;" onclick="closeVariantManagerModal()">✕</button>
+        </div>
+
+        <input type="hidden" id="variant-manager-parent-id">
+
+        <!-- Parent Product Header -->
+        <div style="display:flex; gap:12px; align-items:center; background:rgba(0,0,0,0.35); padding:10px 12px; border-radius:8px; margin-bottom:12px;">
+          <img id="variant-manager-img" src="" style="width:52px; height:52px; object-fit:cover; border-radius:6px; background:#222;">
+          <div style="flex:1; min-width:0;">
+            <div id="variant-manager-title" style="font-weight:bold; font-size:15px; color:white;"></div>
+            <div style="font-size:11px; color:rgba(255,255,255,0.65); margin-top:2px;">
+              ※1行目の「無印（通常版）」にこれまでの通常版データ（在庫・価格・必要数・過去売上）が自動で紐付きます。
+            </div>
+          </div>
+        </div>
+
+        <!-- Add Variant Input Bar -->
+        <div style="background:rgba(0,210,255,0.06); border:1px solid rgba(0,210,255,0.25); border-radius:8px; padding:12px; margin-bottom:12px;">
+          <div style="font-size:12px; font-weight:bold; color:var(--accent); margin-bottom:6px;">➕ バリエーション（衣装・色・モデル違い）を追加</div>
+          <div style="display:flex; gap:8px; flex-wrap:wrap;">
+            <input type="text" id="new-variant-name-input" class="form-input" style="flex:1; min-width:180px; font-size:13px;" placeholder="例: U字タンクトップ・白 （カンマや改行で複数一括追加も可）" onkeydown="if(event.key==='Enter'){event.preventDefault(); addVariantFromInput();}">
+            <input type="number" id="new-variant-price-input" class="form-input" style="width:110px; font-size:13px; text-align:right;" placeholder="個別価格(任意)">
+            <button type="button" class="btn btn-primary" onclick="addVariantFromInput()" style="padding:8px 16px; font-size:13px; white-space:nowrap;">＋ 追加</button>
+          </div>
+          <div style="display:flex; gap:6px; flex-wrap:wrap; margin-top:8px; align-items:center;">
+            <span style="font-size:10px; opacity:0.6;">クイック追加:</span>
+            <button type="button" onclick="quickAddVariantPresets(['U字タンクトップ・白','U字タンクトップ・黒'])" style="font-size:10px; padding:3px 8px; border-radius:12px; border:1px solid rgba(255,255,255,0.2); background:rgba(255,255,255,0.05); color:#ddd; cursor:pointer;">＋ U字タンク(白/黒)</button>
+            <button type="button" onclick="quickAddVariantPresets(['Vネック・白','Vネック・黒'])" style="font-size:10px; padding:3px 8px; border-radius:12px; border:1px solid rgba(255,255,255,0.2); background:rgba(255,255,255,0.05); color:#ddd; cursor:pointer;">＋ Vネック(白/黒)</button>
+            <button type="button" onclick="quickAddVariantPresets(['袖付き・白','袖付き・黒'])" style="font-size:10px; padding:3px 8px; border-radius:12px; border:1px solid rgba(255,255,255,0.2); background:rgba(255,255,255,0.05); color:#ddd; cursor:pointer;">＋ 袖付き(白/黒)</button>
+            <button type="button" onclick="quickAddVariantPresets(['タンクトップ・白','タンクトップ・黒'])" style="font-size:10px; padding:3px 8px; border-radius:12px; border:1px solid rgba(255,255,255,0.2); background:rgba(255,255,255,0.05); color:#ddd; cursor:pointer;">＋ タンクトップ(白/黒)</button>
+            <button type="button" onclick="quickAddVariantPresets(['長袖ヒートテック風'], false)" style="font-size:10px; padding:3px 8px; border-radius:12px; border:1px solid rgba(243,156,18,0.4); background:rgba(243,156,18,0.1); color:#f39c12; cursor:pointer;">＋ 長袖ヒートテック風(検討中)</button>
+          </div>
+        </div>
+
+        <!-- Variants List (Scrollable) -->
+        <div id="variant-manager-list" style="flex:1; overflow-y:auto; display:flex; flex-direction:column; gap:8px; min-height:160px; max-height:42vh; padding-right:4px;">
+          <!-- Populated dynamically -->
+        </div>
+
+        <!-- Footer -->
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:16px; padding-top:12px; border-top:1px solid rgba(255,255,255,0.1); flex-wrap:wrap; gap:10px;">
+          <button type="button" id="btn-clear-all-variants" onclick="clearAllVariantsForProduct()" style="background:rgba(231,76,60,0.15); border:1px solid var(--danger); color:var(--danger); font-size:11px; padding:6px 10px; border-radius:6px; cursor:pointer;">
+            🔄 バリエーションなしの単一商品に戻す
+          </button>
+          <div style="display:flex; gap:10px; margin-left:auto;">
+            <button type="button" class="btn" style="background:#444; color:white; padding:8px 16px; font-size:13px;" onclick="closeVariantManagerModal()">キャンセル</button>
+            <button type="button" class="btn btn-primary" onclick="saveVariantManagerModal()" style="padding:8px 22px; font-size:13px;">💾 保存して反映する</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- POS Register Variant Picker Modal -->
+    <div id="pos-variant-picker-modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.8); z-index:2500; align-items:center; justify-content:center; padding:16px;" onclick="if(event.target===this) closePosVariantPicker()">
+      <div style="background:var(--panel-bg); width:100%; max-width:540px; border-radius:14px; padding:20px; border:1px solid var(--accent); max-height:88vh; display:flex; flex-direction:column; box-shadow:0 15px 40px rgba(0,0,0,0.85);">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:10px;">
+          <div style="display:flex; align-items:center; gap:10px;">
+            <img id="pos-picker-img" src="" style="width:44px; height:44px; border-radius:8px; object-fit:cover; background:#222;">
+            <div>
+              <h3 id="pos-picker-title" style="margin:0; font-size:16px; color:white;"></h3>
+              <div style="font-size:11px; color:var(--accent);">販売するバリエーションをタップしてカートに追加</div>
+            </div>
+          </div>
+          <button style="background:none; border:none; color:white; font-size:22px; cursor:pointer; padding:4px 8px;" onclick="closePosVariantPicker()">✕</button>
+        </div>
+        <div id="pos-picker-list" style="flex:1; overflow-y:auto; display:grid; grid-template-columns:repeat(auto-fill, minmax(210px, 1fr)); gap:10px; padding:4px 0;">
+          <!-- Populated dynamically -->
+        </div>
+        <div style="margin-top:14px; padding-top:12px; border-top:1px solid rgba(255,255,255,0.1); display:flex; justify-content:flex-end;">
+          <button type="button" class="btn btn-primary" onclick="closePosVariantPicker()" style="width:100%; padding:10px;">✅ 選択完了（閉じる）</button>
         </div>
       </div>
     </div>
@@ -1166,7 +1347,10 @@
       <div class="scroll-container" style="padding-bottom: 120px;">
         <div style="background:rgba(255,255,255,0.05); padding:10px; border-radius:8px; margin-bottom:15px; display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
           <h2 style="margin:0; font-size:16px;">🎯 売上シミュ (<span id="sim-event-name"></span>)</h2>
+          <button class="btn" style="background:rgba(0,210,255,0.15); border:1px solid var(--accent); color:var(--accent); font-size:11px; padding:5px 10px; font-weight:bold;" onclick="openMultiEventAggFromSim()">📊 複数イベント必要在庫集計へ</button>
           <div style="flex:1;"></div>
+          <button class="btn" style="background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.15); color:#ddd; font-size:11px; padding:5px 8px;" onclick="toggleAllVariantExpand('sim', true)">▼ 内訳全展開</button>
+          <button class="btn" style="background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.15); color:#ddd; font-size:11px; padding:5px 8px;" onclick="toggleAllVariantExpand('sim', false)">▶ 全折りたたみ</button>
           <span style="font-size:12px; opacity:0.8;">パターン:</span>
           <select id="sim-pattern-select" style="padding:6px; border-radius:4px; background:var(--bg); color:white; border:1px solid var(--border);" onchange="switchSimulationPattern(this.value)"></select>
           <button class="btn" style="background:rgba(255,255,255,0.1); font-size:12px; padding:6px 10px;" onclick="createNewPattern()">＋新規</button>
@@ -1287,14 +1471,107 @@
           </div>
         </div>
 
-        <!-- Sub-tabs for Inventory and Manufacturing -->
-        <div style="display:flex; background:rgba(0,0,0,0.3); border-radius:6px; padding:3px; margin-bottom:20px; width:fit-content;">
+        <!-- Sub-tabs for Inventory, Multi-Event Aggregation, and Manufacturing -->
+        <div style="display:flex; background:rgba(0,0,0,0.3); border-radius:6px; padding:3px; margin-bottom:16px; width:fit-content; flex-wrap:wrap; gap:4px;">
           <button class="btn settings-subtab-btn active" id="btn-settings-subtab-stock" onclick="switchSettingsSubTab('stock')" style="padding:6px 16px; font-size:12px; font-weight:bold; background:var(--accent); color:#000; border-radius:4px;">📋 在庫数一覧</button>
+          <button class="btn settings-subtab-btn" id="btn-settings-subtab-multi-agg" onclick="switchSettingsSubTab('multi-agg')" style="padding:6px 16px; font-size:12px; color:#fff; background:none; border-radius:4px;">📊 複数イベント必要在庫集計</button>
           <button class="btn settings-subtab-btn" id="btn-settings-subtab-production" onclick="switchSettingsSubTab('production')" style="padding:6px 16px; font-size:12px; color:#fff; background:none; border-radius:4px;">📅 製造計画チャート</button>
+        </div>
+
+        <!-- Stock Toolbar: Carry-over from previous event & Expand/Collapse -->
+        <div id="stock-toolbar-panel" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); padding:10px 14px; border-radius:10px; margin-bottom:14px;">
+          <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
+            <span style="font-size:11px; color:var(--accent); font-weight:bold;">📥 前イベントから残在庫を引き継ぐ:</span>
+            <select id="carryover-stock-event-select" class="form-select" style="font-size:11px; padding:4px 8px; width:auto; background:rgba(0,0,0,0.5);">
+              <option value="">コピー元イベントを選択...</option>
+            </select>
+            <button class="btn" onclick="carryOverStockFromSelectedEvent()" style="background:rgba(0,210,255,0.15); border:1px solid var(--accent); color:var(--accent); font-size:11px; padding:4px 10px; border-radius:6px; font-weight:bold;">残在庫を反映</button>
+          </div>
+          <div style="display:flex; gap:6px; align-items:center;">
+            <button class="btn" onclick="toggleAllVariantExpand('stock', true)" style="background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.15); color:#ddd; font-size:11px; padding:4px 8px;">▼ バリエーション全展開</button>
+            <button class="btn" onclick="toggleAllVariantExpand('stock', false)" style="background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.15); color:#ddd; font-size:11px; padding:4px 8px;">▶ 全折りたたみ</button>
+          </div>
         </div>
 
         <!-- Normal Inventory List -->
         <div id="settings-list"></div>
+
+        <!-- Multi-Event Required Inventory Aggregation Panel -->
+        <div id="multi-agg-panel" style="display:none; flex-direction:column; gap:16px; width:100%;">
+          <!-- Event Multi-Selection Box -->
+          <div style="background:var(--panel-bg); border:1px solid rgba(0,210,255,0.25); border-radius:12px; padding:16px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:10px;">
+              <div>
+                <h3 style="margin:0; font-size:16px; color:var(--accent); display:flex; align-items:center; gap:6px;">
+                  📊 複数イベント 必要在庫合算・不足数チェック
+                </h3>
+                <p style="margin:4px 0 0 0; font-size:11px; opacity:0.7;">
+                  複数のイベントにチェックを入れると、各イベントの採用シミュ準備予定数（必要数）を合算し、現在庫（手元在庫）を1回だけ差し引いて不足数を算出します。
+                </p>
+              </div>
+              <div style="display:flex; gap:6px; flex-wrap:wrap;">
+                <button class="btn" onclick="selectMultiAggPreset('scheduled')" style="background:rgba(0,210,255,0.15); border:1px solid var(--accent); color:var(--accent); font-size:11px; padding:4px 10px;">⛺ 出店予定を選択</button>
+                <button class="btn" onclick="selectMultiAggPreset('current')" style="background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.2); color:#fff; font-size:11px; padding:4px 10px;">現在のイベントのみ</button>
+                <button class="btn" onclick="selectMultiAggPreset('all')" style="background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.2); color:#fff; font-size:11px; padding:4px 10px;">全マルシェ選択</button>
+              </div>
+            </div>
+
+            <!-- Checkboxes Container -->
+            <div id="multi-agg-event-checkboxes" style="display:flex; flex-wrap:wrap; gap:8px; padding:10px; background:rgba(0,0,0,0.3); border-radius:8px; border:1px solid rgba(255,255,255,0.06);">
+              <!-- Populated dynamically -->
+            </div>
+
+            <!-- Reference Current Stock Selector -->
+            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-top:10px; padding-top:10px; border-top:1px dashed rgba(255,255,255,0.1); font-size:12px;">
+              <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+                <span style="color:#f1c40f; font-weight:bold;">📦 比較する「手元の現在庫」の参照枠:</span>
+                <select id="multi-agg-stock-source-select" onchange="onChangeMultiAggStockSource(this.value)" class="form-select" style="width:auto; font-size:12px; padding:4px 10px; font-weight:bold; border-color:#f1c40f; color:#fff;">
+                </select>
+                <span style="font-size:11px; opacity:0.65;">※同じ在庫を複数イベントに重複割当せず、先に必要数を合算してからこの現在庫を差し引きます。</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Summary KPI Cards -->
+          <div id="multi-agg-kpi-row" style="display:grid; grid-template-columns:repeat(auto-fit, minmax(150px, 1fr)); gap:12px;">
+            <!-- Populated dynamically -->
+          </div>
+
+          <!-- Controls: View Mode, Filter, Sort -->
+          <div style="background:var(--panel-bg); border:1px solid rgba(255,255,255,0.08); border-radius:10px; padding:12px 14px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+            <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+              <span style="font-size:11px; opacity:0.7;">表示粒度:</span>
+              <select id="multi-agg-view-mode" onchange="renderMultiEventAggregation()" class="form-select" style="width:auto; font-size:12px; padding:4px 8px;">
+                <option value="tree">📂 親商品＋バリエーション内訳</option>
+                <option value="flat">📄 全SKUフラット一覧</option>
+              </select>
+              <span style="font-size:11px; opacity:0.7; margin-left:4px;">絞り込み:</span>
+              <select id="multi-agg-filter" onchange="renderMultiEventAggregation()" class="form-select" style="width:auto; font-size:12px; padding:4px 8px;">
+                <option value="all">すべて表示 (出品/必要対象)</option>
+                <option value="shortage">🔥 不足ありのみ (不足 &gt; 0)</option>
+                <option value="required">📦 必要数ありのみ (合計必要 &gt; 0)</option>
+                <option value="variants">🎨 バリエーションありのみ</option>
+              </select>
+            </div>
+            <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+              <span style="font-size:11px; opacity:0.7;">並び順:</span>
+              <select id="multi-agg-sort" onchange="renderMultiEventAggregation()" class="form-select" style="width:auto; font-size:12px; padding:4px 8px; border-color:var(--accent);">
+                <option value="shortage_desc">🔥 不足数が多い順</option>
+                <option value="required_desc">📦 合計必要数が多い順</option>
+                <option value="default">📋 標準（マスター順）</option>
+              </select>
+              <button class="btn" onclick="toggleAllVariantExpand('agg', true)" style="background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.15); color:#ddd; font-size:11px; padding:4px 8px;">▼ 全展開</button>
+              <button class="btn" onclick="toggleAllVariantExpand('agg', false)" style="background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.15); color:#ddd; font-size:11px; padding:4px 8px;">▶ 全折りたたみ</button>
+            </div>
+          </div>
+
+          <!-- Aggregation Table Container -->
+          <div style="background:var(--panel-bg); border:1px solid rgba(255,255,255,0.08); border-radius:12px; overflow-x:auto; box-shadow:0 4px 16px rgba(0,0,0,0.35);">
+            <div id="multi-agg-table-container" style="min-width:100%;">
+              <!-- Table injected dynamically -->
+            </div>
+          </div>
+        </div>
 
         <!-- Production Plan Chart View Container -->
         <div id="production-chart-panel" style="display:none; flex-direction:column; gap:20px; width:100%;">
@@ -2032,6 +2309,7 @@
           }
 
           if (typeof window.renderCatalogView === 'function') window.renderCatalogView();
+          if (typeof renderAll === 'function') renderAll();
         });
 
         listenToEventData();
@@ -2050,6 +2328,7 @@
       if(window.renderTopics) window.renderTopics();
       if(window.renderExhibitions) window.renderExhibitions();
       if(window.renderProductionPlans) window.renderProductionPlans();
+      if(window.renderMultiEventAggregation && currentSettingsSubTab === 'multi-agg') window.renderMultiEventAggregation();
     }
 
     function updateVisibilityUI() {
@@ -2298,20 +2577,26 @@
           }
         }
         
-        // Product sales aggregation
+        // Product sales aggregation (Parent + SKU aware)
         if (r.items) {
           r.items.forEach(item => {
             totalItemQty += item.qty || 0;
-            let pId = item.id;
-            if (!pId) {
+            let rawId = item.id;
+            if (!rawId) {
               const found = window.getFullMasterProducts(window.customProductsData).find(x => x.name.replace(/\n/g, ' ') === item.name);
-              if (found) pId = found.id;
+              if (found) rawId = found.id;
             }
             const price = item.price || 0;
             const amt = item.qty * price;
-            if (pId) {
-              productSales[pId] = (productSales[pId] || 0) + item.qty;
-              productRevenue[pId] = (productRevenue[pId] || 0) + amt;
+            if (rawId) {
+              productSales[rawId] = (productSales[rawId] || 0) + item.qty;
+              productRevenue[rawId] = (productRevenue[rawId] || 0) + amt;
+              // If rawId is a SKU (parentId__skuKey), also accumulate under parentId for parent-level totals
+              if (rawId.includes('__')) {
+                const parentId = item.parentId || rawId.split('__')[0];
+                productSales['__parent_sum__' + parentId] = (productSales['__parent_sum__' + parentId] || 0) + item.qty;
+                productRevenue['__parent_sum__' + parentId] = (productRevenue['__parent_sum__' + parentId] || 0) + amt;
+              }
             } else {
               productSales[item.name] = (productSales[item.name] || 0) + item.qty;
               productRevenue[item.name] = (productRevenue[item.name] || 0) + amt;
@@ -2624,11 +2909,34 @@
       const prepMap = currentSimulationData?.patterns?.[activePatId]?.prepQty || {};
       
       const productsWithData = activeProducts.map(p => {
-        const soldQty = (productSales[p.id] || 0) + (productSales[p.name.replace(/\n/g, ' ')] || 0);
-        const soldAmt = (productRevenue[p.id] || 0) + (productRevenue[p.name.replace(/\n/g, ' ')] || 0);
-        const prepQty = prepMap[p.id] || 0;
+        const cleanName = p.name.replace(/\n/g, ' ');
+        const directSoldQty = (productSales[p.id] || 0) + (productSales[cleanName] || 0);
+        const directSoldAmt = (productRevenue[p.id] || 0) + (productRevenue[cleanName] || 0);
+        const skuSoldQty = productSales['__parent_sum__' + p.id] || 0;
+        const skuSoldAmt = productRevenue['__parent_sum__' + p.id] || 0;
+        const soldQty = directSoldQty + skuSoldQty;
+        const soldAmt = directSoldAmt + skuSoldAmt;
+
+        const vars = window.getProductVariants ? window.getProductVariants(p.id, false) : [];
+        let prepQty = 0;
+        let skuBreakdown = [];
+        if (vars.length > 0) {
+          const simSummary = window.getParentSimSummary ? window.getParentSimSummary({}, prepMap, inventoryData, p.id) : { prepQty: prepMap[p.id] || 0 };
+          prepQty = simSummary.prepQty;
+          vars.forEach(v => {
+            // Legacy pre-variant sales (id === p.id) belong to isBase ("無印（通常版）")
+            const vSoldQty = (productSales[v.skuId] || 0) + (v.isBase ? directSoldQty : 0);
+            const vSoldAmt = (productRevenue[v.skuId] || 0) + (v.isBase ? directSoldAmt : 0);
+            const vPrepQty = window.getSkuSimQty ? window.getSkuSimQty(prepMap, p.id, v) : (prepMap[v.skuId] || 0);
+            if (vSoldQty > 0 || vPrepQty > 0) {
+              skuBreakdown.push({ v, vSoldQty, vSoldAmt, vPrepQty });
+            }
+          });
+        } else {
+          prepQty = prepMap[p.id] || 0;
+        }
         const rate = prepQty > 0 ? Math.round((soldQty / prepQty) * 100) : 0;
-        return { p, soldQty, soldAmt, prepQty, rate };
+        return { p, soldQty, soldAmt, prepQty, rate, skuBreakdown };
       });
       
       productsWithData.sort((a, b) => {
@@ -2642,7 +2950,7 @@
       const itemsToDisplay = analyticsShowAll ? productsWithData : productsWithData.filter(x => x.soldQty > 0 || x.prepQty > 0);
       
       if (itemsToDisplay.length > 0) {
-        itemsToDisplay.forEach(({ p, soldQty, soldAmt, prepQty, rate }) => {
+        itemsToDisplay.forEach(({ p, soldQty, soldAmt, prepQty, rate, skuBreakdown }) => {
           const cleanName = p.name.replace(/\n/g, ' ');
           let rateHtml = '';
           let progressHtml = '';
@@ -2668,6 +2976,19 @@
           } else {
             rateHtml = `<span style="color:rgba(255,255,255,0.3); font-size:11px; margin-left:8px;">-</span>`;
           }
+
+          let skuHtml = '';
+          if (skuBreakdown && skuBreakdown.length > 0) {
+            skuHtml = `<div style="width:100%; margin-top:5px; padding-left:10px; border-left:2px solid rgba(0,210,255,0.3); display:flex; flex-direction:column; gap:2px;">` +
+              skuBreakdown.map(sb => {
+                const sbRate = sb.vPrepQty > 0 ? Math.round((sb.vSoldQty / sb.vPrepQty) * 100) + '%' : '-';
+                return `<div style="display:flex; justify-content:space-between; font-size:11px; color:rgba(255,255,255,0.75);">
+                  <span>└ ${sb.v.name}</span>
+                  <span><strong style="color:var(--accent);">${sb.vSoldQty}</strong>/${sb.vPrepQty || '-'} (¥${sb.vSoldAmt.toLocaleString()} / ${sbRate})</span>
+                </div>`;
+              }).join('') +
+            `</div>`;
+          }
           
           prodSalesHtml += `
             <div style="border-bottom: 1px solid rgba(255,255,255,0.05); padding: 8px 0; display: flex; flex-direction: column; align-items: flex-start;">
@@ -2680,6 +3001,7 @@
                 </div>
               </div>
               ${progressHtml}
+              ${skuHtml}
             </div>
           `;
         });
@@ -2794,13 +3116,35 @@
 
     function renderSettings() {
       const list = document.getElementById('settings-list');
+      if (!list) return;
       list.innerHTML = '';
+
+      // Populate Carry-over dropdown
+      const carrySelect = document.getElementById('carryover-stock-event-select');
+      if (carrySelect) {
+        const prevVal = carrySelect.value;
+        const allEvents = window.getAllEvents ? window.getAllEvents(eventConfigData) : {};
+        let opts = '<option value="">コピー元イベントを選択...</option>';
+        Object.keys(allEvents).forEach(k => {
+          if (k !== currentEventKey) {
+            opts += `<option value="${k}">${allEvents[k].label}</option>`;
+          }
+        });
+        carrySelect.innerHTML = opts;
+        if (prevVal && prevVal !== currentEventKey) carrySelect.value = prevVal;
+      }
       
       // 在庫管理画面は「管理用（初期並び順）」で表示
       const products = getActiveProducts(true);
+      const adoptedPatId = currentSimulationData?.activePatternId;
+      const adoptedPrepMap = (adoptedPatId && currentSimulationData?.patterns?.[adoptedPatId]?.prepQty) ? currentSimulationData.patterns[adoptedPatId].prepQty : {};
       
       products.forEach(p => {
-        const inv = inventoryData[p.id] || { price: 0, initial: 0, current: 0 };
+        const vars = window.getProductVariants ? window.getProductVariants(p.id, false) : [];
+        const hasVars = vars.length > 0;
+        const inv = hasVars
+          ? window.getParentInventorySummary(inventoryData, p.id)
+          : (inventoryData[p.id] || { price: 0, initial: 0, current: 0 });
         
         // Badge cycling styles
         const badgeValue = badgesData[p.id] || 'none';
@@ -2836,39 +3180,137 @@
           : 'background:rgba(255,255,255,0.05); color:rgba(255,255,255,0.4); border-color:transparent;';
         const hiddenLabel = isHidden ? '🔒 非公開' : '🔓 公開中';
 
-        list.innerHTML += `
-          <div class="settings-row" style="flex-direction:column; align-items:stretch;">
-            <div style="display:flex; gap:12px; align-items:center;">
-              <img src="${p.image}" alt="">
-              <div class="settings-info">
-                <div class="settings-name">${p.name.replace(/\n/g, ' ')}</div>
-                <div style="font-size:14px; font-weight:bold; margin-top:4px; color:var(--accent);">搬入総数: ${inv.initial} / 現在庫: ${inv.current}</div>
-                ${(() => {
-                  const adoptedPatId = currentSimulationData?.activePatternId;
-                  if (!adoptedPatId || !currentSimulationData?.patterns[adoptedPatId]) return '';
-                  const targetPrep = currentSimulationData.patterns[adoptedPatId].prepQty[p.id] || 0;
-                  if (targetPrep === 0) return '';
-                  const shortage = Math.max(0, targetPrep - inv.initial);
-                  const shortageText = shortage > 0 ? `(あと <span style="color:var(--danger); font-weight:bold;">${shortage}</span> 個必要)` : `(✅ 準備完了)`;
-                  return `<div style="font-size:12px; color:#f1c40f; margin-top:4px; font-weight:bold;">🎯 採用シミュ目標: ${targetPrep}個 ${shortageText}</div>`;
-                })()}
-              </div>
-            </div>
-            <div style="display:flex; gap:6px; align-items:center; background:rgba(0,0,0,0.3); padding:8px; border-radius:6px; margin-top:10px;">
-              <span style="font-size:12px; color:rgba(255,255,255,0.7);">在庫調整:</span>
-              <input type="number" id="adj-qty-${p.id}" placeholder="+ / -" style="width:70px; padding:6px; border-radius:4px; border:1px solid var(--border); background:var(--bg); color:var(--text);">
-              <select id="adj-reason-${p.id}" style="padding:6px; border-radius:4px; border:1px solid var(--border); background:var(--bg); color:var(--text); flex:1;">
-                <option value="初期搬入">初期搬入</option>
-                <option value="追加制作">追加制作</option>
-                <option value="在庫発見">在庫発見</option>
+        // Target preparation & shortage calculation (compared against current stock)
+        let targetPrepHtml = '';
+        if (hasVars) {
+          const simSum = window.getParentSimSummary({}, adoptedPrepMap, inventoryData, p.id);
+          if (simSum.prepQty > 0) {
+            let skuShortageTotal = 0;
+            vars.forEach(v => {
+              const vInv = window.getSkuInventory(inventoryData, p.id, v);
+              const vPrep = window.getSkuSimQty(adoptedPrepMap, p.id, v);
+              skuShortageTotal += Math.max(0, vPrep - vInv.current);
+            });
+            const shortageText = skuShortageTotal > 0
+              ? `(現在庫比 あと <span style="color:var(--danger); font-weight:bold;">${skuShortageTotal}</span> 個不足)`
+              : `(✅ 準備完了)`;
+            targetPrepHtml = `<div style="font-size:12px; color:#f1c40f; margin-top:4px; font-weight:bold;">🎯 採用シミュ必要数合計: ${simSum.prepQty}個 ${shortageText}</div>`;
+          }
+        } else {
+          const targetPrep = adoptedPrepMap[p.id] || 0;
+          if (targetPrep > 0) {
+            const shortage = Math.max(0, targetPrep - inv.current);
+            const shortageText = shortage > 0
+              ? `(現在庫比 あと <span style="color:var(--danger); font-weight:bold;">${shortage}</span> 個不足)`
+              : `(✅ 準備完了)`;
+            targetPrepHtml = `<div style="font-size:12px; color:#f1c40f; margin-top:4px; font-weight:bold;">🎯 採用シミュ必要数: ${targetPrep}個 ${shortageText}</div>`;
+          }
+        }
+
+        const isExpanded = window.variantExpandState?.stock?.[p.id] !== false; // default expanded when hasVars
+
+        // Stock controls or SKU breakdown
+        let stockControlsHtml = '';
+        if (!hasVars) {
+          stockControlsHtml = `
+            <div style="display:flex; gap:6px; align-items:center; flex-wrap:wrap; background:rgba(0,0,0,0.3); padding:8px; border-radius:6px; margin-top:10px;">
+              <span style="font-size:12px; color:rgba(255,255,255,0.7);">在庫増減:</span>
+              <input type="number" id="adj-qty-${p.id}" placeholder="+ / -" style="width:68px; padding:6px; border-radius:4px; border:1px solid var(--border); background:var(--bg); color:var(--text);">
+              <select id="adj-reason-${p.id}" style="padding:6px; border-radius:4px; border:1px solid var(--border); background:var(--bg); color:var(--text); flex:1; min-width:110px;">
+                <option value="初期搬入">初期搬入(+)</option>
+                <option value="追加制作">追加制作(+)</option>
+                <option value="在庫発見">在庫発見(+)</option>
+                <option value="フリマ・他販売">フリマ・他販売(-)</option>
+                <option value="プレゼント・破損">プレゼント・破損(-)</option>
                 <option value="不良品破棄">不良品破棄(-)</option>
+                <option value="実数棚卸し調整">実数棚卸し調整</option>
                 <option value="その他">その他</option>
               </select>
-              <button onclick="applyStockAdjustment('${p.id}')" style="padding:6px 12px; border:none; border-radius:4px; background:var(--success); color:white; font-weight:bold; cursor:pointer;">適用</button>
-              <button onclick="resetProductInventory('${p.id}')" style="padding:6px 12px; border:1px solid var(--danger); border-radius:4px; background:none; color:var(--danger); font-size:11px; cursor:pointer;">リセット</button>
+              <button onclick="applyStockAdjustment('${p.id}')" style="padding:6px 12px; border:none; border-radius:4px; background:var(--success); color:white; font-weight:bold; cursor:pointer;">増減適用</button>
+              <button onclick="promptSetExactStock('${p.id}')" style="padding:6px 10px; border:1px solid var(--accent); border-radius:4px; background:rgba(0,210,255,0.12); color:var(--accent); font-size:11px; font-weight:bold; cursor:pointer;" title="手元で数えた実数に直接合わせる">🔢 実数セット</button>
+              <button onclick="resetProductInventory('${p.id}')" style="padding:6px 10px; border:1px solid var(--danger); border-radius:4px; background:none; color:var(--danger); font-size:11px; cursor:pointer;">0リセット</button>
             </div>
+          `;
+        } else {
+          const skuRows = vars.map(v => {
+            const vInv = window.getSkuInventory(inventoryData, p.id, v);
+            const vPrep = window.getSkuSimQty(adoptedPrepMap, p.id, v);
+            const vShortage = Math.max(0, vPrep - vInv.current);
+            const vShortageBadge = vPrep > 0
+              ? (vShortage > 0
+                  ? `<span style="color:var(--danger); font-weight:bold; font-size:11px;">不足 ${vShortage}個 (必要:${vPrep})</span>`
+                  : `<span style="color:var(--success); font-weight:bold; font-size:11px;">✅ 充足 (必要:${vPrep})</span>`)
+              : `<span style="opacity:0.45; font-size:11px;">必要数未設定</span>`;
+            return `
+              <div class="sku-row-card">
+                <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px;">
+                  <div style="display:flex; align-items:center; gap:6px;">
+                    <span style="font-weight:bold; font-size:13px; color:#fff;">${v.isBase ? '🔹' : '🔸'} ${v.name}</span>
+                    ${v.statusNote ? `<span style="font-size:10px; background:rgba(243,156,18,0.2); color:#f39c12; padding:1px 6px; border-radius:8px;">${v.statusNote}</span>` : ''}
+                    <span style="font-size:11px; opacity:0.65;">(¥${vInv.price.toLocaleString()})</span>
+                  </div>
+                  <div style="display:flex; align-items:center; gap:10px;">
+                    ${vShortageBadge}
+                    <span style="font-size:12px; color:var(--accent); font-weight:bold;">搬入:${vInv.initial} / 現在庫:<span style="font-size:14px; color:#fff;">${vInv.current}</span></span>
+                  </div>
+                </div>
+                <div style="display:flex; gap:6px; align-items:center; flex-wrap:wrap;">
+                  <input type="number" id="adj-qty-${v.skuId}" placeholder="+ / -" style="width:64px; padding:5px; border-radius:4px; border:1px solid var(--border); background:var(--bg); color:var(--text); font-size:12px;">
+                  <select id="adj-reason-${v.skuId}" style="padding:5px; border-radius:4px; border:1px solid var(--border); background:var(--bg); color:var(--text); flex:1; min-width:110px; font-size:11px;">
+                    <option value="初期搬入">初期搬入(+)</option>
+                    <option value="追加制作">追加制作(+)</option>
+                    <option value="在庫発見">在庫発見(+)</option>
+                    <option value="フリマ・他販売">フリマ・他販売(-)</option>
+                    <option value="プレゼント・破損">プレゼント・破損(-)</option>
+                    <option value="不良品破棄">不良品破棄(-)</option>
+                    <option value="実数棚卸し調整">実数棚卸し調整</option>
+                    <option value="その他">その他</option>
+                  </select>
+                  <button onclick="applyStockAdjustment('${v.skuId}')" style="padding:5px 10px; border:none; border-radius:4px; background:var(--success); color:white; font-weight:bold; font-size:11px; cursor:pointer;">増減</button>
+                  <button onclick="promptSetExactStock('${v.skuId}')" style="padding:5px 8px; border:1px solid var(--accent); border-radius:4px; background:rgba(0,210,255,0.12); color:var(--accent); font-size:11px; font-weight:bold; cursor:pointer;">🔢実数</button>
+                  <button onclick="resetProductInventory('${v.skuId}')" style="padding:5px 8px; border:1px solid var(--danger); border-radius:4px; background:none; color:var(--danger); font-size:10px; cursor:pointer;">0</button>
+                </div>
+              </div>
+            `;
+          }).join('');
 
-            <div style="display:flex; gap:10px; align-items:center; margin-top:8px; padding-top:8px; border-top:1px solid var(--border);">
+          stockControlsHtml = `
+            <div style="margin-top:8px;">
+              <div style="display:flex; justify-content:space-between; align-items:center;">
+                <button type="button" onclick="toggleSingleVariantExpand('stock', '${p.id}')" style="background:rgba(0,210,255,0.1); border:1px solid rgba(0,210,255,0.3); color:var(--accent); font-size:11px; font-weight:bold; padding:4px 10px; border-radius:6px; cursor:pointer;">
+                  ${isExpanded ? '▼ バリエーション別在庫を折りたたむ' : `▶ バリエーション別在庫を展開 (${vars.length}種)`}
+                </button>
+                <button type="button" onclick="resetProductInventory('${p.id}')" style="padding:4px 8px; border:1px solid var(--danger); border-radius:4px; background:none; color:var(--danger); font-size:10px; cursor:pointer;">全種0リセット</button>
+              </div>
+              <div class="sku-sublist-box" style="display:${isExpanded ? 'flex' : 'none'};">
+                ${skuRows}
+              </div>
+            </div>
+          `;
+        }
+
+        list.innerHTML += `
+          <div class="settings-row" style="flex-direction:column; align-items:stretch;">
+            <div style="display:flex; gap:12px; align-items:center; justify-content:space-between; flex-wrap:wrap;">
+              <div style="display:flex; gap:12px; align-items:center; flex:1; min-width:200px;">
+                <img src="${p.image}" alt="">
+                <div class="settings-info">
+                  <div class="settings-name" style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+                    <span>${p.name.replace(/\n/g, ' ')}</span>
+                    <span class="variant-badge-pill" onclick="openVariantManagerModal('${p.id}')" title="バリエーション（衣装・色など）を追加・編集">
+                      🎨 ${hasVars ? `バリエーション (${vars.length}種)` : '＋バリエーション追加'}
+                    </span>
+                  </div>
+                  <div style="font-size:14px; font-weight:bold; margin-top:4px; color:var(--accent);">
+                    ${hasVars ? '合計搬入総数' : '搬入総数'}: ${inv.initial} / ${hasVars ? '合計現在庫' : '現在庫'}: <span style="color:#fff; font-size:15px;">${inv.current}</span>
+                  </div>
+                  ${targetPrepHtml}
+                </div>
+              </div>
+            </div>
+            ${stockControlsHtml}
+
+            <div style="display:flex; gap:10px; align-items:center; margin-top:8px; padding-top:8px; border-top:1px solid var(--border); flex-wrap:wrap;">
               <div style="display:flex; flex-direction:column; gap:2px;">
                 <span style="font-size:10px; opacity:0.5;">ピックアップ:</span>
                 <button onclick="cycleRecommendStatus('${p.id}')" style="font-size:11px; padding:4px 8px; border-radius:4px; border:1px solid var(--border); cursor:pointer; min-width:80px; ${badgeStyle}">
@@ -2970,36 +3412,52 @@
       }
     };
 
-    window.applyStockAdjustment = async (pId) => {
+    window.applyStockAdjustment = async (targetId) => {
       if (!auth.currentUser) return;
-      const qty = parseInt(document.getElementById(`adj-qty-${pId}`).value);
+      const qtyInput = document.getElementById(`adj-qty-${targetId}`);
+      const qty = parseInt(qtyInput ? qtyInput.value : 0);
       if (!qty || qty === 0) return alert("増減数を入力してください");
       
-      const reason = document.getElementById(`adj-reason-${pId}`).value;
-      const oldInv = inventoryData[pId] || { price: 0, initial: 0, current: 0 };
+      const reasonEl = document.getElementById(`adj-reason-${targetId}`);
+      const reason = reasonEl ? reasonEl.value : 'その他';
+
+      const parsed = window.parseSkuId ? window.parseSkuId(targetId) : { parentId: targetId, skuObj: null };
+      const parentId = parsed.parentId;
+      const skuObj = parsed.skuObj;
+
+      const oldInv = skuObj
+        ? window.getSkuInventory(inventoryData, parentId, skuObj)
+        : (inventoryData[targetId] || { price: 0, initial: 0, current: 0 });
       
-      const newInitial = (oldInv.initial || 0) + qty;
-      const newCurrent = (oldInv.current || 0) + qty;
+      // Only increase initial stock when adding stock (or if initial was 0); non-sale decreases (flea market, breakage) reduce current stock
+      const isDecreaseReason = qty < 0 && (reason.includes('フリマ') || reason.includes('プレゼント') || reason.includes('破損') || reason.includes('不良品') || reason.includes('棚卸'));
+      const newInitial = isDecreaseReason ? Math.max(0, oldInv.initial || 0) : Math.max(0, (oldInv.initial || 0) + qty);
+      const newCurrent = Math.max(0, (oldInv.current || 0) + qty);
       const newInventory = { ...inventoryData };
       
-      newInventory[pId] = { price: oldInv.price, initial: newInitial, current: newCurrent };
+      newInventory[targetId] = { price: oldInv.price, initial: newInitial, current: newCurrent };
+      // Keep parent summary synced if SKU
+      if (skuObj) {
+        const sumInv = window.getParentInventorySummary(newInventory, parentId);
+        newInventory[parentId] = { price: sumInv.price, initial: sumInv.initial, current: sumInv.current };
+      }
       
-      // Stock log entry
-      const pName = MASTER_PRODUCTS.find(x => x.id === pId)?.name || pId;
+      const allMaster = window.getFullMasterProducts ? window.getFullMasterProducts(window.customProductsData) : MASTER_PRODUCTS;
+      const pName = allMaster.find(x => x.id === parentId)?.name || parentId;
+      const displayLabel = skuObj ? `${pName.replace(/\n/g, ' ')} (${skuObj.name})` : pName.replace(/\n/g, ' ');
       const logRecord = {
         timestamp: new Date().toISOString(),
         type: 'adjust',
-        productId: pId,
-        productName: pName.replace(/\n/g, ' '),
+        productId: targetId,
+        parentId: parentId,
+        productName: displayLabel,
         qty: qty,
         reason: reason
       };
 
       try {
-        // 1. Update inventory
         await setDoc(doc(db, "settings", "inventory_" + currentEventKey), newInventory);
         
-        // 2. Append to log array
         const logDocRef = doc(db, "settings", "inventory_log_" + currentEventKey);
         try {
           await updateDoc(logDocRef, { records: arrayUnion(logRecord) });
@@ -3007,33 +3465,104 @@
           await setDoc(logDocRef, { records: [logRecord] });
         }
         
-        // 3. Update global stock badge
+        // Update global stock badge by parent product total
         let newStockStatus = {};
-        const ratio = newCurrent / (newInitial || 1);
-        if (newCurrent <= 0) newStockStatus[pId] = 'soldout';
-        else if (ratio <= 0.3) newStockStatus[pId] = 'few';
-        else newStockStatus[pId] = 'onsale';
+        const parentSummary = skuObj ? window.getParentInventorySummary(newInventory, parentId) : newInventory[parentId];
+        const ratio = parentSummary.current / (parentSummary.initial || 1);
+        if (parentSummary.current <= 0) newStockStatus[parentId] = 'soldout';
+        else if (ratio <= 0.3) newStockStatus[parentId] = 'few';
+        else newStockStatus[parentId] = 'onsale';
         await setDoc(doc(db, "settings", "stock"), newStockStatus, { merge: true });
 
-        alert(`在庫を調整しました（${qty > 0 ? '+'+qty : qty}個）`);
-        
-        // Clear input
-        document.getElementById(`adj-qty-${pId}`).value = '';
+        alert(`「${displayLabel}」の在庫を調整しました（${qty > 0 ? '+'+qty : qty}個 / 現在庫: ${newCurrent}個）`);
+        if (qtyInput) qtyInput.value = '';
       } catch(e) {
         console.error(e);
         alert("エラーが発生しました。");
       }
     };
 
+    window.promptSetExactStock = async (targetId) => {
+      if (!auth.currentUser) return;
+      const parsed = window.parseSkuId ? window.parseSkuId(targetId) : { parentId: targetId, skuObj: null };
+      const parentId = parsed.parentId;
+      const skuObj = parsed.skuObj;
+      const allMaster = window.getFullMasterProducts ? window.getFullMasterProducts(window.customProductsData) : MASTER_PRODUCTS;
+      const pName = allMaster.find(x => x.id === parentId)?.name || parentId;
+      const displayLabel = skuObj ? `${pName.replace(/\n/g, ' ')} (${skuObj.name})` : pName.replace(/\n/g, ' ');
+      const oldInv = skuObj
+        ? window.getSkuInventory(inventoryData, parentId, skuObj)
+        : (inventoryData[targetId] || { price: 0, initial: 0, current: 0 });
+
+      const inputStr = prompt(`【実数セット】
+「${displayLabel}」の現在の手元在庫数を入力してください:
+（変更前 現在庫: ${oldInv.current}個）`, String(oldInv.current));
+      if (inputStr === null) return;
+      const exactVal = parseInt(inputStr);
+      if (isNaN(exactVal) || exactVal < 0) return alert("0以上の数値を入力してください。");
+
+      const diff = exactVal - (oldInv.current || 0);
+      const newInitial = Math.max(exactVal, oldInv.initial || 0);
+      const newInventory = { ...inventoryData };
+      newInventory[targetId] = { price: oldInv.price, initial: newInitial, current: exactVal };
+      if (skuObj) {
+        const sumInv = window.getParentInventorySummary(newInventory, parentId);
+        newInventory[parentId] = { price: sumInv.price, initial: sumInv.initial, current: sumInv.current };
+      }
+
+      const logRecord = {
+        timestamp: new Date().toISOString(),
+        type: 'exact_set',
+        productId: targetId,
+        parentId: parentId,
+        productName: displayLabel,
+        qty: diff,
+        reason: `実数棚卸しセット (${oldInv.current}→${exactVal})`
+      };
+
+      try {
+        await setDoc(doc(db, "settings", "inventory_" + currentEventKey), newInventory);
+        const logDocRef = doc(db, "settings", "inventory_log_" + currentEventKey);
+        try {
+          await updateDoc(logDocRef, { records: arrayUnion(logRecord) });
+        } catch(e) {
+          await setDoc(logDocRef, { records: [logRecord] });
+        }
+        let newStockStatus = {};
+        const parentSummary = skuObj ? window.getParentInventorySummary(newInventory, parentId) : newInventory[parentId];
+        const ratio = parentSummary.current / (parentSummary.initial || 1);
+        if (parentSummary.current <= 0) newStockStatus[parentId] = 'soldout';
+        else if (ratio <= 0.3) newStockStatus[parentId] = 'few';
+        else newStockStatus[parentId] = 'onsale';
+        await setDoc(doc(db, "settings", "stock"), newStockStatus, { merge: true });
+      } catch(e) {
+        console.error(e);
+        alert("在庫の更新に失敗しました。");
+      }
+    };
+
     window.savePrices = async () => {
       if (!auth.currentUser) return;
-      const products = getActiveProducts();
+      const products = getActiveProducts(true);
       let newInventory = { ...inventoryData };
       
       products.forEach(p => {
-        const price = parseInt(document.getElementById(`price-${p.id}`).value) || 0;
-        const oldInv = newInventory[p.id] || { initial: 0, current: 0 };
-        newInventory[p.id] = { price, initial: oldInv.initial, current: oldInv.current };
+        const pInput = document.getElementById(`price-${p.id}`);
+        const parentPrice = pInput ? (parseInt(pInput.value) || 0) : (newInventory[p.id]?.price || 0);
+        const oldParentInv = newInventory[p.id] || { initial: 0, current: 0 };
+        newInventory[p.id] = { price: parentPrice, initial: oldParentInv.initial, current: oldParentInv.current };
+
+        const vars = window.getProductVariants ? window.getProductVariants(p.id, true) : [];
+        if (vars.length > 0) {
+          vars.forEach(v => {
+            const skuInput = document.getElementById(`price-${v.skuId}`);
+            const skuOld = window.getSkuInventory(newInventory, p.id, v);
+            const skuPrice = skuInput ? (parseInt(skuInput.value) || 0) : (skuOld.price || parentPrice);
+            newInventory[v.skuId] = { price: skuPrice, initial: skuOld.initial, current: skuOld.current };
+          });
+          const sumInv = window.getParentInventorySummary(newInventory, p.id);
+          newInventory[p.id] = { price: parentPrice, initial: sumInv.initial, current: sumInv.current };
+        }
       });
 
       try {
@@ -3047,25 +3576,104 @@
 
     function renderPOS() {
       const grid = document.getElementById('pos-grid');
+      if (!grid) return;
       grid.innerHTML = '';
       // レジ画面も「管理用（初期並び順）」で表示
       const products = getActiveProducts(true);
       
       products.forEach(p => {
-        const inv = inventoryData[p.id] || { price: 0, current: 0 };
+        const vars = window.getProductVariants ? window.getProductVariants(p.id, false) : [];
+        const hasVars = vars.length > 0;
+        const inv = hasVars
+          ? window.getParentInventorySummary(inventoryData, p.id)
+          : (inventoryData[p.id] || { price: 0, current: 0 });
         const price = inv.price;
         const stock = inv.current;
+        const varBadge = hasVars
+          ? `<div style="position:absolute; top:6px; right:6px; background:rgba(0,210,255,0.9); color:#000; font-size:10px; font-weight:bold; padding:2px 6px; border-radius:10px; box-shadow:0 2px 6px rgba(0,0,0,0.5);">🎨 ${vars.length}種</div>`
+          : '';
         
         grid.innerHTML += `
-          <div class="pos-item" onclick="addToCart('${p.id}')">
+          <div class="pos-item" style="position:relative;" onclick="handlePosItemClick('${p.id}')">
+            ${varBadge}
             <img src="${p.image}" alt="">
             <div class="pos-item-name">${p.name.replace(/\n/g, '<br>')}</div>
-            <div class="pos-item-price">¥${price}</div>
+            <div class="pos-item-price">¥${price}${hasVars && inv.hasPriceDiff ? '〜' : ''}</div>
             <div class="pos-item-stock">残: ${stock}</div>
           </div>
         `;
       });
       updateCartUI();
+      if (currentPosPickerParentId) {
+        renderPosVariantPickerItems(currentPosPickerParentId);
+      }
+    }
+
+    let currentPosPickerParentId = null;
+
+    window.handlePosItemClick = (pId) => {
+      if (registerLocked) {
+        alert("レジがロックされています。解除してから操作してください。");
+        return;
+      }
+      const vars = window.getProductVariants ? window.getProductVariants(pId, false) : [];
+      if (vars.length > 0) {
+        openPosVariantPicker(pId);
+      } else {
+        addToCart(pId);
+      }
+    };
+
+    window.openPosVariantPicker = (pId) => {
+      currentPosPickerParentId = pId;
+      const allProducts = window.getFullMasterProducts ? window.getFullMasterProducts(window.customProductsData) : MASTER_PRODUCTS;
+      const p = allProducts.find(x => x.id === pId) || { id: pId, name: pId };
+      const titleEl = document.getElementById('pos-picker-title');
+      const imgEl = document.getElementById('pos-picker-img');
+      if (titleEl) titleEl.textContent = p.name.replace(/\n/g, ' ');
+      if (imgEl) imgEl.src = p.image || 'mini_osuwari_keyholder.png';
+      renderPosVariantPickerItems(pId);
+      const modal = document.getElementById('pos-variant-picker-modal');
+      if (modal) modal.style.display = 'flex';
+    };
+
+    window.closePosVariantPicker = () => {
+      currentPosPickerParentId = null;
+      const modal = document.getElementById('pos-variant-picker-modal');
+      if (modal) modal.style.display = 'none';
+    };
+
+    function renderPosVariantPickerItems(pId) {
+      const listEl = document.getElementById('pos-picker-list');
+      if (!listEl) return;
+      const vars = window.getProductVariants ? window.getProductVariants(pId, false) : [];
+      listEl.innerHTML = vars.map(v => {
+        const vInv = window.getSkuInventory(inventoryData, pId, v);
+        const inCart = cart[v.skuId] || 0;
+        const remain = vInv.current - inCart;
+        const isSoldOut = vInv.current <= 0;
+        return `
+          <div onclick="${isSoldOut ? '' : `addToCart('${v.skuId}')`}" style="background:${inCart > 0 ? 'rgba(0,210,255,0.14)' : 'rgba(255,255,255,0.04)'}; border:2px solid ${inCart > 0 ? 'var(--accent)' : (isSoldOut ? 'rgba(231,76,60,0.35)' : 'rgba(255,255,255,0.12)')}; border-radius:10px; padding:12px; cursor:${isSoldOut ? 'not-allowed' : 'pointer'}; opacity:${isSoldOut ? 0.45 : 1}; display:flex; flex-direction:column; justify-content:space-between; gap:8px; transition:all 0.15s;">
+            <div>
+              <div style="font-weight:bold; font-size:14px; color:#fff; line-height:1.3;">${v.isBase ? '🔹 ' : '🔸 '}${v.name}</div>
+              ${v.statusNote ? `<div style="font-size:10px; color:#f39c12; margin-top:2px;">${v.statusNote}</div>` : ''}
+            </div>
+            <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-top:4px;">
+              <div>
+                <div style="font-size:14px; font-weight:bold; color:var(--accent);">¥${vInv.price.toLocaleString()}</div>
+                <div style="font-size:11px; color:${isSoldOut ? 'var(--danger)' : 'rgba(255,255,255,0.7)'};">在庫: ${vInv.current}個 ${inCart > 0 ? `(残${remain})` : ''}</div>
+              </div>
+              ${inCart > 0 ? `
+                <div style="display:flex; align-items:center; gap:6px;" onclick="event.stopPropagation();">
+                  <button type="button" class="qty-btn" style="width:26px; height:26px;" onclick="updateCartQty('${v.skuId}', -1)">-</button>
+                  <span style="font-weight:bold; font-size:14px; color:#fff;">${inCart}</span>
+                  <button type="button" class="qty-btn" style="width:26px; height:26px;" onclick="addToCart('${v.skuId}')">+</button>
+                </div>
+              ` : `<span style="font-size:11px; background:rgba(0,210,255,0.2); color:var(--accent); padding:3px 8px; border-radius:6px; font-weight:bold;">${isSoldOut ? '売切' : '＋追加'}</span>`}
+            </div>
+          </div>
+        `;
+      }).join('');
     }
 
     window.addToCart = (id) => {
@@ -3074,10 +3682,15 @@
         return;
       }
       if (!cart[id]) cart[id] = 0;
-      const stock = (inventoryData[id] && inventoryData[id].current) || 0;
+      const parsed = window.parseSkuId ? window.parseSkuId(id) : { parentId: id, skuObj: null };
+      const inv = parsed.skuObj
+        ? window.getSkuInventory(inventoryData, parsed.parentId, parsed.skuObj)
+        : (inventoryData[id] || { price: 0, current: 0 });
+      const stock = inv.current || 0;
       if (cart[id] < stock) {
         cart[id]++;
         updateCartUI();
+        if (currentPosPickerParentId) renderPosVariantPickerItems(currentPosPickerParentId);
       } else {
         alert("在庫が足りません！");
       }
@@ -3088,30 +3701,43 @@
         alert("レジがロックされています。解除してから操作してください。");
         return;
       }
-      cart[id] += delta;
+      if (delta > 0) {
+        window.addToCart(id);
+        return;
+      }
+      cart[id] = (cart[id] || 0) + delta;
       if (cart[id] <= 0) delete cart[id];
       updateCartUI();
+      if (currentPosPickerParentId) renderPosVariantPickerItems(currentPosPickerParentId);
     };
 
     window.updateCartUI = () => {
       const container = document.getElementById('cart-items');
+      if (!container) return;
       container.innerHTML = '';
       let subtotal = 0;
       const products = window.getFullMasterProducts(window.customProductsData);
       
       Object.keys(cart).forEach(id => {
         const qty = cart[id];
-        const p = products.find(x => x.id === id);
+        const parsed = window.parseSkuId ? window.parseSkuId(id) : { parentId: id, skuObj: null };
+        const p = products.find(x => x.id === parsed.parentId);
         if (!p) return; // 安全ガード: 商品が見つからない場合はスキップ
-        const inv = inventoryData[id] || { price: 0 };
-        const price = inv.price * qty;
+        const inv = parsed.skuObj
+          ? window.getSkuInventory(inventoryData, parsed.parentId, parsed.skuObj)
+          : (inventoryData[id] || { price: 0 });
+        const unitPrice = inv.price || 0;
+        const price = unitPrice * qty;
         subtotal += price;
+        const itemLabel = parsed.skuObj
+          ? `${p.name.replace(/\n/g, ' ')} <span style="color:var(--accent); font-size:11px;">(${parsed.skuObj.name})</span>`
+          : p.name.replace(/\n/g, ' ');
         
         container.innerHTML += `
           <div class="cart-item">
             <div class="cart-item-info">
-              <div class="cart-item-name">${p.name.replace(/\n/g, ' ')}</div>
-              <div style="color:var(--accent);">¥${inv.price}</div>
+              <div class="cart-item-name">${itemLabel}</div>
+              <div style="color:var(--accent);">¥${unitPrice.toLocaleString()}</div>
             </div>
             <div class="cart-item-controls">
               <button class="qty-btn" onclick="updateCartQty('${id}', -1)">-</button>
@@ -3142,28 +3768,57 @@
       const items = [];
       let newInventory = { ...inventoryData };
       let newStockStatus = {}; // Update settings/stock for catalog.html badges
+      const touchedParents = new Set();
 
       for (const id of Object.keys(cart)) {
         const qty = cart[id];
-        const inv = newInventory[id];
+        const parsed = window.parseSkuId ? window.parseSkuId(id) : { parentId: id, skuObj: null };
+        const parentId = parsed.parentId;
+        const skuObj = parsed.skuObj;
+        const inv = skuObj
+          ? window.getSkuInventory(newInventory, parentId, skuObj)
+          : newInventory[id];
         if (!inv || inv.current < qty) {
           return alert("在庫エラーが発生しました。リロードしてください。");
         }
-        const p = products.find(x => x.id === id);
-        items.push({ id, name: p.name.replace(/\n/g, ' '), qty, price: inv.price });
+        const p = products.find(x => x.id === parentId);
+        const cleanParentName = p ? p.name.replace(/\n/g, ' ') : parentId;
+        const fullItemName = skuObj ? `${cleanParentName} (${skuObj.name})` : cleanParentName;
+
+        items.push({
+          id,
+          parentId,
+          variantName: skuObj ? skuObj.name : null,
+          name: fullItemName,
+          qty,
+          price: inv.price
+        });
         subtotalAmount += inv.price * qty;
         
-        inv.current -= qty;
-
-        const ratio = inv.current / (inv.initial || 1);
-        if (inv.current <= 0) {
-          newStockStatus[id] = 'soldout';
-        } else if (ratio <= 0.3) {
-          newStockStatus[id] = 'few';
-        } else {
-          newStockStatus[id] = 'onsale';
-        }
+        newInventory[id] = {
+          price: inv.price,
+          initial: inv.initial,
+          current: inv.current - qty
+        };
+        touchedParents.add(parentId);
       }
+
+      touchedParents.forEach(parentId => {
+        const hasVars = window.hasVariants && window.hasVariants(parentId);
+        if (hasVars) {
+          const sumInv = window.getParentInventorySummary(newInventory, parentId);
+          newInventory[parentId] = { price: sumInv.price, initial: sumInv.initial, current: sumInv.current };
+        }
+        const pInv = newInventory[parentId] || { initial: 0, current: 0 };
+        const ratio = pInv.current / (pInv.initial || 1);
+        if (pInv.current <= 0) {
+          newStockStatus[parentId] = 'soldout';
+        } else if (ratio <= 0.3) {
+          newStockStatus[parentId] = 'few';
+        } else {
+          newStockStatus[parentId] = 'onsale';
+        }
+      });
 
       const discount = parseInt(document.getElementById('cust-discount').value) || 0;
       let totalAmount = subtotalAmount - discount;
@@ -3311,14 +3966,19 @@
 
     window.resetAllInventoryData = async () => {
       if (!auth.currentUser) return;
-      if (!confirm(`全作品の「搬入総数」と「現在庫」を0にリセットしますか？\n※価格設定は残ります。`)) return;
+      if (!confirm(`全作品（全バリエーション含む）の「搬入総数」と「現在庫」を0にリセットしますか？\n※価格設定は残ります。`)) return;
       
       try {
-        let newInv = {};
+        let newInv = { ...inventoryData };
         let newStockStatus = {};
-        const products = getActiveProducts();
+        const products = getActiveProducts(true);
         products.forEach(p => {
           newInv[p.id] = { price: (inventoryData[p.id]?.price || 0), initial: 0, current: 0 };
+          const vars = window.getProductVariants ? window.getProductVariants(p.id, true) : [];
+          vars.forEach(v => {
+            const vOld = window.getSkuInventory(inventoryData, p.id, v);
+            newInv[v.skuId] = { price: vOld.price, initial: 0, current: 0 };
+          });
           newStockStatus[p.id] = 'none';
         });
         await setDoc(doc(db, "settings", "inventory_" + currentEventKey), newInv);
@@ -3327,18 +3987,35 @@
       } catch(e) { console.error(e); }
     };
 
-    window.resetProductInventory = async (pId) => {
+    window.resetProductInventory = async (targetId) => {
       if (!auth.currentUser) return;
+      const parsed = window.parseSkuId ? window.parseSkuId(targetId) : { parentId: targetId, skuObj: null };
+      const parentId = parsed.parentId;
+      const skuObj = parsed.skuObj;
       const allMaster = window.getFullMasterProducts(window.customProductsData);
-      const pName = allMaster.find(x => x.id === pId)?.name || pId;
-      if (!confirm(`「${pName.replace(/\n/g, ' ')}」の在庫数を0にリセットしますか？`)) return;
+      const pName = allMaster.find(x => x.id === parentId)?.name || parentId;
+      const label = skuObj ? `${pName.replace(/\n/g, ' ')} (${skuObj.name})` : pName.replace(/\n/g, ' ');
+      if (!confirm(`「${label}」の在庫数を0にリセットしますか？`)) return;
 
       try {
         const newInventory = { ...inventoryData };
-        newInventory[pId] = { price: (inventoryData[pId]?.price || 0), initial: 0, current: 0 };
+        if (skuObj) {
+          const vOld = window.getSkuInventory(inventoryData, parentId, skuObj);
+          newInventory[targetId] = { price: vOld.price, initial: 0, current: 0 };
+          const sumInv = window.getParentInventorySummary(newInventory, parentId);
+          newInventory[parentId] = { price: sumInv.price, initial: sumInv.initial, current: sumInv.current };
+        } else {
+          newInventory[parentId] = { price: (inventoryData[parentId]?.price || 0), initial: 0, current: 0 };
+          const vars = window.getProductVariants ? window.getProductVariants(parentId, true) : [];
+          vars.forEach(v => {
+            const vOld = window.getSkuInventory(inventoryData, parentId, v);
+            newInventory[v.skuId] = { price: vOld.price, initial: 0, current: 0 };
+          });
+        }
         
+        const parentNow = newInventory[parentId] || { current: 0 };
         await setDoc(doc(db, "settings", "inventory_" + currentEventKey), newInventory);
-        await setDoc(doc(db, "settings", "stock"), { [pId]: 'none' }, { merge: true });
+        await setDoc(doc(db, "settings", "stock"), { [parentId]: parentNow.current > 0 ? 'onsale' : 'none' }, { merge: true });
         alert("在庫をリセットしました。");
       } catch(e) { console.error(e); }
     };
@@ -4434,9 +5111,19 @@
         if (wData.material) specsTags.push(`📦 ${wData.material}`);
 
         card.innerHTML = `
-          <div style="display:flex; justify-content:space-between; align-items:center; gap:6px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; gap:6px; flex-wrap:wrap;">
             ${badgeHtml}
-            <span style="font-size:10px; opacity:0.5; font-family:monospace;">${pId}</span>
+            <div style="display:flex; align-items:center; gap:6px;">
+              ${(() => {
+                const vars = window.getProductVariants ? window.getProductVariants(pId, true) : [];
+                if (vars.length > 0) {
+                  const activeCnt = vars.filter(v => v.active !== false).length;
+                  return `<span class="variant-badge-pill" onclick="event.stopPropagation(); openVariantManagerModal('${pId}')" title="バリエーション管理を開く">🎨 ${activeCnt}種</span>`;
+                }
+                return `<span class="variant-badge-pill" style="background:rgba(255,255,255,0.06); border-color:rgba(255,255,255,0.2); color:#bbb;" onclick="event.stopPropagation(); openVariantManagerModal('${pId}')" title="バリエーションを追加">＋バリエ</span>`;
+              })()}
+              <span style="font-size:10px; opacity:0.5; font-family:monospace;">${pId}</span>
+            </div>
           </div>
 
           <div style="display:flex; gap:12px; align-items:center;">
@@ -4617,7 +5304,7 @@
       closePrintTileModal();
     };
 
-    // --- Simulation Logic ---
+    // --- Simulation Logic (Parent + SKU Variations Supported) ---
 
     window.renderSimulation = function() {
       const list = document.getElementById('sim-product-list');
@@ -4631,78 +5318,258 @@
       const products = getActiveProducts(true);
       
       products.forEach(p => {
-        const inv = inventoryData[p.id] || { price: 0 };
-        const price = inv.price;
-        const qty = simulationQuantities[p.id] || 0;
-        const pQty = preparationQuantities[p.id] || 0;
-        
-        list.innerHTML += `
-          <div style="display:flex; flex-direction:column; gap:12px; background:rgba(0,0,0,0.2); padding:12px; border-radius:8px; border:1px solid rgba(255,255,255,0.05);">
-            <div style="display:flex; align-items:center; gap:12px;">
-              <img src="${p.image}" style="width:50px; height:50px; border-radius:6px; object-fit:cover;">
-              <div style="flex:1;">
-                <div style="font-weight:bold; font-size:14px; margin-bottom:4px;">${p.name.replace(/\n/g, ' ')}</div>
-                <div style="font-size:12px; color:var(--accent);">¥${price}</div>
+        const vars = window.getProductVariants ? window.getProductVariants(p.id, false) : [];
+        const hasVars = vars.length > 0;
+        const isExpanded = window.variantExpandState?.sim?.[p.id] !== false;
+
+        if (!hasVars) {
+          const inv = inventoryData[p.id] || { price: 0, current: 0 };
+          const price = inv.price || 0;
+          const curStock = inv.current || 0;
+          const qty = simulationQuantities[p.id] || 0;
+          const pQty = preparationQuantities[p.id] || 0;
+          const shortage = Math.max(0, pQty - curStock);
+          
+          list.innerHTML += `
+            <div style="display:flex; flex-direction:column; gap:12px; background:rgba(0,0,0,0.2); padding:12px; border-radius:8px; border:1px solid rgba(255,255,255,0.05);">
+              <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;">
+                <div style="display:flex; align-items:center; gap:12px;">
+                  <img src="${p.image}" style="width:50px; height:50px; border-radius:6px; object-fit:cover;">
+                  <div>
+                    <div style="font-weight:bold; font-size:14px; margin-bottom:4px; display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+                      <span>${p.name.replace(/\n/g, ' ')}</span>
+                      <span class="variant-badge-pill" onclick="openVariantManagerModal('${p.id}')">🎨 ＋バリエーション追加</span>
+                    </div>
+                    <div style="font-size:12px; color:var(--accent); display:flex; gap:12px; align-items:center;">
+                      <span>¥${price.toLocaleString()}</span>
+                      <span style="color:rgba(255,255,255,0.7);">現在庫: <strong>${curStock}</strong>個</span>
+                      <span id="sim-shortage-badge-${p.id}" style="color:${shortage > 0 ? 'var(--danger)' : 'var(--success)'}; font-weight:bold;">
+                        ${pQty > 0 ? (shortage > 0 ? `🔥 不足: ${shortage}個` : '✅ 在庫充足') : ''}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:4px;">
+                <!-- 予測 (シミュ) -->
+                <div style="flex:1; min-width:200px; background:rgba(0,0,0,0.3); padding:10px; border-radius:6px;">
+                  <div style="font-size:11px; opacity:0.7; margin-bottom:6px;">🎯 目標販売数</div>
+                  <div style="display:flex; align-items:center; gap:8px;">
+                    <input type="range" id="sim-slider-${p.id}" min="0" max="100" value="${qty}" style="flex:1; accent-color:var(--accent);" oninput="updateSimQty('${p.id}', this.value, true)">
+                    <input type="number" id="sim-qty-${p.id}" value="${qty}" min="0" style="width:55px; padding:4px; text-align:right; background:var(--bg); color:white; border:1px solid var(--border); border-radius:4px;" oninput="updateSimQty('${p.id}', this.value, false)">
+                  </div>
+                  <div style="font-size:12px; font-weight:bold; text-align:right; margin-top:6px; color:var(--accent);">小計: <span id="sim-subtotal-${p.id}">¥${(price * qty).toLocaleString()}</span></div>
+                </div>
+                <!-- 準備数 -->
+                <div style="flex:1; min-width:200px; background:rgba(241,196,15,0.1); border:1px solid rgba(241,196,15,0.3); padding:10px; border-radius:6px;">
+                  <div style="font-size:11px; color:#f1c40f; margin-bottom:6px;">📦 制作・準備予定数（必要数）</div>
+                  <div style="display:flex; align-items:center; justify-content:flex-end; gap:8px;">
+                    <input type="number" id="prep-qty-${p.id}" value="${pQty}" min="0" style="width:70px; padding:6px; font-size:14px; text-align:right; background:var(--bg); color:white; border:1px solid #f1c40f; border-radius:4px;" oninput="updatePrepQty('${p.id}', this.value)">
+                    <span style="font-size:12px; opacity:0.8;">個</span>
+                  </div>
+                  <div style="font-size:12px; font-weight:bold; text-align:right; margin-top:6px; color:#f1c40f;">在庫価値: <span id="prep-subtotal-${p.id}">¥${(price * pQty).toLocaleString()}</span></div>
+                </div>
               </div>
             </div>
-            <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:4px;">
-              <!-- 予測 (シミュ) -->
-              <div style="flex:1; min-width:200px; background:rgba(0,0,0,0.3); padding:10px; border-radius:6px;">
-                <div style="font-size:11px; opacity:0.7; margin-bottom:6px;">🎯 目標販売数</div>
-                <div style="display:flex; align-items:center; gap:8px;">
-                  <input type="range" id="sim-slider-${p.id}" min="0" max="100" value="${qty}" style="flex:1; accent-color:var(--accent);" oninput="updateSimQty('${p.id}', this.value, true)">
-                  <input type="number" id="sim-qty-${p.id}" value="${qty}" min="0" style="width:50px; padding:4px; text-align:right; background:var(--bg); color:white; border:1px solid var(--border); border-radius:4px;" oninput="updateSimQty('${p.id}', this.value, false)">
+          `;
+        } else {
+          // Product with Variants (SKU breakdown)
+          const pInv = window.getParentInventorySummary(inventoryData, p.id);
+          const simSum = window.getParentSimSummary(simulationQuantities, preparationQuantities, inventoryData, p.id);
+          let totalShortage = 0;
+
+          const skuRowsHtml = vars.map(v => {
+            const vInv = window.getSkuInventory(inventoryData, p.id, v);
+            const vSimQty = window.getSkuSimQty(simulationQuantities, p.id, v);
+            const vPrepQty = window.getSkuSimQty(preparationQuantities, p.id, v);
+            const vShortage = Math.max(0, vPrepQty - vInv.current);
+            totalShortage += vShortage;
+
+            return `
+              <div class="sku-row-card">
+                <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px;">
+                  <div style="display:flex; align-items:center; gap:6px;">
+                    <span style="font-weight:bold; font-size:13px; color:#fff;">${v.isBase ? '🔹' : '🔸'} ${v.name}</span>
+                    ${v.statusNote ? `<span style="font-size:10px; background:rgba(243,156,18,0.2); color:#f39c12; padding:1px 6px; border-radius:8px;">${v.statusNote}</span>` : ''}
+                    <span style="font-size:11px; color:var(--accent);">¥${vInv.price.toLocaleString()}</span>
+                  </div>
+                  <div style="display:flex; align-items:center; gap:10px; font-size:12px;">
+                    <span style="color:rgba(255,255,255,0.75);">現在庫: <strong>${vInv.current}</strong>個</span>
+                    <span id="sim-shortage-badge-${v.skuId}" style="font-weight:bold; color:${vShortage > 0 ? 'var(--danger)' : 'var(--success)'};">
+                      ${vPrepQty > 0 ? (vShortage > 0 ? `不足 ${vShortage}個` : '✅ 充足') : '必要0'}
+                    </span>
+                  </div>
                 </div>
-                <div style="font-size:12px; font-weight:bold; text-align:right; margin-top:6px; color:var(--accent);">小計: <span id="sim-subtotal-${p.id}">¥${(price * qty).toLocaleString()}</span></div>
+                <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(210px, 1fr)); gap:8px; margin-top:4px;">
+                  <div style="background:rgba(0,0,0,0.35); padding:6px 10px; border-radius:6px; display:flex; align-items:center; justify-content:space-between; gap:8px;">
+                    <span style="font-size:11px; opacity:0.8; white-space:nowrap;">🎯 販売目標:</span>
+                    <input type="range" id="sim-slider-${v.skuId}" min="0" max="50" value="${vSimQty}" style="flex:1; accent-color:var(--accent);" oninput="updateSimQty('${v.skuId}', this.value, true)">
+                    <input type="number" id="sim-qty-${v.skuId}" value="${vSimQty}" min="0" style="width:52px; padding:4px; text-align:right; background:var(--bg); color:white; border:1px solid var(--border); border-radius:4px; font-size:12px;" oninput="updateSimQty('${v.skuId}', this.value, false)">
+                    <span id="sim-subtotal-${v.skuId}" style="font-size:11px; color:var(--accent); font-weight:bold; min-width:60px; text-align:right;">¥${(vInv.price * vSimQty).toLocaleString()}</span>
+                  </div>
+                  <div style="background:rgba(241,196,15,0.08); border:1px solid rgba(241,196,15,0.28); padding:6px 10px; border-radius:6px; display:flex; align-items:center; justify-content:space-between; gap:8px;">
+                    <span style="font-size:11px; color:#f1c40f; white-space:nowrap;">📦 準備必要数:</span>
+                    <div style="display:flex; align-items:center; gap:6px;">
+                      <input type="number" id="prep-qty-${v.skuId}" value="${vPrepQty}" min="0" style="width:62px; padding:4px 6px; font-size:13px; font-weight:bold; text-align:right; background:var(--bg); color:white; border:1px solid #f1c40f; border-radius:4px;" oninput="updatePrepQty('${v.skuId}', this.value)">
+                      <span style="font-size:11px; opacity:0.8;">個</span>
+                    </div>
+                    <span id="prep-subtotal-${v.skuId}" style="font-size:11px; color:#f1c40f; font-weight:bold; min-width:60px; text-align:right;">¥${(vInv.price * vPrepQty).toLocaleString()}</span>
+                  </div>
+                </div>
               </div>
-              <!-- 準備数 -->
-              <div style="flex:1; min-width:200px; background:rgba(241,196,15,0.1); border:1px solid rgba(241,196,15,0.3); padding:10px; border-radius:6px;">
-                <div style="font-size:11px; color:#f1c40f; margin-bottom:6px;">📦 制作・準備予定数</div>
-                <div style="display:flex; align-items:center; justify-content:flex-end; gap:8px;">
-                  <input type="number" id="prep-qty-${p.id}" value="${pQty}" min="0" style="width:70px; padding:6px; font-size:14px; text-align:right; background:var(--bg); color:white; border:1px solid #f1c40f; border-radius:4px;" oninput="updatePrepQty('${p.id}', this.value)">
-                  <span style="font-size:12px; opacity:0.8;">個</span>
+            `;
+          }).join('');
+
+          list.innerHTML += `
+            <div style="display:flex; flex-direction:column; gap:10px; background:rgba(0,0,0,0.25); padding:12px; border-radius:8px; border:1px solid rgba(0,210,255,0.2);">
+              <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;">
+                <div style="display:flex; align-items:center; gap:12px;">
+                  <img src="${p.image}" style="width:50px; height:50px; border-radius:6px; object-fit:cover;">
+                  <div>
+                    <div style="font-weight:bold; font-size:14px; margin-bottom:4px; display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+                      <span>${p.name.replace(/\n/g, ' ')}</span>
+                      <span class="variant-badge-pill" onclick="openVariantManagerModal('${p.id}')">🎨 バリエーション管理 (${vars.length}種)</span>
+                    </div>
+                    <div style="font-size:12px; display:flex; flex-wrap:wrap; gap:12px; align-items:center;">
+                      <span style="color:var(--accent);">基準¥${pInv.price.toLocaleString()}</span>
+                      <span style="color:rgba(255,255,255,0.75);">現在庫合計: <strong>${pInv.current}</strong>個</span>
+                      <span id="sim-parent-shortage-${p.id}" style="font-weight:bold; color:${totalShortage > 0 ? 'var(--danger)' : 'var(--success)'};">
+                        ${simSum.prepQty > 0 ? (totalShortage > 0 ? `🔥 バリエ合計不足: ${totalShortage}個` : '✅ 全バリエ充足') : ''}
+                      </span>
+                    </div>
+                  </div>
                 </div>
-                <div style="font-size:12px; font-weight:bold; text-align:right; margin-top:6px; color:#f1c40f;">在庫価値: <span id="prep-subtotal-${p.id}">¥${(price * pQty).toLocaleString()}</span></div>
+                <div style="display:flex; gap:12px; align-items:center; flex-wrap:wrap; background:rgba(0,0,0,0.35); padding:8px 12px; border-radius:8px;">
+                  <div style="text-align:right;">
+                    <div style="font-size:10px; opacity:0.65;">🎯 販売目標合計</div>
+                    <div style="font-size:13px; font-weight:bold; color:var(--accent);">
+                      <span id="sim-parent-qty-${p.id}">${simSum.simQty}</span>個 (<span id="sim-subtotal-${p.id}">¥${simSum.simAmount.toLocaleString()}</span>)
+                    </div>
+                  </div>
+                  <div style="width:1px; height:24px; background:rgba(255,255,255,0.12);"></div>
+                  <div style="text-align:right;">
+                    <div style="font-size:10px; color:#f1c40f;">📦 準備必要数合計</div>
+                    <div style="font-size:13px; font-weight:bold; color:#f1c40f;">
+                      <span id="prep-parent-qty-${p.id}">${simSum.prepQty}</span>個 (<span id="prep-subtotal-${p.id}">¥${simSum.prepAmount.toLocaleString()}</span>)
+                    </div>
+                  </div>
+                  <button type="button" onclick="toggleSingleVariantExpand('sim', '${p.id}')" style="background:rgba(0,210,255,0.12); border:1px solid rgba(0,210,255,0.35); color:var(--accent); font-size:11px; font-weight:bold; padding:5px 10px; border-radius:6px; cursor:pointer;">
+                    ${isExpanded ? '▼ 内訳を閉じる' : '▶ 内訳を開く'}
+                  </button>
+                </div>
+              </div>
+              <div class="sku-sublist-box" style="display:${isExpanded ? 'flex' : 'none'}; margin-top:2px;">
+                ${skuRowsHtml}
               </div>
             </div>
-          </div>
-        `;
+          `;
+        }
       });
       updateSimulationUI();
     };
 
-    window.updateSimQty = function(pId, val, fromSlider) {
+    window.updateSimQty = function(targetId, val, fromSlider) {
       let qty = parseInt(val) || 0;
       if(qty < 0) qty = 0;
-      simulationQuantities[pId] = qty;
+
+      const parsed = window.parseSkuId ? window.parseSkuId(targetId) : { parentId: targetId, skuObj: null };
+      const parentId = parsed.parentId;
+      const skuObj = parsed.skuObj;
+
+      if (skuObj) {
+        // Ensure all active variants have explicit entries in simulationQuantities so base fallback doesn't overwrite
+        const vars = window.getProductVariants(parentId, false);
+        vars.forEach(v => {
+          if (simulationQuantities[v.skuId] === undefined) {
+            simulationQuantities[v.skuId] = window.getSkuSimQty(simulationQuantities, parentId, v);
+          }
+        });
+      }
+      simulationQuantities[targetId] = qty;
       
-      const inv = inventoryData[pId] || { price: 0 };
-      const subtotal = inv.price * qty;
+      const inv = skuObj
+        ? window.getSkuInventory(inventoryData, parentId, skuObj)
+        : (inventoryData[targetId] || { price: 0 });
+      const subtotal = (inv.price || 0) * qty;
       
-      const subEl = document.getElementById(`sim-subtotal-${pId}`);
+      const subEl = document.getElementById(`sim-subtotal-${targetId}`);
       if(subEl) subEl.textContent = `¥${subtotal.toLocaleString()}`;
       
       if(fromSlider) {
-        const inputEl = document.getElementById(`sim-qty-${pId}`);
+        const inputEl = document.getElementById(`sim-qty-${targetId}`);
         if(inputEl) inputEl.value = qty;
       } else {
-        const sliderEl = document.getElementById(`sim-slider-${pId}`);
+        const sliderEl = document.getElementById(`sim-slider-${targetId}`);
         if(sliderEl) sliderEl.value = qty;
+      }
+
+      if (skuObj) {
+        const simSum = window.getParentSimSummary(simulationQuantities, preparationQuantities, inventoryData, parentId);
+        simulationQuantities[parentId] = simSum.simQty;
+        const pQtyEl = document.getElementById(`sim-parent-qty-${parentId}`);
+        if (pQtyEl) pQtyEl.textContent = simSum.simQty;
+        const pSubEl = document.getElementById(`sim-subtotal-${parentId}`);
+        if (pSubEl) pSubEl.textContent = `¥${simSum.simAmount.toLocaleString()}`;
       }
       
       updateSimulationUI();
     };
 
-    window.updatePrepQty = function(pId, val) {
+    window.updatePrepQty = function(targetId, val) {
       let qty = parseInt(val) || 0;
       if(qty < 0) qty = 0;
-      preparationQuantities[pId] = qty;
+
+      const parsed = window.parseSkuId ? window.parseSkuId(targetId) : { parentId: targetId, skuObj: null };
+      const parentId = parsed.parentId;
+      const skuObj = parsed.skuObj;
+
+      if (skuObj) {
+        const vars = window.getProductVariants(parentId, false);
+        vars.forEach(v => {
+          if (preparationQuantities[v.skuId] === undefined) {
+            preparationQuantities[v.skuId] = window.getSkuSimQty(preparationQuantities, parentId, v);
+          }
+        });
+      }
+      preparationQuantities[targetId] = qty;
       
-      const inv = inventoryData[pId] || { price: 0 };
-      const subtotal = inv.price * qty;
+      const inv = skuObj
+        ? window.getSkuInventory(inventoryData, parentId, skuObj)
+        : (inventoryData[targetId] || { price: 0, current: 0 });
+      const subtotal = (inv.price || 0) * qty;
       
-      const subEl = document.getElementById(`prep-subtotal-${pId}`);
+      const subEl = document.getElementById(`prep-subtotal-${targetId}`);
       if(subEl) subEl.textContent = `¥${subtotal.toLocaleString()}`;
+
+      // Update shortage badge
+      const shortage = Math.max(0, qty - (inv.current || 0));
+      const badgeEl = document.getElementById(`sim-shortage-badge-${targetId}`);
+      if (badgeEl) {
+        badgeEl.style.color = shortage > 0 ? 'var(--danger)' : 'var(--success)';
+        badgeEl.textContent = qty > 0 ? (shortage > 0 ? (skuObj ? `不足 ${shortage}個` : `🔥 不足: ${shortage}個`) : '✅ 充足') : (skuObj ? '必要0' : '');
+      }
+
+      if (skuObj) {
+        const simSum = window.getParentSimSummary(simulationQuantities, preparationQuantities, inventoryData, parentId);
+        preparationQuantities[parentId] = simSum.prepQty;
+        const pQtyEl = document.getElementById(`prep-parent-qty-${parentId}`);
+        if (pQtyEl) pQtyEl.textContent = simSum.prepQty;
+        const pSubEl = document.getElementById(`prep-subtotal-${parentId}`);
+        if (pSubEl) pSubEl.textContent = `¥${simSum.prepAmount.toLocaleString()}`;
+
+        const vars = window.getProductVariants(parentId, false);
+        let totalShortage = 0;
+        vars.forEach(v => {
+          const vInv = window.getSkuInventory(inventoryData, parentId, v);
+          const vP = window.getSkuSimQty(preparationQuantities, parentId, v);
+          totalShortage += Math.max(0, vP - vInv.current);
+        });
+        const pShortEl = document.getElementById(`sim-parent-shortage-${parentId}`);
+        if (pShortEl) {
+          pShortEl.style.color = totalShortage > 0 ? 'var(--danger)' : 'var(--success)';
+          pShortEl.textContent = simSum.prepQty > 0 ? (totalShortage > 0 ? `🔥 バリエ合計不足: ${totalShortage}個` : '✅ 全バリエ充足') : '';
+        }
+      }
       
       updateSimulationUI();
     };
@@ -4716,11 +5583,18 @@
       let prepTotal = 0;
       const products = getActiveProducts(true);
       products.forEach(p => {
-        const inv = inventoryData[p.id] || { price: 0 };
-        const qty = simulationQuantities[p.id] || 0;
-        const pQty = preparationQuantities[p.id] || 0;
-        currentTotal += inv.price * qty;
-        prepTotal += inv.price * pQty;
+        const hasVars = window.hasVariants && window.hasVariants(p.id);
+        if (hasVars) {
+          const simSum = window.getParentSimSummary(simulationQuantities, preparationQuantities, inventoryData, p.id);
+          currentTotal += simSum.simAmount;
+          prepTotal += simSum.prepAmount;
+        } else {
+          const inv = inventoryData[p.id] || { price: 0 };
+          const qty = simulationQuantities[p.id] || 0;
+          const pQty = preparationQuantities[p.id] || 0;
+          currentTotal += inv.price * qty;
+          prepTotal += inv.price * pQty;
+        }
       });
       
       const currentSalesEl = document.getElementById('sim-current-sales');
@@ -4762,6 +5636,17 @@
               priceInput.value = pastData[p.id].price;
               copied = true;
             }
+            const vars = window.getProductVariants ? window.getProductVariants(p.id, true) : [];
+            vars.forEach(v => {
+              const skuInput = document.getElementById(`price-${v.skuId}`);
+              if (skuInput) {
+                const srcPrice = pastData[v.skuId]?.price !== undefined ? pastData[v.skuId].price : pastData[p.id]?.price;
+                if (srcPrice !== undefined) {
+                  skuInput.value = srcPrice;
+                  copied = true;
+                }
+              }
+            });
           });
           if (copied) alert("価格を反映しました。「価格を保存」ボタンを押して確定してください。");
           else alert("コピーできる価格データがありませんでした。");
@@ -5179,17 +6064,52 @@
       const products = getActiveProducts(true);
       
       products.forEach(p => {
-        const inv = inventoryData[p.id] || { price: 0 };
+        const inv = inventoryData[p.id] || { price: p.price || 0 };
+        const vars = window.getProductVariants ? window.getProductVariants(p.id, false) : [];
+        const hasVars = vars.length > 0;
+
+        let skuPriceHtml = '';
+        if (hasVars) {
+          skuPriceHtml = `
+            <div class="sku-sublist-box" style="margin-top:10px; width:100%;">
+              <div style="display:flex; justify-content:space-between; align-items:center; font-size:11px; color:rgba(255,255,255,0.65);">
+                <span>🎨 バリエーション別 販売価格</span>
+                <button type="button" onclick="applyParentPriceToAllSkus('${p.id}')" style="background:rgba(0,210,255,0.12); border:1px solid rgba(0,210,255,0.3); color:var(--accent); font-size:10px; padding:2px 8px; border-radius:4px; cursor:pointer;">親商品の価格を全種に一括適用</button>
+              </div>
+              ${vars.map(v => {
+                const vInv = window.getSkuInventory(inventoryData, p.id, v);
+                return `
+                  <div style="display:flex; align-items:center; justify-content:space-between; gap:8px; padding:4px 8px; background:rgba(255,255,255,0.03); border-radius:6px;">
+                    <span style="font-size:13px; color:#eee;">${v.isBase ? '🔹' : '🔸'} ${v.name}</span>
+                    <div style="display:flex; align-items:center; gap:6px;">
+                      <span style="font-size:12px; opacity:0.7;">¥</span>
+                      <input type="number" id="price-${v.skuId}" value="${vInv.price}" style="width:92px; padding:6px 8px; font-size:15px; font-weight:bold; text-align:right; border-radius:6px; border:1px solid rgba(0,210,255,0.45); background:rgba(0,0,0,0.5); color:var(--accent);">
+                    </div>
+                  </div>
+                `;
+              }).join('')}
+            </div>
+          `;
+        }
+
         list.innerHTML += `
-          <div class="settings-row" style="display:flex; align-items:center; justify-content:space-between; padding:12px; border-bottom:1px solid rgba(255,255,255,0.05); background:rgba(0,0,0,0.2);">
-            <div style="display:flex; align-items:center; gap:12px;">
-              <img src="${p.image}" alt="" style="width:50px; height:50px; border-radius:6px; object-fit:cover;">
-              <div style="font-weight:bold;">${p.name.replace(/\n/g, ' ')}</div>
+          <div class="settings-row" style="display:flex; flex-direction:column; align-items:stretch; padding:12px; border-bottom:1px solid rgba(255,255,255,0.05); background:rgba(0,0,0,0.2);">
+            <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; width:100%;">
+              <div style="display:flex; align-items:center; gap:12px;">
+                <img src="${p.image}" alt="" style="width:50px; height:50px; border-radius:6px; object-fit:cover;">
+                <div>
+                  <div style="font-weight:bold;">${p.name.replace(/\n/g, ' ')}</div>
+                  <span class="variant-badge-pill" style="margin-top:4px;" onclick="openVariantManagerModal('${p.id}')">
+                    🎨 ${hasVars ? `バリエーション (${vars.length}種)` : '＋バリエーション追加'}
+                  </span>
+                </div>
+              </div>
+              <div style="display:flex; align-items:center; gap:8px;">
+                <span style="font-size:11px; opacity:0.65;">${hasVars ? '基準:' : ''} ¥</span>
+                <input type="number" id="price-${p.id}" value="${inv.price}" style="width:100px; padding:10px; font-size:18px; font-weight:bold; text-align:right; border-radius:6px; border:1px solid var(--accent); background:rgba(0,0,0,0.5); color:var(--accent);">
+              </div>
             </div>
-            <div style="display:flex; align-items:center; gap:8px;">
-              <span style="font-size:14px; opacity:0.8;">¥</span>
-              <input type="number" id="price-${p.id}" value="${inv.price}" style="width:100px; padding:10px; font-size:18px; font-weight:bold; text-align:right; border-radius:6px; border:1px solid var(--accent); background:rgba(0,0,0,0.5); color:var(--accent);">
-            </div>
+            ${skuPriceHtml}
           </div>
         `;
       });
@@ -5205,6 +6125,17 @@
         });
         copySelect.innerHTML = optionsHtml;
       }
+    };
+
+    window.applyParentPriceToAllSkus = function(parentId) {
+      const pInput = document.getElementById(`price-${parentId}`);
+      if (!pInput) return;
+      const val = parseInt(pInput.value) || 0;
+      const vars = window.getProductVariants ? window.getProductVariants(parentId, true) : [];
+      vars.forEach(v => {
+        const sInput = document.getElementById(`price-${v.skuId}`);
+        if (sInput) sInput.value = val;
+      });
     };
 
     // Load and sync exhibition sales
@@ -6679,7 +7610,7 @@
     // -------------------------------------------------------------
     // Manufacturing Production Plan (製造計画) Chart Implementation
     // -------------------------------------------------------------
-    let currentSettingsSubTab = 'stock'; // stock or production
+    let currentSettingsSubTab = 'stock'; // 'stock' | 'multi-agg' | 'production'
 
     window.switchSettingsSubTab = (tab) => {
       currentSettingsSubTab = tab;
@@ -6700,15 +7631,1099 @@
         activeBtn.style.fontWeight = 'bold';
       }
 
-      // Toggle views
+      const stockListEl = document.getElementById('settings-list');
+      const stockToolbarEl = document.getElementById('stock-toolbar-panel');
+      const multiAggEl = document.getElementById('multi-agg-panel');
+      const prodChartEl = document.getElementById('production-chart-panel');
+
+      if (stockListEl) stockListEl.style.display = (tab === 'stock') ? 'block' : 'none';
+      if (stockToolbarEl) stockToolbarEl.style.display = (tab === 'stock') ? 'flex' : 'none';
+      if (multiAggEl) multiAggEl.style.display = (tab === 'multi-agg') ? 'flex' : 'none';
+      if (prodChartEl) prodChartEl.style.display = (tab === 'production') ? 'flex' : 'none';
+
       if (tab === 'stock') {
-        document.getElementById('settings-list').style.display = 'block';
-        document.getElementById('production-chart-panel').style.display = 'none';
-      } else {
-        document.getElementById('settings-list').style.display = 'none';
-        document.getElementById('production-chart-panel').style.display = 'flex';
+        renderSettings();
+      } else if (tab === 'multi-agg') {
+        window.renderMultiEventAggregation();
+      } else if (tab === 'production') {
         window.renderProductionPlans();
       }
+    };
+
+    window.openMultiEventAggFromSim = () => {
+      // Save current simulation edits in memory before jumping
+      if (typeof window.saveCurrentPatternToMemory === 'function') window.saveCurrentPatternToMemory();
+      switchTab('settings');
+      window.switchSettingsSubTab('multi-agg');
+    };
+
+    // =========================================================================
+    // 🎨 商品バリエーション（親商品・SKU）管理 & 複数イベント必要在庫集計ロジック
+    // =========================================================================
+    window.variantExpandState = {
+      stock: {},
+      sim: {},
+      agg: {}
+    };
+
+    window.toggleSingleVariantExpand = (scope, parentId) => {
+      if (!window.variantExpandState[scope]) window.variantExpandState[scope] = {};
+      const cur = window.variantExpandState[scope][parentId] !== false;
+      window.variantExpandState[scope][parentId] = !cur;
+      if (scope === 'stock') renderSettings();
+      else if (scope === 'sim') window.renderSimulation();
+      else if (scope === 'agg') window.renderMultiEventAggregation();
+    };
+
+    window.toggleAllVariantExpand = (scope, expand) => {
+      if (!window.variantExpandState[scope]) window.variantExpandState[scope] = {};
+      const allMaster = window.getFullMasterProducts ? window.getFullMasterProducts(window.customProductsData) : MASTER_PRODUCTS;
+      allMaster.forEach(p => {
+        window.variantExpandState[scope][p.id] = expand;
+      });
+      if (scope === 'stock') renderSettings();
+      else if (scope === 'sim') window.renderSimulation();
+      else if (scope === 'agg') window.renderMultiEventAggregation();
+    };
+
+    // Get variants list for a parent product from worksMasterData
+    window.getProductVariants = (parentId, includeInactive = false) => {
+      const wData = (window.worksMasterData && window.worksMasterData[parentId]) || {};
+      const rawVars = Array.isArray(wData.variants) ? wData.variants : [];
+      if (rawVars.length === 0) return [];
+      const sorted = [...rawVars].sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0));
+      return includeInactive ? sorted : sorted.filter(v => v.active !== false);
+    };
+
+    window.hasVariants = (parentId) => {
+      return window.getProductVariants(parentId, false).length > 0;
+    };
+
+    window.parseSkuId = (id) => {
+      if (!id || typeof id !== 'string' || !id.includes('__')) {
+        return { parentId: id, skuId: null, skuObj: null };
+      }
+      const parentId = id.split('__')[0];
+      const allVars = window.getProductVariants(parentId, true);
+      const skuObj = allVars.find(v => v.skuId === id) || {
+        skuId: id,
+        name: id.endsWith('__base') ? '無印（通常版）' : id.split('__')[1],
+        isBase: id.endsWith('__base'),
+        active: true
+      };
+      return { parentId, skuId: id, skuObj };
+    };
+
+    // Get SKU inventory with seamless fallback to parent's pre-variant data for the base variant ("無印（通常版）")
+    window.getSkuInventory = (invMap, parentId, sku) => {
+      const map = invMap || {};
+      const parentEntry = map[parentId] || {};
+      const allMaster = window.getFullMasterProducts ? window.getFullMasterProducts(window.customProductsData) : MASTER_PRODUCTS;
+      const masterProd = allMaster.find(x => x.id === parentId) || {};
+      const wData = (window.worksMasterData && window.worksMasterData[parentId]) || {};
+      const fallbackPrice = parentEntry.price !== undefined
+        ? parentEntry.price
+        : (wData.defaultPrice !== undefined ? wData.defaultPrice : (masterProd.price || 0));
+
+      if (map[sku.skuId] !== undefined) {
+        const entry = map[sku.skuId];
+        return {
+          price: entry.price !== undefined ? entry.price : (sku.priceOverride || fallbackPrice),
+          initial: entry.initial || 0,
+          current: entry.current || 0
+        };
+      }
+
+      // If no SKU key has been saved yet in this event's inventoryMap, bind existing parent inventory to the base variant only
+      const allVars = window.getProductVariants(parentId, true);
+      const anySkuSaved = allVars.some(v => map[v.skuId] !== undefined);
+      if (sku.isBase && !anySkuSaved && map[parentId] !== undefined) {
+        return {
+          price: sku.priceOverride || fallbackPrice,
+          initial: parentEntry.initial || 0,
+          current: parentEntry.current || 0
+        };
+      }
+
+      return {
+        price: sku.priceOverride || fallbackPrice,
+        initial: 0,
+        current: 0
+      };
+    };
+
+    // Sum inventory across all active SKUs for a parent product (never double-counting parent entry)
+    window.getParentInventorySummary = (invMap, parentId) => {
+      const map = invMap || {};
+      const vars = window.getProductVariants(parentId, false);
+      if (vars.length === 0) {
+        const d = map[parentId] || { price: 0, initial: 0, current: 0 };
+        return { price: d.price || 0, initial: d.initial || 0, current: d.current || 0, hasPriceDiff: false };
+      }
+      let totalInitial = 0;
+      let totalCurrent = 0;
+      let prices = [];
+      vars.forEach(v => {
+        const vInv = window.getSkuInventory(map, parentId, v);
+        totalInitial += (vInv.initial || 0);
+        totalCurrent += (vInv.current || 0);
+        if (vInv.price > 0) prices.push(vInv.price);
+      });
+      const parentBasePrice = map[parentId]?.price || (prices.length > 0 ? Math.min(...prices) : 0);
+      const hasPriceDiff = prices.length > 1 && Math.min(...prices) !== Math.max(...prices);
+      return {
+        price: parentBasePrice,
+        initial: totalInitial,
+        current: totalCurrent,
+        hasPriceDiff
+      };
+    };
+
+    // Get SKU simulation / preparation quantity with seamless fallback to parent's pre-variant data for base SKU
+    window.getSkuSimQty = (qtyMap, parentId, sku) => {
+      const map = qtyMap || {};
+      if (map[sku.skuId] !== undefined) {
+        return Number(map[sku.skuId]) || 0;
+      }
+      const allVars = window.getProductVariants(parentId, true);
+      const anySkuSaved = allVars.some(v => map[v.skuId] !== undefined);
+      if (sku.isBase && !anySkuSaved && map[parentId] !== undefined) {
+        return Number(map[parentId]) || 0;
+      }
+      return 0;
+    };
+
+    // Sum simulation & preparation quantities and amounts across active SKUs for a parent product
+    window.getParentSimSummary = (simMap, prepMap, invMap, parentId) => {
+      const vars = window.getProductVariants(parentId, false);
+      if (vars.length === 0) {
+        const pInv = (invMap && invMap[parentId]) || { price: 0 };
+        const sQ = Number(simMap && simMap[parentId]) || 0;
+        const pQ = Number(prepMap && prepMap[parentId]) || 0;
+        return {
+          simQty: sQ,
+          prepQty: pQ,
+          simAmount: sQ * (pInv.price || 0),
+          prepAmount: pQ * (pInv.price || 0)
+        };
+      }
+      let totalSimQty = 0;
+      let totalPrepQty = 0;
+      let totalSimAmt = 0;
+      let totalPrepAmt = 0;
+      vars.forEach(v => {
+        const vInv = window.getSkuInventory(invMap, parentId, v);
+        const sQ = window.getSkuSimQty(simMap, parentId, v);
+        const pQ = window.getSkuSimQty(prepMap, parentId, v);
+        totalSimQty += sQ;
+        totalPrepQty += pQ;
+        totalSimAmt += sQ * (vInv.price || 0);
+        totalPrepAmt += pQ * (vInv.price || 0);
+      });
+      return {
+        simQty: totalSimQty,
+        prepQty: totalPrepQty,
+        simAmount: totalSimAmt,
+        prepAmount: totalPrepAmt
+      };
+    };
+
+    // -------- Variant Manager Modal Logic --------
+    let variantDraftList = [];
+    let variantDraftParentId = null;
+
+    window.openVariantManagerModal = (parentId) => {
+      if (!parentId) return;
+      variantDraftParentId = parentId;
+      const allProducts = window.getFullMasterProducts ? window.getFullMasterProducts(window.customProductsData) : MASTER_PRODUCTS;
+      const p = allProducts.find(x => x.id === parentId) || { id: parentId, name: parentId };
+      const wData = (window.worksMasterData && window.worksMasterData[parentId]) || {};
+
+      document.getElementById('variant-manager-parent-id').value = parentId;
+      document.getElementById('variant-manager-title').textContent = `${(wData.name || p.name || parentId).replace(/\n/g, ' ')} (${parentId})`;
+      const imgEl = document.getElementById('variant-manager-img');
+      if (imgEl) imgEl.src = p.image || 'mini_osuwari_keyholder.png';
+
+      const existing = Array.isArray(wData.variants) ? wData.variants : [];
+      if (existing.length > 0) {
+        variantDraftList = existing.map((v, i) => ({
+          skuId: v.skuId,
+          name: v.name || '',
+          isBase: Boolean(v.isBase),
+          active: v.active !== false,
+          priceOverride: v.priceOverride || null,
+          statusNote: v.statusNote || '',
+          sortOrder: v.sortOrder !== undefined ? v.sortOrder : i
+        }));
+      } else {
+        // Initialize with 1st row as "無印（通常版）" (isBase: true) so existing stock/sales/sim bind to it
+        variantDraftList = [
+          {
+            skuId: `${parentId}__base`,
+            name: '無印（通常版）',
+            isBase: true,
+            active: true,
+            priceOverride: null,
+            statusNote: '',
+            sortOrder: 0
+          }
+        ];
+      }
+
+      const nameInput = document.getElementById('new-variant-name-input');
+      const priceInput = document.getElementById('new-variant-price-input');
+      if (nameInput) nameInput.value = '';
+      if (priceInput) priceInput.value = '';
+
+      renderVariantManagerList();
+      document.getElementById('variant-manager-modal').style.display = 'flex';
+    };
+
+    window.closeVariantManagerModal = () => {
+      document.getElementById('variant-manager-modal').style.display = 'none';
+      variantDraftParentId = null;
+    };
+
+    function syncDraftInputsFromDOM() {
+      variantDraftList.forEach((v, idx) => {
+        const nameEl = document.getElementById(`var-draft-name-${idx}`);
+        const priceEl = document.getElementById(`var-draft-price-${idx}`);
+        const noteEl = document.getElementById(`var-draft-note-${idx}`);
+        const activeEl = document.getElementById(`var-draft-active-${idx}`);
+        if (nameEl) v.name = nameEl.value.trim() || v.name;
+        if (priceEl) {
+          const val = parseInt(priceEl.value);
+          v.priceOverride = (!isNaN(val) && val > 0) ? val : null;
+        }
+        if (noteEl) v.statusNote = noteEl.value.trim();
+        if (activeEl) v.active = activeEl.checked;
+      });
+    }
+
+    function renderVariantManagerList() {
+      const container = document.getElementById('variant-manager-list');
+      if (!container) return;
+      if (variantDraftList.length === 0) {
+        container.innerHTML = `<div style="text-align:center; padding:20px; color:rgba(255,255,255,0.5); font-size:12px;">バリエーションがありません。上から追加してください。</div>`;
+        return;
+      }
+
+      container.innerHTML = variantDraftList.map((v, idx) => {
+        const baseBadge = v.isBase
+          ? `<span style="background:rgba(0,210,255,0.2); border:1px solid var(--accent); color:var(--accent); font-size:10px; font-weight:bold; padding:2px 6px; border-radius:8px; white-space:nowrap;" title="これまでの通常版データ（在庫・売上・必要数）を引き継ぐ基本枠">🔹 既存通常版枠</span>`
+          : `<span style="background:rgba(255,255,255,0.08); color:#ccc; font-size:10px; padding:2px 6px; border-radius:8px; white-space:nowrap;">SKU #${idx + 1}</span>`;
+
+        return `
+          <div style="background:${v.active ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.4)'}; border:1px solid ${v.isBase ? 'rgba(0,210,255,0.4)' : 'rgba(255,255,255,0.1)'}; border-radius:8px; padding:10px; display:flex; align-items:center; gap:8px; flex-wrap:wrap; opacity:${v.active ? 1 : 0.55};">
+            <label style="display:flex; align-items:center; gap:4px; font-size:11px; cursor:pointer;" title="チェックを外すと一時非表示（検討中・廃盤など）になります">
+              <input type="checkbox" id="var-draft-active-${idx}" ${v.active ? 'checked' : ''} onchange="onToggleVariantDraftActive(${idx}, this.checked)" style="width:16px; height:16px; accent-color:var(--accent);">
+              <span>有効</span>
+            </label>
+            ${baseBadge}
+            <input type="text" id="var-draft-name-${idx}" class="form-input" value="${v.name.replace(/"/g, '&quot;')}" placeholder="バリエーション名 (例: U字タンクトップ・白)" style="flex:1; min-width:150px; font-size:13px; padding:6px 8px; font-weight:bold;">
+            <input type="number" id="var-draft-price-${idx}" class="form-input" value="${v.priceOverride || ''}" placeholder="親価格と同じ" style="width:95px; font-size:12px; padding:6px 8px; text-align:right;" title="空欄の場合は親商品の価格が適用されます">
+            <input type="text" id="var-draft-note-${idx}" class="form-input" value="${(v.statusNote || '').replace(/"/g, '&quot;')}" placeholder="メモ(検討中など)" style="width:105px; font-size:11px; padding:6px 8px;">
+            <div style="display:flex; gap:4px;">
+              <button type="button" onclick="moveVariantDraft(${idx}, -1)" ${idx === 0 ? 'disabled' : ''} style="background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.15); color:#fff; border-radius:4px; width:26px; height:26px; cursor:pointer; font-size:11px;">▲</button>
+              <button type="button" onclick="moveVariantDraft(${idx}, 1)" ${idx === variantDraftList.length - 1 ? 'disabled' : ''} style="background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.15); color:#fff; border-radius:4px; width:26px; height:26px; cursor:pointer; font-size:11px;">▼</button>
+              ${v.isBase ? '' : `<button type="button" onclick="removeVariantDraft(${idx})" style="background:rgba(231,76,60,0.2); border:1px solid var(--danger); color:var(--danger); border-radius:4px; width:26px; height:26px; cursor:pointer; font-size:12px;" title="削除">✕</button>`}
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    window.onToggleVariantDraftActive = (idx, checked) => {
+      syncDraftInputsFromDOM();
+      if (variantDraftList[idx]) variantDraftList[idx].active = checked;
+      renderVariantManagerList();
+    };
+
+    window.addVariantFromInput = () => {
+      syncDraftInputsFromDOM();
+      const nameInput = document.getElementById('new-variant-name-input');
+      const priceInput = document.getElementById('new-variant-price-input');
+      if (!nameInput) return;
+      const rawText = nameInput.value.trim();
+      if (!rawText) return alert("追加するバリエーション名を入力してください。");
+
+      const priceOverride = priceInput && parseInt(priceInput.value) > 0 ? parseInt(priceInput.value) : null;
+      // Split by comma, Japanese comma, or newline for easy bulk addition
+      const names = rawText.split(/[,、\n]+/).map(s => s.trim()).filter(Boolean);
+
+      names.forEach((n, i) => {
+        if (variantDraftList.some(v => v.name === n)) return; // avoid exact duplicate name
+        const slug = 'var_' + Date.now().toString(36) + '_' + Math.random().toString(36).substring(2, 5) + i;
+        variantDraftList.push({
+          skuId: `${variantDraftParentId}__${slug}`,
+          name: n,
+          isBase: false,
+          active: true,
+          priceOverride: priceOverride,
+          statusNote: '',
+          sortOrder: variantDraftList.length
+        });
+      });
+
+      nameInput.value = '';
+      if (priceInput) priceInput.value = '';
+      renderVariantManagerList();
+    };
+
+    window.quickAddVariantPresets = (namesArray, isActive = true) => {
+      syncDraftInputsFromDOM();
+      namesArray.forEach((n, i) => {
+        if (variantDraftList.some(v => v.name === n)) return;
+        const slug = 'var_' + Date.now().toString(36) + '_' + Math.random().toString(36).substring(2, 5) + i;
+        variantDraftList.push({
+          skuId: `${variantDraftParentId}__${slug}`,
+          name: n,
+          isBase: false,
+          active: isActive,
+          priceOverride: null,
+          statusNote: isActive ? '' : '検討中',
+          sortOrder: variantDraftList.length
+        });
+      });
+      renderVariantManagerList();
+    };
+
+    window.moveVariantDraft = (idx, delta) => {
+      syncDraftInputsFromDOM();
+      const targetIdx = idx + delta;
+      if (targetIdx < 0 || targetIdx >= variantDraftList.length) return;
+      const temp = variantDraftList[idx];
+      variantDraftList[idx] = variantDraftList[targetIdx];
+      variantDraftList[targetIdx] = temp;
+      variantDraftList.forEach((v, i) => v.sortOrder = i);
+      renderVariantManagerList();
+    };
+
+    window.removeVariantDraft = (idx) => {
+      syncDraftInputsFromDOM();
+      const v = variantDraftList[idx];
+      if (!v) return;
+      if (v.isBase) return alert("基本枠（無印・通常版）は削除できません。名前変更または無効化をご利用ください。");
+      if (!confirm(`バリエーション「${v.name}」を削除しますか？`)) return;
+      variantDraftList.splice(idx, 1);
+      variantDraftList.forEach((item, i) => item.sortOrder = i);
+      renderVariantManagerList();
+    };
+
+    window.clearAllVariantsForProduct = async () => {
+      if (!auth.currentUser) return alert("ログインが必要です");
+      if (!variantDraftParentId) return;
+      if (!confirm("バリエーション分割を解除し、従来の単一商品管理に戻しますか？\n（各SKUの現在庫合計は親商品に引き継がれます）")) return;
+
+      const parentId = variantDraftParentId;
+      try {
+        // Sum current inventory back to parent
+        const sumInv = window.getParentInventorySummary(inventoryData, parentId);
+        const newInv = { ...inventoryData };
+        newInv[parentId] = { price: sumInv.price, initial: sumInv.initial, current: sumInv.current };
+        await setDoc(doc(db, "settings", "inventory_" + currentEventKey), newInv);
+
+        const updatedMaster = { ...window.worksMasterData };
+        if (updatedMaster[parentId]) {
+          updatedMaster[parentId] = {
+            ...updatedMaster[parentId],
+            variants: [],
+            updatedAt: Date.now()
+          };
+          await setDoc(doc(db, "settings", "works_master"), updatedMaster);
+        }
+        closeVariantManagerModal();
+        alert("単一商品管理に戻しました。");
+      } catch(e) {
+        console.error(e);
+        alert("解除に失敗しました: " + e.message);
+      }
+    };
+
+    window.saveVariantManagerModal = async () => {
+      if (!auth.currentUser) return alert("ログインが必要です");
+      syncDraftInputsFromDOM();
+      const parentId = variantDraftParentId;
+      if (!parentId) return;
+
+      const cleaned = variantDraftList.map((v, i) => ({
+        skuId: v.skuId,
+        name: v.name.trim() || `バリエーション${i + 1}`,
+        isBase: Boolean(v.isBase),
+        active: v.active !== false,
+        priceOverride: v.priceOverride || null,
+        statusNote: v.statusNote || '',
+        sortOrder: i
+      }));
+
+      try {
+        // 1. Save variants definition to settings/works_master
+        const allProducts = window.getFullMasterProducts ? window.getFullMasterProducts(window.customProductsData) : MASTER_PRODUCTS;
+        const p = allProducts.find(x => x.id === parentId) || { id: parentId, name: parentId, price: 0 };
+        const updatedMaster = { ...(window.worksMasterData || {}) };
+        updatedMaster[parentId] = {
+          ...(updatedMaster[parentId] || {
+            workId: parentId,
+            name: p.name ? p.name.replace(/\n/g, ' ') : parentId,
+            defaultPrice: p.price || 0,
+            profileStatus: 'unregistered'
+          }),
+          variants: cleaned,
+          updatedAt: Date.now()
+        };
+        window.worksMasterData = updatedMaster;
+        await setDoc(doc(db, "settings", "works_master"), updatedMaster);
+
+        // 2. Ensure current event's inventoryData has initialized SKU entries (migrating existing parent stock to base SKU once)
+        const newInv = { ...inventoryData };
+        const parentPrice = newInv[parentId]?.price || updatedMaster[parentId].defaultPrice || p.price || 0;
+        const anySkuInInv = cleaned.some(v => newInv[v.skuId] !== undefined);
+        cleaned.forEach(v => {
+          if (newInv[v.skuId] === undefined) {
+            if (v.isBase && !anySkuInInv && newInv[parentId]) {
+              newInv[v.skuId] = {
+                price: v.priceOverride || parentPrice,
+                initial: newInv[parentId].initial || 0,
+                current: newInv[parentId].current || 0
+              };
+            } else {
+              newInv[v.skuId] = {
+                price: v.priceOverride || parentPrice,
+                initial: 0,
+                current: 0
+              };
+            }
+          } else if (v.priceOverride && v.priceOverride > 0) {
+            newInv[v.skuId] = { ...newInv[v.skuId], price: v.priceOverride };
+          }
+        });
+        const sumInv = window.getParentInventorySummary(newInv, parentId);
+        newInv[parentId] = { price: parentPrice, initial: sumInv.initial, current: sumInv.current };
+        await setDoc(doc(db, "settings", "inventory_" + currentEventKey), newInv);
+
+        // 3. Ensure current event's simulation patterns preserve existing target under base SKU without double counting
+        if (currentSimulationData && currentSimulationData.patterns) {
+          let simChanged = false;
+          Object.keys(currentSimulationData.patterns).forEach(patKey => {
+            const pat = currentSimulationData.patterns[patKey];
+            if (!pat) return;
+            if (!pat.simQty) pat.simQty = {};
+            if (!pat.prepQty) pat.prepQty = {};
+            const anySkuSim = cleaned.some(v => pat.simQty[v.skuId] !== undefined || pat.prepQty[v.skuId] !== undefined);
+            if (!anySkuSim) {
+              const baseVar = cleaned.find(v => v.isBase) || cleaned[0];
+              if (baseVar) {
+                if (pat.simQty[parentId] !== undefined) {
+                  pat.simQty[baseVar.skuId] = pat.simQty[parentId];
+                  simChanged = true;
+                }
+                if (pat.prepQty[parentId] !== undefined) {
+                  pat.prepQty[baseVar.skuId] = pat.prepQty[parentId];
+                  simChanged = true;
+                }
+              }
+            }
+          });
+          if (simChanged) {
+            const activePat = currentSimulationData.patterns[currentPatternId];
+            if (activePat) {
+              simulationQuantities = activePat.simQty || {};
+              preparationQuantities = activePat.prepQty || {};
+            }
+            await setDoc(doc(db, "settings", "simulation_" + currentEventKey), currentSimulationData);
+          }
+        }
+
+        closeVariantManagerModal();
+        renderAll();
+        alert(`「${p.name.replace(/\n/g, ' ')}」のバリエーション（${cleaned.filter(x => x.active).length}種）を保存しました！`);
+      } catch(e) {
+        console.error("Save variant manager error:", e);
+        alert("バリエーションの保存に失敗しました: " + e.message);
+      }
+    };
+
+    // -------- Carry-Over Stock from Previous Event --------
+    window.carryOverStockFromSelectedEvent = async () => {
+      if (!auth.currentUser) return alert("ログインが必要です");
+      const selectEl = document.getElementById('carryover-stock-event-select');
+      if (!selectEl || !selectEl.value) return alert("コピー元のイベントを選択してください。");
+      const srcEventKey = selectEl.value;
+      const allEvents = window.getAllEvents ? window.getAllEvents(eventConfigData) : {};
+      const srcLabel = allEvents[srcEventKey]?.label || srcEventKey;
+      const curLabel = allEvents[currentEventKey]?.label || currentEventKey;
+
+      if (!confirm(`【残在庫の引き継ぎ】
+「${srcLabel}」の現在庫（売れ残り在庫）を、現在の「${curLabel}」の手元在庫として引き継ぎますか？
+
+※バリエーション別の在庫数もそのまま引き継がれます。
+※引き継ぎ後、フリマ販売分や破損分があれば「🔢実数」または「増減」で微調整できます。`)) {
+        return;
+      }
+
+      try {
+        const snap = await getDoc(doc(db, "settings", "inventory_" + srcEventKey));
+        if (!snap.exists()) {
+          return alert(`「${srcLabel}」の在庫データが見つかりませんでした。`);
+        }
+        const srcInv = snap.data() || {};
+        const newInv = { ...inventoryData };
+        const products = getActiveProducts(true);
+        let copiedCount = 0;
+        let newStockStatus = {};
+
+        products.forEach(p => {
+          const curPrice = newInv[p.id]?.price || srcInv[p.id]?.price || p.price || 0;
+          const vars = window.getProductVariants(p.id, true);
+          if (vars.length > 0) {
+            vars.forEach(v => {
+              const vSrc = window.getSkuInventory(srcInv, p.id, v);
+              const vCurPrice = newInv[v.skuId]?.price || vSrc.price || curPrice;
+              newInv[v.skuId] = {
+                price: vCurPrice,
+                initial: vSrc.current || 0,
+                current: vSrc.current || 0
+              };
+            });
+            const sumInv = window.getParentInventorySummary(newInv, p.id);
+            newInv[p.id] = { price: curPrice, initial: sumInv.initial, current: sumInv.current };
+            copiedCount++;
+          } else if (srcInv[p.id] !== undefined) {
+            const remain = srcInv[p.id].current || 0;
+            newInv[p.id] = {
+              price: curPrice,
+              initial: remain,
+              current: remain
+            };
+            copiedCount++;
+          }
+
+          const pNow = newInv[p.id] || { current: 0 };
+          newStockStatus[p.id] = pNow.current > 0 ? 'onsale' : 'soldout';
+        });
+
+        await setDoc(doc(db, "settings", "inventory_" + currentEventKey), newInv);
+        await setDoc(doc(db, "settings", "stock"), newStockStatus, { merge: true });
+
+        // Log entry
+        const logDocRef = doc(db, "settings", "inventory_log_" + currentEventKey);
+        const logRecord = {
+          timestamp: new Date().toISOString(),
+          type: 'carryover',
+          productId: 'ALL',
+          productName: `全作品 (${srcLabel}から残在庫引き継ぎ)`,
+          qty: 0,
+          reason: `${srcLabel}より残在庫引継`
+        };
+        try {
+          await updateDoc(logDocRef, { records: arrayUnion(logRecord) });
+        } catch(e) {
+          await setDoc(logDocRef, { records: [logRecord] });
+        }
+
+        alert(`「${srcLabel}」から ${copiedCount} 作品の残在庫を引き継ぎました！`);
+      } catch(e) {
+        console.error(e);
+        alert("残在庫の引き継ぎに失敗しました: " + e.message);
+      }
+    };
+
+    // =========================================================================
+    // 📊 改善③：複数イベントの必要在庫集計モード (Multi-Event Aggregation)
+    // =========================================================================
+    let multiAggSelectedEvents = []; // Array of eventKeys
+    let multiAggStockSourceEvent = null; // Defaults to currentEventKey
+    let multiAggSimCache = {}; // { [eventKey]: simulationDocData }
+    let multiAggInvCache = {}; // { [eventKey]: inventoryDocData }
+    let multiAggLoading = false;
+
+    async function ensureAllEventsSimAndInvLoaded(forceReload = false) {
+      const allEvents = window.getAllEvents ? window.getAllEvents(eventConfigData) : {};
+      const keys = Object.keys(allEvents);
+      // Always keep currentEventKey synced with live memory
+      if (currentEventKey) {
+        if (typeof window.saveCurrentPatternToMemory === 'function') window.saveCurrentPatternToMemory();
+        multiAggSimCache[currentEventKey] = currentSimulationData;
+        multiAggInvCache[currentEventKey] = inventoryData;
+      }
+
+      const keysToFetch = keys.filter(k => forceReload || (!multiAggSimCache[k] && k !== currentEventKey));
+      if (keysToFetch.length === 0) return;
+
+      multiAggLoading = true;
+      try {
+        await Promise.all(keysToFetch.map(async (evKey) => {
+          try {
+            const [simSnap, invSnap] = await Promise.all([
+              getDoc(doc(db, "settings", "simulation_" + evKey)),
+              getDoc(doc(db, "settings", "inventory_" + evKey))
+            ]);
+            if (simSnap.exists()) {
+              const sData = simSnap.data();
+              if (sData.simQty || sData.prepQty) {
+                multiAggSimCache[evKey] = {
+                  activePatternId: 'default',
+                  patterns: { default: { name: '標準パターン', target: sData.target || 150000, simQty: sData.simQty || {}, prepQty: sData.prepQty || {} } }
+                };
+              } else {
+                multiAggSimCache[evKey] = sData;
+              }
+            } else {
+              multiAggSimCache[evKey] = { activePatternId: 'default', patterns: { default: { prepQty: {}, simQty: {} } } };
+            }
+            multiAggInvCache[evKey] = invSnap.exists() ? invSnap.data() : {};
+          } catch(err) {
+            console.warn("Failed loading sim/inv for", evKey, err);
+          }
+        }));
+      } finally {
+        multiAggLoading = false;
+      }
+    }
+
+    function getEventAdoptedPrepMap(evKey) {
+      if (evKey === currentEventKey && currentSimulationData) {
+        const patId = currentSimulationData.activePatternId || currentPatternId || 'default';
+        return currentSimulationData.patterns?.[patId]?.prepQty || {};
+      }
+      const simDoc = multiAggSimCache[evKey];
+      if (!simDoc || !simDoc.patterns) return {};
+      const patId = simDoc.activePatternId || Object.keys(simDoc.patterns)[0] || 'default';
+      return simDoc.patterns[patId]?.prepQty || {};
+    }
+
+    window.selectMultiAggPreset = (preset) => {
+      const allEvents = window.getAllEvents ? window.getAllEvents(eventConfigData) : {};
+      const plans = window.exhibitionPlansData || {};
+      if (preset === 'current') {
+        multiAggSelectedEvents = [currentEventKey];
+      } else if (preset === 'scheduled') {
+        const sched = Object.keys(allEvents).filter(k => {
+          if (allEvents[k].isMarche === false) return false;
+          const pStatus = plans[k]?.status;
+          return pStatus === 'scheduled' || pStatus === 'considering' || k === currentEventKey;
+        });
+        multiAggSelectedEvents = sched.length > 0 ? sched : [currentEventKey];
+      } else if (preset === 'all') {
+        multiAggSelectedEvents = Object.keys(allEvents).filter(k => allEvents[k].isMarche !== false);
+      }
+      window.renderMultiEventAggregation();
+    };
+
+    window.toggleMultiAggEvent = (evKey) => {
+      const idx = multiAggSelectedEvents.indexOf(evKey);
+      if (idx === -1) {
+        multiAggSelectedEvents.push(evKey);
+      } else {
+        if (multiAggSelectedEvents.length <= 1) {
+          return alert("集計対象のイベントを最低1つは選択してください。");
+        }
+        multiAggSelectedEvents.splice(idx, 1);
+      }
+      window.renderMultiEventAggregation();
+    };
+
+    window.onChangeMultiAggStockSource = async (evKey) => {
+      multiAggStockSourceEvent = evKey;
+      await ensureAllEventsSimAndInvLoaded(false);
+      window.renderMultiEventAggregation();
+    };
+
+    window.renderMultiEventAggregation = async () => {
+      const container = document.getElementById('multi-agg-table-container');
+      const chkContainer = document.getElementById('multi-agg-event-checkboxes');
+      const kpiContainer = document.getElementById('multi-agg-kpi-row');
+      const stockSrcSelect = document.getElementById('multi-agg-stock-source-select');
+      if (!container || !chkContainer) return;
+
+      const allEvents = window.getAllEvents ? window.getAllEvents(eventConfigData) : {};
+      const plans = window.exhibitionPlansData || {};
+
+      // Initialize default selected events if empty
+      if (!multiAggSelectedEvents || multiAggSelectedEvents.length === 0) {
+        multiAggSelectedEvents = [currentEventKey];
+      } else {
+        multiAggSelectedEvents = multiAggSelectedEvents.filter(k => allEvents[k]);
+        if (multiAggSelectedEvents.length === 0 && currentEventKey) multiAggSelectedEvents = [currentEventKey];
+      }
+
+      if (!multiAggStockSourceEvent || !allEvents[multiAggStockSourceEvent]) {
+        multiAggStockSourceEvent = currentEventKey;
+      }
+
+      await ensureAllEventsSimAndInvLoaded(false);
+      // Sync live currentEventKey cache
+      multiAggSimCache[currentEventKey] = currentSimulationData;
+      multiAggInvCache[currentEventKey] = inventoryData;
+
+      // 1. Render Event Checkboxes
+      chkContainer.innerHTML = Object.keys(allEvents).map(evKey => {
+        const ev = allEvents[evKey];
+        const isChecked = multiAggSelectedEvents.includes(evKey);
+        const plan = plans[evKey] || {};
+        const dateBadge = (plan.date || ev.date) ? `<span style="font-size:10px; opacity:0.65; margin-left:4px;">(${plan.date || ev.date})</span>` : '';
+        const prepMap = getEventAdoptedPrepMap(evKey);
+        const hasPrepData = Object.values(prepMap).some(v => Number(v) > 0);
+        return `
+          <label style="display:inline-flex; align-items:center; gap:6px; padding:6px 12px; border-radius:20px; cursor:pointer; font-size:12px; font-weight:${isChecked ? 'bold' : 'normal'}; background:${isChecked ? 'rgba(0,210,255,0.2)' : 'rgba(255,255,255,0.05)'}; border:1px solid ${isChecked ? 'var(--accent)' : 'rgba(255,255,255,0.15)'}; color:${isChecked ? '#fff' : 'rgba(255,255,255,0.75)'}; transition:all 0.15s;">
+            <input type="checkbox" ${isChecked ? 'checked' : ''} onchange="toggleMultiAggEvent('${evKey}')" style="accent-color:var(--accent); width:15px; height:15px; cursor:pointer;">
+            <span>${ev.label}</span>
+            ${dateBadge}
+            ${hasPrepData ? `<span style="font-size:9px; background:rgba(241,196,15,0.2); color:#f1c40f; padding:1px 5px; border-radius:6px;">必要数あり</span>` : ''}
+          </label>
+        `;
+      }).join('');
+
+      // 2. Render Stock Source Selector
+      if (stockSrcSelect) {
+        stockSrcSelect.innerHTML = Object.keys(allEvents).map(evKey => {
+          const isCur = evKey === currentEventKey;
+          return `<option value="${evKey}" ${evKey === multiAggStockSourceEvent ? 'selected' : ''}>${allEvents[evKey].label}${isCur ? ' (現在選択中のイベント)' : ''}</option>`;
+        }).join('');
+      }
+
+      const refInvMap = (multiAggStockSourceEvent === currentEventKey)
+        ? inventoryData
+        : (multiAggInvCache[multiAggStockSourceEvent] || {});
+
+      // 3. Collect union of products across selected events (or all master products)
+      const allMaster = window.getFullMasterProducts ? window.getFullMasterProducts(window.customProductsData) : MASTER_PRODUCTS;
+      const viewMode = document.getElementById('multi-agg-view-mode')?.value || 'tree';
+      const filterMode = document.getElementById('multi-agg-filter')?.value || 'all';
+      const sortMode = document.getElementById('multi-agg-sort')?.value || 'shortage_desc';
+
+      // Build structured aggregation rows
+      let parentRows = [];
+      let flatSkuRows = [];
+
+      let grandTotalRequired = 0;
+      let grandTotalCurrentStock = 0;
+      let grandTotalShortage = 0;
+      let shortageSkuCount = 0;
+
+      allMaster.forEach((p, masterIdx) => {
+        const vars = window.getProductVariants(p.id, false);
+        const hasVars = vars.length > 0;
+
+        // Check if product is selected in any of the checked events or has stock/required > 0
+        const isSelectedInAnyEvent = multiAggSelectedEvents.some(evKey => {
+          const selIds = window.eventProductsData?.[evKey];
+          return !selIds || selIds.includes(p.id);
+        });
+
+        if (hasVars) {
+          let pPerEventReq = {};
+          multiAggSelectedEvents.forEach(evKey => pPerEventReq[evKey] = 0);
+          let pTotalReq = 0;
+          let pCurrentStock = 0;
+          let pShortage = 0;
+          let skuItems = [];
+
+          vars.forEach((v, vIdx) => {
+            let vPerEvent = {};
+            let vTotalReq = 0;
+            multiAggSelectedEvents.forEach(evKey => {
+              const prepMap = getEventAdoptedPrepMap(evKey);
+              const q = window.getSkuSimQty(prepMap, p.id, v);
+              vPerEvent[evKey] = q;
+              vTotalReq += q;
+              pPerEventReq[evKey] += q;
+            });
+            const vInv = window.getSkuInventory(refInvMap, p.id, v);
+            const vCur = vInv.current || 0;
+            // IMPORTANT FORMULA: 不足数 = max(0, 選択イベントの合計必要数 - 現在庫数)
+            // Never allocate the same stock across multiple events!
+            const vShort = Math.max(0, vTotalReq - vCur);
+
+            pTotalReq += vTotalReq;
+            pCurrentStock += vCur;
+            pShortage += vShort;
+
+            if (isSelectedInAnyEvent || vTotalReq > 0 || vCur > 0) {
+              grandTotalRequired += vTotalReq;
+              grandTotalCurrentStock += vCur;
+              grandTotalShortage += vShort;
+              if (vShort > 0) shortageSkuCount++;
+            }
+
+            const skuRowObj = {
+              type: 'sku',
+              parentId: p.id,
+              parentName: p.name.replace(/\n/g, ' '),
+              parentImage: p.image,
+              skuId: v.skuId,
+              variantName: v.name,
+              isBase: v.isBase,
+              statusNote: v.statusNote,
+              perEventReq: vPerEvent,
+              totalReq: vTotalReq,
+              currentStock: vCur,
+              shortage: vShort,
+              masterOrder: masterIdx * 100 + vIdx
+            };
+            skuItems.push(skuRowObj);
+            if (isSelectedInAnyEvent || vTotalReq > 0 || vCur > 0) {
+              flatSkuRows.push(skuRowObj);
+            }
+          });
+
+          if (isSelectedInAnyEvent || pTotalReq > 0 || pCurrentStock > 0) {
+            parentRows.push({
+              type: 'parent',
+              parentId: p.id,
+              parentName: p.name.replace(/\n/g, ' '),
+              parentImage: p.image,
+              hasVars: true,
+              varsCount: vars.length,
+              perEventReq: pPerEventReq,
+              totalReq: pTotalReq,
+              currentStock: pCurrentStock,
+              shortage: pShortage,
+              skuItems,
+              masterOrder: masterIdx * 100
+            });
+          }
+        } else {
+          // Single Product without variants
+          let pPerEvent = {};
+          let pTotalReq = 0;
+          multiAggSelectedEvents.forEach(evKey => {
+            const prepMap = getEventAdoptedPrepMap(evKey);
+            const q = Number(prepMap[p.id]) || 0;
+            pPerEvent[evKey] = q;
+            pTotalReq += q;
+          });
+          const pInv = refInvMap[p.id] || { current: 0 };
+          const pCur = pInv.current || 0;
+          const pShort = Math.max(0, pTotalReq - pCur);
+
+          if (isSelectedInAnyEvent || pTotalReq > 0 || pCur > 0) {
+            grandTotalRequired += pTotalReq;
+            grandTotalCurrentStock += pCur;
+            grandTotalShortage += pShort;
+            if (pShort > 0) shortageSkuCount++;
+
+            const singleObj = {
+              type: 'parent',
+              parentId: p.id,
+              parentName: p.name.replace(/\n/g, ' '),
+              parentImage: p.image,
+              hasVars: false,
+              varsCount: 0,
+              perEventReq: pPerEvent,
+              totalReq: pTotalReq,
+              currentStock: pCur,
+              shortage: pShort,
+              skuItems: [],
+              masterOrder: masterIdx * 100
+            };
+            parentRows.push(singleObj);
+            flatSkuRows.push({
+              ...singleObj,
+              type: 'single_sku',
+              skuId: p.id,
+              variantName: '通常版（単一）'
+            });
+          }
+        }
+      });
+
+      // 4. Render KPI Summary Cards
+      if (kpiContainer) {
+        const fulfillmentPct = grandTotalRequired > 0
+          ? Math.min(100, Math.round(((grandTotalRequired - grandTotalShortage) / grandTotalRequired) * 100))
+          : 100;
+        kpiContainer.innerHTML = `
+          <div style="background:rgba(0,0,0,0.35); border:1px solid rgba(255,255,255,0.1); border-radius:10px; padding:12px 14px;">
+            <div style="font-size:11px; opacity:0.7;">選択イベント数</div>
+            <div style="font-size:20px; font-weight:bold; color:var(--accent); margin-top:4px;">${multiAggSelectedEvents.length} <span style="font-size:12px;">イベント合算</span></div>
+          </div>
+          <div style="background:rgba(241,196,15,0.08); border:1px solid rgba(241,196,15,0.3); border-radius:10px; padding:12px 14px;">
+            <div style="font-size:11px; color:#f1c40f;">📦 合計必要在庫数</div>
+            <div style="font-size:22px; font-weight:bold; color:#f1c40f; margin-top:4px;">${grandTotalRequired.toLocaleString()} <span style="font-size:12px;">個</span></div>
+          </div>
+          <div style="background:rgba(0,210,255,0.08); border:1px solid rgba(0,210,255,0.3); border-radius:10px; padding:12px 14px;">
+            <div style="font-size:11px; color:var(--accent);">🏠 手元現在庫 合計</div>
+            <div style="font-size:22px; font-weight:bold; color:#fff; margin-top:4px;">${grandTotalCurrentStock.toLocaleString()} <span style="font-size:12px;">個</span></div>
+          </div>
+          <div style="background:${grandTotalShortage > 0 ? 'rgba(231,76,60,0.15)' : 'rgba(46,204,113,0.15)'}; border:1px solid ${grandTotalShortage > 0 ? 'var(--danger)' : 'var(--success)'}; border-radius:10px; padding:12px 14px;">
+            <div style="font-size:11px; color:${grandTotalShortage > 0 ? '#ff7675' : '#2ecc71'};">🔥 合計不足数 (要制作)</div>
+            <div style="font-size:22px; font-weight:bold; color:${grandTotalShortage > 0 ? 'var(--danger)' : 'var(--success)'}; margin-top:4px;">
+              ${grandTotalShortage.toLocaleString()} <span style="font-size:12px;">個 (${shortageSkuCount}種 / 充足率${fulfillmentPct}%)</span>
+            </div>
+          </div>
+        `;
+      }
+
+      // 5. Filter & Sort Rows
+      const sortFn = (a, b) => {
+        if (sortMode === 'shortage_desc') {
+          if (b.shortage !== a.shortage) return b.shortage - a.shortage;
+          if (b.totalReq !== a.totalReq) return b.totalReq - a.totalReq;
+        } else if (sortMode === 'required_desc') {
+          if (b.totalReq !== a.totalReq) return b.totalReq - a.totalReq;
+          if (b.shortage !== a.shortage) return b.shortage - a.shortage;
+        }
+        return a.masterOrder - b.masterOrder;
+      };
+
+      const filterFn = (row) => {
+        if (filterMode === 'shortage') return row.shortage > 0;
+        if (filterMode === 'required') return row.totalReq > 0;
+        if (filterMode === 'variants') return row.hasVars || row.type === 'sku';
+        return true;
+      };
+
+      // Build Table Header
+      const eventHeadersHtml = multiAggSelectedEvents.map(evKey => {
+        const label = allEvents[evKey]?.label || evKey;
+        return `<th style="min-width:74px; color:rgba(255,255,255,0.85);">${label}<div style="font-size:9px; font-weight:normal; opacity:0.65;">必要数</div></th>`;
+      }).join('');
+
+      const isEditableCurrentStock = (multiAggStockSourceEvent === currentEventKey);
+
+      let tbodyHtml = '';
+
+      if (viewMode === 'flat') {
+        const filteredFlat = flatSkuRows.filter(filterFn).sort(sortFn);
+        if (filteredFlat.length === 0) {
+          tbodyHtml = `<tr><td colspan="${multiAggSelectedEvents.length + 4}" style="text-align:center; padding:30px; color:rgba(255,255,255,0.5);">条件に一致する商品・バリエーションがありません。</td></tr>`;
+        } else {
+          tbodyHtml = filteredFlat.map(r => {
+            const evCols = multiAggSelectedEvents.map(evKey => {
+              const val = r.perEventReq[evKey] || 0;
+              return `<td style="color:${val > 0 ? '#fff' : 'rgba(255,255,255,0.3)'};">${val}</td>`;
+            }).join('');
+            const shortBadge = r.shortage > 0
+              ? `<span style="background:rgba(231,76,60,0.22); border:1px solid var(--danger); color:#ff7675; padding:3px 8px; border-radius:12px; font-weight:bold;">-${r.shortage}</span>`
+              : (r.totalReq > 0 ? `<span style="color:var(--success); font-weight:bold;">✅ 0</span>` : `<span style="opacity:0.35;">0</span>`);
+
+            return `
+              <tr class="multi-agg-parent-row">
+                <td>
+                  <div style="display:flex; align-items:center; gap:8px;">
+                    <img src="${r.parentImage}" style="width:32px; height:32px; border-radius:6px; object-fit:cover;">
+                    <div>
+                      <div style="font-weight:bold; color:#fff; font-size:13px;">${r.parentName}</div>
+                      ${r.type === 'sku' ? `<div style="font-size:11px; color:var(--accent);">${r.isBase ? '🔹' : '🔸'} ${r.variantName}</div>` : ''}
+                    </div>
+                  </div>
+                </td>
+                ${evCols}
+                <td style="font-weight:bold; color:#f1c40f; font-size:14px; background:rgba(241,196,15,0.05);">${r.totalReq}</td>
+                <td style="background:rgba(0,210,255,0.05);">
+                  ${isEditableCurrentStock ? `
+                    <div style="display:inline-flex; align-items:center; gap:4px; justify-content:flex-end;">
+                      <span style="font-weight:bold; color:#fff; font-size:14px;">${r.currentStock}</span>
+                      <button type="button" onclick="promptSetExactStock('${r.skuId}')" style="background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.2); color:var(--accent); font-size:10px; padding:2px 5px; border-radius:4px; cursor:pointer;" title="現在庫を直接変更">✏️</button>
+                    </div>
+                  ` : `<span style="font-weight:bold; color:#fff; font-size:14px;">${r.currentStock}</span>`}
+                </td>
+                <td style="font-size:14px;">${shortBadge}</td>
+              </tr>
+            `;
+          }).join('');
+        }
+      } else {
+        // Tree View (Parent + Expandable SKU breakdown)
+        const filteredParents = parentRows.filter(filterFn).sort(sortFn);
+        if (filteredParents.length === 0) {
+          tbodyHtml = `<tr><td colspan="${multiAggSelectedEvents.length + 4}" style="text-align:center; padding:30px; color:rgba(255,255,255,0.5);">条件に一致する商品がありません。</td></tr>`;
+        } else {
+          filteredParents.forEach(pRow => {
+            const isExpanded = window.variantExpandState?.agg?.[pRow.parentId] !== false;
+            const evCols = multiAggSelectedEvents.map(evKey => {
+              const val = pRow.perEventReq[evKey] || 0;
+              return `<td style="color:${val > 0 ? '#fff' : 'rgba(255,255,255,0.3)'};">${val}</td>`;
+            }).join('');
+            const shortBadge = pRow.shortage > 0
+              ? `<span style="background:rgba(231,76,60,0.22); border:1px solid var(--danger); color:#ff7675; padding:3px 9px; border-radius:12px; font-weight:bold;">🔥 不足 ${pRow.shortage}</span>`
+              : (pRow.totalReq > 0 ? `<span style="color:var(--success); font-weight:bold;">✅ 充足</span>` : `<span style="opacity:0.35;">0</span>`);
+
+            tbodyHtml += `
+              <tr class="multi-agg-parent-row" style="${pRow.hasVars ? 'cursor:pointer;' : ''}" onclick="${pRow.hasVars ? `toggleSingleVariantExpand('agg', '${pRow.parentId}')` : ''}">
+                <td>
+                  <div style="display:flex; align-items:center; gap:8px;">
+                    <img src="${pRow.parentImage}" style="width:34px; height:34px; border-radius:6px; object-fit:cover;">
+                    <div>
+                      <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
+                        <span style="color:#fff; font-size:13px;">${pRow.parentName}</span>
+                        ${pRow.hasVars ? `<span style="font-size:10px; background:rgba(0,210,255,0.18); color:var(--accent); padding:1px 6px; border-radius:8px;">${isExpanded ? '▼' : '▶'} ${pRow.varsCount}種</span>` : ''}
+                        <button type="button" onclick="event.stopPropagation(); openVariantManagerModal('${pRow.parentId}')" style="background:none; border:1px solid rgba(255,255,255,0.18); color:#aaa; font-size:10px; padding:1px 5px; border-radius:6px; cursor:pointer;" title="バリエーション管理">🎨</button>
+                      </div>
+                    </div>
+                  </div>
+                </td>
+                ${evCols}
+                <td style="font-weight:bold; color:#f1c40f; font-size:14px; background:rgba(241,196,15,0.06);">${pRow.totalReq}</td>
+                <td style="background:rgba(0,210,255,0.06);">
+                  ${(!pRow.hasVars && isEditableCurrentStock) ? `
+                    <div style="display:inline-flex; align-items:center; gap:4px; justify-content:flex-end;" onclick="event.stopPropagation();">
+                      <span style="font-weight:bold; color:#fff; font-size:14px;">${pRow.currentStock}</span>
+                      <button type="button" onclick="promptSetExactStock('${pRow.parentId}')" style="background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.2); color:var(--accent); font-size:10px; padding:2px 5px; border-radius:4px; cursor:pointer;" title="現在庫を直接変更">✏️</button>
+                    </div>
+                  ` : `<span style="font-weight:bold; color:#fff; font-size:14px;">${pRow.currentStock}</span>`}
+                </td>
+                <td style="font-size:13px;">${shortBadge}</td>
+              </tr>
+            `;
+
+            if (pRow.hasVars && isExpanded) {
+              const sortedSkus = [...pRow.skuItems].sort(sortFn);
+              sortedSkus.forEach(sRow => {
+                if (filterMode === 'shortage' && sRow.shortage <= 0) return;
+                if (filterMode === 'required' && sRow.totalReq <= 0) return;
+                const sEvCols = multiAggSelectedEvents.map(evKey => {
+                  const val = sRow.perEventReq[evKey] || 0;
+                  return `<td style="color:${val > 0 ? '#eee' : 'rgba(255,255,255,0.25)'};">${val}</td>`;
+                }).join('');
+                const sShortBadge = sRow.shortage > 0
+                  ? `<span style="color:var(--danger); font-weight:bold;">🔥 不足 ${sRow.shortage}</span>`
+                  : (sRow.totalReq > 0 ? `<span style="color:var(--success);">✅ 0</span>` : `<span style="opacity:0.35;">0</span>`);
+
+                tbodyHtml += `
+                  <tr class="multi-agg-sku-row">
+                    <td>
+                      <div style="display:flex; align-items:center; gap:6px;">
+                        <span>${sRow.isBase ? '🔹' : '🔸'} ${sRow.variantName}</span>
+                        ${sRow.statusNote ? `<span style="font-size:10px; color:#f39c12;">(${sRow.statusNote})</span>` : ''}
+                      </div>
+                    </td>
+                    ${sEvCols}
+                    <td style="font-weight:bold; color:#f1c40f; background:rgba(241,196,15,0.03);">${sRow.totalReq}</td>
+                    <td style="background:rgba(0,210,255,0.03);">
+                      ${isEditableCurrentStock ? `
+                        <div style="display:inline-flex; align-items:center; gap:4px; justify-content:flex-end;">
+                          <span style="font-weight:bold; color:#fff;">${sRow.currentStock}</span>
+                          <button type="button" onclick="promptSetExactStock('${sRow.skuId}')" style="background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.2); color:var(--accent); font-size:10px; padding:1px 5px; border-radius:4px; cursor:pointer;" title="現在庫を直接変更">✏️</button>
+                        </div>
+                      ` : `<span style="font-weight:bold; color:#fff;">${sRow.currentStock}</span>`}
+                    </td>
+                    <td>${sShortBadge}</td>
+                  </tr>
+                `;
+              });
+            }
+          });
+        }
+      }
+
+      container.innerHTML = `
+        <table class="multi-agg-table">
+          <thead>
+            <tr>
+              <th style="min-width:190px;">商品・バリエーション</th>
+              ${eventHeadersHtml}
+              <th style="min-width:86px; color:#f1c40f; background:rgba(241,196,15,0.12);">合計必要数</th>
+              <th style="min-width:86px; color:var(--accent); background:rgba(0,210,255,0.12);">現在庫</th>
+              <th style="min-width:95px; color:#ff7675;">不足数 (要制作)</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${tbodyHtml}
+          </tbody>
+        </table>
+      `;
     };
 
     // Open Modal
