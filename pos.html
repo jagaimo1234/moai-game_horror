@@ -398,9 +398,10 @@
       gap: 6px;
     }
     #settings-view .scroll-container {
-      max-width: 1680px !important;
+      max-width: 98% !important;
       width: 100% !important;
-      padding: 16px 24px 80px 24px !important;
+      margin: 0 auto !important;
+      padding: 14px 18px 80px 18px !important;
       box-sizing: border-box !important;
     }
     /* === 🖨️ Manufacturing Planning Board (製造計画ボード) UI === */
@@ -434,7 +435,7 @@
     }
     .mfg-board-3col {
       display: grid;
-      grid-template-columns: 315px minmax(0, 1fr) 350px;
+      grid-template-columns: 335px minmax(0, 1fr) 335px;
       gap: 14px;
       align-items: start;
       width: 100%;
@@ -447,7 +448,7 @@
       display: flex;
       flex-direction: column;
       gap: 10px;
-      max-height: 820px;
+      max-height: 840px;
     }
     .mfg-unplanned-list {
       display: flex;
@@ -475,9 +476,10 @@
       border-color: rgba(255, 255, 255, 0.2);
     }
     .mfg-unplanned-card.mfg-card-selected {
-      background: rgba(59, 130, 246, 0.16);
-      border-color: #3b82f6;
-      box-shadow: 0 0 0 1px #3b82f6;
+      background: rgba(56, 189, 248, 0.16) !important;
+      border-color: #38bdf8 !important;
+      box-shadow: 0 0 0 2px #38bdf8, 0 6px 18px rgba(56, 189, 248, 0.28) !important;
+      transform: scale(1.008);
     }
     .mfg-printer-badge {
       display: inline-flex;
@@ -10883,6 +10885,8 @@
       printers.forEach(p => { printerShortMap[p.id] = p.shortName || p.name; });
 
       const filtered = skuList.filter(s => {
+        // If this SKU is currently selected (e.g. from schedule click), ALWAYS show it so the user sees its status!
+        if (mfgSelectedUnplannedSkuId && s.skuId === mfgSelectedUnplannedSkuId) return true;
         if (filterMode === 'unplanned' && s.unplannedQty <= 0) return false;
         if (filterMode === 'shortage' && s.shortage <= 0) return false;
         if (filterMode === 'required' && s.totalReq <= 0) return false;
@@ -10941,71 +10945,93 @@
       }
 
       container.innerHTML = filtered.map(s => {
-        const isSel = mfgSelectedUnplannedSkuId === s.skuId && !mfgSelectedJobId;
+        const isSel = (mfgSelectedUnplannedSkuId === s.skuId);
         const pBadges = s.compatiblePrinters
           .filter(pid => printerShortMap[pid])
           .map(pid => `<span class="mfg-printer-badge">${printerShortMap[pid].replace('号機', '')}</span>`)
           .join('');
 
-        const isFulfilled = s.shortage === 0;
-        const planPct = isFulfilled ? 100 : Math.min(100, Math.round((s.plannedQty / s.shortage) * 100));
+        // 3-Segment Stacked Gauge Calculations (Image 2 style)
+        const totalReq = s.totalReq;
+        const curStock = s.currentStock;
+        const shortage = s.shortage;
+        const planned = s.plannedQty;
+        const unplanned = s.unplannedQty;
 
-        let barColor = 'rgba(255,255,255,0.1)';
-        if (isFulfilled || planPct >= 100) {
-          barColor = '#10b981';
-        } else if (planPct > 0) {
-          barColor = 'linear-gradient(90deg, #3b82f6, #06b6d4)';
+        const totalBasis = Math.max(1, totalReq, (curStock + planned));
+        const stockAlloc = Math.min(totalReq > 0 ? totalReq : curStock, curStock);
+        const plannedAlloc = Math.min(shortage, planned);
+        const unplannedAlloc = unplanned;
+
+        let stockPct = Math.round((stockAlloc / totalBasis) * 100);
+        let plannedPct = Math.round((plannedAlloc / totalBasis) * 100);
+        let unplannedPct = 100 - stockPct - plannedPct;
+
+        if (unplannedAlloc === 0) {
+          unplannedPct = 0;
+          const sumSP = stockAlloc + plannedAlloc;
+          if (sumSP > 0) {
+            stockPct = Math.round((stockAlloc / sumSP) * 100);
+            plannedPct = 100 - stockPct;
+          } else {
+            stockPct = 100;
+            plannedPct = 0;
+          }
+        } else {
+          if (unplannedPct < 0) unplannedPct = 0;
         }
 
         return `
-          <div class="mfg-unplanned-card ${isSel ? 'mfg-card-selected' : ''}"
+          <div id="mfg-card-${s.skuId}"
+               class="mfg-unplanned-card ${isSel ? 'mfg-card-selected' : ''}"
                draggable="true"
                ondragstart="onMfgDragStartSku(event, '${s.skuId}')"
                onclick="selectMfgUnplannedSku('${s.skuId}')">
             <img src="${s.parentImage}" style="width:48px; height:48px; border-radius:8px; object-fit:cover; background:#222; flex-shrink:0;">
             <div style="flex:1; min-width:0;">
-              <!-- 1. Product & Variant Names + Add Button -->
+              <!-- Row 1: Product Name & +Add Button -->
               <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:4px;">
-                <div style="min-width:0;">
-                  <div style="font-size:12px; font-weight:bold; color:#fff; line-height:1.25; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="${s.parentName}">
-                    ${s.parentName}
-                  </div>
-                  <div style="font-size:11px; color:${s.isBase ? 'rgba(255,255,255,0.65)' : 'var(--accent)'}; font-weight:${s.isBase ? 'normal' : 'bold'}; margin-top:1px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
-                    ${s.variantName}
-                  </div>
+                <div style="font-size:12.5px; font-weight:bold; color:#fff; line-height:1.25; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="${s.parentName}">
+                  ${s.parentName}
                 </div>
                 <button type="button" onclick="event.stopPropagation(); quickAutoPlaceSku('${s.skuId}')"
                         style="background:rgba(59,130,246,0.18); border:1px solid #3b82f6; color:#93c5fd; font-size:10px; font-weight:bold; padding:2px 7px; border-radius:6px; cursor:pointer; white-space:nowrap; flex-shrink:0;"
-                        title="空いている対応プリンター枠へ自動配置">＋計画に追加</button>
+                        title="空いている対応プリンター枠へ自動配置">＋ 計画に追加</button>
               </div>
 
-              <!-- 2. Slim Progress Bar (5px) -->
-              <div style="margin-top:6px; background:rgba(255,255,255,0.08); height:5px; border-radius:3px; overflow:hidden;"
-                   title="${isFulfilled ? '在庫充足 (必要枠の計画不要)' : `製造計画進捗: ${planPct}% (計画 ${s.plannedQty} / 不足 ${s.shortage}個)`}">
-                <div style="background:${barColor}; width:${planPct}%; height:100%; transition:width 0.25s ease;"></div>
+              <!-- Row 2: Variant Name & Planned / Shortage Count -->
+              <div style="display:flex; justify-content:space-between; align-items:center; gap:4px; margin-top:2px;">
+                <div style="font-size:11px; color:${s.isBase ? 'rgba(255,255,255,0.65)' : 'var(--accent)'}; font-weight:bold; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
+                  ${s.variantName}
+                </div>
+                <div style="font-size:11px; font-weight:bold; white-space:nowrap; flex-shrink:0;">
+                  ${shortage === 0 ? `
+                    <span style="color:#34d399; font-size:10px;">✨ 在庫充足</span>
+                  ` : `
+                    <span style="color:#fff;">計画 ${planned}</span> / <span style="color:#f87171;">不足 ${shortage}</span>
+                  `}
+                </div>
               </div>
 
-              <!-- 3 & 4. Planned / Shortage Count & Remaining Unplanned Badge -->
-              <div style="display:flex; justify-content:space-between; align-items:center; margin-top:4px; font-size:10.5px;">
-                ${isFulfilled ? `
-                  <span style="color:#34d399; font-weight:bold;">
-                    ✨ 在庫充足 <span style="font-size:9.5px; opacity:0.8; font-weight:normal;">(必要:${s.totalReq} / 在庫:${s.currentStock})</span>
-                  </span>
-                  <span style="color:rgba(255,255,255,0.45); font-size:9.5px; font-weight:bold;">計画不要</span>
-                ` : `
-                  <span style="color:${planPct >= 100 ? '#34d399' : '#fff'}; font-weight:${planPct >= 100 ? 'bold' : 'normal'};">
-                    計画 <strong>${s.plannedQty}</strong> / ${s.shortage}個 <span style="opacity:0.75; font-size:9.5px;">(${planPct}%)</span>
-                  </span>
-                  <span style="${s.unplannedQty > 0 ? 'background:rgba(239,68,68,0.22); border:1px solid rgba(239,68,68,0.5); color:#f87171;' : 'background:rgba(16,185,129,0.2); border:1px solid rgba(16,185,129,0.45); color:#34d399;'} font-size:9.5px; font-weight:bold; padding:1px 5px; border-radius:4px; white-space:nowrap;">
-                    ${s.unplannedQty > 0 ? `残り ${s.unplannedQty}個` : `✔ 枠完了`}
-                  </span>
-                `}
+              <!-- Row 3: 3-Segment Stacked Gauge (Image 2 style: Blue Stock, Green Planned, Red Unplanned) -->
+              <div style="margin-top:6px; display:flex; height:8px; border-radius:4px; overflow:hidden; background:rgba(255,255,255,0.06); gap:2px;"
+                   title="内訳: 在庫 ${curStock}個 (${stockPct}%) / 計画済み ${planned}個 (${plannedPct}%) / 未計画 ${unplanned}個 (${unplannedPct}%)">
+                ${stockPct > 0 ? `<div style="background:#38bdf8; width:${stockPct}%; height:100%; border-radius:2px; transition:width 0.2s;" title="手元在庫: ${curStock}個"></div>` : ''}
+                ${plannedPct > 0 ? `<div style="background:#34d399; width:${plannedPct}%; height:100%; border-radius:2px; transition:width 0.2s;" title="製造計画済み: ${planned}個"></div>` : ''}
+                ${unplannedPct > 0 ? `<div style="background:#f87171; width:${unplannedPct}%; height:100%; border-radius:2px; transition:width 0.2s;" title="未計画: ${unplanned}個"></div>` : ''}
               </div>
 
-              <!-- 5. Sub-Info: Hand Stock & Unit Hours & Compatible Printers -->
+              <!-- Row 4: 3-Value Labels (Under Gauge) -->
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-top:4px; font-size:10px; font-weight:bold;">
+                <span style="color:rgba(255,255,255,0.65);">在庫 <strong style="color:#38bdf8;">${curStock}</strong></span>
+                <span style="color:rgba(255,255,255,0.65);">計画済み <strong style="color:#34d399;">${planned}</strong></span>
+                <span style="color:${unplanned > 0 ? '#f87171' : 'rgba(255,255,255,0.45)'};">未計画 <strong style="color:${unplanned > 0 ? '#f87171' : '#34d399'};">${unplanned}</strong></span>
+              </div>
+
+              <!-- Row 5: Unit Hours & Compatible Printers -->
               <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:4px; margin-top:5px; padding-top:4px; border-top:1px solid rgba(255,255,255,0.05); font-size:9.5px;">
-                <span style="color:rgba(255,255,255,0.5);">
-                  手元在庫: <strong style="color:#fff;">${s.currentStock}</strong> | ⏱ ${s.unitHours}h/個
+                <span style="color:#fbbf24; font-weight:bold;">
+                  ⏱ ${s.unitHours}h/個 ${unplanned > 0 ? `<span style="color:rgba(255,255,255,0.5); font-weight:normal;">(残${s.unplannedHours}h)</span>` : ''}
                 </span>
                 <div style="display:flex; gap:3px; flex-wrap:wrap;">
                   ${pBadges}
@@ -11015,6 +11041,16 @@
           </div>
         `;
       }).join('');
+
+      // Auto-scroll left column to focused card if a SKU is selected!
+      if (mfgSelectedUnplannedSkuId) {
+        setTimeout(() => {
+          const cardEl = document.getElementById('mfg-card-' + mfgSelectedUnplannedSkuId);
+          if (cardEl) {
+            cardEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+          }
+        }, 50);
+      }
     }
 
     // Center Panel: Printer x Date Schedule Matrix
@@ -11069,7 +11105,7 @@
         const barColor = dayOver ? '#ef4444' : (dayPct >= 85 ? '#f59e0b' : '#10b981');
 
         return `
-          <th style="min-width:132px; background:${isToday ? 'rgba(59,130,246,0.12)' : '#10131d'};">
+          <th style="min-width:142px; background:${isToday ? 'rgba(59,130,246,0.12)' : '#10131d'};">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
               <span style="font-size:12px; font-weight:bold; color:${dowColor};">${label}</span>
               ${isToday ? `<span style="background:#06b6d4; color:#000; font-size:9px; font-weight:bold; padding:1px 5px; border-radius:4px;">本日</span>` : ''}
@@ -11111,7 +11147,8 @@
             const pal = getChipPalette(j.productId, j.status);
             const isJobSel = (mfgSelectedJobId === j.id);
             const statusIcon = j.status === 'completed' ? '✅' : (j.status === 'printing' ? '🖨️' : '');
-            const shortTitle = skuInfo.parentName.replace(/モアイペン立て|モアイメガネスタンド|モアイ一輪挿し/g, '').trim() || skuInfo.parentName;
+            // Keep recognizable name, only strip very long suffix if needed
+            let shortTitle = skuInfo.parentName.replace(/モアイペン立て/g, 'ペン立て').replace(/モアイメガネスタンド/g, 'メガネ').replace(/モアイ一輪挿し/g, '一輪挿し').trim() || skuInfo.parentName;
 
             return `
               <div class="mfg-job-chip ${isJobSel ? 'mfg-job-selected' : ''}"
@@ -11500,8 +11537,28 @@
               <div style="font-size:14px; font-weight:bold; color:#fff; line-height:1.25;">${skuInfo.parentName}</div>
               <div style="font-size:12px; color:var(--accent); font-weight:bold; margin-top:2px;">${skuInfo.variantName}</div>
               <div style="font-size:10px; color:rgba(255,255,255,0.55); margin-top:3px;">
-                不足:${skuInfo.shortage} / 計画済:${skuInfo.plannedQty} / <strong style="color:${skuInfo.unplannedQty > 0 ? '#f87171' : '#34d399'};">未計画:${skuInfo.unplannedQty}</strong>
+                必要:${skuInfo.totalReq || (skuInfo.currentStock + skuInfo.shortage)} / 在庫:${skuInfo.currentStock || 0}
               </div>
+            </div>
+          </div>
+
+          <!-- 3-Segment Stacked Gauge in Job Inspector (Image 2 style) -->
+          <div style="background:rgba(0,0,0,0.3); padding:9px 11px; border-radius:10px; border:1px solid rgba(255,255,255,0.06);">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px; font-size:11px;">
+              <span style="color:rgba(255,255,255,0.7); font-weight:bold;">📊 作品全体の計画進捗</span>
+              <span style="font-weight:bold;">
+                ${skuInfo.shortage === 0 ? '<span style="color:#34d399;">✨ 在庫充足</span>' : `<span style="color:#fff;">計画 ${skuInfo.plannedQty}</span> / <span style="color:#f87171;">不足 ${skuInfo.shortage}</span>`}
+              </span>
+            </div>
+            <div style="display:flex; height:8px; border-radius:4px; overflow:hidden; background:rgba(255,255,255,0.06); gap:2px;">
+              <div style="background:#38bdf8; width:${Math.max(1, skuInfo.totalReq || 1) > 0 ? Math.min(100, Math.round((Math.min(skuInfo.totalReq || 1, skuInfo.currentStock || 0) / Math.max(1, skuInfo.totalReq || 1, (skuInfo.currentStock || 0) + skuInfo.plannedQty)) * 100)) : 100}%; height:100%; border-radius:2px;" title="手元在庫"></div>
+              <div style="background:#34d399; width:${Math.max(1, skuInfo.totalReq || 1) > 0 ? Math.min(100, Math.round((Math.min(skuInfo.shortage, skuInfo.plannedQty) / Math.max(1, skuInfo.totalReq || 1, (skuInfo.currentStock || 0) + skuInfo.plannedQty)) * 100)) : 0}%; height:100%; border-radius:2px;" title="計画済み"></div>
+              <div style="background:#f87171; width:${skuInfo.unplannedQty > 0 ? Math.max(0, 100 - Math.round(((Math.min(skuInfo.totalReq || 1, skuInfo.currentStock || 0) + Math.min(skuInfo.shortage, skuInfo.plannedQty)) / Math.max(1, skuInfo.totalReq || 1, (skuInfo.currentStock || 0) + skuInfo.plannedQty)) * 100)) : 0}%; height:100%; border-radius:2px;" title="未計画"></div>
+            </div>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-top:4px; font-size:10px; font-weight:bold;">
+              <span style="color:rgba(255,255,255,0.65);">在庫 <strong style="color:#38bdf8;">${skuInfo.currentStock || 0}</strong></span>
+              <span style="color:rgba(255,255,255,0.65);">計画済み <strong style="color:#34d399;">${skuInfo.plannedQty}</strong></span>
+              <span style="color:${skuInfo.unplannedQty > 0 ? '#f87171' : 'rgba(255,255,255,0.45)'};">未計画 <strong style="color:${skuInfo.unplannedQty > 0 ? '#f87171' : '#34d399'};">${skuInfo.unplannedQty}</strong></span>
             </div>
           </div>
 
@@ -11622,30 +11679,23 @@
             </div>
           </div>
 
-          <!-- Progress bar & 3 KPIs -->
+          <!-- 3-Segment Stacked Gauge in Inspector (Image 2 style) -->
           <div style="background:rgba(0,0,0,0.3); padding:10px; border-radius:10px; border:1px solid rgba(255,255,255,0.06);">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px; font-size:11px;">
-              <span style="color:rgba(255,255,255,0.7);">製造計画進捗</span>
-              <span style="font-weight:bold; color:${selSku.shortage === 0 ? '#34d399' : (selSku.plannedQty >= selSku.shortage ? '#34d399' : 'var(--accent)')};">
-                ${selSku.shortage === 0 ? '✨ 在庫充足 (計画不要)' : `計画 ${selSku.plannedQty} / ${selSku.shortage}個 (${Math.min(100, Math.round((selSku.plannedQty / selSku.shortage) * 100))}%)`}
+              <span style="color:rgba(255,255,255,0.7); font-weight:bold;">📊 作品全体の計画進捗</span>
+              <span style="font-weight:bold;">
+                ${selSku.shortage === 0 ? '<span style="color:#34d399;">✨ 在庫充足</span>' : `<span style="color:#fff;">計画 ${selSku.plannedQty}</span> / <span style="color:#f87171;">不足 ${selSku.shortage}</span>`}
               </span>
             </div>
-            <div style="background:rgba(255,255,255,0.08); height:6px; border-radius:3px; overflow:hidden;">
-              <div style="background:${selSku.shortage === 0 || selSku.plannedQty >= selSku.shortage ? '#10b981' : (selSku.plannedQty > 0 ? 'linear-gradient(90deg, #3b82f6, #06b6d4)' : 'rgba(255,255,255,0.1)')}; width:${selSku.shortage === 0 ? 100 : Math.min(100, Math.round((selSku.plannedQty / selSku.shortage) * 100))}%; height:100%;"></div>
+            <div style="display:flex; height:8px; border-radius:4px; overflow:hidden; background:rgba(255,255,255,0.06); gap:2px;">
+              <div style="background:#38bdf8; width:${Math.max(1, selSku.totalReq) > 0 ? Math.min(100, Math.round((Math.min(selSku.totalReq, selSku.currentStock) / Math.max(1, selSku.totalReq, selSku.currentStock + selSku.plannedQty)) * 100)) : 100}%; height:100%; border-radius:2px;" title="手元在庫: ${selSku.currentStock}個"></div>
+              <div style="background:#34d399; width:${Math.max(1, selSku.totalReq) > 0 ? Math.min(100, Math.round((Math.min(selSku.shortage, selSku.plannedQty) / Math.max(1, selSku.totalReq, selSku.currentStock + selSku.plannedQty)) * 100)) : 0}%; height:100%; border-radius:2px;" title="計画済み: ${selSku.plannedQty}個"></div>
+              <div style="background:#f87171; width:${selSku.unplannedQty > 0 ? Math.max(0, 100 - Math.round(((Math.min(selSku.totalReq, selSku.currentStock) + Math.min(selSku.shortage, selSku.plannedQty)) / Math.max(1, selSku.totalReq, selSku.currentStock + selSku.plannedQty)) * 100)) : 0}%; height:100%; border-radius:2px;" title="未計画: ${selSku.unplannedQty}個"></div>
             </div>
-            <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:8px; text-align:center; margin-top:8px; padding-top:8px; border-top:1px solid rgba(255,255,255,0.06);">
-              <div>
-                <div style="font-size:10px; color:rgba(255,255,255,0.5);">不足数</div>
-                <div style="font-size:17px; font-weight:bold; color:#f87171;">${selSku.shortage}</div>
-              </div>
-              <div>
-                <div style="font-size:10px; color:rgba(255,255,255,0.5);">計画済み</div>
-                <div style="font-size:17px; font-weight:bold; color:#34d399;">${selSku.plannedQty}</div>
-              </div>
-              <div>
-                <div style="font-size:10px; color:rgba(255,255,255,0.5);">未計画</div>
-                <div style="font-size:17px; font-weight:bold; color:#fbbf24;">${selSku.unplannedQty}</div>
-              </div>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-top:5px; font-size:10px; font-weight:bold;">
+              <span style="color:rgba(255,255,255,0.65);">在庫 <strong style="color:#38bdf8;">${selSku.currentStock}</strong></span>
+              <span style="color:rgba(255,255,255,0.65);">計画済み <strong style="color:#34d399;">${selSku.plannedQty}</strong></span>
+              <span style="color:${selSku.unplannedQty > 0 ? '#f87171' : 'rgba(255,255,255,0.45)'};">未計画 <strong style="color:${selSku.unplannedQty > 0 ? '#f87171' : '#34d399'};">${selSku.unplannedQty}</strong></span>
             </div>
           </div>
 
