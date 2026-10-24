@@ -10552,8 +10552,7 @@
       mfgSkuMapCache = {};
 
       allMaster.forEach((p, mIdx) => {
-        const cleanParentName = p.name.replace(/
-/g, ' ');
+        const cleanParentName = p.name.replace(/\n/g, ' ');
         const vars = window.getProductVariants(p.id, false);
         const isSelectedInAnyEvent = multiAggSelectedEvents.some(evKey => {
           const selIds = window.eventProductsData?.[evKey];
@@ -10929,8 +10928,7 @@
       if (filtered.length === 0) {
         container.innerHTML = `
           <div style="text-align:center; padding:32px 12px; color:rgba(255,255,255,0.45); font-size:12px;">
-            ${filterMode === 'unplanned' ? '🎉 未計画の不足作品はありません！
-（上のフィルタを「全出品対象」に変えると全作品を表示できます）' : '条件に一致する作品がありません。'}
+            ${filterMode === 'unplanned' ? '🎉 未計画の不足作品はありません！<br>（上のフィルタを「全出品対象」に変えると全作品を表示できます）' : '条件に一致する作品がありません。'}
           </div>
         `;
         return;
@@ -11828,9 +11826,7 @@
       const skuObj = parsed.skuObj;
       const allMaster = window.getFullMasterProducts ? window.getFullMasterProducts(window.customProductsData) : MASTER_PRODUCTS;
       const pName = allMaster.find(x => x.id === parentId)?.name || parentId;
-      const displayLabel = skuObj ? `${pName.replace(/
-/g, ' ')} (${skuObj.name})` : pName.replace(/
-/g, ' ');
+      const displayLabel = skuObj ? `${pName.replace(/\n/g, ' ')} (${skuObj.name})` : pName.replace(/\n/g, ' ');
 
       if (!confirm(`【印刷完了 → 在庫への自動反映】
 「${displayLabel}」× ${qty}個 を完成として記録し、「${evLabel}」の現在庫に +${qty}個 追加しますか？
