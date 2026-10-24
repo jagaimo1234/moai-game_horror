@@ -398,10 +398,200 @@
       gap: 6px;
     }
     #settings-view .scroll-container {
-      max-width: 1540px !important;
+      max-width: 1680px !important;
       width: 100% !important;
       padding: 16px 24px 80px 24px !important;
       box-sizing: border-box !important;
+    }
+    /* === 🖨️ Manufacturing Planning Board (製造計画ボード) UI === */
+    .mfg-kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(6, minmax(150px, 1fr));
+      gap: 10px;
+    }
+    .mfg-printer-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(220px, 1fr));
+      gap: 12px;
+    }
+    .mfg-printer-card {
+      background: #141722;
+      border: 1px solid rgba(255, 255, 255, 0.09);
+      border-radius: 12px;
+      padding: 12px 14px;
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
+      transition: border-color 0.15s, transform 0.15s;
+    }
+    .mfg-printer-card:hover {
+      border-color: rgba(0, 210, 255, 0.35);
+    }
+    .mfg-printer-card.printer-compatible-highlight {
+      border-color: #00d2ff;
+      box-shadow: 0 0 0 1px #00d2ff, 0 6px 18px rgba(0, 210, 255, 0.2);
+    }
+    .mfg-board-3col {
+      display: grid;
+      grid-template-columns: 315px minmax(0, 1fr) 350px;
+      gap: 14px;
+      align-items: start;
+      width: 100%;
+    }
+    .mfg-left-panel {
+      background: #141722;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 14px;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      max-height: 820px;
+    }
+    .mfg-unplanned-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      overflow-y: auto;
+      padding-right: 4px;
+      flex: 1;
+    }
+    .mfg-unplanned-card {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 10px;
+      padding: 10px;
+      cursor: pointer;
+      transition: all 0.15s;
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+      position: relative;
+      user-select: none;
+    }
+    .mfg-unplanned-card:hover {
+      background: rgba(255, 255, 255, 0.06);
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+    .mfg-unplanned-card.mfg-card-selected {
+      background: rgba(59, 130, 246, 0.16);
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 1px #3b82f6;
+    }
+    .mfg-printer-badge {
+      display: inline-flex;
+      align-items: center;
+      font-size: 10px;
+      padding: 1px 6px;
+      border-radius: 4px;
+      background: rgba(255, 255, 255, 0.07);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      color: rgba(255, 255, 255, 0.8);
+      white-space: nowrap;
+    }
+    .mfg-sched-wrapper {
+      background: #141722;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 14px;
+      padding: 14px;
+      overflow-x: auto;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+    }
+    .mfg-sched-table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      table-layout: fixed;
+      min-width: 760px;
+    }
+    .mfg-sched-table th {
+      background: #10131d;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      border-right: 1px solid rgba(255, 255, 255, 0.06);
+      padding: 8px 8px;
+      text-align: left;
+      vertical-align: top;
+    }
+    .mfg-sched-table td {
+      border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+      border-right: 1px solid rgba(255, 255, 255, 0.06);
+      padding: 8px;
+      vertical-align: top;
+      background: rgba(0, 0, 0, 0.18);
+      transition: background 0.15s;
+    }
+    .mfg-sched-cell {
+      min-height: 118px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .mfg-sched-td.mfg-drop-hover {
+      background: rgba(0, 210, 255, 0.14) !important;
+      box-shadow: inset 0 0 0 2px var(--accent);
+    }
+    .mfg-sched-td.mfg-compatible-row-cell {
+      background: rgba(0, 210, 255, 0.035);
+    }
+    .mfg-job-chip {
+      border-radius: 8px;
+      padding: 6px 8px;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      cursor: pointer;
+      transition: transform 0.12s, box-shadow 0.12s;
+      position: relative;
+      user-select: none;
+    }
+    .mfg-job-chip:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.45);
+    }
+    .mfg-job-chip.mfg-job-selected {
+      box-shadow: 0 0 0 2px #fff, 0 4px 14px rgba(59, 130, 246, 0.5) !important;
+    }
+    .mfg-add-slot-btn {
+      margin-top: auto;
+      width: 100%;
+      padding: 6px 4px;
+      border-radius: 6px;
+      border: 1px dashed rgba(255, 255, 255, 0.16);
+      background: rgba(255, 255, 255, 0.02);
+      color: rgba(255, 255, 255, 0.45);
+      font-size: 11px;
+      cursor: pointer;
+      transition: all 0.15s;
+      text-align: center;
+    }
+    .mfg-add-slot-btn:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+      background: rgba(0, 210, 255, 0.08);
+    }
+    @media (max-width: 1360px) {
+      .mfg-kpi-grid {
+        grid-template-columns: repeat(3, minmax(150px, 1fr));
+      }
+      .mfg-printer-grid {
+        grid-template-columns: repeat(2, minmax(200px, 1fr));
+      }
+      .mfg-board-3col {
+        grid-template-columns: 290px minmax(0, 1fr);
+      }
+      #mfg-right-inspector {
+        grid-column: 1 / -1;
+        position: static !important;
+      }
+    }
+    @media (max-width: 960px) {
+      .mfg-board-3col {
+        grid-template-columns: 1fr;
+      }
+      .mfg-printer-grid {
+        grid-template-columns: 1fr;
+      }
     }
     .prod-kpi-grid {
       display: grid;
@@ -1610,11 +1800,11 @@
         </div>
 
         <!-- Sub-tabs & Carry-over Bar -->
-        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:16px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:14px;">
           <div style="display:flex; background:rgba(0,0,0,0.35); border-radius:8px; padding:4px; width:fit-content; flex-wrap:wrap; gap:4px; border:1px solid rgba(255,255,255,0.08);">
             <button class="btn settings-subtab-btn active" id="btn-settings-subtab-multi-agg" onclick="switchSettingsSubTab('multi-agg')" style="padding:7px 16px; font-size:12px; font-weight:bold; background:var(--accent); color:#000; border-radius:6px;">📊 イベント制作状況・在庫一覧</button>
+            <button class="btn settings-subtab-btn" id="btn-settings-subtab-production" onclick="switchSettingsSubTab('production')" style="padding:7px 16px; font-size:12px; color:#fff; background:none; border-radius:6px;">🗓️ 製造計画ボード (3Dプリンター)</button>
             <button class="btn settings-subtab-btn" id="btn-settings-subtab-stock" onclick="switchSettingsSubTab('stock')" style="padding:7px 16px; font-size:12px; color:#fff; background:none; border-radius:6px;">🃏 従来カード表示</button>
-            <button class="btn settings-subtab-btn" id="btn-settings-subtab-production" onclick="switchSettingsSubTab('production')" style="padding:7px 16px; font-size:12px; color:#fff; background:none; border-radius:6px;">📅 製造計画チャート</button>
           </div>
 
           <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); padding:6px 12px; border-radius:8px;">
@@ -1626,28 +1816,17 @@
           </div>
         </div>
 
-        <!-- Stock Toolbar for Classic Card View -->
-        <div id="stock-toolbar-panel" style="display:none; justify-content:flex-end; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:12px;">
-          <button class="btn" onclick="toggleAllVariantExpand('stock', true)" style="background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.15); color:#ddd; font-size:11px; padding:4px 8px;">▼ バリエーション全展開</button>
-          <button class="btn" onclick="toggleAllVariantExpand('stock', false)" style="background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.15); color:#ddd; font-size:11px; padding:4px 8px;">▶ 全折りたたみ</button>
-        </div>
-
-        <!-- Classic Card Inventory List (Hidden by default, toggled via '🃏 従来カード表示') -->
-        <div id="settings-list" style="display:none;"></div>
-
-        <!-- Unified Event Production Status & Multi-Event Inventory Dashboard -->
-        <div id="multi-agg-panel" style="display:flex; flex-direction:column; gap:16px; width:100%;">
-          
-          <!-- ① Top Header Bar: Title + Target Event Pills + Event Date Box -->
-          <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:14px; background:#141722; border:1px solid rgba(255,255,255,0.08); border-radius:14px; padding:16px 20px; box-shadow:0 4px 16px rgba(0,0,0,0.3);">
+        <!-- Shared Top Event Pills & Reference Stock Bar (Shared across イベント制作状況 & 製造計画ボード) -->
+        <div id="shared-event-target-header" style="display:flex; flex-direction:column; gap:12px; margin-bottom:16px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:14px; background:#141722; border:1px solid rgba(255,255,255,0.08); border-radius:14px; padding:14px 20px; box-shadow:0 4px 16px rgba(0,0,0,0.3);">
             <div>
-              <h3 style="margin:0; font-size:20px; color:#fff; font-weight:bold; letter-spacing:0.3px;">イベント制作状況</h3>
-              <p style="margin:4px 0 0 0; font-size:12px; color:rgba(255,255,255,0.55);">イベントに向けた制作・在庫の進捗を管理できます（単一イベント／複数イベント合算対応）</p>
+              <h3 id="shared-header-main-title" style="margin:0; font-size:19px; color:#fff; font-weight:bold; letter-spacing:0.3px;">📊 イベント制作状況・在庫一覧</h3>
+              <p id="shared-header-sub-desc" style="margin:3px 0 0 0; font-size:12px; color:rgba(255,255,255,0.55);">イベントに向けた制作・在庫の進捗と3Dプリンター製造計画を連動管理できます（単一／複数イベント合算対応）</p>
             </div>
 
             <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
               <!-- Active Event Pills Box -->
-              <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap; background:rgba(0,0,0,0.35); border:1px solid rgba(255,255,255,0.1); padding:8px 12px; border-radius:10px;">
+              <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap; background:rgba(0,0,0,0.35); border:1px solid rgba(255,255,255,0.1); padding:7px 12px; border-radius:10px;">
                 <span style="font-size:11px; color:rgba(255,255,255,0.6); font-weight:bold;">対象イベント</span>
                 <div id="multi-agg-active-pills" style="display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
                   <!-- Active pills injected dynamically -->
@@ -1658,7 +1837,7 @@
               </div>
 
               <!-- Event Date Card -->
-              <div style="background:rgba(0,0,0,0.35); border:1px solid rgba(255,255,255,0.1); border-radius:10px; padding:8px 14px; display:flex; align-items:center; gap:12px;">
+              <div style="background:rgba(0,0,0,0.35); border:1px solid rgba(255,255,255,0.1); border-radius:10px; padding:7px 14px; display:flex; align-items:center; gap:10px;">
                 <div>
                   <div style="font-size:10px; color:rgba(255,255,255,0.5);">開催日</div>
                   <div id="multi-agg-date-display" style="font-size:12px; font-weight:bold; color:#fff; margin-top:2px;">-</div>
@@ -1676,7 +1855,7 @@
                   📊 集計対象イベントの選択 ＆ 手元現在庫の参照枠設定
                 </h4>
                 <p style="margin:3px 0 0 0; font-size:11px; opacity:0.7;">
-                  チェックを入れたイベントの採用シミュ必要数を合算し、指定した参照枠の現在庫を1回だけ差し引いて不足数・達成率を算出します。
+                  チェックを入れたイベントの採用シミュ必要数を合算し、指定した参照枠の現在庫を1回だけ差し引いて不足数・未計画数を算出します。
                 </p>
               </div>
               <div style="display:flex; gap:6px; flex-wrap:wrap;">
@@ -1698,10 +1877,23 @@
                 <span style="color:#f1c40f; font-weight:bold;">📦 比較・操作する「手元の現在庫」の参照枠:</span>
                 <select id="multi-agg-stock-source-select" onchange="onChangeMultiAggStockSource(this.value)" class="form-select" style="width:auto; font-size:12px; padding:4px 10px; font-weight:bold; border-color:#f1c40f; color:#fff;">
                 </select>
-                <span style="font-size:11px; opacity:0.65;">※右パネルの在庫調整もこの参照枠の在庫に対して直接反映されます。</span>
+                <span style="font-size:11px; opacity:0.65;">※在庫調整および製造計画の「✅完成→在庫反映」もこの参照枠に反映されます。</span>
               </div>
             </div>
           </div>
+        </div>
+
+        <!-- Stock Toolbar for Classic Card View -->
+        <div id="stock-toolbar-panel" style="display:none; justify-content:flex-end; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:12px;">
+          <button class="btn" onclick="toggleAllVariantExpand('stock', true)" style="background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.15); color:#ddd; font-size:11px; padding:4px 8px;">▼ バリエーション全展開</button>
+          <button class="btn" onclick="toggleAllVariantExpand('stock', false)" style="background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.15); color:#ddd; font-size:11px; padding:4px 8px;">▶ 全折りたたみ</button>
+        </div>
+
+        <!-- Classic Card Inventory List (Hidden by default, toggled via '🃏 従来カード表示') -->
+        <div id="settings-list" style="display:none;"></div>
+
+        <!-- Unified Event Production Status & Multi-Event Inventory Dashboard -->
+        <div id="multi-agg-panel" style="display:flex; flex-direction:column; gap:16px; width:100%;">
 
           <!-- ② 5 KPI Summary Cards Row -->
           <div id="multi-agg-kpi-row" class="prod-kpi-grid">
@@ -1789,17 +1981,178 @@
           </div>
         </div>
 
-        <!-- Production Plan Chart View Container -->
-        <div id="production-chart-panel" style="display:none; flex-direction:column; gap:20px; width:100%;">
-          <div style="display:flex; justify-content:space-between; align-items:center;">
-            <h3 style="margin:0; font-size:16px; color:var(--accent); display:flex; align-items:center; gap:6px;">🔧 製造タイムチャート (直近30日間)</h3>
-            <button class="btn btn-primary" onclick="openProductionPlanModal()" style="font-weight:bold; font-size:12px;">＋ 製造計画を追加</button>
-          </div>
+        <!-- 🖨️ Redesigned Manufacturing Planning Board (製造計画ボード) -->
+        <div id="production-chart-panel" style="display:none; flex-direction:column; gap:14px; width:100%;">
           
-          <!-- Gantt chart scrollable container -->
-          <div style="background:var(--panel-bg); border:1px solid rgba(255,255,255,0.08); border-radius:12px; overflow-x:auto; width:100%; box-shadow:0 4px 10px rgba(0,0,0,0.3);">
-            <div id="production-gantt-grid" style="min-width: 900px; display:flex; flex-direction:column; padding:16px; box-sizing:border-box;">
-              <!-- Grid header and lanes will be generated dynamically by JS -->
+          <!-- Board Mode Switcher & Date Navigation Bar -->
+          <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; background:#141722; border:1px solid rgba(255,255,255,0.08); border-radius:12px; padding:10px 16px;">
+            <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+              <div style="display:flex; background:rgba(0,0,0,0.4); border-radius:8px; padding:3px; border:1px solid rgba(255,255,255,0.08);">
+                <button type="button" id="btn-mfg-mode-daily" onclick="switchMfgBoardMode('daily')" style="padding:6px 14px; font-size:12px; font-weight:bold; background:#3b82f6; color:#fff; border:none; border-radius:6px; cursor:pointer;">🗓️ 日別スケジュールボード</button>
+                <button type="button" id="btn-mfg-mode-matrix" onclick="switchMfgBoardMode('matrix')" style="padding:6px 14px; font-size:12px; color:rgba(255,255,255,0.75); background:none; border:none; border-radius:6px; cursor:pointer;">📊 プリンター別配分一覧</button>
+                <button type="button" id="btn-mfg-mode-legacy" onclick="switchMfgBoardMode('legacy')" style="padding:6px 14px; font-size:12px; color:rgba(255,255,255,0.75); background:none; border:none; border-radius:6px; cursor:pointer;">🕒 従来チャート</button>
+              </div>
+              <button type="button" onclick="openMfgPrinterSettingsModal()" style="background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.16); color:#ddd; font-size:11px; font-weight:bold; padding:6px 12px; border-radius:8px; cursor:pointer;">
+                ⚙️ プリンター・稼働時間設定
+              </button>
+            </div>
+
+            <!-- Date Navigation Controls -->
+            <div id="mfg-date-nav-bar" style="display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
+              <button type="button" onclick="shiftMfgStartDate(-7)" style="background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.15); color:#ddd; padding:5px 9px; border-radius:6px; cursor:pointer; font-size:11px;" title="1週間前へ">≪ 前週</button>
+              <button type="button" onclick="shiftMfgStartDate(-1)" style="background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.15); color:#ddd; padding:5px 9px; border-radius:6px; cursor:pointer; font-size:11px;" title="前日へ">＜ 前日</button>
+              <div style="display:flex; align-items:center; gap:6px; background:rgba(0,0,0,0.4); border:1px solid rgba(255,255,255,0.15); padding:4px 10px; border-radius:8px;">
+                <input type="date" id="mfg-start-date-picker" onchange="onChangeMfgStartDate(this.value)" style="background:transparent; border:none; color:#fff; font-size:12px; font-weight:bold; outline:none; cursor:pointer;">
+                <span id="mfg-date-range-label" style="font-size:12px; color:var(--accent); font-weight:bold;"></span>
+              </div>
+              <button type="button" onclick="resetMfgStartDateToToday()" style="background:rgba(0,210,255,0.15); border:1px solid var(--accent); color:var(--accent); padding:5px 10px; border-radius:6px; cursor:pointer; font-size:11px; font-weight:bold;">本日</button>
+              <button type="button" onclick="shiftMfgStartDate(1)" style="background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.15); color:#ddd; padding:5px 9px; border-radius:6px; cursor:pointer; font-size:11px;" title="翌日へ">翌日 ＞</button>
+              <button type="button" onclick="shiftMfgStartDate(7)" style="background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.15); color:#ddd; padding:5px 9px; border-radius:6px; cursor:pointer; font-size:11px;" title="1週間先へ">翌週 ≫</button>
+              <select id="mfg-days-count-select" onchange="onChangeMfgDaysCount(this.value)" class="form-select" style="width:auto; font-size:11px; padding:5px 8px; background:#0d0f17;">
+                <option value="6" selected>6日間表示</option>
+                <option value="7">7日間 (1週間)</option>
+                <option value="10">10日間表示</option>
+                <option value="14">14日間 (2週間)</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- ① 6 KPI Summary Cards Row -->
+          <div id="mfg-kpi-row" class="mfg-kpi-grid">
+            <!-- Injected dynamically -->
+          </div>
+
+          <!-- ② 4 Printer Status & Capacity Cards Row -->
+          <div id="mfg-printer-cards-row" class="mfg-printer-grid">
+            <!-- Injected dynamically -->
+          </div>
+
+          <!-- ③ Mode A: 3-Column Daily Schedule Board (Left: Unplanned SKUs, Center: Printer x Date Grid, Right: Detail Inspector) -->
+          <div id="mfg-view-daily-board" class="mfg-board-3col">
+            
+            <!-- Left Column: Unplanned / Shortage SKUs List -->
+            <div class="mfg-left-panel">
+              <div style="display:flex; justify-content:space-between; align-items:center;">
+                <div style="font-size:14px; font-weight:bold; color:#fff; display:flex; align-items:center; gap:6px;">
+                  <span>📦 未計画・不足作品</span>
+                  <span id="mfg-unplanned-count-badge" style="font-size:11px; background:rgba(239,68,68,0.2); color:#f87171; border:1px solid rgba(239,68,68,0.4); padding:1px 7px; border-radius:10px;">0件</span>
+                </div>
+                <span style="font-size:10px; color:rgba(255,255,255,0.45);">クリック選択 / D&amp;D</span>
+              </div>
+
+              <!-- Left Filters -->
+              <div style="display:flex; flex-direction:column; gap:6px;">
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px;">
+                  <select id="mfg-left-sort" onchange="renderProductionPlans()" class="form-select" style="font-size:11px; padding:5px 6px; background:#0d0f17;">
+                    <option value="unplanned_desc">未計画数が多い順</option>
+                    <option value="shortage_desc">不足数が多い順</option>
+                    <option value="hours_desc">残り時間が長い順</option>
+                    <option value="default">標準（登録順）</option>
+                  </select>
+                  <select id="mfg-left-filter" onchange="renderProductionPlans()" class="form-select" style="font-size:11px; padding:5px 6px; background:#0d0f17;">
+                    <option value="unplanned">🔥 未計画ありのみ</option>
+                    <option value="shortage">⚠️ 不足ありすべて</option>
+                    <option value="required">📦 必要数 &gt; 0 すべて</option>
+                    <option value="all">全出品対象</option>
+                  </select>
+                </div>
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px;">
+                  <select id="mfg-left-series" onchange="renderProductionPlans()" class="form-select" style="font-size:11px; padding:4px 6px; background:#0d0f17;">
+                    <option value="all">全シリーズ</option>
+                  </select>
+                  <select id="mfg-left-printer" onchange="renderProductionPlans()" class="form-select" style="font-size:11px; padding:4px 6px; background:#0d0f17;">
+                    <option value="all">全プリンター対応</option>
+                  </select>
+                </div>
+                <input type="text" id="mfg-left-search" oninput="renderProductionPlans()" class="form-input" placeholder="🔍 作品名・バリエーション検索..." style="font-size:11px; padding:5px 8px; background:#0d0f17;">
+              </div>
+
+              <!-- Unplanned SKUs Scrollable Cards -->
+              <div id="mfg-unplanned-list-container" class="mfg-unplanned-list">
+                <!-- Populated dynamically -->
+              </div>
+            </div>
+
+            <!-- Center Column: Printer x Date Schedule Matrix -->
+            <div class="mfg-sched-wrapper">
+              <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:10px;">
+                <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+                  <span style="font-size:14px; font-weight:bold; color:#fff;">🖨️ プリンター別スケジュール</span>
+                  <span id="mfg-stamp-hint-banner" style="font-size:11px; background:rgba(59,130,246,0.14); border:1px solid rgba(59,130,246,0.35); color:#93c5fd; padding:3px 10px; border-radius:20px;">
+                    💡 左の作品を選択して「＋追加」を押すか、ドラッグ＆ドロップで配置できます
+                  </span>
+                </div>
+                <div style="display:flex; align-items:center; gap:8px;">
+                  <label style="display:inline-flex; align-items:center; gap:4px; font-size:11px; color:rgba(255,255,255,0.7); cursor:pointer;">
+                    <input type="checkbox" id="mfg-show-completed-jobs" checked onchange="renderProductionPlans()" style="accent-color:#10b981; cursor:pointer;">
+                    <span>完了済も表示</span>
+                  </label>
+                </div>
+              </div>
+
+              <div id="mfg-schedule-grid-container" style="width:100%; overflow-x:auto;">
+                <!-- Schedule Table Injected Dynamically -->
+              </div>
+            </div>
+
+            <!-- Right Column: Job / SKU Schedule Detail & Quick Editor -->
+            <div id="mfg-right-inspector" class="prod-dash-detail-card" style="padding:16px;">
+              <!-- Populated dynamically -->
+            </div>
+
+          </div>
+
+          <!-- ④ Mode B: Printer Allocation Matrix View (Image 2 style: SKU rows x 4 Printer columns) -->
+          <div id="mfg-view-matrix-board" style="display:none; flex-direction:column; gap:14px;">
+            <div style="background:#141722; border:1px solid rgba(255,255,255,0.08); border-radius:14px; padding:16px; overflow-x:auto;">
+              <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:12px;">
+                <div>
+                  <h4 style="margin:0; font-size:15px; color:#fff;">📊 作品×プリンター 全体配分マトリクス</h4>
+                  <p style="margin:3px 0 0 0; font-size:11px; color:rgba(255,255,255,0.55);">
+                    各作品の不足分をどのプリンターで何個作るか一覧で確認・調整できます。数値を入力すると、そのプリンターの空き日へ自動配分されます。
+                  </p>
+                </div>
+              </div>
+              <div id="mfg-matrix-table-container">
+                <!-- Populated dynamically -->
+              </div>
+            </div>
+          </div>
+
+          <!-- ⑤ Mode C: Legacy 30-Day Timeline Chart (Preserved 100%) -->
+          <div id="mfg-view-legacy-chart" style="display:none; flex-direction:column; gap:14px;">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <h4 style="margin:0; font-size:15px; color:var(--accent);">🕒 従来の製造タイムチャート (直近30日間)</h4>
+              <button class="btn btn-primary" onclick="openProductionPlanModal()" style="font-weight:bold; font-size:12px;">＋ 従来形式で計画を追加</button>
+            </div>
+            <div style="background:var(--panel-bg); border:1px solid rgba(255,255,255,0.08); border-radius:12px; overflow-x:auto; width:100%; box-shadow:0 4px 10px rgba(0,0,0,0.3);">
+              <div id="production-gantt-grid" style="min-width: 900px; display:flex; flex-direction:column; padding:16px; box-sizing:border-box;">
+                <!-- Legacy Grid generated dynamically -->
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- ⚙️ Printer Settings & Daily Capacity Modal -->
+        <div id="mfg-printer-settings-modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.82); z-index:2600; align-items:center; justify-content:center; padding:20px;">
+          <div style="background:#141722; width:100%; max-width:680px; border-radius:14px; padding:22px; border:1px solid var(--accent); max-height:90vh; overflow-y:auto; box-shadow:0 16px 40px rgba(0,0,0,0.85);">
+            <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:12px; margin-bottom:14px;">
+              <div>
+                <h3 style="margin:0; font-size:17px; color:var(--accent);">⚙️ 3Dプリンター管理・1日の稼働可能時間設定</h3>
+                <p style="margin:4px 0 0 0; font-size:11px; color:rgba(255,255,255,0.6);">各プリンターの名称、基本稼働可能時間（時間/日）、週末稼働時間などを設定できます。</p>
+              </div>
+              <button type="button" onclick="closeMfgPrinterSettingsModal()" style="background:none; border:none; color:#aaa; font-size:20px; cursor:pointer;">✕</button>
+            </div>
+            <div id="mfg-printer-settings-list" style="display:flex; flex-direction:column; gap:10px; margin-bottom:16px;">
+              <!-- Populated dynamically -->
+            </div>
+            <div style="display:flex; justify-content:space-between; align-items:center; border-top:1px solid rgba(255,255,255,0.1); padding-top:14px;">
+              <button type="button" class="btn" onclick="addMfgPrinterRow()" style="background:rgba(0,210,255,0.15); border:1px solid var(--accent); color:var(--accent); font-size:12px; padding:7px 12px; font-weight:bold;">＋ プリンターを追加</button>
+              <div style="display:flex; gap:10px;">
+                <button type="button" class="btn" onclick="closeMfgPrinterSettingsModal()" style="background:#333; color:#fff; padding:8px 16px;">キャンセル</button>
+                <button type="button" class="btn btn-primary" onclick="saveMfgPrinterSettings()" style="padding:8px 20px; font-weight:bold;">💾 設定を保存</button>
+              </div>
             </div>
           </div>
         </div>
@@ -7857,10 +8210,25 @@
         activeBtn.style.fontWeight = 'bold';
       }
 
+      const sharedHeaderEl = document.getElementById('shared-event-target-header');
+      const mainTitleEl = document.getElementById('shared-header-main-title');
+      const subDescEl = document.getElementById('shared-header-sub-desc');
       const stockListEl = document.getElementById('settings-list');
       const stockToolbarEl = document.getElementById('stock-toolbar-panel');
       const multiAggEl = document.getElementById('multi-agg-panel');
       const prodChartEl = document.getElementById('production-chart-panel');
+
+      if (sharedHeaderEl) sharedHeaderEl.style.display = (tab === 'stock') ? 'none' : 'flex';
+      if (mainTitleEl) {
+        mainTitleEl.textContent = (tab === 'production')
+          ? '🗓️ 製造計画ボード (3Dプリンター別スケジュール)'
+          : '📊 イベント制作状況・在庫一覧';
+      }
+      if (subDescEl) {
+        subDescEl.textContent = (tab === 'production')
+          ? 'プリンターごとに「いつ・何を・何個作るか」を直感的に計画し、稼働時間と残り未計画数を把握できます'
+          : 'イベントに向けた制作・在庫の進捗を管理できます（単一イベント／複数イベント合算対応）';
+      }
 
       if (stockListEl) stockListEl.style.display = (tab === 'stock') ? 'block' : 'none';
       if (stockToolbarEl) stockToolbarEl.style.display = (tab === 'stock') ? 'flex' : 'none';
@@ -7872,6 +8240,7 @@
       } else if (tab === 'multi-agg') {
         window.renderMultiEventAggregation();
       } else if (tab === 'production') {
+        window.renderMultiEventAggregation();
         window.renderProductionPlans();
       }
     };
@@ -8531,7 +8900,7 @@
       return simDoc.patterns[patId]?.prepQty || {};
     }
 
-    window.selectMultiAggPreset = (preset) => {
+    window.selectMultiAggPreset = async (preset) => {
       const allEvents = window.getAllEvents ? window.getAllEvents(eventConfigData) : {};
       const plans = window.exhibitionPlansData || {};
       if (preset === 'current') {
@@ -8546,10 +8915,13 @@
       } else if (preset === 'all') {
         multiAggSelectedEvents = Object.keys(allEvents).filter(k => allEvents[k].isMarche !== false);
       }
-      window.renderMultiEventAggregation();
+      await window.renderMultiEventAggregation();
+      if (currentSettingsSubTab === 'production' && typeof window.renderProductionPlans === 'function') {
+        window.renderProductionPlans();
+      }
     };
 
-    window.toggleMultiAggEvent = (evKey) => {
+    window.toggleMultiAggEvent = async (evKey) => {
       const idx = multiAggSelectedEvents.indexOf(evKey);
       if (idx === -1) {
         multiAggSelectedEvents.push(evKey);
@@ -8559,13 +8931,19 @@
         }
         multiAggSelectedEvents.splice(idx, 1);
       }
-      window.renderMultiEventAggregation();
+      await window.renderMultiEventAggregation();
+      if (currentSettingsSubTab === 'production' && typeof window.renderProductionPlans === 'function') {
+        window.renderProductionPlans();
+      }
     };
 
     window.onChangeMultiAggStockSource = async (evKey) => {
       multiAggStockSourceEvent = evKey;
       await ensureAllEventsSimAndInvLoaded(false);
-      window.renderMultiEventAggregation();
+      await window.renderMultiEventAggregation();
+      if (currentSettingsSubTab === 'production' && typeof window.renderProductionPlans === 'function') {
+        window.renderProductionPlans();
+      }
     };
 
     window.cycleMultiAggSort = (field) => {
@@ -9435,6 +9813,12 @@
           </div>
         </div>
 
+        <!-- 4B. Shortcut to 3D Printer Manufacturing Planning Board -->
+        <button type="button" onclick="jumpToMfgBoardForSku('${targetStockId}')" style="width:100%; padding:10px 12px; border-radius:10px; border:1px solid rgba(59,130,246,0.45); background:linear-gradient(90deg, rgba(59,130,246,0.2), rgba(0,210,255,0.15)); color:#fff; font-weight:bold; font-size:12px; cursor:pointer; display:flex; justify-content:space-between; align-items:center;">
+          <span>🗓️ この作品を3Dプリンター製造計画に配置する</span>
+          <span style="color:var(--accent);">製造計画ボードへ →</span>
+        </button>
+
         <!-- 5. Per-Event Required Quantities Breakdown & Direct Edit -->
         <div style="background:rgba(0,0,0,0.28); border:1px solid rgba(255,255,255,0.07); border-radius:10px; padding:12px;">
           <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
@@ -9723,8 +10107,292 @@
       }
     };
 
-    // Render Timeline Chart
-    window.renderProductionPlans = () => {
+    // =========================================================================
+    // 🖨️ 製造計画ボード (3Dプリンター別・日付別スケジュール & 在庫・複数イベント連動エンジン)
+    // =========================================================================
+    const DEFAULT_MFG_PRINTERS = [
+      { id: 'mini1', name: 'Bambu A1 mini 1号機', shortName: 'mini 1号機', type: 'fdm', defaultHours: 12.0, weekendHours: 12.0, dateOverrides: {}, color: '#3b82f6', icon: '🖨️', active: true },
+      { id: 'mini2', name: 'Bambu A1 mini 2号機', shortName: 'mini 2号機', type: 'fdm', defaultHours: 12.0, weekendHours: 12.0, dateOverrides: {}, color: '#06b6d4', icon: '🖨️', active: true },
+      { id: 'creator5', name: 'FlashForge Creator5', shortName: 'Creator5', type: 'fdm', defaultHours: 12.0, weekendHours: 12.0, dateOverrides: {}, color: '#a855f7', icon: '⚡', active: true },
+      { id: 'resin1', name: '光造形プリンター', shortName: '光造形', type: 'resin', defaultHours: 8.0, weekendHours: 8.0, dateOverrides: {}, color: '#f59e0b', icon: '🧪', active: true }
+    ];
+
+    let mfgBoardMode = 'daily'; // 'daily' | 'matrix' | 'legacy'
+    let mfgStartDateStr = null; // YYYY-MM-DD
+    let mfgDaysCount = 6;
+    let mfgSelectedUnplannedSkuId = null; // Selected SKU in Left Panel for 2-click Stamp Placement
+    let mfgSelectedJobId = null;          // Selected scheduled job in Center Grid for Right Inspector
+    let mfgDragPayload = null;            // { type: 'sku' | 'job', id: string }
+    let mfgSkuMapCache = {};              // { [skuId]: skuDemandObj }
+    let mfgPrinterDraftList = [];
+
+    function getLocalYmd(d = new Date()) {
+      const y = d.getFullYear();
+      const m = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      return `${y}-${m}-${day}`;
+    }
+
+    function parseLocalYmd(ymd) {
+      if (!ymd || typeof ymd !== 'string') return new Date();
+      const parts = ymd.split('-').map(Number);
+      if (parts.length !== 3) return new Date();
+      return new Date(parts[0], parts[1] - 1, parts[2]);
+    }
+
+    function addDaysYmd(ymd, delta) {
+      const d = parseLocalYmd(ymd);
+      d.setDate(d.getDate() + delta);
+      return getLocalYmd(d);
+    }
+
+    window.getMfgPrinters = (includeInactive = false) => {
+      const raw = window.productionPlansData && Array.isArray(window.productionPlansData._printers)
+        ? window.productionPlansData._printers
+        : null;
+      const list = (raw && raw.length > 0) ? raw : DEFAULT_MFG_PRINTERS;
+      return includeInactive ? list : list.filter(p => p.active !== false);
+    };
+
+    window.getPrinterDailyCapacity = (printer, dateStr) => {
+      if (!printer) return 12.0;
+      if (printer.dateOverrides && printer.dateOverrides[dateStr] !== undefined) {
+        return Math.max(0, Number(printer.dateOverrides[dateStr]) || 0);
+      }
+      const d = parseLocalYmd(dateStr);
+      const dow = d.getDay();
+      if ((dow === 0 || dow === 6) && printer.weekendHours !== undefined && printer.weekendHours !== null) {
+        return Math.max(0, Number(printer.weekendHours));
+      }
+      return Math.max(0, Number(printer.defaultHours !== undefined ? printer.defaultHours : 12.0));
+    };
+
+    window.getMfgSkuSpec = (skuId, parentId, parentName = '') => {
+      const specs = (window.productionPlansData && window.productionPlansData._specs) || {};
+      const sEntry = specs[skuId] || specs[parentId] || {};
+      const defaultUnitHours = sEntry.unitHours !== undefined ? Number(sEntry.unitHours) : 2.5;
+      let defaultPrinters = Array.isArray(sEntry.printers) && sEntry.printers.length > 0 ? sEntry.printers : null;
+      if (!defaultPrinters) {
+        const lower = (parentName || '').toLowerCase();
+        if (lower.includes('レジン') || lower.includes('robo') || lower.includes('ロボ') || lower.includes('エレク')) {
+          defaultPrinters = ['mini1', 'mini2', 'creator5', 'resin1'];
+        } else {
+          defaultPrinters = ['mini1', 'mini2', 'creator5'];
+        }
+      }
+      return {
+        unitHours: defaultUnitHours > 0 ? defaultUnitHours : 2.5,
+        printers: defaultPrinters,
+        printerUnitHours: sEntry.printerUnitHours || {}
+      };
+    };
+
+    window.getMfgScheduledJobs = () => {
+      const data = window.productionPlansData || {};
+      const jobs = [];
+      Object.keys(data).forEach(k => {
+        if (k.startsWith('_')) return;
+        const item = data[k];
+        if (!item || typeof item !== 'object') return;
+        // New format has printerId and date
+        if (item.printerId && item.date) {
+          jobs.push({
+            id: k,
+            productId: item.productId,
+            skuId: item.skuId || item.productId,
+            printerId: item.printerId,
+            date: item.date,
+            qty: Math.max(1, parseInt(item.qty) || 1),
+            unitHours: Number(item.unitHours) || 2.5,
+            totalHours: Number(item.totalHours) || ((Math.max(1, parseInt(item.qty) || 1)) * (Number(item.unitHours) || 2.5)),
+            isCustomHours: Boolean(item.isCustomHours),
+            status: item.status || 'planned', // 'planned' | 'printing' | 'completed'
+            targetEvents: Array.isArray(item.targetEvents) ? item.targetEvents : [],
+            memo: item.memo || '',
+            updatedAt: item.updatedAt || 0
+          });
+        }
+      });
+      return jobs.sort((a, b) => (a.updatedAt || 0) - (b.updatedAt || 0));
+    };
+
+    window.jumpToMfgBoardForSku = (skuId) => {
+      mfgSelectedUnplannedSkuId = skuId;
+      mfgSelectedJobId = null;
+      window.switchSettingsSubTab('production');
+      window.switchMfgBoardMode('daily');
+    };
+
+    window.switchMfgBoardMode = (mode) => {
+      mfgBoardMode = mode;
+      const modes = ['daily', 'matrix', 'legacy'];
+      modes.forEach(m => {
+        const btn = document.getElementById('btn-mfg-mode-' + m);
+        if (btn) {
+          const isAct = (m === mode);
+          btn.style.background = isAct ? '#3b82f6' : 'none';
+          btn.style.color = isAct ? '#fff' : 'rgba(255,255,255,0.75)';
+          btn.style.fontWeight = isAct ? 'bold' : 'normal';
+        }
+      });
+      const dailyEl = document.getElementById('mfg-view-daily-board');
+      const matrixEl = document.getElementById('mfg-view-matrix-board');
+      const legacyEl = document.getElementById('mfg-view-legacy-chart');
+      if (dailyEl) dailyEl.style.display = (mode === 'daily') ? 'grid' : 'none';
+      if (matrixEl) matrixEl.style.display = (mode === 'matrix') ? 'flex' : 'none';
+      if (legacyEl) legacyEl.style.display = (mode === 'legacy') ? 'flex' : 'none';
+      window.renderProductionPlans();
+    };
+
+    window.shiftMfgStartDate = (deltaDays) => {
+      if (!mfgStartDateStr) mfgStartDateStr = getLocalYmd();
+      mfgStartDateStr = addDaysYmd(mfgStartDateStr, deltaDays);
+      window.renderProductionPlans();
+    };
+
+    window.onChangeMfgStartDate = (val) => {
+      if (val) {
+        mfgStartDateStr = val;
+        window.renderProductionPlans();
+      }
+    };
+
+    window.resetMfgStartDateToToday = () => {
+      mfgStartDateStr = getLocalYmd();
+      window.renderProductionPlans();
+    };
+
+    window.onChangeMfgDaysCount = (val) => {
+      mfgDaysCount = Math.max(3, Math.min(21, parseInt(val) || 6));
+      window.renderProductionPlans();
+    };
+
+    // Prompt date-specific capacity override when clicking a cell's capacity header
+    window.promptOverridePrinterDateCapacity = async (printerId, dateStr) => {
+      if (!auth.currentUser) return alert("ログインが必要です");
+      const printers = [...window.getMfgPrinters(true)];
+      const pIdx = printers.findIndex(p => p.id === printerId);
+      if (pIdx === -1) return;
+      const p = { ...printers[pIdx], dateOverrides: { ...(printers[pIdx].dateOverrides || {}) } };
+      const curCap = window.getPrinterDailyCapacity(p, dateStr);
+      const input = prompt(`【${p.name} - ${dateStr} の稼働可能時間変更】
+この日の稼働可能時間（h）を入力してください:
+（※空欄にすると通常設定 ${p.defaultHours}h に戻ります）`, String(curCap));
+      if (input === null) return;
+      const trimmed = input.trim();
+      if (trimmed === '') {
+        delete p.dateOverrides[dateStr];
+      } else {
+        const val = parseFloat(trimmed);
+        if (isNaN(val) || val < 0 || val > 24) return alert("0〜24の数値を入力してください。");
+        p.dateOverrides[dateStr] = val;
+      }
+      printers[pIdx] = p;
+      const updated = { ...(window.productionPlansData || {}), _printers: printers };
+      window.productionPlansData = updated;
+      await setDoc(doc(db, "settings", "production_plans"), updated);
+      window.renderProductionPlans();
+    };
+
+    // Printer Settings Modal
+    window.openMfgPrinterSettingsModal = () => {
+      mfgPrinterDraftList = window.getMfgPrinters(true).map(p => ({ ...p, dateOverrides: { ...(p.dateOverrides || {}) } }));
+      renderMfgPrinterSettingsList();
+      document.getElementById('mfg-printer-settings-modal').style.display = 'flex';
+    };
+
+    window.closeMfgPrinterSettingsModal = () => {
+      document.getElementById('mfg-printer-settings-modal').style.display = 'none';
+    };
+
+    function syncMfgPrinterDraftFromDOM() {
+      mfgPrinterDraftList.forEach((p, i) => {
+        const nameEl = document.getElementById(`mfg-pr-name-${i}`);
+        const shortEl = document.getElementById(`mfg-pr-short-${i}`);
+        const defH = document.getElementById(`mfg-pr-defh-${i}`);
+        const wkH = document.getElementById(`mfg-pr-wkh-${i}`);
+        const actEl = document.getElementById(`mfg-pr-act-${i}`);
+        if (nameEl) p.name = nameEl.value.trim() || p.name;
+        if (shortEl) p.shortName = shortEl.value.trim() || p.name;
+        if (defH) p.defaultHours = Math.max(0, parseFloat(defH.value) || 0);
+        if (wkH) p.weekendHours = Math.max(0, parseFloat(wkH.value) || 0);
+        if (actEl) p.active = actEl.checked;
+      });
+    }
+
+    function renderMfgPrinterSettingsList() {
+      const box = document.getElementById('mfg-printer-settings-list');
+      if (!box) return;
+      box.innerHTML = mfgPrinterDraftList.map((p, i) => `
+        <div style="background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.1); border-radius:10px; padding:12px; display:grid; grid-template-columns: auto 1.3fr 0.9fr 95px 95px auto; gap:8px; align-items:center;">
+          <label style="display:flex; align-items:center; gap:4px; font-size:11px; cursor:pointer;">
+            <input type="checkbox" id="mfg-pr-act-${i}" ${p.active !== false ? 'checked' : ''} style="accent-color:var(--accent); width:16px; height:16px;">
+            <span>有効</span>
+          </label>
+          <div>
+            <div style="font-size:10px; opacity:0.55;">プリンター名称</div>
+            <input type="text" id="mfg-pr-name-${i}" class="form-input" value="${(p.name || '').replace(/"/g, '&quot;')}" style="font-size:12px; padding:5px 8px; font-weight:bold;">
+          </div>
+          <div>
+            <div style="font-size:10px; opacity:0.55;">ボード表示略称</div>
+            <input type="text" id="mfg-pr-short-${i}" class="form-input" value="${(p.shortName || p.name || '').replace(/"/g, '&quot;')}" style="font-size:12px; padding:5px 8px;">
+          </div>
+          <div>
+            <div style="font-size:10px; opacity:0.55;">平日稼働(h/日)</div>
+            <input type="number" step="0.5" min="0" max="24" id="mfg-pr-defh-${i}" class="form-input" value="${p.defaultHours ?? 12}" style="font-size:12px; padding:5px 6px; text-align:right; font-weight:bold;">
+          </div>
+          <div>
+            <div style="font-size:10px; opacity:0.55;">土日稼働(h/日)</div>
+            <input type="number" step="0.5" min="0" max="24" id="mfg-pr-wkh-${i}" class="form-input" value="${p.weekendHours ?? p.defaultHours ?? 12}" style="font-size:12px; padding:5px 6px; text-align:right; font-weight:bold;">
+          </div>
+          <button type="button" onclick="removeMfgPrinterRow(${i})" style="background:rgba(239,68,68,0.15); border:1px solid #ef4444; color:#f87171; border-radius:6px; width:28px; height:28px; cursor:pointer; margin-top:14px;" title="削除">✕</button>
+        </div>
+      `).join('');
+    }
+
+    window.addMfgPrinterRow = () => {
+      syncMfgPrinterDraftFromDOM();
+      const newId = 'printer_' + Date.now().toString(36);
+      mfgPrinterDraftList.push({
+        id: newId,
+        name: `追加プリンター ${mfgPrinterDraftList.length + 1}`,
+        shortName: `追加機 ${mfgPrinterDraftList.length + 1}`,
+        type: 'fdm',
+        defaultHours: 12.0,
+        weekendHours: 12.0,
+        dateOverrides: {},
+        color: '#10b981',
+        icon: '🖨️',
+        active: true
+      });
+      renderMfgPrinterSettingsList();
+    };
+
+    window.removeMfgPrinterRow = (idx) => {
+      syncMfgPrinterDraftFromDOM();
+      if (mfgPrinterDraftList.length <= 1) return alert("最低1台のプリンターが必要です。");
+      if (!confirm(`「${mfgPrinterDraftList[idx].name}」を削除しますか？`)) return;
+      mfgPrinterDraftList.splice(idx, 1);
+      renderMfgPrinterSettingsList();
+    };
+
+    window.saveMfgPrinterSettings = async () => {
+      if (!auth.currentUser) return alert("ログインが必要です");
+      syncMfgPrinterDraftFromDOM();
+      try {
+        const updated = { ...(window.productionPlansData || {}), _printers: mfgPrinterDraftList };
+        window.productionPlansData = updated;
+        await setDoc(doc(db, "settings", "production_plans"), updated);
+        closeMfgPrinterSettingsModal();
+        window.renderProductionPlans();
+      } catch(e) {
+        console.error(e);
+        alert("プリンター設定の保存に失敗しました: " + e.message);
+      }
+    };
+
+    // Legacy Timeline Chart Renderer (preserved for Mode C)
+    window.renderLegacyProductionPlans = () => {
       const grid = document.getElementById('production-gantt-grid');
       if (!grid) return;
       grid.innerHTML = '';
@@ -9769,7 +10437,7 @@
       `;
       grid.innerHTML += headerRow;
 
-      const planKeys = Object.keys(window.productionPlansData || {});
+      const planKeys = Object.keys(window.productionPlansData || {}).filter(k => !k.startsWith('_') && window.productionPlansData[k]?.startDate);
       if (planKeys.length === 0) {
         grid.innerHTML += `
           <div style="padding:40px; text-align:center; opacity:0.5; font-size:13px;">製造計画がありません。「＋ 製造計画を追加」から予定を登録しましょう！</div>
@@ -9846,6 +10514,1558 @@
           </div>
         `;
       });
+    };
+
+    // Build SKU demand & production plan summary across selected events
+    function buildMfgSkuDemandList() {
+      const allEvents = window.getAllEvents ? window.getAllEvents(eventConfigData) : {};
+      if (!multiAggSelectedEvents || multiAggSelectedEvents.length === 0) {
+        multiAggSelectedEvents = [currentEventKey];
+      }
+      if (!multiAggStockSourceEvent || !allEvents[multiAggStockSourceEvent]) {
+        multiAggStockSourceEvent = currentEventKey;
+      }
+
+      const refInvMap = (multiAggStockSourceEvent === currentEventKey)
+        ? inventoryData
+        : (multiAggInvCache[multiAggStockSourceEvent] || {});
+
+      const allJobs = window.getMfgScheduledJobs();
+      // Sum planned (pending: 'planned' or 'printing') and completed per skuId
+      const plannedBySku = {};
+      const completedBySku = {};
+      const plannedBySkuPrinter = {}; // { [skuId]: { [printerId]: qty } }
+
+      allJobs.forEach(j => {
+        const sid = j.skuId || j.productId;
+        if (j.status === 'completed') {
+          completedBySku[sid] = (completedBySku[sid] || 0) + j.qty;
+        } else {
+          plannedBySku[sid] = (plannedBySku[sid] || 0) + j.qty;
+          if (!plannedBySkuPrinter[sid]) plannedBySkuPrinter[sid] = {};
+          plannedBySkuPrinter[sid][j.printerId] = (plannedBySkuPrinter[sid][j.printerId] || 0) + j.qty;
+        }
+      });
+
+      const allMaster = window.getFullMasterProducts ? window.getFullMasterProducts(window.customProductsData) : MASTER_PRODUCTS;
+      const skuList = [];
+      mfgSkuMapCache = {};
+
+      allMaster.forEach((p, mIdx) => {
+        const cleanParentName = p.name.replace(/
+/g, ' ');
+        const vars = window.getProductVariants(p.id, false);
+        const isSelectedInAnyEvent = multiAggSelectedEvents.some(evKey => {
+          const selIds = window.eventProductsData?.[evKey];
+          return !selIds || selIds.includes(p.id);
+        });
+
+        if (vars.length > 0) {
+          vars.forEach((v, vIdx) => {
+            let totalReq = 0;
+            multiAggSelectedEvents.forEach(evKey => {
+              const prepMap = getEventAdoptedPrepMap(evKey);
+              totalReq += window.getSkuSimQty(prepMap, p.id, v);
+            });
+            const vInv = window.getSkuInventory(refInvMap, p.id, v);
+            const curStock = vInv.current || 0;
+            const shortage = Math.max(0, totalReq - curStock);
+            const plannedQty = plannedBySku[v.skuId] || 0;
+            const completedQty = completedBySku[v.skuId] || 0;
+            const unplannedQty = Math.max(0, shortage - plannedQty);
+            const spec = window.getMfgSkuSpec(v.skuId, p.id, cleanParentName);
+
+            const item = {
+              skuId: v.skuId,
+              parentId: p.id,
+              parentName: cleanParentName,
+              parentImage: p.image,
+              variantName: v.name,
+              isBase: v.isBase,
+              hasVars: true,
+              totalReq,
+              currentStock: curStock,
+              shortage,
+              plannedQty,
+              completedQty,
+              unplannedQty,
+              unitHours: spec.unitHours,
+              compatiblePrinters: spec.printers,
+              printerBreakdown: plannedBySkuPrinter[v.skuId] || {},
+              unplannedHours: +(unplannedQty * spec.unitHours).toFixed(1),
+              masterOrder: mIdx * 100 + vIdx,
+              isSelectedInAnyEvent
+            };
+            mfgSkuMapCache[v.skuId] = item;
+            if (isSelectedInAnyEvent || totalReq > 0 || curStock > 0 || plannedQty > 0) {
+              skuList.push(item);
+            }
+          });
+        } else {
+          let totalReq = 0;
+          multiAggSelectedEvents.forEach(evKey => {
+            const prepMap = getEventAdoptedPrepMap(evKey);
+            totalReq += Number(prepMap[p.id]) || 0;
+          });
+          const pInv = refInvMap[p.id] || { current: 0 };
+          const curStock = pInv.current || 0;
+          const shortage = Math.max(0, totalReq - curStock);
+          const plannedQty = plannedBySku[p.id] || 0;
+          const completedQty = completedBySku[p.id] || 0;
+          const unplannedQty = Math.max(0, shortage - plannedQty);
+          const spec = window.getMfgSkuSpec(p.id, p.id, cleanParentName);
+
+          const item = {
+            skuId: p.id,
+            parentId: p.id,
+            parentName: cleanParentName,
+            parentImage: p.image,
+            variantName: '無印',
+            isBase: true,
+            hasVars: false,
+            totalReq,
+            currentStock: curStock,
+            shortage,
+            plannedQty,
+            completedQty,
+            unplannedQty,
+            unitHours: spec.unitHours,
+            compatiblePrinters: spec.printers,
+            printerBreakdown: plannedBySkuPrinter[p.id] || {},
+            unplannedHours: +(unplannedQty * spec.unitHours).toFixed(1),
+            masterOrder: mIdx * 100,
+            isSelectedInAnyEvent
+          };
+          mfgSkuMapCache[p.id] = item;
+          if (isSelectedInAnyEvent || totalReq > 0 || curStock > 0 || plannedQty > 0) {
+            skuList.push(item);
+          }
+        }
+      });
+
+      return skuList;
+    }
+
+    // Main entry point for Manufacturing Planning Board
+    window.renderProductionPlans = async () => {
+      if (!mfgStartDateStr) mfgStartDateStr = getLocalYmd();
+      await ensureAllEventsSimAndInvLoaded(false);
+
+      if (mfgBoardMode === 'legacy') {
+        window.renderLegacyProductionPlans();
+      }
+
+      const printers = window.getMfgPrinters(false);
+      const skuList = buildMfgSkuDemandList();
+      const allJobs = window.getMfgScheduledJobs();
+      const todayStr = getLocalYmd();
+
+      // Date array for current window
+      const dateList = [];
+      for (let i = 0; i < mfgDaysCount; i++) {
+        dateList.push(addDaysYmd(mfgStartDateStr, i));
+      }
+      const endDateStr = dateList[dateList.length - 1] || mfgStartDateStr;
+
+      // Update Date Picker & Range Label
+      const pickerEl = document.getElementById('mfg-start-date-picker');
+      if (pickerEl) pickerEl.value = mfgStartDateStr;
+      const rangeLabelEl = document.getElementById('mfg-date-range-label');
+      if (rangeLabelEl) {
+        const dStart = parseLocalYmd(mfgStartDateStr);
+        const dEnd = parseLocalYmd(endDateStr);
+        const dowNames = ['日', '月', '火', '水', '木', '金', '土'];
+        rangeLabelEl.textContent = `〜 ${dEnd.getMonth() + 1}/${dEnd.getDate()}(${dowNames[dEnd.getDay()]})`;
+      }
+
+      // Compute KPI totals
+      let totalShortageQty = 0;
+      let totalPlannedPendingQty = 0;
+      let totalCappedPlannedQty = 0;
+      let totalUnplannedQty = 0;
+      let totalUnplannedHours = 0;
+
+      skuList.forEach(s => {
+        totalShortageQty += s.shortage;
+        totalPlannedPendingQty += s.plannedQty;
+        totalCappedPlannedQty += Math.min(s.shortage, s.plannedQty);
+        totalUnplannedQty += s.unplannedQty;
+        totalUnplannedHours += s.unplannedHours;
+      });
+
+      // Compute Today's & Period's scheduled hours
+      let todayScheduledHours = 0;
+      let todayJobCount = 0;
+      let todayTotalCapacity = 0;
+      printers.forEach(pr => {
+        todayTotalCapacity += window.getPrinterDailyCapacity(pr, todayStr);
+      });
+
+      let periodScheduledHours = 0;
+      let periodTotalCapacity = 0;
+      printers.forEach(pr => {
+        dateList.forEach(dStr => {
+          periodTotalCapacity += window.getPrinterDailyCapacity(pr, dStr);
+        });
+      });
+
+      const dateSet = new Set(dateList);
+      allJobs.forEach(j => {
+        if (j.date === todayStr) {
+          todayScheduledHours += j.totalHours;
+          todayJobCount++;
+        }
+        if (dateSet.has(j.date)) {
+          periodScheduledHours += j.totalHours;
+        }
+      });
+
+      const planCoverRate = totalShortageQty > 0
+        ? Math.min(100, Math.round((totalCappedPlannedQty / totalShortageQty) * 100))
+        : 100;
+
+      // 1. Render 6 KPI Cards
+      const kpiRow = document.getElementById('mfg-kpi-row');
+      if (kpiRow) {
+        kpiRow.innerHTML = `
+          <!-- 1. 未計画数 -->
+          <div class="prod-kpi-card" style="padding:12px 14px;">
+            <div class="prod-kpi-icon" style="background:rgba(239,68,68,0.16); color:#f87171; border:1px solid rgba(239,68,68,0.35); width:38px; height:38px; font-size:17px;">📦</div>
+            <div style="flex:1; min-width:0;">
+              <div style="font-size:11px; color:rgba(255,255,255,0.6);">未計画数</div>
+              <div style="font-size:22px; font-weight:bold; color:${totalUnplannedQty > 0 ? '#f87171' : '#34d399'}; line-height:1.2;">
+                ${totalUnplannedQty} <span style="font-size:11px; font-weight:normal; color:rgba(255,255,255,0.5);">個 (全不足 ${totalShortageQty}個)</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 2. 製造計画済み -->
+          <div class="prod-kpi-card" style="padding:12px 14px;">
+            <div class="prod-kpi-icon" style="background:rgba(16,185,129,0.16); color:#34d399; border:1px solid rgba(16,185,129,0.35); width:38px; height:38px; font-size:17px;">🗓️</div>
+            <div style="flex:1; min-width:0;">
+              <div style="font-size:11px; color:rgba(255,255,255,0.6);">製造計画済み</div>
+              <div style="font-size:22px; font-weight:bold; color:#34d399; line-height:1.2;">
+                ${totalPlannedPendingQty} <span style="font-size:11px; font-weight:normal; color:rgba(255,255,255,0.5);">個 (未完予定)</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 3. 本日の予定 -->
+          <div class="prod-kpi-card" style="padding:12px 14px;">
+            <div class="prod-kpi-icon" style="background:rgba(59,130,246,0.16); color:#60a5fa; border:1px solid rgba(59,130,246,0.35); width:38px; height:38px; font-size:17px;">⏱️</div>
+            <div style="flex:1; min-width:0;">
+              <div style="font-size:11px; color:rgba(255,255,255,0.6);">本日の予定</div>
+              <div style="font-size:22px; font-weight:bold; color:#60a5fa; line-height:1.2;">
+                ${todayScheduledHours.toFixed(1)} <span style="font-size:11px; font-weight:normal; color:rgba(255,255,255,0.5);">時間 (${todayJobCount}件)</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 4. 表示期間の予定 -->
+          <div class="prod-kpi-card" style="padding:12px 14px;">
+            <div class="prod-kpi-icon" style="background:rgba(6,182,212,0.16); color:#22d3ee; border:1px solid rgba(6,182,212,0.35); width:38px; height:38px; font-size:17px;">📅</div>
+            <div style="flex:1; min-width:0;">
+              <div style="font-size:11px; color:rgba(255,255,255,0.6);">期間内の予定 (${mfgDaysCount}日間)</div>
+              <div style="font-size:22px; font-weight:bold; color:#22d3ee; line-height:1.2;">
+                ${periodScheduledHours.toFixed(1)} <span style="font-size:11px; font-weight:normal; color:rgba(255,255,255,0.5);">/ ${periodTotalCapacity.toFixed(0)}h</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 5. 残り必要時間 (未計画分) -->
+          <div class="prod-kpi-card" style="padding:12px 14px;">
+            <div class="prod-kpi-icon" style="background:rgba(245,158,11,0.16); color:#fbbf24; border:1px solid rgba(245,158,11,0.35); width:38px; height:38px; font-size:17px;">⏳</div>
+            <div style="flex:1; min-width:0;">
+              <div style="font-size:11px; color:rgba(255,255,255,0.6);">残り必要時間</div>
+              <div style="font-size:22px; font-weight:bold; color:#fbbf24; line-height:1.2;">
+                ${totalUnplannedHours.toFixed(1)} <span style="font-size:11px; font-weight:normal; color:rgba(255,255,255,0.5);">時間 (未計画分)</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 6. 予定達成率 -->
+          <div class="prod-kpi-card" style="padding:10px 14px; flex-direction:column; align-items:stretch; justify-content:center; gap:6px;">
+            <div style="display:flex; justify-content:space-between; align-items:baseline;">
+              <span style="font-size:11px; color:rgba(255,255,255,0.6);">🎯 計画カバー率</span>
+              <span style="font-size:20px; font-weight:bold; color:#34d399;">${planCoverRate}%</span>
+            </div>
+            <div style="background:rgba(255,255,255,0.08); height:6px; border-radius:4px; overflow:hidden;">
+              <div style="background:linear-gradient(90deg, #10b981, #06b6d4); width:${planCoverRate}%; height:100%; border-radius:4px;"></div>
+            </div>
+            <div style="font-size:10px; color:rgba(255,255,255,0.45); text-align:right;">計画済 ${totalCappedPlannedQty} / 不足 ${totalShortageQty}個</div>
+          </div>
+        `;
+      }
+
+      // 2. Render 4 Printer Status Cards Row
+      const printerRow = document.getElementById('mfg-printer-cards-row');
+      const selectedSkuObj = mfgSelectedUnplannedSkuId ? mfgSkuMapCache[mfgSelectedUnplannedSkuId] : null;
+      if (printerRow) {
+        printerRow.innerHTML = printers.map(pr => {
+          const todayCap = window.getPrinterDailyCapacity(pr, todayStr);
+          const todayUsed = allJobs
+            .filter(j => j.printerId === pr.id && j.date === todayStr)
+            .reduce((sum, j) => sum + j.totalHours, 0);
+          const todayRemain = Math.max(0, todayCap - todayUsed);
+          const todayPct = todayCap > 0 ? Math.round((todayUsed / todayCap) * 100) : 0;
+          const isOver = todayUsed > todayCap + 0.01;
+          const barColor = isOver ? '#ef4444' : (todayPct >= 85 ? '#f59e0b' : '#10b981');
+          const isCompat = selectedSkuObj && selectedSkuObj.compatiblePrinters.includes(pr.id);
+
+          return `
+            <div class="mfg-printer-card ${isCompat ? 'printer-compatible-highlight' : ''}" onclick="promptOverridePrinterDateCapacity('${pr.id}', '${todayStr}')" style="cursor:pointer;" title="クリックで本日の稼働可能時間を変更できます">
+              <div style="width:46px; height:46px; border-radius:10px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.12); display:flex; align-items:center; justify-content:center; font-size:22px; flex-shrink:0;">
+                ${pr.icon || '🖨️'}
+              </div>
+              <div style="flex:1; min-width:0;">
+                <div style="display:flex; justify-content:space-between; align-items:center; gap:4px;">
+                  <span style="font-size:14px; font-weight:bold; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${pr.shortName || pr.name}</span>
+                  <span style="font-size:11px; color:${isOver ? '#f87171' : '#34d399'}; font-weight:bold;">本日の予定 ${todayUsed.toFixed(1)}h</span>
+                </div>
+                <div style="display:flex; justify-content:space-between; align-items:center; font-size:10px; color:rgba(255,255,255,0.55); margin:3px 0 5px 0;">
+                  <span style="color:#34d399;">● 稼働中 (${todayCap.toFixed(1)}h/日)</span>
+                  <span>${isOver ? `<strong style="color:#f87171;">⚠️ +${(todayUsed - todayCap).toFixed(1)}h 超過</strong>` : `残り <strong style="color:#fff;">${todayRemain.toFixed(1)}h</strong> (${todayPct}%)`}</span>
+                </div>
+                <div style="background:rgba(255,255,255,0.08); height:6px; border-radius:4px; overflow:hidden;">
+                  <div style="background:${barColor}; width:${Math.min(100, todayPct)}%; height:100%; border-radius:4px; transition:width 0.25s;"></div>
+                </div>
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+
+      // Populate Left Series & Printer Filter Options
+      const leftSeriesEl = document.getElementById('mfg-left-series');
+      if (leftSeriesEl) {
+        const curS = leftSeriesEl.value || 'all';
+        const seenParents = new Map();
+        skuList.forEach(s => { if (!seenParents.has(s.parentId)) seenParents.set(s.parentId, s.parentName); });
+        leftSeriesEl.innerHTML = `<option value="all">全シリーズ (${seenParents.size})</option>` +
+          Array.from(seenParents.entries()).map(([pid, pname]) => `<option value="${pid}" ${pid === curS ? 'selected' : ''}>${pname}</option>`).join('');
+      }
+      const leftPrinterEl = document.getElementById('mfg-left-printer');
+      if (leftPrinterEl) {
+        const curP = leftPrinterEl.value || 'all';
+        leftPrinterEl.innerHTML = `<option value="all">全プリンター対応</option>` +
+          printers.map(pr => `<option value="${pr.id}" ${pr.id === curP ? 'selected' : ''}>${pr.shortName || pr.name}</option>`).join('');
+      }
+
+      // 3. Render Left Unplanned SKUs Panel
+      renderMfgLeftUnplannedList(skuList, printers);
+
+      // 4. Render Center Printer x Date Schedule Matrix
+      renderMfgCenterScheduleGrid(printers, dateList, allJobs, todayStr);
+
+      // 5. Render Right Detail Inspector
+      renderMfgRightInspector(printers, allJobs);
+
+      // 6. If Matrix Mode is active, render Matrix Table
+      if (mfgBoardMode === 'matrix') {
+        renderMfgMatrixView(skuList, printers, allJobs, dateList);
+      }
+    };
+
+    // Left Panel: Unplanned / Shortage SKUs List
+    function renderMfgLeftUnplannedList(skuList, printers) {
+      const container = document.getElementById('mfg-unplanned-list-container');
+      const countBadge = document.getElementById('mfg-unplanned-count-badge');
+      const hintBanner = document.getElementById('mfg-stamp-hint-banner');
+      if (!container) return;
+
+      const sortMode = document.getElementById('mfg-left-sort')?.value || 'unplanned_desc';
+      const filterMode = document.getElementById('mfg-left-filter')?.value || 'unplanned';
+      const seriesFilter = document.getElementById('mfg-left-series')?.value || 'all';
+      const printerFilter = document.getElementById('mfg-left-printer')?.value || 'all';
+      const searchQ = (document.getElementById('mfg-left-search')?.value || '').trim().toLowerCase();
+
+      const printerShortMap = {};
+      printers.forEach(p => { printerShortMap[p.id] = p.shortName || p.name; });
+
+      const filtered = skuList.filter(s => {
+        if (filterMode === 'unplanned' && s.unplannedQty <= 0) return false;
+        if (filterMode === 'shortage' && s.shortage <= 0) return false;
+        if (filterMode === 'required' && s.totalReq <= 0) return false;
+        if (seriesFilter !== 'all' && s.parentId !== seriesFilter) return false;
+        if (printerFilter !== 'all' && !s.compatiblePrinters.includes(printerFilter)) return false;
+        if (searchQ) {
+          const text = `${s.parentName} ${s.variantName}`.toLowerCase();
+          if (!text.includes(searchQ)) return false;
+        }
+        return true;
+      });
+
+      filtered.sort((a, b) => {
+        if (sortMode === 'unplanned_desc') {
+          if (b.unplannedQty !== a.unplannedQty) return b.unplannedQty - a.unplannedQty;
+          if (b.shortage !== a.shortage) return b.shortage - a.shortage;
+        } else if (sortMode === 'shortage_desc') {
+          if (b.shortage !== a.shortage) return b.shortage - a.shortage;
+          if (b.unplannedQty !== a.unplannedQty) return b.unplannedQty - a.unplannedQty;
+        } else if (sortMode === 'hours_desc') {
+          if (b.unplannedHours !== a.unplannedHours) return b.unplannedHours - a.unplannedHours;
+        }
+        return a.masterOrder - b.masterOrder;
+      });
+
+      const totalUnplannedItems = skuList.filter(s => s.unplannedQty > 0).length;
+      if (countBadge) countBadge.textContent = `${totalUnplannedItems}件`;
+
+      if (hintBanner) {
+        const selSku = mfgSelectedUnplannedSkuId ? mfgSkuMapCache[mfgSelectedUnplannedSkuId] : null;
+        if (selSku) {
+          hintBanner.style.background = 'rgba(0, 210, 255, 0.2)';
+          hintBanner.style.borderColor = '#00d2ff';
+          hintBanner.style.color = '#fff';
+          hintBanner.innerHTML = `🎯 選択中: <strong>${selSku.parentName} (${selSku.variantName})</strong> [未計画 ${selSku.unplannedQty}個] — 中央の「＋追加」枠をクリックで即配置！`;
+        } else {
+          hintBanner.style.background = 'rgba(59,130,246,0.14)';
+          hintBanner.style.borderColor = 'rgba(59,130,246,0.35)';
+          hintBanner.style.color = '#93c5fd';
+          hintBanner.innerHTML = `💡 左の作品をクリック選択（またはドラッグ）して、入れたい「プリンター×日付」の枠へ配置できます`;
+        }
+      }
+
+      if (filtered.length === 0) {
+        container.innerHTML = `
+          <div style="text-align:center; padding:32px 12px; color:rgba(255,255,255,0.45); font-size:12px;">
+            ${filterMode === 'unplanned' ? '🎉 未計画の不足作品はありません！
+（上のフィルタを「全出品対象」に変えると全作品を表示できます）' : '条件に一致する作品がありません。'}
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = filtered.map(s => {
+        const isSel = mfgSelectedUnplannedSkuId === s.skuId && !mfgSelectedJobId;
+        const pBadges = s.compatiblePrinters
+          .filter(pid => printerShortMap[pid])
+          .map(pid => `<span class="mfg-printer-badge">${printerShortMap[pid].replace('号機', '')}</span>`)
+          .join('');
+
+        return `
+          <div class="mfg-unplanned-card ${isSel ? 'mfg-card-selected' : ''}"
+               draggable="true"
+               ondragstart="onMfgDragStartSku(event, '${s.skuId}')"
+               onclick="selectMfgUnplannedSku('${s.skuId}')">
+            <img src="${s.parentImage}" style="width:46px; height:46px; border-radius:8px; object-fit:cover; background:#222; flex-shrink:0;">
+            <div style="flex:1; min-width:0;">
+              <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:4px;">
+                <div style="font-size:12px; font-weight:bold; color:#fff; line-height:1.25; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="${s.parentName}">${s.parentName}</div>
+                <button type="button" onclick="event.stopPropagation(); quickAutoPlaceSku('${s.skuId}')" style="background:rgba(59,130,246,0.2); border:1px solid #3b82f6; color:#93c5fd; font-size:10px; font-weight:bold; padding:2px 7px; border-radius:6px; cursor:pointer; white-space:nowrap; flex-shrink:0;" title="空いている対応プリンター枠へ自動追加">＋計画に追加</button>
+              </div>
+              <div style="font-size:11px; color:${s.isBase ? 'rgba(255,255,255,0.65)' : 'var(--accent)'}; font-weight:${s.isBase ? 'normal' : 'bold'}; margin-top:1px;">
+                ${s.variantName}
+              </div>
+
+              <!-- Numbers breakdown -->
+              <div style="display:flex; align-items:center; flex-wrap:wrap; gap:4px; margin-top:6px;">
+                ${s.unplannedQty > 0
+                  ? `<span style="background:rgba(239,68,68,0.22); border:1px solid rgba(239,68,68,0.5); color:#f87171; font-size:10px; font-weight:bold; padding:1px 6px; border-radius:4px;">未計画 ${s.unplannedQty}</span>`
+                  : `<span style="background:rgba(16,185,129,0.2); border:1px solid rgba(16,185,129,0.45); color:#34d399; font-size:10px; font-weight:bold; padding:1px 6px; border-radius:4px;">✔ 計画済</span>`
+                }
+                <span style="font-size:10px; color:rgba(255,255,255,0.55);">不足:${s.shortage} / 計画:${s.plannedQty} / 在庫:${s.currentStock}</span>
+              </div>
+
+              <!-- Unit time & Compatible Printers -->
+              <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:4px; margin-top:5px;">
+                <span style="font-size:10px; color:#fbbf24; font-weight:bold;">⏱ ${s.unitHours}h/個 ${s.unplannedQty > 0 ? `(計${s.unplannedHours}h)` : ''}</span>
+                <div style="display:flex; gap:3px; flex-wrap:wrap;">${pBadges}</div>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // Center Panel: Printer x Date Schedule Matrix
+    function renderMfgCenterScheduleGrid(printers, dateList, allJobs, todayStr) {
+      const container = document.getElementById('mfg-schedule-grid-container');
+      if (!container) return;
+
+      const showCompleted = document.getElementById('mfg-show-completed-jobs')?.checked !== false;
+      const dowNames = ['日', '月', '火', '水', '木', '金', '土'];
+      const selectedSkuObj = mfgSelectedUnplannedSkuId ? mfgSkuMapCache[mfgSelectedUnplannedSkuId] : null;
+
+      // Color palette for product chips
+      const chipPalettes = [
+        { bg: 'rgba(59, 130, 246, 0.24)', border: '#3b82f6', text: '#dbeafe' },
+        { bg: 'rgba(245, 158, 11, 0.24)', border: '#f59e0b', text: '#fef3c7' },
+        { bg: 'rgba(168, 85, 247, 0.24)', border: '#a855f7', text: '#f3e8ff' },
+        { bg: 'rgba(6, 182, 212, 0.24)', border: '#06b6d4', text: '#cffafe' },
+        { bg: 'rgba(236, 72, 153, 0.24)', border: '#ec4899', text: '#fce7f3' }
+      ];
+
+      function getChipPalette(productId, status) {
+        if (status === 'completed') {
+          return { bg: 'rgba(16, 185, 129, 0.2)', border: '#10b981', text: '#d1fae5' };
+        }
+        if (status === 'printing') {
+          return { bg: 'rgba(245, 158, 11, 0.28)', border: '#fbbf24', text: '#fef3c7' };
+        }
+        let hash = 0;
+        const s = String(productId || '');
+        for (let i = 0; i < s.length; i++) hash = (hash * 31 + s.charCodeAt(i)) % 997;
+        return chipPalettes[hash % chipPalettes.length];
+      }
+
+      // Build Date Header Columns
+      const dateHeaderCols = dateList.map(dStr => {
+        const dObj = parseLocalYmd(dStr);
+        const dow = dObj.getDay();
+        const isToday = (dStr === todayStr);
+        const label = `${dObj.getMonth() + 1}/${dObj.getDate()} (${dowNames[dow]})`;
+        const dowColor = dow === 0 ? '#f87171' : (dow === 6 ? '#60a5fa' : '#fff');
+
+        let dayCapSum = 0;
+        let dayUsedSum = 0;
+        printers.forEach(pr => {
+          dayCapSum += window.getPrinterDailyCapacity(pr, dStr);
+        });
+        allJobs.forEach(j => {
+          if (j.date === dStr) dayUsedSum += j.totalHours;
+        });
+        const dayPct = dayCapSum > 0 ? Math.min(100, Math.round((dayUsedSum / dayCapSum) * 100)) : 0;
+        const dayOver = dayUsedSum > dayCapSum + 0.01;
+        const barColor = dayOver ? '#ef4444' : (dayPct >= 85 ? '#f59e0b' : '#10b981');
+
+        return `
+          <th style="min-width:132px; background:${isToday ? 'rgba(59,130,246,0.12)' : '#10131d'};">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+              <span style="font-size:12px; font-weight:bold; color:${dowColor};">${label}</span>
+              ${isToday ? `<span style="background:#06b6d4; color:#000; font-size:9px; font-weight:bold; padding:1px 5px; border-radius:4px;">本日</span>` : ''}
+            </div>
+            <div style="font-size:10px; color:${dayOver ? '#f87171' : 'rgba(255,255,255,0.65)'}; margin-bottom:4px; font-weight:bold;">
+              ${dayUsedSum.toFixed(1)} / ${dayCapSum.toFixed(1)}h
+            </div>
+            <div style="background:rgba(255,255,255,0.08); height:4px; border-radius:2px; overflow:hidden;">
+              <div style="background:${barColor}; width:${dayPct}%; height:100%;"></div>
+            </div>
+          </th>
+        `;
+      }).join('');
+
+      let grandPeriodHours = 0;
+      const rowsHtml = printers.map(pr => {
+        let printerPeriodHours = 0;
+        const isCompatPrinter = selectedSkuObj && selectedSkuObj.compatiblePrinters.includes(pr.id);
+
+        const cellsHtml = dateList.map(dStr => {
+          const cap = window.getPrinterDailyCapacity(pr, dStr);
+          const cellJobs = allJobs.filter(j => j.printerId === pr.id && j.date === dStr && (showCompleted || j.status !== 'completed'));
+          const allCellJobs = allJobs.filter(j => j.printerId === pr.id && j.date === dStr);
+          const usedHours = allCellJobs.reduce((sum, j) => sum + j.totalHours, 0);
+          printerPeriodHours += usedHours;
+          grandPeriodHours += usedHours;
+
+          const pct = cap > 0 ? Math.min(100, Math.round((usedHours / cap) * 100)) : (usedHours > 0 ? 100 : 0);
+          const isOver = usedHours > cap + 0.01;
+          const barColor = isOver ? '#ef4444' : (pct >= 85 ? '#f59e0b' : (usedHours > 0 ? '#10b981' : 'rgba(255,255,255,0.15)'));
+          const isToday = (dStr === todayStr);
+
+          const jobsHtml = cellJobs.map(j => {
+            const skuInfo = mfgSkuMapCache[j.skuId] || mfgSkuMapCache[j.productId] || {
+              parentName: j.productId,
+              variantName: '無印',
+              parentImage: ''
+            };
+            const pal = getChipPalette(j.productId, j.status);
+            const isJobSel = (mfgSelectedJobId === j.id);
+            const statusIcon = j.status === 'completed' ? '✅' : (j.status === 'printing' ? '🖨️' : '');
+            const shortTitle = skuInfo.parentName.replace(/モアイペン立て|モアイメガネスタンド|モアイ一輪挿し/g, '').trim() || skuInfo.parentName;
+
+            return `
+              <div class="mfg-job-chip ${isJobSel ? 'mfg-job-selected' : ''}"
+                   draggable="true"
+                   ondragstart="onMfgDragStartJob(event, '${j.id}')"
+                   onclick="event.stopPropagation(); selectMfgJob('${j.id}')"
+                   style="background:${pal.bg}; border:1px solid ${pal.border}; color:${pal.text}; opacity:${j.status === 'completed' ? '0.68' : '1'};">
+                ${skuInfo.parentImage ? `<img src="${skuInfo.parentImage}" style="width:28px; height:28px; border-radius:5px; object-fit:cover; flex-shrink:0;">` : ''}
+                <div style="flex:1; min-width:0; line-height:1.2;">
+                  <div style="font-size:11px; font-weight:bold; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="${skuInfo.parentName} (${skuInfo.variantName})">
+                    ${statusIcon}${shortTitle}
+                  </div>
+                  <div style="font-size:9px; opacity:0.85; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+                    ${skuInfo.variantName !== '無印' ? skuInfo.variantName + ' ' : ''}<strong>×${j.qty}</strong> (${j.totalHours.toFixed(1)}h)
+                  </div>
+                </div>
+              </div>
+            `;
+          }).join('');
+
+          return `
+            <td class="mfg-sched-td ${isCompatPrinter ? 'mfg-compatible-row-cell' : ''}"
+                style="${isToday ? 'background:rgba(59,130,246,0.05);' : ''}"
+                ondragover="onMfgDragOverCell(event, this)"
+                ondragleave="onMfgDragLeaveCell(event, this)"
+                ondrop="onMfgDropCell(event, this, '${pr.id}', '${dStr}')"
+                onclick="onClickMfgCell('${pr.id}', '${dStr}')">
+              <div class="mfg-sched-cell">
+                <!-- Cell Capacity Header -->
+                <div>
+                  <div style="display:flex; justify-content:space-between; align-items:center; font-size:10px; margin-bottom:3px;"
+                       onclick="event.stopPropagation(); promptOverridePrinterDateCapacity('${pr.id}', '${dStr}')"
+                       title="クリックでこの日の稼働可能時間を変更">
+                    <span style="color:${isOver ? '#f87171' : (usedHours > 0 ? '#fff' : 'rgba(255,255,255,0.4)')}; font-weight:${usedHours > 0 ? 'bold' : 'normal'}; cursor:pointer;">
+                      ${usedHours.toFixed(1)} / ${cap.toFixed(1)}h
+                    </span>
+                    ${isOver
+                      ? `<span style="color:#f87171; font-size:9px; font-weight:bold;">⚠️超過</span>`
+                      : `<span style="color:rgba(255,255,255,0.4); font-size:9px;">残${Math.max(0, cap - usedHours).toFixed(1)}h</span>`
+                    }
+                  </div>
+                  <div style="background:rgba(255,255,255,0.08); height:4px; border-radius:2px; overflow:hidden;">
+                    <div style="background:${barColor}; width:${pct}%; height:100%;"></div>
+                  </div>
+                </div>
+
+                <!-- Scheduled Jobs -->
+                <div style="display:flex; flex-direction:column; gap:5px;">
+                  ${jobsHtml}
+                </div>
+
+                <!-- Add Slot Button -->
+                <button type="button" class="mfg-add-slot-btn" onclick="event.stopPropagation(); onClickMfgAddSlot('${pr.id}', '${dStr}')">
+                  ${selectedSkuObj ? `＋ ${selectedSkuObj.parentName.substring(0, 6)}を配置` : '＋ 追加'}
+                </button>
+              </div>
+            </td>
+          `;
+        }).join('');
+
+        return `
+          <tr>
+            <td style="width:128px; background:#121521; vertical-align:middle; position:sticky; left:0; z-index:10;">
+              <div style="display:flex; align-items:center; gap:8px;">
+                <div style="width:32px; height:32px; border-radius:8px; background:rgba(255,255,255,0.05); display:flex; align-items:center; justify-content:center; font-size:16px; flex-shrink:0;">
+                  ${pr.icon || '🖨️'}
+                </div>
+                <div style="min-width:0;">
+                  <div style="font-size:12px; font-weight:bold; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${pr.shortName || pr.name}</div>
+                  <div style="font-size:10px; color:rgba(255,255,255,0.5);">${pr.defaultHours}h / 日</div>
+                  <div style="font-size:10px; color:#34d399; margin-top:2px;">● 稼働中</div>
+                </div>
+              </div>
+            </td>
+            ${cellsHtml}
+            <td style="width:74px; text-align:right; vertical-align:middle; font-weight:bold; font-size:13px; color:#fff; background:#10131d;">
+              ${printerPeriodHours.toFixed(1)}h
+            </td>
+          </tr>
+        `;
+      }).join('');
+
+      container.innerHTML = `
+        <table class="mfg-sched-table">
+          <thead>
+            <tr>
+              <th style="width:128px; position:sticky; left:0; z-index:15; background:#10131d; vertical-align:middle;">
+                <div style="font-size:12px; color:rgba(255,255,255,0.7); font-weight:bold;">プリンター</div>
+              </th>
+              ${dateHeaderCols}
+              <th style="width:74px; text-align:right; vertical-align:middle;">
+                <div style="font-size:10px; color:rgba(255,255,255,0.55);">期間合計</div>
+                <div style="font-size:14px; font-weight:bold; color:var(--accent); margin-top:2px;">${grandPeriodHours.toFixed(1)}h</div>
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            ${rowsHtml}
+          </tbody>
+        </table>
+      `;
+    }
+
+    // Selection & Drag-and-Drop Handlers
+    window.selectMfgUnplannedSku = (skuId) => {
+      mfgSelectedUnplannedSkuId = skuId;
+      mfgSelectedJobId = null;
+      window.renderProductionPlans();
+    };
+
+    window.selectMfgJob = (jobId) => {
+      mfgSelectedJobId = jobId;
+      const pData = window.productionPlansData && window.productionPlansData[jobId];
+      if (pData) {
+        mfgSelectedUnplannedSkuId = pData.skuId || pData.productId;
+      }
+      window.renderProductionPlans();
+    };
+
+    window.onMfgDragStartSku = (ev, skuId) => {
+      mfgDragPayload = { type: 'sku', id: skuId };
+      if (ev.dataTransfer) {
+        ev.dataTransfer.setData('text/plain', JSON.stringify(mfgDragPayload));
+        ev.dataTransfer.effectAllowed = 'copyMove';
+      }
+    };
+
+    window.onMfgDragStartJob = (ev, jobId) => {
+      mfgDragPayload = { type: 'job', id: jobId };
+      if (ev.dataTransfer) {
+        ev.dataTransfer.setData('text/plain', JSON.stringify(mfgDragPayload));
+        ev.dataTransfer.effectAllowed = 'move';
+      }
+    };
+
+    window.onMfgDragOverCell = (ev, tdEl) => {
+      ev.preventDefault();
+      if (tdEl) tdEl.classList.add('mfg-drop-hover');
+    };
+
+    window.onMfgDragLeaveCell = (ev, tdEl) => {
+      if (tdEl) tdEl.classList.remove('mfg-drop-hover');
+    };
+
+    window.onMfgDropCell = async (ev, tdEl, printerId, dateStr) => {
+      ev.preventDefault();
+      if (tdEl) tdEl.classList.remove('mfg-drop-hover');
+      let payload = mfgDragPayload;
+      if (!payload && ev.dataTransfer) {
+        try {
+          payload = JSON.parse(ev.dataTransfer.getData('text/plain'));
+        } catch(e) {}
+      }
+      mfgDragPayload = null;
+      if (!payload) return;
+
+      if (payload.type === 'sku') {
+        await window.createOrAddMfgJob(payload.id, printerId, dateStr);
+      } else if (payload.type === 'job') {
+        await window.moveMfgJobToCell(payload.id, printerId, dateStr);
+      }
+    };
+
+    window.onClickMfgCell = async (printerId, dateStr) => {
+      if (mfgSelectedUnplannedSkuId && !mfgSelectedJobId) {
+        await window.createOrAddMfgJob(mfgSelectedUnplannedSkuId, printerId, dateStr);
+      }
+    };
+
+    window.onClickMfgAddSlot = async (printerId, dateStr) => {
+      if (mfgSelectedUnplannedSkuId) {
+        await window.createOrAddMfgJob(mfgSelectedUnplannedSkuId, printerId, dateStr);
+        return;
+      }
+      // If no SKU is selected yet, pick the top unplanned SKU compatible with this printer
+      const candidates = Object.values(mfgSkuMapCache).filter(s => s.unplannedQty > 0 && s.compatiblePrinters.includes(printerId));
+      candidates.sort((a, b) => b.unplannedQty - a.unplannedQty);
+      if (candidates.length > 0) {
+        await window.createOrAddMfgJob(candidates[0].skuId, printerId, dateStr);
+      } else {
+        const anyShort = Object.values(mfgSkuMapCache).filter(s => s.unplannedQty > 0);
+        if (anyShort.length > 0) {
+          await window.createOrAddMfgJob(anyShort[0].skuId, printerId, dateStr);
+        } else {
+          alert("左の一覧から配置したい作品をクリックして選択してください。");
+        }
+      }
+    };
+
+    // Move an existing scheduled job to another printer / date
+    window.moveMfgJobToCell = async (jobId, printerId, dateStr) => {
+      if (!auth.currentUser) return alert("ログインが必要です");
+      const raw = window.productionPlansData && window.productionPlansData[jobId];
+      if (!raw) return;
+      const updated = { ...(window.productionPlansData || {}) };
+      updated[jobId] = {
+        ...raw,
+        printerId,
+        date: dateStr,
+        updatedAt: Date.now()
+      };
+      window.productionPlansData = updated;
+      mfgSelectedJobId = jobId;
+      await setDoc(doc(db, "settings", "production_plans"), updated);
+      window.renderProductionPlans();
+    };
+
+    // Create a new scheduled job (or increment existing same-SKU job on that printer+date)
+    window.createOrAddMfgJob = async (skuId, printerId, dateStr, explicitQty = null) => {
+      if (!auth.currentUser) return alert("ログインが必要です");
+      const skuInfo = mfgSkuMapCache[skuId];
+      if (!skuInfo) return;
+
+      const printers = window.getMfgPrinters(true);
+      const pr = printers.find(p => p.id === printerId) || printers[0];
+      const cap = window.getPrinterDailyCapacity(pr, dateStr);
+      const allJobs = window.getMfgScheduledJobs();
+      const usedHours = allJobs
+        .filter(j => j.printerId === printerId && j.date === dateStr)
+        .reduce((sum, j) => sum + j.totalHours, 0);
+      const availHours = Math.max(0, cap - usedHours);
+      const unitHours = skuInfo.unitHours || 2.5;
+
+      let qtyToPlace = explicitQty;
+      if (!qtyToPlace || qtyToPlace <= 0) {
+        const maxFit = unitHours > 0 ? Math.floor((availHours + 0.01) / unitHours) : 1;
+        const needed = skuInfo.unplannedQty > 0 ? skuInfo.unplannedQty : 1;
+        if (maxFit >= 1) {
+          qtyToPlace = Math.min(needed, maxFit);
+        } else {
+          qtyToPlace = Math.min(needed, Math.max(1, Math.floor(cap / unitHours) || 1));
+        }
+      }
+      qtyToPlace = Math.max(1, qtyToPlace);
+
+      // Check if there is already a planned job for this exact skuId on this printer+date
+      const existingJob = allJobs.find(j => j.printerId === printerId && j.date === dateStr && j.skuId === skuId && j.status !== 'completed');
+      const updated = { ...(window.productionPlansData || {}) };
+
+      if (existingJob && explicitQty === null) {
+        const newQty = existingJob.qty + 1;
+        const newTotal = existingJob.isCustomHours ? existingJob.totalHours : +(newQty * existingJob.unitHours).toFixed(1);
+        updated[existingJob.id] = {
+          ...updated[existingJob.id],
+          qty: newQty,
+          totalHours: newTotal,
+          updatedAt: Date.now()
+        };
+        mfgSelectedJobId = existingJob.id;
+      } else {
+        const newId = 'prod_' + Date.now() + '_' + Math.random().toString(36).substring(2, 5);
+        const totalHours = +(qtyToPlace * unitHours).toFixed(1);
+        updated[newId] = {
+          id: newId,
+          productId: skuInfo.parentId,
+          skuId: skuInfo.skuId,
+          printerId: printerId,
+          date: dateStr,
+          qty: qtyToPlace,
+          unitHours: unitHours,
+          totalHours: totalHours,
+          isCustomHours: false,
+          status: 'planned',
+          targetEvents: [...(multiAggSelectedEvents || [currentEventKey])],
+          memo: '',
+          updatedAt: Date.now()
+        };
+        mfgSelectedJobId = newId;
+      }
+
+      window.productionPlansData = updated;
+      await setDoc(doc(db, "settings", "production_plans"), updated);
+      window.renderProductionPlans();
+    };
+
+    // Quick "+ 計画に追加" button on Left Unplanned Card: finds earliest date in view with free capacity on a compatible printer
+    window.quickAutoPlaceSku = async (skuId) => {
+      const skuInfo = mfgSkuMapCache[skuId];
+      if (!skuInfo) return;
+      const printers = window.getMfgPrinters(false);
+      const compatPrinters = printers.filter(p => skuInfo.compatiblePrinters.includes(p.id));
+      const targetPrinters = compatPrinters.length > 0 ? compatPrinters : printers;
+      const allJobs = window.getMfgScheduledJobs();
+
+      const startStr = mfgStartDateStr || getLocalYmd();
+      for (let dOffset = 0; dOffset < 14; dOffset++) {
+        const dStr = addDaysYmd(startStr, dOffset);
+        for (const pr of targetPrinters) {
+          const cap = window.getPrinterDailyCapacity(pr, dStr);
+          const used = allJobs
+            .filter(j => j.printerId === pr.id && j.date === dStr)
+            .reduce((sum, j) => sum + j.totalHours, 0);
+          if (cap - used >= Math.min(skuInfo.unitHours, cap * 0.5)) {
+            await window.createOrAddMfgJob(skuId, pr.id, dStr);
+            return;
+          }
+        }
+      }
+      // Fallback: place on first compatible printer on start date
+      if (targetPrinters[0]) {
+        await window.createOrAddMfgJob(skuId, targetPrinters[0].id, startStr);
+      }
+    };
+
+    // Right Column: Schedule Detail & Quick Editor
+    function renderMfgRightInspector(printers, allJobs) {
+      const panel = document.getElementById('mfg-right-inspector');
+      if (!panel) return;
+
+      const allEvents = window.getAllEvents ? window.getAllEvents(eventConfigData) : {};
+      const refEvLabel = allEvents[multiAggStockSourceEvent || currentEventKey]?.label || currentEventKey;
+      const activeJob = mfgSelectedJobId ? allJobs.find(j => j.id === mfgSelectedJobId) : null;
+
+      // Case A: A scheduled job on the board is selected
+      if (activeJob) {
+        const skuInfo = mfgSkuMapCache[activeJob.skuId] || mfgSkuMapCache[activeJob.productId] || {
+          skuId: activeJob.skuId || activeJob.productId,
+          parentId: activeJob.productId,
+          parentName: activeJob.productId,
+          variantName: '無印',
+          parentImage: '',
+          shortage: 0,
+          plannedQty: activeJob.qty,
+          unplannedQty: 0,
+          unitHours: activeJob.unitHours || 2.5,
+          compatiblePrinters: ['mini1', 'mini2', 'creator5']
+        };
+
+        const curPrinter = printers.find(p => p.id === activeJob.printerId) || printers[0];
+        const dayCap = window.getPrinterDailyCapacity(curPrinter, activeJob.date);
+        const otherJobsHours = allJobs
+          .filter(j => j.printerId === activeJob.printerId && j.date === activeJob.date && j.id !== activeJob.id)
+          .reduce((sum, j) => sum + j.totalHours, 0);
+        const totalDayHours = otherJobsHours + activeJob.totalHours;
+        const remainDayHours = dayCap - totalDayHours;
+        const isOver = remainDayHours < -0.01;
+
+        const dObj = parseLocalYmd(activeJob.date);
+        const dowNames = ['日', '月', '火', '水', '木', '金', '土'];
+        const datePretty = `${dObj.getMonth() + 1}/${dObj.getDate()} (${dowNames[dObj.getDay()]})`;
+
+        const compatPillsHtml = printers.map(pr => {
+          const isCompat = skuInfo.compatiblePrinters.includes(pr.id);
+          return `
+            <button type="button" onclick="toggleMfgSkuCompatiblePrinter('${skuInfo.skuId}', '${pr.id}')"
+                    style="font-size:10px; padding:3px 7px; border-radius:6px; cursor:pointer; font-weight:${isCompat ? 'bold' : 'normal'}; background:${isCompat ? 'rgba(0,210,255,0.2)' : 'rgba(255,255,255,0.04)'}; border:1px solid ${isCompat ? 'var(--accent)' : 'rgba(255,255,255,0.12)'}; color:${isCompat ? '#fff' : 'rgba(255,255,255,0.4)'};">
+              ${isCompat ? '✓ ' : ''}${pr.shortName || pr.name}
+            </button>
+          `;
+        }).join('');
+
+        panel.innerHTML = `
+          <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid rgba(255,255,255,0.08); padding-bottom:8px;">
+            <span style="font-size:14px; font-weight:bold; color:#fff;">📅 スケジュール詳細</span>
+            <button type="button" onclick="mfgSelectedJobId=null; renderProductionPlans();" style="background:none; border:none; color:#aaa; cursor:pointer; font-size:16px;">✕</button>
+          </div>
+
+          <!-- Date & Printer Switcher -->
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; background:rgba(0,0,0,0.3); padding:8px; border-radius:8px; border:1px solid rgba(255,255,255,0.06);">
+            <div>
+              <label style="font-size:10px; color:rgba(255,255,255,0.5); display:block; margin-bottom:2px;">📅 製造予定日 (${datePretty})</label>
+              <input type="date" value="${activeJob.date}" onchange="updateMfgJobField('${activeJob.id}', 'date', this.value)" style="width:100%; background:#0d0f17; border:1px solid rgba(255,255,255,0.18); color:#fff; padding:5px 6px; border-radius:6px; font-size:12px; font-weight:bold;">
+            </div>
+            <div>
+              <label style="font-size:10px; color:rgba(255,255,255,0.5); display:block; margin-bottom:2px;">🖨️ 使用プリンター</label>
+              <select onchange="updateMfgJobField('${activeJob.id}', 'printerId', this.value)" style="width:100%; background:#0d0f17; border:1px solid rgba(255,255,255,0.18); color:#fff; padding:5px 6px; border-radius:6px; font-size:12px; font-weight:bold;">
+                ${printers.map(pr => `<option value="${pr.id}" ${pr.id === activeJob.printerId ? 'selected' : ''}>${pr.shortName || pr.name}</option>`).join('')}
+              </select>
+            </div>
+          </div>
+
+          <!-- Product Info & Compatible Printers -->
+          <div style="display:flex; gap:10px; align-items:center; background:rgba(255,255,255,0.03); padding:10px; border-radius:10px; border:1px solid rgba(255,255,255,0.07);">
+            ${skuInfo.parentImage ? `<img src="${skuInfo.parentImage}" style="width:52px; height:52px; border-radius:8px; object-fit:cover; background:#222;">` : ''}
+            <div style="flex:1; min-width:0;">
+              <div style="font-size:14px; font-weight:bold; color:#fff; line-height:1.25;">${skuInfo.parentName}</div>
+              <div style="font-size:12px; color:var(--accent); font-weight:bold; margin-top:2px;">${skuInfo.variantName}</div>
+              <div style="font-size:10px; color:rgba(255,255,255,0.55); margin-top:3px;">
+                不足:${skuInfo.shortage} / 計画済:${skuInfo.plannedQty} / <strong style="color:${skuInfo.unplannedQty > 0 ? '#f87171' : '#34d399'};">未計画:${skuInfo.unplannedQty}</strong>
+              </div>
+            </div>
+          </div>
+
+          <!-- Compatible Printers Toggle (Saved to SKU Spec) -->
+          <div>
+            <div style="font-size:10px; color:rgba(255,255,255,0.5); margin-bottom:4px;">🔧 この作品の対応プリンター（クリックでON/OFF記憶）</div>
+            <div style="display:flex; flex-wrap:wrap; gap:4px;">
+              ${compatPillsHtml}
+            </div>
+          </div>
+
+          <!-- Quantity & Time Calculation -->
+          <div style="background:rgba(0,0,0,0.3); border:1px solid rgba(255,255,255,0.07); border-radius:10px; padding:12px; display:flex; flex-direction:column; gap:10px;">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <span style="font-size:12px; color:rgba(255,255,255,0.8); font-weight:bold;">製造個数</span>
+              <div style="display:flex; align-items:center; gap:6px;">
+                <button type="button" onclick="stepMfgJobQty('${activeJob.id}', -1)" style="width:30px; height:30px; border-radius:6px; border:1px solid rgba(255,255,255,0.2); background:rgba(255,255,255,0.08); color:#fff; font-size:16px; font-weight:bold; cursor:pointer;">−</button>
+                <input type="number" min="1" value="${activeJob.qty}" onchange="updateMfgJobField('${activeJob.id}', 'qty', this.value)" style="width:58px; padding:5px; text-align:center; font-size:16px; font-weight:bold; background:#0d0f17; color:#fff; border:1px solid #3b82f6; border-radius:6px;">
+                <button type="button" onclick="stepMfgJobQty('${activeJob.id}', 1)" style="width:30px; height:30px; border-radius:6px; border:1px solid rgba(255,255,255,0.2); background:rgba(255,255,255,0.08); color:#fff; font-size:16px; font-weight:bold; cursor:pointer;">＋</button>
+              </div>
+            </div>
+
+            <div style="display:flex; justify-content:space-between; align-items:center; padding-top:8px; border-top:1px solid rgba(255,255,255,0.06);">
+              <span style="font-size:11px; color:rgba(255,255,255,0.65);">1個あたり目安時間</span>
+              <div style="display:flex; align-items:center; gap:5px;">
+                <input type="number" step="0.1" min="0.1" value="${activeJob.unitHours}" onchange="updateMfgJobField('${activeJob.id}', 'unitHours', this.value)" style="width:68px; padding:4px 6px; text-align:right; font-size:13px; font-weight:bold; background:#0d0f17; color:#fff; border:1px solid rgba(255,255,255,0.18); border-radius:6px;">
+                <span style="font-size:11px; color:rgba(255,255,255,0.6);">時間</span>
+              </div>
+            </div>
+
+            <div style="display:flex; justify-content:space-between; align-items:center; padding-top:8px; border-top:1px solid rgba(255,255,255,0.06);">
+              <div>
+                <div style="font-size:12px; color:#fff; font-weight:bold;">合計製造時間</div>
+                <div style="font-size:9px; color:rgba(255,255,255,0.45);">
+                  ${activeJob.isCustomHours ? '🔒 実測・バッチ時間で上書き中' : `自動計算 (${activeJob.qty}個 × ${activeJob.unitHours}h)`}
+                </div>
+              </div>
+              <div style="display:flex; align-items:center; gap:5px;">
+                <input type="number" step="0.5" min="0.1" value="${activeJob.totalHours}" onchange="updateMfgJobField('${activeJob.id}', 'totalHours', this.value)" style="width:72px; padding:5px 6px; text-align:right; font-size:16px; font-weight:bold; background:#0d0f17; color:var(--accent); border:1px solid var(--accent); border-radius:6px;" title="プレートまとめ刷りや光造形バッチなど、実際の印刷時間に直接上書きできます">
+                <span style="font-size:12px; color:var(--accent); font-weight:bold;">時間</span>
+                ${activeJob.isCustomHours ? `<button type="button" onclick="updateMfgJobField('${activeJob.id}', 'resetAutoHours', true)" style="background:rgba(255,255,255,0.08); border:none; color:#ccc; font-size:10px; padding:3px 6px; border-radius:4px; cursor:pointer;" title="自動計算に戻す">🔄</button>` : ''}
+              </div>
+            </div>
+          </div>
+
+          <!-- Job Status & Memo -->
+          <div style="display:flex; flex-direction:column; gap:8px;">
+            <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:4px; background:rgba(0,0,0,0.35); padding:4px; border-radius:8px;">
+              <button type="button" onclick="updateMfgJobField('${activeJob.id}', 'status', 'planned')" style="padding:5px; font-size:11px; border:none; border-radius:6px; cursor:pointer; font-weight:${activeJob.status === 'planned' ? 'bold' : 'normal'}; background:${activeJob.status === 'planned' ? '#3b82f6' : 'transparent'}; color:#fff;">📋 予定</button>
+              <button type="button" onclick="updateMfgJobField('${activeJob.id}', 'status', 'printing')" style="padding:5px; font-size:11px; border:none; border-radius:6px; cursor:pointer; font-weight:${activeJob.status === 'printing' ? 'bold' : 'normal'}; background:${activeJob.status === 'printing' ? '#f59e0b' : 'transparent'}; color:${activeJob.status === 'printing' ? '#000' : '#fff'};">🖨️ 印刷中</button>
+              <button type="button" onclick="updateMfgJobField('${activeJob.id}', 'status', 'completed')" style="padding:5px; font-size:11px; border:none; border-radius:6px; cursor:pointer; font-weight:${activeJob.status === 'completed' ? 'bold' : 'normal'}; background:${activeJob.status === 'completed' ? '#10b981' : 'transparent'}; color:#fff;">✅ 完了のみ</button>
+            </div>
+
+            <div>
+              <label style="font-size:10px; color:rgba(255,255,255,0.5);">メモ（任意：フィラメント色・プレート配置など）</label>
+              <input type="text" value="${(activeJob.memo || '').replace(/"/g, '&quot;')}" onchange="updateMfgJobField('${activeJob.id}', 'memo', this.value)" placeholder="例: 白フィラメント・1プレート4個同時" class="form-input" style="font-size:12px; padding:6px 8px; margin-top:2px; background:#0d0f17;">
+            </div>
+          </div>
+
+          <!-- Daily Remaining Capacity Simulation Box -->
+          <div style="background:${isOver ? 'rgba(239,68,68,0.12)' : 'rgba(6,182,212,0.1)'}; border:1px solid ${isOver ? 'rgba(239,68,68,0.4)' : 'rgba(6,182,212,0.35)'}; border-radius:10px; padding:10px 12px;">
+            <div style="font-size:12px; font-weight:bold; color:${isOver ? '#f87171' : '#22d3ee'};">
+              ${isOver
+                ? `⚠️ この日の稼働枠を ${Math.abs(remainDayHours).toFixed(1)}h 超過しています`
+                : `🕒 この日の空き: 残り ${remainDayHours.toFixed(1)}h`
+              }
+            </div>
+            <div style="font-size:10px; color:rgba(255,255,255,0.6); margin-top:2px;">
+              稼働可能 ${dayCap.toFixed(1)}h − 予定合計 ${totalDayHours.toFixed(1)}h = ${remainDayHours.toFixed(1)}h ${isOver ? '（夜間連続印刷等で対応可）' : ''}
+            </div>
+          </div>
+
+          <!-- Complete -> Stock Conversion & Delete Buttons -->
+          <div style="display:flex; flex-direction:column; gap:8px; margin-top:2px;">
+            ${activeJob.status !== 'completed' ? `
+              <button type="button" onclick="completeMfgJobAndAddStock('${activeJob.id}')" style="width:100%; padding:10px; border:none; border-radius:8px; background:linear-gradient(90deg, #10b981, #059669); color:#fff; font-weight:bold; font-size:13px; cursor:pointer; box-shadow:0 4px 12px rgba(16,185,129,0.3);">
+                ✅ 印刷完了 → 在庫に反映 (+${activeJob.qty}個 / ${refEvLabel})
+              </button>
+            ` : `
+              <div style="text-align:center; padding:8px; border-radius:8px; background:rgba(16,185,129,0.15); border:1px solid rgba(16,185,129,0.4); color:#34d399; font-size:12px; font-weight:bold;">
+                ✔ この製造予定は完了済みです
+              </div>
+            `}
+            <button type="button" onclick="deleteMfgJob('${activeJob.id}')" style="width:100%; padding:8px; border:1px solid rgba(239,68,68,0.5); border-radius:8px; background:rgba(239,68,68,0.12); color:#f87171; font-weight:bold; font-size:12px; cursor:pointer;">
+              🗑️ この製造予定をクリア（削除）
+            </button>
+          </div>
+        `;
+        return;
+      }
+
+      // Case B: An Unplanned SKU on the Left is selected (Ready to Stamp / Quick Add)
+      const selSku = mfgSelectedUnplannedSkuId ? mfgSkuMapCache[mfgSelectedUnplannedSkuId] : null;
+      if (selSku) {
+        const compatPillsHtml = printers.map(pr => {
+          const isCompat = selSku.compatiblePrinters.includes(pr.id);
+          return `
+            <button type="button" onclick="toggleMfgSkuCompatiblePrinter('${selSku.skuId}', '${pr.id}')"
+                    style="font-size:11px; padding:4px 8px; border-radius:6px; cursor:pointer; font-weight:${isCompat ? 'bold' : 'normal'}; background:${isCompat ? 'rgba(0,210,255,0.2)' : 'rgba(255,255,255,0.04)'}; border:1px solid ${isCompat ? 'var(--accent)' : 'rgba(255,255,255,0.12)'}; color:${isCompat ? '#fff' : 'rgba(255,255,255,0.4)'};">
+              ${isCompat ? '✓ ' : ''}${pr.shortName || pr.name}
+            </button>
+          `;
+        }).join('');
+
+        panel.innerHTML = `
+          <div style="font-size:14px; font-weight:bold; color:#fff; border-bottom:1px solid rgba(255,255,255,0.08); padding-bottom:8px;">
+            🎯 作品スペック ＆ クイック計画配置
+          </div>
+
+          <div style="display:flex; gap:10px; align-items:center; background:rgba(255,255,255,0.03); padding:10px; border-radius:10px; border:1px solid rgba(59,130,246,0.35);">
+            ${selSku.parentImage ? `<img src="${selSku.parentImage}" style="width:54px; height:54px; border-radius:8px; object-fit:cover; background:#222;">` : ''}
+            <div>
+              <div style="font-size:14px; font-weight:bold; color:#fff;">${selSku.parentName}</div>
+              <div style="font-size:12px; color:var(--accent); font-weight:bold; margin-top:2px;">${selSku.variantName}</div>
+              <div style="font-size:11px; color:rgba(255,255,255,0.65); margin-top:4px;">
+                必要:${selSku.totalReq} / 在庫:${selSku.currentStock} / 不足:<strong style="color:#f87171;">${selSku.shortage}</strong>
+              </div>
+            </div>
+          </div>
+
+          <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:8px; text-align:center; background:rgba(0,0,0,0.3); padding:10px; border-radius:10px;">
+            <div>
+              <div style="font-size:10px; color:rgba(255,255,255,0.5);">不足数</div>
+              <div style="font-size:18px; font-weight:bold; color:#f87171;">${selSku.shortage}</div>
+            </div>
+            <div>
+              <div style="font-size:10px; color:rgba(255,255,255,0.5);">計画済み</div>
+              <div style="font-size:18px; font-weight:bold; color:#34d399;">${selSku.plannedQty}</div>
+            </div>
+            <div>
+              <div style="font-size:10px; color:rgba(255,255,255,0.5);">未計画</div>
+              <div style="font-size:18px; font-weight:bold; color:#fbbf24;">${selSku.unplannedQty}</div>
+            </div>
+          </div>
+
+          <!-- Master Spec: Unit Hours & Compatible Printers -->
+          <div style="background:rgba(0,0,0,0.28); border:1px solid rgba(255,255,255,0.07); border-radius:10px; padding:12px; display:flex; flex-direction:column; gap:10px;">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <span style="font-size:12px; color:rgba(255,255,255,0.85); font-weight:bold;">⏱ 1個あたり目安製造時間</span>
+              <div style="display:flex; align-items:center; gap:5px;">
+                <input type="number" step="0.1" min="0.1" value="${selSku.unitHours}" onchange="saveMfgSkuUnitHours('${selSku.skuId}', this.value)" style="width:70px; padding:5px 6px; text-align:right; font-size:14px; font-weight:bold; background:#0d0f17; color:#fbbf24; border:1px solid #f59e0b; border-radius:6px;">
+                <span style="font-size:11px; color:rgba(255,255,255,0.6);">時間</span>
+              </div>
+            </div>
+
+            <div>
+              <div style="font-size:11px; color:rgba(255,255,255,0.65); margin-bottom:6px;">🖨️ 対応可能な3Dプリンター（複数選択可）</div>
+              <div style="display:flex; flex-wrap:wrap; gap:5px;">
+                ${compatPillsHtml}
+              </div>
+            </div>
+          </div>
+
+          <div style="background:rgba(59,130,246,0.12); border:1px solid rgba(59,130,246,0.35); border-radius:10px; padding:12px; font-size:11px; color:#dbeafe; line-height:1.5;">
+            💡 <strong>かんたん配置：</strong><br>
+            このまま中央のスケジュール表の好きな<strong>「プリンター × 日付」の枠（＋追加）をクリック</strong>すると、その枠に即座に配置されます！
+          </div>
+
+          ${selSku.unplannedQty > 0 ? `
+            <button type="button" onclick="autoDistributeAllUnplannedForSku('${selSku.skuId}')" style="width:100%; padding:10px; border:none; border-radius:8px; background:linear-gradient(90deg, #3b82f6, #06b6d4); color:#fff; font-weight:bold; font-size:12px; cursor:pointer;">
+              ⚡ 未計画 ${selSku.unplannedQty}個 (${selSku.unplannedHours}h) を空き枠へ一括自動配置
+            </button>
+          ` : ''}
+        `;
+        return;
+      }
+
+      // Case C: Nothing selected yet
+      panel.innerHTML = `
+        <div style="text-align:center; padding:36px 14px; color:rgba(255,255,255,0.5); font-size:12px; line-height:1.6;">
+          <div style="font-size:28px; margin-bottom:8px;">🗓️</div>
+          <strong>スケジュール詳細・編集パネル</strong><br>
+          ・中央ボードの<strong>予定チップ</strong>をクリックすると、個数・時間・プリンター変更や<strong>「✅完成→在庫反映」</strong>ができます。<br>
+          ・左の<strong>未計画作品</strong>をクリックすると、目安時間・対応プリンターの設定やワンクリック配置ができます。
+        </div>
+      `;
+    }
+
+    // Update a field on a scheduled job and persist immediately
+    window.updateMfgJobField = async (jobId, field, value) => {
+      if (!auth.currentUser) return alert("ログインが必要です");
+      const raw = window.productionPlansData && window.productionPlansData[jobId];
+      if (!raw) return;
+      const updatedJob = { ...raw, updatedAt: Date.now() };
+      const updatedAll = { ...(window.productionPlansData || {}) };
+
+      if (field === 'qty') {
+        const q = Math.max(1, parseInt(value) || 1);
+        updatedJob.qty = q;
+        if (!updatedJob.isCustomHours) {
+          updatedJob.totalHours = +(q * (Number(updatedJob.unitHours) || 2.5)).toFixed(1);
+        }
+      } else if (field === 'unitHours') {
+        const uh = Math.max(0.1, parseFloat(value) || 2.5);
+        updatedJob.unitHours = uh;
+        if (!updatedJob.isCustomHours) {
+          updatedJob.totalHours = +((updatedJob.qty || 1) * uh).toFixed(1);
+        }
+        // Also remember in _specs for this SKU
+        const skuId = updatedJob.skuId || updatedJob.productId;
+        const specs = { ...(updatedAll._specs || {}) };
+        specs[skuId] = { ...(specs[skuId] || {}), unitHours: uh };
+        updatedAll._specs = specs;
+      } else if (field === 'totalHours') {
+        const th = Math.max(0.1, parseFloat(value) || 1.0);
+        updatedJob.totalHours = th;
+        updatedJob.isCustomHours = true;
+      } else if (field === 'resetAutoHours') {
+        updatedJob.isCustomHours = false;
+        updatedJob.totalHours = +((updatedJob.qty || 1) * (Number(updatedJob.unitHours) || 2.5)).toFixed(1);
+      } else if (field === 'date' || field === 'printerId' || field === 'status' || field === 'memo') {
+        updatedJob[field] = value;
+      }
+
+      updatedAll[jobId] = updatedJob;
+      window.productionPlansData = updatedAll;
+      await setDoc(doc(db, "settings", "production_plans"), updatedAll);
+      window.renderProductionPlans();
+    };
+
+    window.stepMfgJobQty = async (jobId, delta) => {
+      const raw = window.productionPlansData && window.productionPlansData[jobId];
+      if (!raw) return;
+      const nextQty = Math.max(1, (parseInt(raw.qty) || 1) + delta);
+      await window.updateMfgJobField(jobId, 'qty', nextQty);
+    };
+
+    window.deleteMfgJob = async (jobId) => {
+      if (!auth.currentUser) return alert("ログインが必要です");
+      const updated = { ...(window.productionPlansData || {}) };
+      delete updated[jobId];
+      if (mfgSelectedJobId === jobId) mfgSelectedJobId = null;
+      window.productionPlansData = updated;
+      await setDoc(doc(db, "settings", "production_plans"), updated);
+      window.renderProductionPlans();
+    };
+
+    // Save SKU Unit Hours to _specs
+    window.saveMfgSkuUnitHours = async (skuId, val) => {
+      if (!auth.currentUser) return alert("ログインが必要です");
+      const uh = Math.max(0.1, parseFloat(val) || 2.5);
+      const updated = { ...(window.productionPlansData || {}) };
+      const specs = { ...(updated._specs || {}) };
+      const curSpec = specs[skuId] || {};
+      specs[skuId] = { ...curSpec, unitHours: uh };
+      updated._specs = specs;
+      window.productionPlansData = updated;
+      await setDoc(doc(db, "settings", "production_plans"), updated);
+      window.renderProductionPlans();
+    };
+
+    // Toggle compatible printer for a SKU
+    window.toggleMfgSkuCompatiblePrinter = async (skuId, printerId) => {
+      if (!auth.currentUser) return alert("ログインが必要です");
+      const skuInfo = mfgSkuMapCache[skuId];
+      const currentList = skuInfo ? [...skuInfo.compatiblePrinters] : ['mini1', 'mini2', 'creator5'];
+      const idx = currentList.indexOf(printerId);
+      if (idx === -1) {
+        currentList.push(printerId);
+      } else {
+        if (currentList.length <= 1) return alert("最低1台の対応プリンターを選択してください。");
+        currentList.splice(idx, 1);
+      }
+      const updated = { ...(window.productionPlansData || {}) };
+      const specs = { ...(updated._specs || {}) };
+      specs[skuId] = { ...(specs[skuId] || {}), printers: currentList };
+      updated._specs = specs;
+      window.productionPlansData = updated;
+      await setDoc(doc(db, "settings", "production_plans"), updated);
+      window.renderProductionPlans();
+    };
+
+    // Auto-distribute all remaining unplanned units of a SKU across compatible printers starting from mfgStartDateStr
+    window.autoDistributeAllUnplannedForSku = async (skuId) => {
+      if (!auth.currentUser) return alert("ログインが必要です");
+      const skuInfo = mfgSkuMapCache[skuId];
+      if (!skuInfo || skuInfo.unplannedQty <= 0) return;
+
+      let remaining = skuInfo.unplannedQty;
+      const unitH = skuInfo.unitHours || 2.5;
+      const printers = window.getMfgPrinters(false);
+      const compatPrinters = printers.filter(p => skuInfo.compatiblePrinters.includes(p.id));
+      const targetPrinters = compatPrinters.length > 0 ? compatPrinters : printers;
+      const allJobs = window.getMfgScheduledJobs();
+      const updated = { ...(window.productionPlansData || {}) };
+      const startStr = mfgStartDateStr || getLocalYmd();
+
+      // Track simulated hours per (printerId, dateStr)
+      const usedMap = {};
+      allJobs.forEach(j => {
+        const k = `${j.printerId}__${j.date}`;
+        usedMap[k] = (usedMap[k] || 0) + j.totalHours;
+      });
+
+      let lastCreatedId = null;
+      for (let dOff = 0; dOff < 21 && remaining > 0; dOff++) {
+        const dStr = addDaysYmd(startStr, dOff);
+        for (const pr of targetPrinters) {
+          if (remaining <= 0) break;
+          const cap = window.getPrinterDailyCapacity(pr, dStr);
+          const k = `${pr.id}__${dStr}`;
+          const used = usedMap[k] || 0;
+          const avail = Math.max(0, cap - used);
+          const fitQty = unitH > 0 ? Math.floor((avail + 0.01) / unitH) : 1;
+          if (fitQty >= 1) {
+            const take = Math.min(remaining, fitQty);
+            const newId = 'prod_' + Date.now() + '_' + dOff + '_' + pr.id + '_' + Math.random().toString(36).substring(2, 5);
+            const tHours = +(take * unitH).toFixed(1);
+            updated[newId] = {
+              id: newId,
+              productId: skuInfo.parentId,
+              skuId: skuInfo.skuId,
+              printerId: pr.id,
+              date: dStr,
+              qty: take,
+              unitHours: unitH,
+              totalHours: tHours,
+              isCustomHours: false,
+              status: 'planned',
+              targetEvents: [...(multiAggSelectedEvents || [currentEventKey])],
+              memo: '自動配分',
+              updatedAt: Date.now()
+            };
+            usedMap[k] = used + tHours;
+            remaining -= take;
+            lastCreatedId = newId;
+          }
+        }
+      }
+
+      // If still remaining (e.g., unitH > daily capacity), place remainder on first compatible printer on startStr
+      if (remaining > 0 && targetPrinters[0]) {
+        const newId = 'prod_' + Date.now() + '_rem';
+        updated[newId] = {
+          id: newId,
+          productId: skuInfo.parentId,
+          skuId: skuInfo.skuId,
+          printerId: targetPrinters[0].id,
+          date: startStr,
+          qty: remaining,
+          unitHours: unitH,
+          totalHours: +(remaining * unitH).toFixed(1),
+          isCustomHours: false,
+          status: 'planned',
+          targetEvents: [...(multiAggSelectedEvents || [currentEventKey])],
+          memo: '自動配分',
+          updatedAt: Date.now()
+        };
+        lastCreatedId = newId;
+      }
+
+      if (lastCreatedId) mfgSelectedJobId = lastCreatedId;
+      window.productionPlansData = updated;
+      await setDoc(doc(db, "settings", "production_plans"), updated);
+      window.renderProductionPlans();
+    };
+
+    // ✅ Complete a scheduled print job AND automatically add its quantity to actual stock (Zero double-counting!)
+    window.completeMfgJobAndAddStock = async (jobId) => {
+      if (!auth.currentUser) return alert("ログインが必要です");
+      const raw = window.productionPlansData && window.productionPlansData[jobId];
+      if (!raw) return;
+      if (raw.status === 'completed') return alert("この予定はすでに完了済みです。");
+
+      const targetId = raw.skuId || raw.productId;
+      const qty = Math.max(1, parseInt(raw.qty) || 1);
+      const targetEvKey = multiAggStockSourceEvent || currentEventKey;
+      const allEvents = window.getAllEvents ? window.getAllEvents(eventConfigData) : {};
+      const evLabel = allEvents[targetEvKey]?.label || targetEvKey;
+
+      const parsed = window.parseSkuId ? window.parseSkuId(targetId) : { parentId: raw.productId, skuObj: null };
+      const parentId = parsed.parentId || raw.productId;
+      const skuObj = parsed.skuObj;
+      const allMaster = window.getFullMasterProducts ? window.getFullMasterProducts(window.customProductsData) : MASTER_PRODUCTS;
+      const pName = allMaster.find(x => x.id === parentId)?.name || parentId;
+      const displayLabel = skuObj ? `${pName.replace(/
+/g, ' ')} (${skuObj.name})` : pName.replace(/
+/g, ' ');
+
+      if (!confirm(`【印刷完了 → 在庫への自動反映】
+「${displayLabel}」× ${qty}個 を完成として記録し、「${evLabel}」の現在庫に +${qty}個 追加しますか？
+
+※製造計画は「完了」となり、未完の計画済み数から自動で外れるため二重計上されません。`)) {
+        return;
+      }
+
+      try {
+        // 1. Update stock in targetEvKey
+        const sourceInvMap = (targetEvKey === currentEventKey)
+          ? inventoryData
+          : (multiAggInvCache[targetEvKey] || {});
+        const oldInv = skuObj
+          ? window.getSkuInventory(sourceInvMap, parentId, skuObj)
+          : (sourceInvMap[targetId] || { price: 0, initial: 0, current: 0 });
+
+        const newInitial = Math.max(0, (oldInv.initial || 0) + qty);
+        const newCurrent = Math.max(0, (oldInv.current || 0) + qty);
+        const newInventory = { ...sourceInvMap };
+        newInventory[targetId] = { price: oldInv.price, initial: newInitial, current: newCurrent };
+        if (skuObj) {
+          const sumInv = window.getParentInventorySummary(newInventory, parentId);
+          newInventory[parentId] = { price: sumInv.price, initial: sumInv.initial, current: sumInv.current };
+        }
+
+        multiAggInvCache[targetEvKey] = newInventory;
+        if (targetEvKey === currentEventKey) inventoryData = newInventory;
+        await setDoc(doc(db, "settings", "inventory_" + targetEvKey), newInventory);
+
+        // 2. Record Inventory Log
+        const printers = window.getMfgPrinters(true);
+        const prName = printers.find(p => p.id === raw.printerId)?.shortName || raw.printerId;
+        const logDocRef = doc(db, "settings", "inventory_log_" + targetEvKey);
+        const logRecord = {
+          timestamp: new Date().toISOString(),
+          type: 'adjust',
+          productId: targetId,
+          parentId: parentId,
+          productName: displayLabel,
+          qty: qty,
+          reason: `追加制作 (${prName} ${raw.date} 完了)`
+        };
+        try {
+          await updateDoc(logDocRef, { records: arrayUnion(logRecord) });
+        } catch(e) {
+          await setDoc(logDocRef, { records: [logRecord] });
+        }
+
+        // 3. Mark production job as completed
+        const updatedPlans = { ...(window.productionPlansData || {}) };
+        updatedPlans[jobId] = {
+          ...raw,
+          status: 'completed',
+          completedAt: Date.now(),
+          updatedAt: Date.now()
+        };
+        window.productionPlansData = updatedPlans;
+        await setDoc(doc(db, "settings", "production_plans"), updatedPlans);
+
+        await window.renderMultiEventAggregation();
+        await window.renderProductionPlans();
+      } catch(e) {
+        console.error(e);
+        alert("完了反映中にエラーが発生しました: " + e.message);
+      }
+    };
+
+    // Mode B: Printer Allocation Matrix View (Image 2 style: SKU rows x 4 Printer columns)
+    function renderMfgMatrixView(skuList, printers, allJobs, dateList) {
+      const container = document.getElementById('mfg-matrix-table-container');
+      if (!container) return;
+
+      const rows = skuList.filter(s => s.shortage > 0 || s.plannedQty > 0);
+      if (rows.length === 0) {
+        container.innerHTML = `<div style="text-align:center; padding:32px; color:rgba(255,255,255,0.5);">現在、不足または計画中の作品はありません。</div>`;
+        return;
+      }
+
+      const printerColsHeader = printers.map(pr => `
+        <th style="min-width:110px; text-align:center;">
+          <div style="color:#fff; font-weight:bold;">${pr.shortName || pr.name}</div>
+          <div style="font-size:9px; color:rgba(255,255,255,0.5); font-weight:normal;">(${pr.defaultHours}h/日)</div>
+        </th>
+      `).join('');
+
+      const tbodyHtml = rows.map(s => {
+        const totalScheduledHours = +(s.plannedQty * s.unitHours).toFixed(1);
+        const isDone = s.plannedQty >= s.shortage && s.shortage > 0;
+        const pInputsHtml = printers.map(pr => {
+          const curQty = s.printerBreakdown[pr.id] || 0;
+          const pHours = +(curQty * s.unitHours).toFixed(1);
+          const isCompat = s.compatiblePrinters.includes(pr.id);
+          return `
+            <td style="text-align:center; opacity:${isCompat ? 1 : 0.45};">
+              <div style="display:inline-flex; flex-direction:column; align-items:center; gap:2px;">
+                <input type="number" min="0" value="${curQty}"
+                       onchange="updateMfgMatrixAllocation('${s.skuId}', '${pr.id}', this.value)"
+                       style="width:68px; padding:5px 6px; text-align:center; font-size:13px; font-weight:bold; background:#0d0f17; color:${curQty > 0 ? '#34d399' : '#fff'}; border:1px solid ${curQty > 0 ? '#10b981' : 'rgba(255,255,255,0.18)'}; border-radius:6px;">
+                <span style="font-size:10px; color:rgba(255,255,255,0.5);">${pHours.toFixed(1)}h</span>
+              </div>
+            </td>
+          `;
+        }).join('');
+
+        return `
+          <tr class="multi-agg-parent-row">
+            <td>
+              <div style="display:flex; align-items:center; gap:10px;">
+                <img src="${s.parentImage}" style="width:36px; height:36px; border-radius:6px; object-fit:cover; background:#222;">
+                <div>
+                  <div style="font-size:13px; font-weight:bold; color:#fff;">${s.parentName}</div>
+                  <div style="font-size:11px; color:var(--accent);">${s.variantName}</div>
+                </div>
+              </div>
+            </td>
+            <td style="font-weight:bold; color:#f87171; font-size:14px;">${s.shortage}</td>
+            <td>
+              <input type="number" step="0.1" min="0.1" value="${s.unitHours}"
+                     onchange="saveMfgSkuUnitHours('${s.skuId}', this.value)"
+                     style="width:58px; padding:4px; text-align:right; font-size:12px; background:#0d0f17; color:#fbbf24; border:1px solid rgba(255,255,255,0.16); border-radius:6px;">
+              <span style="font-size:10px; opacity:0.6;">h</span>
+            </td>
+            ${pInputsHtml}
+            <td style="font-weight:bold; font-size:14px;">
+              <span style="color:${isDone ? '#34d399' : '#60a5fa'};">${s.plannedQty}</span>
+              <span style="color:rgba(255,255,255,0.45); font-size:12px;"> / ${s.shortage}</span>
+            </td>
+            <td style="font-weight:bold; color:#fff; font-size:13px;">${totalScheduledHours.toFixed(1)}h</td>
+            <td>
+              ${isDone
+                ? `<span class="status-pill-ready">✔ 計画完了</span>`
+                : `<span class="status-pill-short">▲ 未計画 ${s.unplannedQty}</span>`
+              }
+            </td>
+          </tr>
+        `;
+      }).join('');
+
+      container.innerHTML = `
+        <table class="multi-agg-table">
+          <thead>
+            <tr>
+              <th style="min-width:210px;">作品名 / バリエーション</th>
+              <th style="min-width:65px;">不足数</th>
+              <th style="min-width:85px;">1個目安時間</th>
+              ${printerColsHeader}
+              <th style="min-width:95px;">合計予定 / 不足</th>
+              <th style="min-width:75px;">総時間</th>
+              <th style="min-width:95px;">状態</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${tbodyHtml}
+          </tbody>
+        </table>
+      `;
+    }
+
+    // Update allocation for (skuId, printerId) from Matrix View and distribute onto calendar dates
+    window.updateMfgMatrixAllocation = async (skuId, printerId, newQtyVal) => {
+      if (!auth.currentUser) return alert("ログインが必要です");
+      const targetQty = Math.max(0, parseInt(newQtyVal) || 0);
+      const skuInfo = mfgSkuMapCache[skuId];
+      if (!skuInfo) return;
+
+      const updated = { ...(window.productionPlansData || {}) };
+      // Remove existing non-completed jobs for this (skuId, printerId)
+      Object.keys(updated).forEach(k => {
+        if (k.startsWith('_')) return;
+        const item = updated[k];
+        if (item && item.printerId === printerId && (item.skuId || item.productId) === skuId && item.status !== 'completed') {
+          delete updated[k];
+        }
+      });
+
+      if (targetQty > 0) {
+        const printers = window.getMfgPrinters(true);
+        const pr = printers.find(p => p.id === printerId) || printers[0];
+        const unitH = skuInfo.unitHours || 2.5;
+        const startStr = mfgStartDateStr || getLocalYmd();
+        let rem = targetQty;
+
+        for (let dOff = 0; dOff < 21 && rem > 0; dOff++) {
+          const dStr = addDaysYmd(startStr, dOff);
+          const cap = window.getPrinterDailyCapacity(pr, dStr);
+          const used = Object.keys(updated)
+            .filter(k => !k.startsWith('_') && updated[k]?.printerId === printerId && updated[k]?.date === dStr)
+            .reduce((s, k) => s + (Number(updated[k].totalHours) || 0), 0);
+          const avail = Math.max(0, cap - used);
+          const fit = unitH > 0 ? Math.floor((avail + 0.01) / unitH) : rem;
+          if (fit >= 1) {
+            const take = Math.min(rem, fit);
+            const newId = 'prod_' + Date.now() + '_' + dOff + '_' + Math.random().toString(36).substring(2, 5);
+            updated[newId] = {
+              id: newId,
+              productId: skuInfo.parentId,
+              skuId: skuInfo.skuId,
+              printerId: printerId,
+              date: dStr,
+              qty: take,
+              unitHours: unitH,
+              totalHours: +(take * unitH).toFixed(1),
+              isCustomHours: false,
+              status: 'planned',
+              targetEvents: [...(multiAggSelectedEvents || [currentEventKey])],
+              memo: 'マトリクス配分',
+              updatedAt: Date.now()
+            };
+            rem -= take;
+          }
+        }
+        if (rem > 0) {
+          const newId = 'prod_' + Date.now() + '_rem';
+          updated[newId] = {
+            id: newId,
+            productId: skuInfo.parentId,
+            skuId: skuInfo.skuId,
+            printerId: printerId,
+            date: startStr,
+            qty: rem,
+            unitHours: unitH,
+            totalHours: +(rem * unitH).toFixed(1),
+            isCustomHours: false,
+            status: 'planned',
+            targetEvents: [...(multiAggSelectedEvents || [currentEventKey])],
+            memo: 'マトリクス配分',
+            updatedAt: Date.now()
+          };
+        }
+      }
+
+      window.productionPlansData = updated;
+      await setDoc(doc(db, "settings", "production_plans"), updated);
+      window.renderProductionPlans();
     };
 
     window.printSalesReport = () => {
