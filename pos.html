@@ -397,49 +397,187 @@
       flex-direction: column;
       gap: 6px;
     }
+    #settings-view .scroll-container {
+      max-width: 1540px !important;
+      width: 100% !important;
+      padding: 16px 24px 80px 24px !important;
+      box-sizing: border-box !important;
+    }
+    .prod-kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(170px, 1fr));
+      gap: 12px;
+    }
+    .prod-kpi-card {
+      background: #141722;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 14px;
+      padding: 14px 16px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
+    }
+    .prod-kpi-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      flex-shrink: 0;
+    }
+    .prod-dash-split {
+      display: grid;
+      grid-template-columns: minmax(0, 1.6fr) 390px;
+      gap: 18px;
+      align-items: start;
+      width: 100%;
+    }
+    .prod-dash-detail-card {
+      background: #141722;
+      border: 1px solid rgba(59, 130, 246, 0.35);
+      border-radius: 14px;
+      padding: 18px;
+      position: sticky;
+      top: 12px;
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.55);
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .event-pill-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(59, 130, 246, 0.18);
+      border: 1px solid #3b82f6;
+      color: #60a5fa;
+      font-size: 12px;
+      font-weight: bold;
+      padding: 5px 12px;
+      border-radius: 8px;
+      transition: all 0.15s;
+    }
+    .event-pill-chip button {
+      background: none;
+      border: none;
+      color: #93c5fd;
+      cursor: pointer;
+      font-size: 13px;
+      padding: 0 2px;
+      line-height: 1;
+    }
+    .event-pill-chip button:hover {
+      color: #fff;
+    }
     .multi-agg-table {
       width: 100%;
       border-collapse: collapse;
       font-size: 13px;
     }
     .multi-agg-table th {
-      background: rgba(15, 15, 22, 0.96);
-      color: rgba(255, 255, 255, 0.85);
-      padding: 10px 8px;
-      border-bottom: 2px solid rgba(0, 210, 255, 0.35);
+      background: #12151f;
+      color: rgba(255, 255, 255, 0.65);
+      font-size: 11px;
+      font-weight: 600;
+      padding: 11px 10px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
       text-align: right;
       white-space: nowrap;
       position: sticky;
       top: 0;
       z-index: 5;
     }
-    .multi-agg-table th:first-child {
+    .multi-agg-table th:first-child,
+    .multi-agg-table th:nth-child(2) {
       text-align: left;
     }
     .multi-agg-table td {
-      padding: 9px 8px;
+      padding: 10px 10px;
       border-bottom: 1px solid rgba(255, 255, 255, 0.06);
       text-align: right;
       vertical-align: middle;
     }
-    .multi-agg-table td:first-child {
+    .multi-agg-table td:first-child,
+    .multi-agg-table td:nth-child(2) {
       text-align: left;
     }
     .multi-agg-parent-row {
-      background: rgba(255, 255, 255, 0.03);
+      background: rgba(255, 255, 255, 0.025);
       font-weight: bold;
+      cursor: pointer;
+      transition: background 0.12s;
     }
     .multi-agg-parent-row:hover {
       background: rgba(255, 255, 255, 0.06);
     }
     .multi-agg-sku-row {
-      background: rgba(0, 0, 0, 0.25);
+      background: rgba(0, 0, 0, 0.22);
       font-size: 12px;
-      color: rgba(255, 255, 255, 0.88);
+      color: rgba(255, 255, 255, 0.9);
+      cursor: pointer;
+      transition: background 0.12s;
+    }
+    .multi-agg-sku-row:hover {
+      background: rgba(59, 130, 246, 0.09);
     }
     .multi-agg-sku-row td:first-child {
-      padding-left: 28px;
-      border-left: 3px solid rgba(0, 210, 255, 0.4);
+      padding-left: 24px;
+      border-left: 3px solid rgba(0, 210, 255, 0.35);
+    }
+    .multi-agg-row-selected {
+      background: rgba(59, 130, 246, 0.16) !important;
+      box-shadow: inset 0 0 0 1.5px #3b82f6;
+    }
+    .status-pill-ready {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: rgba(16, 185, 129, 0.16);
+      border: 1px solid rgba(16, 185, 129, 0.45);
+      color: #34d399;
+      font-size: 11px;
+      font-weight: bold;
+      padding: 3px 9px;
+      border-radius: 6px;
+      white-space: nowrap;
+    }
+    .status-pill-short {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: rgba(239, 68, 68, 0.16);
+      border: 1px solid rgba(239, 68, 68, 0.45);
+      color: #f87171;
+      font-size: 11px;
+      font-weight: bold;
+      padding: 3px 9px;
+      border-radius: 6px;
+      white-space: nowrap;
+    }
+    .status-pill-none {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: rgba(255, 255, 255, 0.06);
+      color: rgba(255, 255, 255, 0.45);
+      font-size: 11px;
+      padding: 3px 9px;
+      border-radius: 6px;
+      white-space: nowrap;
+    }
+    @media (max-width: 1180px) {
+      .prod-kpi-grid {
+        grid-template-columns: repeat(auto-fit, minmax(165px, 1fr));
+      }
+      .prod-dash-split {
+        grid-template-columns: 1fr;
+      }
+      .prod-dash-detail-card {
+        position: static;
+      }
     }
     @media (max-width: 768px) {
       #settings-view .scroll-container {
@@ -1471,48 +1609,81 @@
           </div>
         </div>
 
-        <!-- Sub-tabs for Inventory, Multi-Event Aggregation, and Manufacturing -->
-        <div style="display:flex; background:rgba(0,0,0,0.3); border-radius:6px; padding:3px; margin-bottom:16px; width:fit-content; flex-wrap:wrap; gap:4px;">
-          <button class="btn settings-subtab-btn active" id="btn-settings-subtab-stock" onclick="switchSettingsSubTab('stock')" style="padding:6px 16px; font-size:12px; font-weight:bold; background:var(--accent); color:#000; border-radius:4px;">📋 在庫数一覧</button>
-          <button class="btn settings-subtab-btn" id="btn-settings-subtab-multi-agg" onclick="switchSettingsSubTab('multi-agg')" style="padding:6px 16px; font-size:12px; color:#fff; background:none; border-radius:4px;">📊 複数イベント必要在庫集計</button>
-          <button class="btn settings-subtab-btn" id="btn-settings-subtab-production" onclick="switchSettingsSubTab('production')" style="padding:6px 16px; font-size:12px; color:#fff; background:none; border-radius:4px;">📅 製造計画チャート</button>
-        </div>
+        <!-- Sub-tabs & Carry-over Bar -->
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:16px;">
+          <div style="display:flex; background:rgba(0,0,0,0.35); border-radius:8px; padding:4px; width:fit-content; flex-wrap:wrap; gap:4px; border:1px solid rgba(255,255,255,0.08);">
+            <button class="btn settings-subtab-btn active" id="btn-settings-subtab-multi-agg" onclick="switchSettingsSubTab('multi-agg')" style="padding:7px 16px; font-size:12px; font-weight:bold; background:var(--accent); color:#000; border-radius:6px;">📊 イベント制作状況・在庫一覧</button>
+            <button class="btn settings-subtab-btn" id="btn-settings-subtab-stock" onclick="switchSettingsSubTab('stock')" style="padding:7px 16px; font-size:12px; color:#fff; background:none; border-radius:6px;">🃏 従来カード表示</button>
+            <button class="btn settings-subtab-btn" id="btn-settings-subtab-production" onclick="switchSettingsSubTab('production')" style="padding:7px 16px; font-size:12px; color:#fff; background:none; border-radius:6px;">📅 製造計画チャート</button>
+          </div>
 
-        <!-- Stock Toolbar: Carry-over from previous event & Expand/Collapse -->
-        <div id="stock-toolbar-panel" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); padding:10px 14px; border-radius:10px; margin-bottom:14px;">
-          <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
+          <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); padding:6px 12px; border-radius:8px;">
             <span style="font-size:11px; color:var(--accent); font-weight:bold;">📥 前イベントから残在庫を引き継ぐ:</span>
             <select id="carryover-stock-event-select" class="form-select" style="font-size:11px; padding:4px 8px; width:auto; background:rgba(0,0,0,0.5);">
               <option value="">コピー元イベントを選択...</option>
             </select>
             <button class="btn" onclick="carryOverStockFromSelectedEvent()" style="background:rgba(0,210,255,0.15); border:1px solid var(--accent); color:var(--accent); font-size:11px; padding:4px 10px; border-radius:6px; font-weight:bold;">残在庫を反映</button>
           </div>
-          <div style="display:flex; gap:6px; align-items:center;">
-            <button class="btn" onclick="toggleAllVariantExpand('stock', true)" style="background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.15); color:#ddd; font-size:11px; padding:4px 8px;">▼ バリエーション全展開</button>
-            <button class="btn" onclick="toggleAllVariantExpand('stock', false)" style="background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.15); color:#ddd; font-size:11px; padding:4px 8px;">▶ 全折りたたみ</button>
-          </div>
         </div>
 
-        <!-- Normal Inventory List -->
-        <div id="settings-list"></div>
+        <!-- Stock Toolbar for Classic Card View -->
+        <div id="stock-toolbar-panel" style="display:none; justify-content:flex-end; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:12px;">
+          <button class="btn" onclick="toggleAllVariantExpand('stock', true)" style="background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.15); color:#ddd; font-size:11px; padding:4px 8px;">▼ バリエーション全展開</button>
+          <button class="btn" onclick="toggleAllVariantExpand('stock', false)" style="background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.15); color:#ddd; font-size:11px; padding:4px 8px;">▶ 全折りたたみ</button>
+        </div>
 
-        <!-- Multi-Event Required Inventory Aggregation Panel -->
-        <div id="multi-agg-panel" style="display:none; flex-direction:column; gap:16px; width:100%;">
-          <!-- Event Multi-Selection Box -->
-          <div style="background:var(--panel-bg); border:1px solid rgba(0,210,255,0.25); border-radius:12px; padding:16px;">
+        <!-- Classic Card Inventory List (Hidden by default, toggled via '🃏 従来カード表示') -->
+        <div id="settings-list" style="display:none;"></div>
+
+        <!-- Unified Event Production Status & Multi-Event Inventory Dashboard -->
+        <div id="multi-agg-panel" style="display:flex; flex-direction:column; gap:16px; width:100%;">
+          
+          <!-- ① Top Header Bar: Title + Target Event Pills + Event Date Box -->
+          <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:14px; background:#141722; border:1px solid rgba(255,255,255,0.08); border-radius:14px; padding:16px 20px; box-shadow:0 4px 16px rgba(0,0,0,0.3);">
+            <div>
+              <h3 style="margin:0; font-size:20px; color:#fff; font-weight:bold; letter-spacing:0.3px;">イベント制作状況</h3>
+              <p style="margin:4px 0 0 0; font-size:12px; color:rgba(255,255,255,0.55);">イベントに向けた制作・在庫の進捗を管理できます（単一イベント／複数イベント合算対応）</p>
+            </div>
+
+            <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
+              <!-- Active Event Pills Box -->
+              <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap; background:rgba(0,0,0,0.35); border:1px solid rgba(255,255,255,0.1); padding:8px 12px; border-radius:10px;">
+                <span style="font-size:11px; color:rgba(255,255,255,0.6); font-weight:bold;">対象イベント</span>
+                <div id="multi-agg-active-pills" style="display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
+                  <!-- Active pills injected dynamically -->
+                </div>
+                <button type="button" onclick="toggleMultiAggEventDrawer()" id="btn-toggle-event-drawer" style="background:rgba(255,255,255,0.06); border:1px dashed rgba(255,255,255,0.28); color:#ddd; font-size:11px; padding:5px 10px; border-radius:8px; cursor:pointer; font-weight:bold;">
+                  ＋ イベントを追加・参照設定 ▼
+                </button>
+              </div>
+
+              <!-- Event Date Card -->
+              <div style="background:rgba(0,0,0,0.35); border:1px solid rgba(255,255,255,0.1); border-radius:10px; padding:8px 14px; display:flex; align-items:center; gap:12px;">
+                <div>
+                  <div style="font-size:10px; color:rgba(255,255,255,0.5);">開催日</div>
+                  <div id="multi-agg-date-display" style="font-size:12px; font-weight:bold; color:#fff; margin-top:2px;">-</div>
+                </div>
+                <span style="font-size:16px; opacity:0.6;">📅</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Collapsible Event Multi-Selection & Reference Stock Drawer -->
+          <div id="multi-agg-selector-drawer" style="display:none; background:#141722; border:1px solid rgba(0,210,255,0.35); border-radius:12px; padding:16px; box-shadow:0 8px 24px rgba(0,0,0,0.5);">
             <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:10px;">
               <div>
-                <h3 style="margin:0; font-size:16px; color:var(--accent); display:flex; align-items:center; gap:6px;">
-                  📊 複数イベント 必要在庫合算・不足数チェック
-                </h3>
-                <p style="margin:4px 0 0 0; font-size:11px; opacity:0.7;">
-                  複数のイベントにチェックを入れると、各イベントの採用シミュ準備予定数（必要数）を合算し、現在庫（手元在庫）を1回だけ差し引いて不足数を算出します。
+                <h4 style="margin:0; font-size:14px; color:var(--accent); display:flex; align-items:center; gap:6px;">
+                  📊 集計対象イベントの選択 ＆ 手元現在庫の参照枠設定
+                </h4>
+                <p style="margin:3px 0 0 0; font-size:11px; opacity:0.7;">
+                  チェックを入れたイベントの採用シミュ必要数を合算し、指定した参照枠の現在庫を1回だけ差し引いて不足数・達成率を算出します。
                 </p>
               </div>
               <div style="display:flex; gap:6px; flex-wrap:wrap;">
                 <button class="btn" onclick="selectMultiAggPreset('scheduled')" style="background:rgba(0,210,255,0.15); border:1px solid var(--accent); color:var(--accent); font-size:11px; padding:4px 10px;">⛺ 出店予定を選択</button>
                 <button class="btn" onclick="selectMultiAggPreset('current')" style="background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.2); color:#fff; font-size:11px; padding:4px 10px;">現在のイベントのみ</button>
                 <button class="btn" onclick="selectMultiAggPreset('all')" style="background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.2); color:#fff; font-size:11px; padding:4px 10px;">全マルシェ選択</button>
+                <button class="btn" onclick="toggleMultiAggEventDrawer()" style="background:rgba(255,255,255,0.05); color:#aaa; font-size:11px; padding:4px 10px;">▲ 閉じる</button>
               </div>
             </div>
 
@@ -1524,51 +1695,96 @@
             <!-- Reference Current Stock Selector -->
             <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-top:10px; padding-top:10px; border-top:1px dashed rgba(255,255,255,0.1); font-size:12px;">
               <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
-                <span style="color:#f1c40f; font-weight:bold;">📦 比較する「手元の現在庫」の参照枠:</span>
+                <span style="color:#f1c40f; font-weight:bold;">📦 比較・操作する「手元の現在庫」の参照枠:</span>
                 <select id="multi-agg-stock-source-select" onchange="onChangeMultiAggStockSource(this.value)" class="form-select" style="width:auto; font-size:12px; padding:4px 10px; font-weight:bold; border-color:#f1c40f; color:#fff;">
                 </select>
-                <span style="font-size:11px; opacity:0.65;">※同じ在庫を複数イベントに重複割当せず、先に必要数を合算してからこの現在庫を差し引きます。</span>
+                <span style="font-size:11px; opacity:0.65;">※右パネルの在庫調整もこの参照枠の在庫に対して直接反映されます。</span>
               </div>
             </div>
           </div>
 
-          <!-- Summary KPI Cards -->
-          <div id="multi-agg-kpi-row" style="display:grid; grid-template-columns:repeat(auto-fit, minmax(150px, 1fr)); gap:12px;">
+          <!-- ② 5 KPI Summary Cards Row -->
+          <div id="multi-agg-kpi-row" class="prod-kpi-grid">
             <!-- Populated dynamically -->
           </div>
 
-          <!-- Controls: View Mode, Filter, Sort -->
-          <div style="background:var(--panel-bg); border:1px solid rgba(255,255,255,0.08); border-radius:10px; padding:12px 14px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
-            <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
-              <span style="font-size:11px; opacity:0.7;">表示粒度:</span>
-              <select id="multi-agg-view-mode" onchange="renderMultiEventAggregation()" class="form-select" style="width:auto; font-size:12px; padding:4px 8px;">
-                <option value="tree">📂 親商品＋バリエーション内訳</option>
-                <option value="flat">📄 全SKUフラット一覧</option>
-              </select>
-              <span style="font-size:11px; opacity:0.7; margin-left:4px;">絞り込み:</span>
-              <select id="multi-agg-filter" onchange="renderMultiEventAggregation()" class="form-select" style="width:auto; font-size:12px; padding:4px 8px;">
-                <option value="all">すべて表示 (出品/必要対象)</option>
-                <option value="shortage">🔥 不足ありのみ (不足 &gt; 0)</option>
-                <option value="required">📦 必要数ありのみ (合計必要 &gt; 0)</option>
-                <option value="variants">🎨 バリエーションありのみ</option>
-              </select>
+          <!-- ③ Filter, Sort, View Mode & Search Toolbar -->
+          <div style="background:#141722; border:1px solid rgba(255,255,255,0.08); border-radius:12px; padding:10px 14px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+            <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+              <div style="display:flex; align-items:center; gap:5px;">
+                <span style="font-size:11px; color:rgba(255,255,255,0.6);">並び替え</span>
+                <select id="multi-agg-sort" onchange="renderMultiEventAggregation()" class="form-select" style="width:auto; font-size:12px; padding:5px 10px; background:#0d0f17; border-color:rgba(255,255,255,0.15);">
+                  <option value="shortage_desc">不足数順 (多い順)</option>
+                  <option value="rate_asc">達成率が低い順</option>
+                  <option value="required_desc">必要数が多い順</option>
+                  <option value="default">標準（作品登録順）</option>
+                </select>
+              </div>
+
+              <label style="display:inline-flex; align-items:center; gap:6px; font-size:12px; color:#fff; cursor:pointer; background:rgba(59,130,246,0.12); border:1px solid rgba(59,130,246,0.35); padding:5px 10px; border-radius:6px; font-weight:bold;">
+                <input type="checkbox" id="multi-agg-unfinished-only" onchange="renderMultiEventAggregation()" style="width:15px; height:15px; accent-color:#3b82f6; cursor:pointer;">
+                <span>未完了のみ表示</span>
+              </label>
+
+              <div style="display:flex; align-items:center; gap:5px;">
+                <span style="font-size:11px; color:rgba(255,255,255,0.6);">作品シリーズ</span>
+                <select id="multi-agg-series-filter" onchange="renderMultiEventAggregation()" class="form-select" style="width:auto; max-width:170px; font-size:12px; padding:5px 8px; background:#0d0f17;">
+                  <option value="all">すべて</option>
+                </select>
+              </div>
+
+              <div style="display:flex; align-items:center; gap:5px;">
+                <span style="font-size:11px; color:rgba(255,255,255,0.6);">バリエーション</span>
+                <select id="multi-agg-variant-filter" onchange="renderMultiEventAggregation()" class="form-select" style="width:auto; max-width:150px; font-size:12px; padding:5px 8px; background:#0d0f17;">
+                  <option value="all">すべて</option>
+                </select>
+              </div>
+
+              <div style="display:flex; align-items:center; gap:5px;">
+                <span style="font-size:11px; color:rgba(255,255,255,0.6);">粒度</span>
+                <select id="multi-agg-view-mode" onchange="renderMultiEventAggregation()" class="form-select" style="width:auto; font-size:12px; padding:5px 8px; background:#0d0f17;">
+                  <option value="flat">📄 SKUフラット一覧</option>
+                  <option value="tree">📂 親商品＋バリエ内訳</option>
+                </select>
+              </div>
+
+              <div style="display:flex; align-items:center; gap:5px;">
+                <select id="multi-agg-filter" onchange="renderMultiEventAggregation()" class="form-select" style="width:auto; font-size:12px; padding:5px 8px; background:#0d0f17;">
+                  <option value="all">全出品対象を表示</option>
+                  <option value="required">📦 必要数 &gt; 0 のみ</option>
+                  <option value="shortage">🔥 不足 &gt; 0 のみ</option>
+                  <option value="completed">✅ 準備完了のみ</option>
+                  <option value="variants">🎨 バリエありのみ</option>
+                </select>
+              </div>
+
+              <label style="display:inline-flex; align-items:center; gap:4px; font-size:11px; color:rgba(255,255,255,0.7); cursor:pointer;" title="複数イベント選択時にイベントごとの内訳列を表内に表示します">
+                <input type="checkbox" id="multi-agg-show-ev-cols" checked onchange="renderMultiEventAggregation()" style="accent-color:var(--accent); cursor:pointer;">
+                <span>イベント別列</span>
+              </label>
             </div>
-            <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
-              <span style="font-size:11px; opacity:0.7;">並び順:</span>
-              <select id="multi-agg-sort" onchange="renderMultiEventAggregation()" class="form-select" style="width:auto; font-size:12px; padding:4px 8px; border-color:var(--accent);">
-                <option value="shortage_desc">🔥 不足数が多い順</option>
-                <option value="required_desc">📦 合計必要数が多い順</option>
-                <option value="default">📋 標準（マスター順）</option>
-              </select>
-              <button class="btn" onclick="toggleAllVariantExpand('agg', true)" style="background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.15); color:#ddd; font-size:11px; padding:4px 8px;">▼ 全展開</button>
-              <button class="btn" onclick="toggleAllVariantExpand('agg', false)" style="background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.15); color:#ddd; font-size:11px; padding:4px 8px;">▶ 全折りたたみ</button>
+
+            <!-- Search Input -->
+            <div style="display:flex; align-items:center; gap:6px; flex:1; min-width:200px; max-width:290px; margin-left:auto;">
+              <div style="position:relative; width:100%;">
+                <span style="position:absolute; left:10px; top:50%; transform:translateY(-50%); font-size:12px; opacity:0.5;">🔍</span>
+                <input type="text" id="multi-agg-search" oninput="renderMultiEventAggregation()" class="form-input" placeholder="作品名・バリエーションで検索..." style="width:100%; padding:6px 10px 6px 28px; font-size:12px; background:#0d0f17; border:1px solid rgba(255,255,255,0.15); border-radius:8px;">
+              </div>
             </div>
           </div>
 
-          <!-- Aggregation Table Container -->
-          <div style="background:var(--panel-bg); border:1px solid rgba(255,255,255,0.08); border-radius:12px; overflow-x:auto; box-shadow:0 4px 16px rgba(0,0,0,0.35);">
-            <div id="multi-agg-table-container" style="min-width:100%;">
-              <!-- Table injected dynamically -->
+          <!-- ④ Main 2-Column Split Layout: Left Compact Table + Right Sticky Detail Inspector -->
+          <div class="prod-dash-split">
+            <!-- Left Column: Table -->
+            <div style="background:#141722; border:1px solid rgba(255,255,255,0.08); border-radius:14px; overflow-x:auto; box-shadow:0 6px 20px rgba(0,0,0,0.4);">
+              <div id="multi-agg-table-container" style="min-width:100%;">
+                <!-- Table injected dynamically -->
+              </div>
+            </div>
+
+            <!-- Right Column: Selected Product / SKU Detail & Stock Adjustment Inspector -->
+            <div id="multi-agg-detail-panel" class="prod-dash-detail-card">
+              <!-- Populated dynamically when a row is selected -->
             </div>
           </div>
         </div>
@@ -2070,7 +2286,14 @@
       document.querySelectorAll('.event-tab').forEach(el => el.classList.remove('active'));
       const activeBtn = document.getElementById(`tab-${key}`);
       if (activeBtn) activeBtn.classList.add('active');
+      const prevEventKey = currentEventKey;
       currentEventKey = key;
+      if (typeof multiAggSelectedEvents !== 'undefined') {
+        if (multiAggSelectedEvents.length <= 1 && (!multiAggSelectedEvents[0] || multiAggSelectedEvents[0] === prevEventKey)) {
+          multiAggSelectedEvents = [key];
+        }
+        multiAggStockSourceEvent = key;
+      }
       cart = {}; // Clear cart when switching events
       updateCartUI();
       listenToEventData();
@@ -3336,6 +3559,9 @@
           </div>
         `;
       });
+      if (typeof window.renderMultiEventAggregation === 'function' && currentSettingsSubTab === 'multi-agg') {
+        window.renderMultiEventAggregation();
+      }
     }
 
     // Edit Modals Logic
@@ -7610,7 +7836,7 @@
     // -------------------------------------------------------------
     // Manufacturing Production Plan (製造計画) Chart Implementation
     // -------------------------------------------------------------
-    let currentSettingsSubTab = 'stock'; // 'stock' | 'multi-agg' | 'production'
+    let currentSettingsSubTab = 'multi-agg'; // Default to the unified Event Production Status dashboard
 
     window.switchSettingsSubTab = (tab) => {
       currentSettingsSubTab = tab;
@@ -7651,9 +7877,8 @@
     };
 
     window.openMultiEventAggFromSim = () => {
-      // Save current simulation edits in memory before jumping
       if (typeof window.saveCurrentPatternToMemory === 'function') window.saveCurrentPatternToMemory();
-      switchTab('settings');
+      if (typeof window.switchSysTab === 'function') window.switchSysTab('settings');
       window.switchSettingsSubTab('multi-agg');
     };
 
@@ -8229,18 +8454,32 @@
     };
 
     // =========================================================================
-    // 📊 改善③：複数イベントの必要在庫集計モード (Multi-Event Aggregation)
+    // 📊 イベント制作状況ダッシュボード（単一/複数イベント集計 × 右サイド詳細操作パネル）
     // =========================================================================
     let multiAggSelectedEvents = []; // Array of eventKeys
     let multiAggStockSourceEvent = null; // Defaults to currentEventKey
     let multiAggSimCache = {}; // { [eventKey]: simulationDocData }
     let multiAggInvCache = {}; // { [eventKey]: inventoryDocData }
     let multiAggLoading = false;
+    let selectedMultiAggItemId = null; // Currently focused skuId or parentId in Right Detail Panel
+    let lastBuiltRowLookup = {}; // { [id]: rowDataObj }
+
+    window.toggleMultiAggEventDrawer = () => {
+      const drawer = document.getElementById('multi-agg-selector-drawer');
+      const btn = document.getElementById('btn-toggle-event-drawer');
+      if (!drawer) return;
+      const isHidden = drawer.style.display === 'none';
+      drawer.style.display = isHidden ? 'block' : 'none';
+      if (btn) {
+        btn.textContent = isHidden ? '▲ イベント選択を閉じる' : '＋ イベントを追加・参照設定 ▼';
+        btn.style.borderColor = isHidden ? 'var(--accent)' : 'rgba(255,255,255,0.28)';
+        btn.style.color = isHidden ? 'var(--accent)' : '#ddd';
+      }
+    };
 
     async function ensureAllEventsSimAndInvLoaded(forceReload = false) {
       const allEvents = window.getAllEvents ? window.getAllEvents(eventConfigData) : {};
       const keys = Object.keys(allEvents);
-      // Always keep currentEventKey synced with live memory
       if (currentEventKey) {
         if (typeof window.saveCurrentPatternToMemory === 'function') window.saveCurrentPatternToMemory();
         multiAggSimCache[currentEventKey] = currentSimulationData;
@@ -8329,9 +8568,44 @@
       window.renderMultiEventAggregation();
     };
 
+    window.cycleMultiAggSort = (field) => {
+      const sel = document.getElementById('multi-agg-sort');
+      if (!sel) return;
+      if (field === 'shortage') sel.value = 'shortage_desc';
+      else if (field === 'rate') sel.value = 'rate_asc';
+      else if (field === 'required') sel.value = 'required_desc';
+      else sel.value = 'default';
+      window.renderMultiEventAggregation();
+    };
+
+    function getRateBarColor(rate) {
+      if (rate >= 100) return '#10b981'; // Emerald Green
+      if (rate >= 40) return '#f59e0b';  // Amber
+      return '#ef4444';                  // Red
+    }
+
+    window.selectMultiAggItem = (itemId, shouldScrollMobile = false) => {
+      selectedMultiAggItemId = itemId;
+      // Update active row highlight in DOM without full re-fetch
+      document.querySelectorAll('.multi-agg-row-item').forEach(tr => {
+        if (tr.getAttribute('data-item-id') === itemId) {
+          tr.classList.add('multi-agg-row-selected');
+        } else {
+          tr.classList.remove('multi-agg-row-selected');
+        }
+      });
+      renderMultiAggDetailPanel();
+      if (shouldScrollMobile && window.innerWidth <= 1180) {
+        const panel = document.getElementById('multi-agg-detail-panel');
+        if (panel) panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+    };
+
     window.renderMultiEventAggregation = async () => {
       const container = document.getElementById('multi-agg-table-container');
       const chkContainer = document.getElementById('multi-agg-event-checkboxes');
+      const pillsContainer = document.getElementById('multi-agg-active-pills');
+      const dateDisplayEl = document.getElementById('multi-agg-date-display');
       const kpiContainer = document.getElementById('multi-agg-kpi-row');
       const stockSrcSelect = document.getElementById('multi-agg-stock-source-select');
       if (!container || !chkContainer) return;
@@ -8352,11 +8626,39 @@
       }
 
       await ensureAllEventsSimAndInvLoaded(false);
-      // Sync live currentEventKey cache
       multiAggSimCache[currentEventKey] = currentSimulationData;
       multiAggInvCache[currentEventKey] = inventoryData;
 
-      // 1. Render Event Checkboxes
+      // 1A. Render Top Header Active Event Pills & Date Display
+      if (pillsContainer) {
+        pillsContainer.innerHTML = multiAggSelectedEvents.map(evKey => {
+          const ev = allEvents[evKey] || { label: evKey };
+          const canRemove = multiAggSelectedEvents.length > 1;
+          return `
+            <span class="event-pill-chip">
+              <span>${ev.label}</span>
+              ${canRemove ? `<button type="button" onclick="toggleMultiAggEvent('${evKey}')" title="集計対象から外す">✕</button>` : ''}
+            </span>
+          `;
+        }).join('');
+      }
+
+      if (dateDisplayEl) {
+        const dates = multiAggSelectedEvents.map(evKey => {
+          const p = plans[evKey] || {};
+          const ev = allEvents[evKey] || {};
+          return p.date || ev.date || '';
+        }).filter(Boolean);
+        if (dates.length === 0) {
+          dateDisplayEl.textContent = '日程未設定';
+        } else if (dates.length === 1) {
+          dateDisplayEl.textContent = dates[0];
+        } else {
+          dateDisplayEl.textContent = dates.join(' / ');
+        }
+      }
+
+      // 1B. Render Event Checkboxes inside Drawer
       chkContainer.innerHTML = Object.keys(allEvents).map(evKey => {
         const ev = allEvents[evKey];
         const isChecked = multiAggSelectedEvents.includes(evKey);
@@ -8365,8 +8667,8 @@
         const prepMap = getEventAdoptedPrepMap(evKey);
         const hasPrepData = Object.values(prepMap).some(v => Number(v) > 0);
         return `
-          <label style="display:inline-flex; align-items:center; gap:6px; padding:6px 12px; border-radius:20px; cursor:pointer; font-size:12px; font-weight:${isChecked ? 'bold' : 'normal'}; background:${isChecked ? 'rgba(0,210,255,0.2)' : 'rgba(255,255,255,0.05)'}; border:1px solid ${isChecked ? 'var(--accent)' : 'rgba(255,255,255,0.15)'}; color:${isChecked ? '#fff' : 'rgba(255,255,255,0.75)'}; transition:all 0.15s;">
-            <input type="checkbox" ${isChecked ? 'checked' : ''} onchange="toggleMultiAggEvent('${evKey}')" style="accent-color:var(--accent); width:15px; height:15px; cursor:pointer;">
+          <label style="display:inline-flex; align-items:center; gap:6px; padding:6px 12px; border-radius:20px; cursor:pointer; font-size:12px; font-weight:${isChecked ? 'bold' : 'normal'}; background:${isChecked ? 'rgba(59,130,246,0.22)' : 'rgba(255,255,255,0.05)'}; border:1px solid ${isChecked ? '#3b82f6' : 'rgba(255,255,255,0.15)'}; color:${isChecked ? '#fff' : 'rgba(255,255,255,0.75)'}; transition:all 0.15s;">
+            <input type="checkbox" ${isChecked ? 'checked' : ''} onchange="toggleMultiAggEvent('${evKey}')" style="accent-color:#3b82f6; width:15px; height:15px; cursor:pointer;">
             <span>${ev.label}</span>
             ${dateBadge}
             ${hasPrepData ? `<span style="font-size:9px; background:rgba(241,196,15,0.2); color:#f1c40f; padding:1px 5px; border-radius:6px;">必要数あり</span>` : ''}
@@ -8378,7 +8680,7 @@
       if (stockSrcSelect) {
         stockSrcSelect.innerHTML = Object.keys(allEvents).map(evKey => {
           const isCur = evKey === currentEventKey;
-          return `<option value="${evKey}" ${evKey === multiAggStockSourceEvent ? 'selected' : ''}>${allEvents[evKey].label}${isCur ? ' (現在選択中のイベント)' : ''}</option>`;
+          return `<option value="${evKey}" ${evKey === multiAggStockSourceEvent ? 'selected' : ''}>${allEvents[evKey].label}${isCur ? ' (現在選択中タブ)' : ''}</option>`;
         }).join('');
       }
 
@@ -8386,26 +8688,37 @@
         ? inventoryData
         : (multiAggInvCache[multiAggStockSourceEvent] || {});
 
-      // 3. Collect union of products across selected events (or all master products)
+      // 3. Collect union of products & build SKU / Parent rows
       const allMaster = window.getFullMasterProducts ? window.getFullMasterProducts(window.customProductsData) : MASTER_PRODUCTS;
-      const viewMode = document.getElementById('multi-agg-view-mode')?.value || 'tree';
+      const viewMode = document.getElementById('multi-agg-view-mode')?.value || 'flat';
       const filterMode = document.getElementById('multi-agg-filter')?.value || 'all';
       const sortMode = document.getElementById('multi-agg-sort')?.value || 'shortage_desc';
+      const unfinishedOnly = document.getElementById('multi-agg-unfinished-only')?.checked || false;
+      const seriesFilter = document.getElementById('multi-agg-series-filter')?.value || 'all';
+      const variantFilter = document.getElementById('multi-agg-variant-filter')?.value || 'all';
+      const searchQuery = (document.getElementById('multi-agg-search')?.value || '').trim().toLowerCase();
+      const showEvCols = document.getElementById('multi-agg-show-ev-cols')?.checked !== false;
 
-      // Build structured aggregation rows
       let parentRows = [];
       let flatSkuRows = [];
+      lastBuiltRowLookup = {};
 
-      let grandTotalRequired = 0;
-      let grandTotalCurrentStock = 0;
-      let grandTotalShortage = 0;
-      let shortageSkuCount = 0;
+      // Anti-inflation KPI accumulators
+      let grandTotalRequired = 0;       // Sum of R_i
+      let grandTotalAllocatedStock = 0; // Sum of min(S_i, R_i) for SKUs with R_i > 0
+      let grandTotalRawStock = 0;       // Sum of physical S_i across all active items
+      let grandTotalShortage = 0;       // Sum of max(0, R_i - S_i)
+      let totalTargetSkus = 0;          // Count of SKUs where R_i > 0
+      let completedTargetSkus = 0;      // Count of SKUs where R_i > 0 and S_i >= R_i
+
+      const seriesOptions = [];
+      const variantNameSet = new Set();
 
       allMaster.forEach((p, masterIdx) => {
+        const cleanParentName = p.name.replace(/\n/g, ' ');
         const vars = window.getProductVariants(p.id, false);
         const hasVars = vars.length > 0;
 
-        // Check if product is selected in any of the checked events or has stock/required > 0
         const isSelectedInAnyEvent = multiAggSelectedEvents.some(evKey => {
           const selIds = window.eventProductsData?.[evKey];
           return !selIds || selIds.includes(p.id);
@@ -8416,10 +8729,12 @@
           multiAggSelectedEvents.forEach(evKey => pPerEventReq[evKey] = 0);
           let pTotalReq = 0;
           let pCurrentStock = 0;
+          let pAllocatedStock = 0;
           let pShortage = 0;
           let skuItems = [];
 
           vars.forEach((v, vIdx) => {
+            variantNameSet.add(v.name);
             let vPerEvent = {};
             let vTotalReq = 0;
             multiAggSelectedEvents.forEach(evKey => {
@@ -8431,60 +8746,83 @@
             });
             const vInv = window.getSkuInventory(refInvMap, p.id, v);
             const vCur = vInv.current || 0;
-            // IMPORTANT FORMULA: 不足数 = max(0, 選択イベントの合計必要数 - 現在庫数)
-            // Never allocate the same stock across multiple events!
+            const vAlloc = Math.min(vCur, vTotalReq);
             const vShort = Math.max(0, vTotalReq - vCur);
+            const vRate = vTotalReq > 0 ? Math.min(100, Math.round((vAlloc / vTotalReq) * 100)) : (vCur > 0 ? 100 : 0);
 
             pTotalReq += vTotalReq;
             pCurrentStock += vCur;
+            pAllocatedStock += vAlloc;
             pShortage += vShort;
 
             if (isSelectedInAnyEvent || vTotalReq > 0 || vCur > 0) {
               grandTotalRequired += vTotalReq;
-              grandTotalCurrentStock += vCur;
+              grandTotalAllocatedStock += vAlloc;
+              grandTotalRawStock += vCur;
               grandTotalShortage += vShort;
-              if (vShort > 0) shortageSkuCount++;
+              if (vTotalReq > 0) {
+                totalTargetSkus++;
+                if (vShort === 0) completedTargetSkus++;
+              }
             }
 
             const skuRowObj = {
+              rowId: v.skuId,
               type: 'sku',
               parentId: p.id,
-              parentName: p.name.replace(/\n/g, ' '),
+              parentName: cleanParentName,
               parentImage: p.image,
               skuId: v.skuId,
               variantName: v.name,
               isBase: v.isBase,
               statusNote: v.statusNote,
+              hasVars: true,
+              varsCount: vars.length,
               perEventReq: vPerEvent,
               totalReq: vTotalReq,
               currentStock: vCur,
+              allocatedStock: vAlloc,
               shortage: vShort,
+              rate: vRate,
+              isReady: vTotalReq > 0 && vShort === 0,
               masterOrder: masterIdx * 100 + vIdx
             };
             skuItems.push(skuRowObj);
+            lastBuiltRowLookup[v.skuId] = skuRowObj;
             if (isSelectedInAnyEvent || vTotalReq > 0 || vCur > 0) {
               flatSkuRows.push(skuRowObj);
             }
           });
 
           if (isSelectedInAnyEvent || pTotalReq > 0 || pCurrentStock > 0) {
-            parentRows.push({
+            seriesOptions.push({ id: p.id, name: cleanParentName });
+            const pRate = pTotalReq > 0 ? Math.min(100, Math.round((pAllocatedStock / pTotalReq) * 100)) : (pCurrentStock > 0 ? 100 : 0);
+            const pObj = {
+              rowId: p.id,
               type: 'parent',
               parentId: p.id,
-              parentName: p.name.replace(/\n/g, ' '),
+              parentName: cleanParentName,
               parentImage: p.image,
+              skuId: p.id,
+              variantName: `${vars.length}種合計`,
               hasVars: true,
               varsCount: vars.length,
               perEventReq: pPerEventReq,
               totalReq: pTotalReq,
               currentStock: pCurrentStock,
+              allocatedStock: pAllocatedStock,
               shortage: pShortage,
+              rate: pRate,
+              isReady: pTotalReq > 0 && pShortage === 0,
               skuItems,
               masterOrder: masterIdx * 100
-            });
+            };
+            parentRows.push(pObj);
+            lastBuiltRowLookup[p.id] = pObj;
           }
         } else {
           // Single Product without variants
+          variantNameSet.add('無印');
           let pPerEvent = {};
           let pTotalReq = 0;
           multiAggSelectedEvents.forEach(evKey => {
@@ -8495,61 +8833,141 @@
           });
           const pInv = refInvMap[p.id] || { current: 0 };
           const pCur = pInv.current || 0;
+          const pAlloc = Math.min(pCur, pTotalReq);
           const pShort = Math.max(0, pTotalReq - pCur);
+          const pRate = pTotalReq > 0 ? Math.min(100, Math.round((pAlloc / pTotalReq) * 100)) : (pCur > 0 ? 100 : 0);
 
           if (isSelectedInAnyEvent || pTotalReq > 0 || pCur > 0) {
+            seriesOptions.push({ id: p.id, name: cleanParentName });
             grandTotalRequired += pTotalReq;
-            grandTotalCurrentStock += pCur;
+            grandTotalAllocatedStock += pAlloc;
+            grandTotalRawStock += pCur;
             grandTotalShortage += pShort;
-            if (pShort > 0) shortageSkuCount++;
+            if (pTotalReq > 0) {
+              totalTargetSkus++;
+              if (pShort === 0) completedTargetSkus++;
+            }
 
             const singleObj = {
-              type: 'parent',
+              rowId: p.id,
+              type: 'single_sku',
               parentId: p.id,
-              parentName: p.name.replace(/\n/g, ' '),
+              parentName: cleanParentName,
               parentImage: p.image,
+              skuId: p.id,
+              variantName: '無印',
+              isBase: true,
               hasVars: false,
               varsCount: 0,
               perEventReq: pPerEvent,
               totalReq: pTotalReq,
               currentStock: pCur,
+              allocatedStock: pAlloc,
               shortage: pShort,
+              rate: pRate,
+              isReady: pTotalReq > 0 && pShort === 0,
               skuItems: [],
               masterOrder: masterIdx * 100
             };
             parentRows.push(singleObj);
-            flatSkuRows.push({
-              ...singleObj,
-              type: 'single_sku',
-              skuId: p.id,
-              variantName: '通常版（単一）'
-            });
+            flatSkuRows.push(singleObj);
+            lastBuiltRowLookup[p.id] = singleObj;
           }
         }
       });
 
-      // 4. Render KPI Summary Cards
+      // Populate Series & Variant Filter Dropdowns preserving current selection
+      const seriesSelEl = document.getElementById('multi-agg-series-filter');
+      if (seriesSelEl) {
+        const curS = seriesSelEl.value || 'all';
+        seriesSelEl.innerHTML = `<option value="all">すべて (${seriesOptions.length}作品)</option>` +
+          seriesOptions.map(s => `<option value="${s.id}" ${s.id === curS ? 'selected' : ''}>${s.name}</option>`).join('');
+      }
+      const varSelEl = document.getElementById('multi-agg-variant-filter');
+      if (varSelEl) {
+        const curV = varSelEl.value || 'all';
+        const vList = Array.from(variantNameSet);
+        varSelEl.innerHTML = `<option value="all">すべて</option>` +
+          vList.map(vName => `<option value="${vName}" ${vName === curV ? 'selected' : ''}>${vName}</option>`).join('');
+      }
+
+      // 4. Render 5 KPI Summary Cards (Anti-Inflation Capped Rate)
       if (kpiContainer) {
-        const fulfillmentPct = grandTotalRequired > 0
-          ? Math.min(100, Math.round(((grandTotalRequired - grandTotalShortage) / grandTotalRequired) * 100))
+        const overallRateNum = grandTotalRequired > 0
+          ? ((grandTotalAllocatedStock / grandTotalRequired) * 100)
           : 100;
+        const overallRateStr = grandTotalRequired > 0 ? overallRateNum.toFixed(1) : '100.0';
+        const surplusStock = Math.max(0, grandTotalRawStock - grandTotalAllocatedStock);
+        const refEvLabel = allEvents[multiAggStockSourceEvent]?.label || multiAggStockSourceEvent;
+
         kpiContainer.innerHTML = `
-          <div style="background:rgba(0,0,0,0.35); border:1px solid rgba(255,255,255,0.1); border-radius:10px; padding:12px 14px;">
-            <div style="font-size:11px; opacity:0.7;">選択イベント数</div>
-            <div style="font-size:20px; font-weight:bold; color:var(--accent); margin-top:4px;">${multiAggSelectedEvents.length} <span style="font-size:12px;">イベント合算</span></div>
+          <!-- 1. 合計必要数 -->
+          <div class="prod-kpi-card">
+            <div class="prod-kpi-icon" style="background:rgba(59,130,246,0.16); color:#3b82f6; border:1px solid rgba(59,130,246,0.3);">🧊</div>
+            <div style="flex:1; min-width:0;">
+              <div style="font-size:11px; color:rgba(255,255,255,0.6);">合計必要数</div>
+              <div style="font-size:26px; font-weight:bold; color:#fff; line-height:1.15; margin-top:2px;">
+                ${grandTotalRequired.toLocaleString()} <span style="font-size:12px; font-weight:normal; opacity:0.7;">個</span>
+              </div>
+              <div style="font-size:10px; color:rgba(255,255,255,0.45); margin-top:3px;">
+                選択中のイベント合計 (${multiAggSelectedEvents.length}件)
+              </div>
+            </div>
           </div>
-          <div style="background:rgba(241,196,15,0.08); border:1px solid rgba(241,196,15,0.3); border-radius:10px; padding:12px 14px;">
-            <div style="font-size:11px; color:#f1c40f;">📦 合計必要在庫数</div>
-            <div style="font-size:22px; font-weight:bold; color:#f1c40f; margin-top:4px;">${grandTotalRequired.toLocaleString()} <span style="font-size:12px;">個</span></div>
+
+          <!-- 2. 現在庫 -->
+          <div class="prod-kpi-card">
+            <div class="prod-kpi-icon" style="background:rgba(16,185,129,0.16); color:#10b981; border:1px solid rgba(16,185,129,0.3);">📦</div>
+            <div style="flex:1; min-width:0;">
+              <div style="font-size:11px; color:rgba(255,255,255,0.6);">現在庫 (${refEvLabel})</div>
+              <div style="font-size:26px; font-weight:bold; color:#10b981; line-height:1.15; margin-top:2px;">
+                ${grandTotalAllocatedStock.toLocaleString()} <span style="font-size:12px; font-weight:normal; color:rgba(255,255,255,0.7);">個</span>
+              </div>
+              <div style="font-size:10px; color:rgba(255,255,255,0.45); margin-top:3px;">
+                ${surplusStock > 0 ? `実在庫合計 ${grandTotalRawStock}個 (余剰+${surplusStock}除外)` : `全作品の現在庫合計: ${grandTotalRawStock}個`}
+              </div>
+            </div>
           </div>
-          <div style="background:rgba(0,210,255,0.08); border:1px solid rgba(0,210,255,0.3); border-radius:10px; padding:12px 14px;">
-            <div style="font-size:11px; color:var(--accent);">🏠 手元現在庫 合計</div>
-            <div style="font-size:22px; font-weight:bold; color:#fff; margin-top:4px;">${grandTotalCurrentStock.toLocaleString()} <span style="font-size:12px;">個</span></div>
+
+          <!-- 3. 不足数 -->
+          <div class="prod-kpi-card">
+            <div class="prod-kpi-icon" style="background:rgba(239,68,68,0.16); color:#ef4444; border:1px solid rgba(239,68,68,0.3);">⚠️</div>
+            <div style="flex:1; min-width:0;">
+              <div style="font-size:11px; color:rgba(255,255,255,0.6);">不足数</div>
+              <div style="font-size:26px; font-weight:bold; color:${grandTotalShortage > 0 ? '#ef4444' : '#10b981'}; line-height:1.15; margin-top:2px;">
+                ${grandTotalShortage.toLocaleString()} <span style="font-size:12px; font-weight:normal; color:rgba(255,255,255,0.7);">個</span>
+              </div>
+              <div style="font-size:10px; color:rgba(255,255,255,0.5); margin-top:3px;">
+                ${grandTotalShortage > 0 ? `あと <strong style="color:#f87171;">${grandTotalShortage}</strong> 個の制作が必要` : '✨ すべての必要数を達成！'}
+              </div>
+            </div>
           </div>
-          <div style="background:${grandTotalShortage > 0 ? 'rgba(231,76,60,0.15)' : 'rgba(46,204,113,0.15)'}; border:1px solid ${grandTotalShortage > 0 ? 'var(--danger)' : 'var(--success)'}; border-radius:10px; padding:12px 14px;">
-            <div style="font-size:11px; color:${grandTotalShortage > 0 ? '#ff7675' : '#2ecc71'};">🔥 合計不足数 (要制作)</div>
-            <div style="font-size:22px; font-weight:bold; color:${grandTotalShortage > 0 ? 'var(--danger)' : 'var(--success)'}; margin-top:4px;">
-              ${grandTotalShortage.toLocaleString()} <span style="font-size:12px;">個 (${shortageSkuCount}種 / 充足率${fulfillmentPct}%)</span>
+
+          <!-- 4. 達成率 -->
+          <div class="prod-kpi-card" style="flex-direction:column; align-items:stretch; justify-content:center; gap:8px;">
+            <div style="display:flex; align-items:center; gap:12px;">
+              <div class="prod-kpi-icon" style="background:rgba(168,85,247,0.16); color:#a855f7; border:1px solid rgba(168,85,247,0.3); width:40px; height:40px; font-size:18px;">🟣</div>
+              <div>
+                <div style="font-size:11px; color:rgba(255,255,255,0.6);">達成率</div>
+                <div style="font-size:24px; font-weight:bold; color:#a855f7; line-height:1.15;">${overallRateStr}%</div>
+              </div>
+            </div>
+            <div style="background:rgba(255,255,255,0.08); height:6px; border-radius:4px; overflow:hidden; width:100%;">
+              <div style="background:linear-gradient(90deg, #8b5cf6, #a855f7); width:${Math.min(100, overallRateNum)}%; height:100%; border-radius:4px; transition:width 0.3s;"></div>
+            </div>
+          </div>
+
+          <!-- 5. 準備完了SKU -->
+          <div class="prod-kpi-card">
+            <div class="prod-kpi-icon" style="background:rgba(16,185,129,0.16); color:#10b981; border:1px solid rgba(16,185,129,0.3);">✔</div>
+            <div style="flex:1; min-width:0;">
+              <div style="font-size:11px; color:rgba(255,255,255,0.6);">準備完了SKU</div>
+              <div style="font-size:26px; font-weight:bold; color:#10b981; line-height:1.15; margin-top:2px;">
+                ${completedTargetSkus} <span style="font-size:15px; font-weight:normal; color:rgba(255,255,255,0.5);">/ ${totalTargetSkus}</span>
+              </div>
+              <div style="font-size:10px; color:rgba(255,255,255,0.45); margin-top:3px;">
+                全 ${totalTargetSkus} SKU のうち (必要数設定分)
+              </div>
             </div>
           </div>
         `;
@@ -8560,6 +8978,13 @@
         if (sortMode === 'shortage_desc') {
           if (b.shortage !== a.shortage) return b.shortage - a.shortage;
           if (b.totalReq !== a.totalReq) return b.totalReq - a.totalReq;
+        } else if (sortMode === 'rate_asc') {
+          // Put items with required > 0 first sorted by lowest rate
+          const aHasReq = a.totalReq > 0 ? 1 : 0;
+          const bHasReq = b.totalReq > 0 ? 1 : 0;
+          if (aHasReq !== bHasReq) return bHasReq - aHasReq;
+          if (a.rate !== b.rate) return a.rate - b.rate;
+          if (b.shortage !== a.shortage) return b.shortage - a.shortage;
         } else if (sortMode === 'required_desc') {
           if (b.totalReq !== a.totalReq) return b.totalReq - a.totalReq;
           if (b.shortage !== a.shortage) return b.shortage - a.shortage;
@@ -8567,139 +8992,189 @@
         return a.masterOrder - b.masterOrder;
       };
 
-      const filterFn = (row) => {
-        if (filterMode === 'shortage') return row.shortage > 0;
-        if (filterMode === 'required') return row.totalReq > 0;
-        if (filterMode === 'variants') return row.hasVars || row.type === 'sku';
+      const matchesCommonFilters = (row) => {
+        if (unfinishedOnly && row.shortage <= 0) return false;
+        if (filterMode === 'shortage' && row.shortage <= 0) return false;
+        if (filterMode === 'required' && row.totalReq <= 0) return false;
+        if (filterMode === 'completed' && !(row.totalReq > 0 && row.shortage === 0)) return false;
+        if (filterMode === 'variants' && !row.hasVars) return false;
+        if (seriesFilter !== 'all' && row.parentId !== seriesFilter) return false;
+        if (variantFilter !== 'all') {
+          if (row.type === 'parent' && row.hasVars) {
+            if (!row.skuItems.some(s => s.variantName === variantFilter)) return false;
+          } else if (row.variantName !== variantFilter) {
+            return false;
+          }
+        }
+        if (searchQuery) {
+          const text = `${row.parentName} ${row.variantName || ''}`.toLowerCase();
+          if (row.type === 'parent' && row.hasVars) {
+            const childMatch = row.skuItems.some(s => `${s.parentName} ${s.variantName}`.toLowerCase().includes(searchQuery));
+            if (!text.includes(searchQuery) && !childMatch) return false;
+          } else if (!text.includes(searchQuery)) {
+            return false;
+          }
+        }
         return true;
       };
 
-      // Build Table Header
-      const eventHeadersHtml = multiAggSelectedEvents.map(evKey => {
+      const renderEventColsVisible = showEvCols && multiAggSelectedEvents.length > 1;
+      const eventHeadersHtml = renderEventColsVisible ? multiAggSelectedEvents.map(evKey => {
         const label = allEvents[evKey]?.label || evKey;
-        return `<th style="min-width:74px; color:rgba(255,255,255,0.85);">${label}<div style="font-size:9px; font-weight:normal; opacity:0.65;">必要数</div></th>`;
-      }).join('');
+        return `<th style="min-width:66px; color:rgba(255,255,255,0.75);">${label}<div style="font-size:9px; font-weight:normal; opacity:0.6;">必要数</div></th>`;
+      }).join('') : '';
 
-      const isEditableCurrentStock = (multiAggStockSourceEvent === currentEventKey);
-
+      const totalColSpan = 7 + (renderEventColsVisible ? multiAggSelectedEvents.length : 0);
       let tbodyHtml = '';
+      let displayedIds = [];
+
+      const buildStatusBadge = (r) => {
+        if (r.totalReq <= 0) {
+          return `<span class="status-pill-none">ー 未設定</span>`;
+        }
+        if (r.shortage <= 0) {
+          return `<span class="status-pill-ready">✔ 準備完了</span>`;
+        }
+        return `<span class="status-pill-short">▲ 不足</span>`;
+      };
+
+      const buildRateCell = (r) => {
+        if (r.totalReq <= 0) {
+          return `<div style="display:flex; align-items:center; justify-content:flex-end; gap:8px; opacity:0.35;"><span style="font-size:11px;">-</span></div>`;
+        }
+        const barColor = getRateBarColor(r.rate);
+        return `
+          <div style="display:flex; align-items:center; justify-content:flex-end; gap:8px; min-width:110px;">
+            <div style="width:62px; height:7px; background:rgba(255,255,255,0.08); border-radius:4px; overflow:hidden;">
+              <div style="width:${Math.min(100, r.rate)}%; height:100%; background:${barColor}; border-radius:4px;"></div>
+            </div>
+            <span style="font-size:12px; color:rgba(255,255,255,0.85); min-width:34px; text-align:right;">${r.rate}%</span>
+          </div>
+        `;
+      };
 
       if (viewMode === 'flat') {
-        const filteredFlat = flatSkuRows.filter(filterFn).sort(sortFn);
+        const filteredFlat = flatSkuRows.filter(matchesCommonFilters).sort(sortFn);
         if (filteredFlat.length === 0) {
-          tbodyHtml = `<tr><td colspan="${multiAggSelectedEvents.length + 4}" style="text-align:center; padding:30px; color:rgba(255,255,255,0.5);">条件に一致する商品・バリエーションがありません。</td></tr>`;
+          tbodyHtml = `<tr><td colspan="${totalColSpan}" style="text-align:center; padding:36px; color:rgba(255,255,255,0.5);">条件に一致する作品・バリエーションがありません。</td></tr>`;
         } else {
           tbodyHtml = filteredFlat.map(r => {
-            const evCols = multiAggSelectedEvents.map(evKey => {
+            displayedIds.push(r.rowId);
+            const isSel = selectedMultiAggItemId === r.rowId;
+            const evCols = renderEventColsVisible ? multiAggSelectedEvents.map(evKey => {
               const val = r.perEventReq[evKey] || 0;
-              return `<td style="color:${val > 0 ? '#fff' : 'rgba(255,255,255,0.3)'};">${val}</td>`;
-            }).join('');
-            const shortBadge = r.shortage > 0
-              ? `<span style="background:rgba(231,76,60,0.22); border:1px solid var(--danger); color:#ff7675; padding:3px 8px; border-radius:12px; font-weight:bold;">-${r.shortage}</span>`
-              : (r.totalReq > 0 ? `<span style="color:var(--success); font-weight:bold;">✅ 0</span>` : `<span style="opacity:0.35;">0</span>`);
+              return `<td style="color:${val > 0 ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.25)'};">${val}</td>`;
+            }).join('') : '';
 
             return `
-              <tr class="multi-agg-parent-row">
+              <tr class="multi-agg-parent-row multi-agg-row-item ${isSel ? 'multi-agg-row-selected' : ''}" data-item-id="${r.rowId}" onclick="selectMultiAggItem('${r.rowId}', true)">
                 <td>
-                  <div style="display:flex; align-items:center; gap:8px;">
-                    <img src="${r.parentImage}" style="width:32px; height:32px; border-radius:6px; object-fit:cover;">
-                    <div>
-                      <div style="font-weight:bold; color:#fff; font-size:13px;">${r.parentName}</div>
-                      ${r.type === 'sku' ? `<div style="font-size:11px; color:var(--accent);">${r.isBase ? '🔹' : '🔸'} ${r.variantName}</div>` : ''}
-                    </div>
+                  <div style="display:flex; align-items:center; gap:10px;">
+                    <img src="${r.parentImage}" style="width:36px; height:36px; border-radius:6px; object-fit:cover; background:#222; flex-shrink:0;">
+                    <span style="font-weight:bold; color:#fff; font-size:13px; line-height:1.3;">${r.parentName}</span>
                   </div>
                 </td>
-                ${evCols}
-                <td style="font-weight:bold; color:#f1c40f; font-size:14px; background:rgba(241,196,15,0.05);">${r.totalReq}</td>
-                <td style="background:rgba(0,210,255,0.05);">
-                  ${isEditableCurrentStock ? `
-                    <div style="display:inline-flex; align-items:center; gap:4px; justify-content:flex-end;">
-                      <span style="font-weight:bold; color:#fff; font-size:14px;">${r.currentStock}</span>
-                      <button type="button" onclick="promptSetExactStock('${r.skuId}')" style="background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.2); color:var(--accent); font-size:10px; padding:2px 5px; border-radius:4px; cursor:pointer;" title="現在庫を直接変更">✏️</button>
-                    </div>
-                  ` : `<span style="font-weight:bold; color:#fff; font-size:14px;">${r.currentStock}</span>`}
+                <td>
+                  <span style="font-size:12px; color:${r.isBase ? 'rgba(255,255,255,0.7)' : 'var(--accent)'}; font-weight:${r.isBase ? 'normal' : 'bold'};">
+                    ${r.variantName}
+                  </span>
+                  ${r.statusNote ? `<span style="font-size:10px; color:#f39c12; margin-left:4px;">(${r.statusNote})</span>` : ''}
                 </td>
-                <td style="font-size:14px;">${shortBadge}</td>
+                ${evCols}
+                <td style="font-weight:bold; color:#fff; font-size:14px;">${r.totalReq}</td>
+                <td style="font-weight:bold; color:${r.totalReq > 0 && r.currentStock >= r.totalReq ? '#10b981' : '#fff'}; font-size:14px;">${r.currentStock}</td>
+                <td style="font-weight:bold; color:${r.shortage > 0 ? '#ef4444' : '#10b981'}; font-size:14px;">${r.shortage}</td>
+                <td>${buildRateCell(r)}</td>
+                <td>
+                  <div style="display:flex; align-items:center; justify-content:flex-end; gap:6px;">
+                    ${buildStatusBadge(r)}
+                    <span style="opacity:0.4; font-size:14px;">›</span>
+                  </div>
+                </td>
               </tr>
             `;
           }).join('');
         }
       } else {
         // Tree View (Parent + Expandable SKU breakdown)
-        const filteredParents = parentRows.filter(filterFn).sort(sortFn);
+        const filteredParents = parentRows.filter(matchesCommonFilters).sort(sortFn);
         if (filteredParents.length === 0) {
-          tbodyHtml = `<tr><td colspan="${multiAggSelectedEvents.length + 4}" style="text-align:center; padding:30px; color:rgba(255,255,255,0.5);">条件に一致する商品がありません。</td></tr>`;
+          tbodyHtml = `<tr><td colspan="${totalColSpan}" style="text-align:center; padding:36px; color:rgba(255,255,255,0.5);">条件に一致する作品がありません。</td></tr>`;
         } else {
           filteredParents.forEach(pRow => {
+            displayedIds.push(pRow.rowId);
             const isExpanded = window.variantExpandState?.agg?.[pRow.parentId] !== false;
-            const evCols = multiAggSelectedEvents.map(evKey => {
+            const isParentSel = selectedMultiAggItemId === pRow.rowId;
+            const evCols = renderEventColsVisible ? multiAggSelectedEvents.map(evKey => {
               const val = pRow.perEventReq[evKey] || 0;
-              return `<td style="color:${val > 0 ? '#fff' : 'rgba(255,255,255,0.3)'};">${val}</td>`;
-            }).join('');
-            const shortBadge = pRow.shortage > 0
-              ? `<span style="background:rgba(231,76,60,0.22); border:1px solid var(--danger); color:#ff7675; padding:3px 9px; border-radius:12px; font-weight:bold;">🔥 不足 ${pRow.shortage}</span>`
-              : (pRow.totalReq > 0 ? `<span style="color:var(--success); font-weight:bold;">✅ 充足</span>` : `<span style="opacity:0.35;">0</span>`);
+              return `<td style="color:${val > 0 ? '#fff' : 'rgba(255,255,255,0.25)'};">${val}</td>`;
+            }).join('') : '';
 
             tbodyHtml += `
-              <tr class="multi-agg-parent-row" style="${pRow.hasVars ? 'cursor:pointer;' : ''}" onclick="${pRow.hasVars ? `toggleSingleVariantExpand('agg', '${pRow.parentId}')` : ''}">
+              <tr class="multi-agg-parent-row multi-agg-row-item ${isParentSel ? 'multi-agg-row-selected' : ''}" data-item-id="${pRow.rowId}" onclick="selectMultiAggItem('${pRow.rowId}', true)">
                 <td>
-                  <div style="display:flex; align-items:center; gap:8px;">
-                    <img src="${pRow.parentImage}" style="width:34px; height:34px; border-radius:6px; object-fit:cover;">
-                    <div>
-                      <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
-                        <span style="color:#fff; font-size:13px;">${pRow.parentName}</span>
-                        ${pRow.hasVars ? `<span style="font-size:10px; background:rgba(0,210,255,0.18); color:var(--accent); padding:1px 6px; border-radius:8px;">${isExpanded ? '▼' : '▶'} ${pRow.varsCount}種</span>` : ''}
-                        <button type="button" onclick="event.stopPropagation(); openVariantManagerModal('${pRow.parentId}')" style="background:none; border:1px solid rgba(255,255,255,0.18); color:#aaa; font-size:10px; padding:1px 5px; border-radius:6px; cursor:pointer;" title="バリエーション管理">🎨</button>
-                      </div>
-                    </div>
+                  <div style="display:flex; align-items:center; gap:10px;">
+                    <img src="${pRow.parentImage}" style="width:36px; height:36px; border-radius:6px; object-fit:cover; background:#222; flex-shrink:0;">
+                    <span style="color:#fff; font-size:13px; font-weight:bold;">${pRow.parentName}</span>
                   </div>
                 </td>
-                ${evCols}
-                <td style="font-weight:bold; color:#f1c40f; font-size:14px; background:rgba(241,196,15,0.06);">${pRow.totalReq}</td>
-                <td style="background:rgba(0,210,255,0.06);">
-                  ${(!pRow.hasVars && isEditableCurrentStock) ? `
-                    <div style="display:inline-flex; align-items:center; gap:4px; justify-content:flex-end;" onclick="event.stopPropagation();">
-                      <span style="font-weight:bold; color:#fff; font-size:14px;">${pRow.currentStock}</span>
-                      <button type="button" onclick="promptSetExactStock('${pRow.parentId}')" style="background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.2); color:var(--accent); font-size:10px; padding:2px 5px; border-radius:4px; cursor:pointer;" title="現在庫を直接変更">✏️</button>
-                    </div>
-                  ` : `<span style="font-weight:bold; color:#fff; font-size:14px;">${pRow.currentStock}</span>`}
+                <td>
+                  ${pRow.hasVars ? `
+                    <button type="button" onclick="event.stopPropagation(); toggleSingleVariantExpand('agg', '${pRow.parentId}')" style="background:rgba(0,210,255,0.15); border:1px solid rgba(0,210,255,0.4); color:var(--accent); font-size:11px; font-weight:bold; padding:2px 8px; border-radius:10px; cursor:pointer;">
+                      ${isExpanded ? '▼' : '▶'} ${pRow.varsCount}種内訳
+                    </button>
+                  ` : `<span style="font-size:12px; opacity:0.65;">無印</span>`}
                 </td>
-                <td style="font-size:13px;">${shortBadge}</td>
+                ${evCols}
+                <td style="font-weight:bold; color:#fff; font-size:14px;">${pRow.totalReq}</td>
+                <td style="font-weight:bold; color:${pRow.totalReq > 0 && pRow.currentStock >= pRow.totalReq ? '#10b981' : '#fff'}; font-size:14px;">${pRow.currentStock}</td>
+                <td style="font-weight:bold; color:${pRow.shortage > 0 ? '#ef4444' : '#10b981'}; font-size:14px;">${pRow.shortage}</td>
+                <td>${buildRateCell(pRow)}</td>
+                <td>
+                  <div style="display:flex; align-items:center; justify-content:flex-end; gap:6px;">
+                    ${buildStatusBadge(pRow)}
+                    <span style="opacity:0.4; font-size:14px;">›</span>
+                  </div>
+                </td>
               </tr>
             `;
 
             if (pRow.hasVars && isExpanded) {
               const sortedSkus = [...pRow.skuItems].sort(sortFn);
               sortedSkus.forEach(sRow => {
+                if (unfinishedOnly && sRow.shortage <= 0) return;
                 if (filterMode === 'shortage' && sRow.shortage <= 0) return;
                 if (filterMode === 'required' && sRow.totalReq <= 0) return;
-                const sEvCols = multiAggSelectedEvents.map(evKey => {
+                if (filterMode === 'completed' && !(sRow.totalReq > 0 && sRow.shortage === 0)) return;
+                if (variantFilter !== 'all' && sRow.variantName !== variantFilter) return;
+
+                displayedIds.push(sRow.rowId);
+                const isSkuSel = selectedMultiAggItemId === sRow.rowId;
+                const sEvCols = renderEventColsVisible ? multiAggSelectedEvents.map(evKey => {
                   const val = sRow.perEventReq[evKey] || 0;
                   return `<td style="color:${val > 0 ? '#eee' : 'rgba(255,255,255,0.25)'};">${val}</td>`;
-                }).join('');
-                const sShortBadge = sRow.shortage > 0
-                  ? `<span style="color:var(--danger); font-weight:bold;">🔥 不足 ${sRow.shortage}</span>`
-                  : (sRow.totalReq > 0 ? `<span style="color:var(--success);">✅ 0</span>` : `<span style="opacity:0.35;">0</span>`);
+                }).join('') : '';
 
                 tbodyHtml += `
-                  <tr class="multi-agg-sku-row">
+                  <tr class="multi-agg-sku-row multi-agg-row-item ${isSkuSel ? 'multi-agg-row-selected' : ''}" data-item-id="${sRow.rowId}" onclick="selectMultiAggItem('${sRow.rowId}', true)">
                     <td>
-                      <div style="display:flex; align-items:center; gap:6px;">
-                        <span>${sRow.isBase ? '🔹' : '🔸'} ${sRow.variantName}</span>
-                        ${sRow.statusNote ? `<span style="font-size:10px; color:#f39c12;">(${sRow.statusNote})</span>` : ''}
-                      </div>
+                      <span style="font-size:11px; color:rgba(255,255,255,0.5);">└ ${sRow.parentName}</span>
+                    </td>
+                    <td>
+                      <span style="font-weight:bold; color:${sRow.isBase ? '#ddd' : 'var(--accent)'};">${sRow.isBase ? '🔹' : '🔸'} ${sRow.variantName}</span>
+                      ${sRow.statusNote ? `<span style="font-size:10px; color:#f39c12; margin-left:4px;">(${sRow.statusNote})</span>` : ''}
                     </td>
                     ${sEvCols}
-                    <td style="font-weight:bold; color:#f1c40f; background:rgba(241,196,15,0.03);">${sRow.totalReq}</td>
-                    <td style="background:rgba(0,210,255,0.03);">
-                      ${isEditableCurrentStock ? `
-                        <div style="display:inline-flex; align-items:center; gap:4px; justify-content:flex-end;">
-                          <span style="font-weight:bold; color:#fff;">${sRow.currentStock}</span>
-                          <button type="button" onclick="promptSetExactStock('${sRow.skuId}')" style="background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.2); color:var(--accent); font-size:10px; padding:1px 5px; border-radius:4px; cursor:pointer;" title="現在庫を直接変更">✏️</button>
-                        </div>
-                      ` : `<span style="font-weight:bold; color:#fff;">${sRow.currentStock}</span>`}
+                    <td style="font-weight:bold; color:#fff;">${sRow.totalReq}</td>
+                    <td style="font-weight:bold; color:${sRow.totalReq > 0 && sRow.currentStock >= sRow.totalReq ? '#10b981' : '#fff'};">${sRow.currentStock}</td>
+                    <td style="font-weight:bold; color:${sRow.shortage > 0 ? '#ef4444' : '#10b981'};">${sRow.shortage}</td>
+                    <td>${buildRateCell(sRow)}</td>
+                    <td>
+                      <div style="display:flex; align-items:center; justify-content:flex-end; gap:6px;">
+                        ${buildStatusBadge(sRow)}
+                        <span style="opacity:0.4; font-size:14px;">›</span>
+                      </div>
                     </td>
-                    <td>${sShortBadge}</td>
                   </tr>
                 `;
               });
@@ -8712,11 +9187,14 @@
         <table class="multi-agg-table">
           <thead>
             <tr>
-              <th style="min-width:190px;">商品・バリエーション</th>
+              <th style="min-width:180px; cursor:pointer;" onclick="cycleMultiAggSort('default')">作品名 ⇅</th>
+              <th style="min-width:120px;">バリエーション</th>
               ${eventHeadersHtml}
-              <th style="min-width:86px; color:#f1c40f; background:rgba(241,196,15,0.12);">合計必要数</th>
-              <th style="min-width:86px; color:var(--accent); background:rgba(0,210,255,0.12);">現在庫</th>
-              <th style="min-width:95px; color:#ff7675;">不足数 (要制作)</th>
+              <th style="min-width:68px; cursor:pointer;" onclick="cycleMultiAggSort('required')">必要数 ⇅</th>
+              <th style="min-width:68px;">現在庫</th>
+              <th style="min-width:68px; cursor:pointer;" onclick="cycleMultiAggSort('shortage')">不足数 ⇅</th>
+              <th style="min-width:115px; cursor:pointer;" onclick="cycleMultiAggSort('rate')">達成率 ⇅</th>
+              <th style="min-width:95px;">状態</th>
             </tr>
           </thead>
           <tbody>
@@ -8724,6 +9202,440 @@
           </tbody>
         </table>
       `;
+
+      // Auto-select first row if current selection is empty or not in lookup
+      if (!selectedMultiAggItemId || !lastBuiltRowLookup[selectedMultiAggItemId]) {
+        selectedMultiAggItemId = displayedIds[0] || Object.keys(lastBuiltRowLookup)[0] || null;
+        if (selectedMultiAggItemId) {
+          const tr = container.querySelector(`tr[data-item-id="${selectedMultiAggItemId}"]`);
+          if (tr) tr.classList.add('multi-agg-row-selected');
+        }
+      }
+
+      renderMultiAggDetailPanel();
+    };
+
+    // Render Right-Side Sticky Detail & Stock Adjustment Inspector Panel
+    function renderMultiAggDetailPanel() {
+      const panel = document.getElementById('multi-agg-detail-panel');
+      if (!panel) return;
+
+      const row = selectedMultiAggItemId ? lastBuiltRowLookup[selectedMultiAggItemId] : null;
+      if (!row) {
+        panel.innerHTML = `
+          <div style="text-align:center; padding:40px 16px; color:rgba(255,255,255,0.45); font-size:13px;">
+            左の一覧から作品・バリエーションを選択すると、ここに在庫調整・詳細設定が表示されます。
+          </div>
+        `;
+        return;
+      }
+
+      const parentId = row.parentId;
+      const allEvents = window.getAllEvents ? window.getAllEvents(eventConfigData) : {};
+      const refEvLabel = allEvents[multiAggStockSourceEvent]?.label || multiAggStockSourceEvent;
+
+      // If user clicked a Parent summary row that has variants, allow switching among its SKUs right inside the detail panel!
+      const vars = window.getProductVariants(parentId, false);
+      let activeSkuRow = row;
+      if (row.type === 'parent' && row.hasVars && row.skuItems && row.skuItems.length > 0) {
+        activeSkuRow = row.skuItems[0];
+      }
+      const targetStockId = activeSkuRow.skuId;
+
+      // Pickup / Manual Stock / Visibility states for parentId
+      const badgeValue = badgesData[parentId] || 'none';
+      let badgeLabel = '☆ ピックアップなし';
+      let badgeStyle = 'background:rgba(255,255,255,0.06); color:rgba(255,255,255,0.55); border:1px solid rgba(255,255,255,0.15);';
+      if (badgeValue === 'recommend') {
+        badgeLabel = '👑 おすすめ';
+        badgeStyle = 'background:rgba(59,130,246,0.18); color:#60a5fa; border:1px solid #3b82f6;';
+      } else if (badgeValue === 'super') {
+        badgeLabel = '👑 超おすすめ';
+        badgeStyle = 'background:rgba(245,158,11,0.18); color:#fbbf24; border:1px solid #f59e0b;';
+      }
+
+      const manualStatus = stockData[parentId] || 'none';
+      let stockLabel = '↻ 自動/未設定';
+      let stockStyle = 'background:rgba(255,255,255,0.06); color:rgba(255,255,255,0.55); border:1px solid rgba(255,255,255,0.15);';
+      if (manualStatus === 'onsale') {
+        stockLabel = '↻ 販売中';
+        stockStyle = 'background:rgba(16,185,129,0.18); color:#34d399; border:1px solid #10b981;';
+      } else if (manualStatus === 'few') {
+        stockLabel = '↻ 残りわずか';
+        stockStyle = 'background:rgba(245,158,11,0.18); color:#fbbf24; border:1px solid #f59e0b;';
+      } else if (manualStatus === 'soldout') {
+        stockLabel = '↻ 売り切れ';
+        stockStyle = 'background:rgba(239,68,68,0.18); color:#f87171; border:1px solid #ef4444;';
+      }
+
+      const isHidden = hiddenProductsData[parentId] === true;
+      const hiddenLabel = isHidden ? '🔒 非公開' : '🔓 公開中';
+      const hiddenStyle = isHidden
+        ? 'background:rgba(239,68,68,0.18); color:#f87171; border:1px solid #ef4444;'
+        : 'background:rgba(255,255,255,0.06); color:rgba(255,255,255,0.7); border:1px solid rgba(255,255,255,0.15);';
+
+      // Variant selector tabs inside Detail Panel when product has variants
+      let variantSelectorHtml = '';
+      if (vars.length > 0) {
+        const parentRowObj = lastBuiltRowLookup[parentId];
+        variantSelectorHtml = `
+          <div style="background:rgba(0,0,0,0.3); padding:8px; border-radius:8px; border:1px solid rgba(255,255,255,0.06);">
+            <div style="font-size:10px; color:rgba(255,255,255,0.5); margin-bottom:6px; display:flex; justify-content:space-between;">
+              <span>🎨 操作するバリエーション（SKU）を選択:</span>
+              ${parentRowObj ? `<span style="color:var(--accent);">シリーズ合計 必要:${parentRowObj.totalReq} / 在庫:${parentRowObj.currentStock} / 不足:${parentRowObj.shortage}</span>` : ''}
+            </div>
+            <div style="display:flex; flex-wrap:wrap; gap:5px;">
+              ${vars.map(v => {
+                const isAct = v.skuId === targetStockId;
+                const sObj = lastBuiltRowLookup[v.skuId];
+                const sShort = sObj ? sObj.shortage : 0;
+                return `
+                  <button type="button" onclick="selectMultiAggItem('${v.skuId}', false)" style="font-size:11px; padding:4px 8px; border-radius:6px; cursor:pointer; font-weight:${isAct ? 'bold' : 'normal'}; background:${isAct ? 'rgba(59,130,246,0.28)' : 'rgba(255,255,255,0.05)'}; border:1px solid ${isAct ? '#3b82f6' : 'rgba(255,255,255,0.12)'}; color:${isAct ? '#fff' : '#ccc'};">
+                    ${v.name} ${sShort > 0 ? `<span style="color:#f87171; font-size:10px;">(-${sShort})</span>` : `<span style="color:#34d399; font-size:10px;">✓</span>`}
+                  </button>
+                `;
+              }).join('')}
+            </div>
+          </div>
+        `;
+      }
+
+      const barColor = getRateBarColor(activeSkuRow.rate);
+      const isComplete = activeSkuRow.totalReq > 0 && activeSkuRow.shortage <= 0;
+
+      // Per-event required breakdown with direct inline input
+      const perEventRowsHtml = multiAggSelectedEvents.map(evKey => {
+        const evLabel = allEvents[evKey]?.label || evKey;
+        const reqVal = activeSkuRow.perEventReq[evKey] || 0;
+        return `
+          <div style="display:flex; justify-content:space-between; align-items:center; padding:6px 0; border-bottom:1px solid rgba(255,255,255,0.06); font-size:12px;">
+            <span style="color:rgba(255,255,255,0.8);">${evLabel}</span>
+            <div style="display:flex; align-items:center; gap:6px;">
+              <input type="number" min="0" value="${reqVal}" onchange="updateEventPrepQtyFromDetail('${evKey}', '${targetStockId}', this.value)" style="width:62px; padding:4px 6px; text-align:right; font-weight:bold; font-size:13px; background:#0d0f17; color:#fff; border:1px solid rgba(255,255,255,0.18); border-radius:6px;">
+              <span style="font-size:11px; opacity:0.65;">個</span>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      panel.innerHTML = `
+        <!-- 1. Product Header -->
+        <div style="display:flex; gap:12px; align-items:flex-start; justify-content:space-between;">
+          <div style="display:flex; gap:12px; align-items:center;">
+            <img src="${activeSkuRow.parentImage}" style="width:58px; height:58px; border-radius:10px; object-fit:cover; background:#222; border:1px solid rgba(255,255,255,0.1);">
+            <div>
+              <div style="font-size:16px; font-weight:bold; color:#fff; line-height:1.3;">${activeSkuRow.parentName}</div>
+              <div style="font-size:12px; color:var(--accent); font-weight:bold; margin-top:2px;">
+                ${activeSkuRow.isBase ? '🔹' : '🔸'} ${activeSkuRow.variantName}
+              </div>
+              <div style="display:flex; gap:6px; flex-wrap:wrap; margin-top:6px;">
+                <span onclick="cycleRecommendStatus('${parentId}')" style="${badgeStyle} font-size:10px; font-weight:bold; padding:2px 8px; border-radius:6px; cursor:pointer;" title="クリックでピックアップ切替">${badgeLabel}</span>
+                <span onclick="cycleManualStock('${parentId}')" style="${stockStyle} font-size:10px; font-weight:bold; padding:2px 8px; border-radius:6px; cursor:pointer;" title="クリックで手動在庫切替">${stockLabel}</span>
+                <span onclick="toggleProductHidden('${parentId}')" style="${hiddenStyle} font-size:10px; font-weight:bold; padding:2px 8px; border-radius:6px; cursor:pointer;" title="クリックで公開/非公開切替">${hiddenLabel}</span>
+              </div>
+            </div>
+          </div>
+          <button type="button" onclick="openVariantManagerModal('${parentId}')" style="background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.15); color:#ddd; padding:6px 8px; border-radius:8px; cursor:pointer; font-size:11px; white-space:nowrap;" title="バリエーション管理">
+            🎨 バリエ
+          </button>
+        </div>
+
+        ${variantSelectorHtml}
+
+        <!-- 2. Progress Status Section -->
+        <div style="background:rgba(0,0,0,0.28); border:1px solid rgba(255,255,255,0.07); border-radius:10px; padding:12px;">
+          <div style="font-size:11px; color:rgba(255,255,255,0.6); margin-bottom:6px;">進捗状況 (${activeSkuRow.variantName})</div>
+          <div style="display:flex; align-items:center; gap:10px; margin-bottom:12px;">
+            <div style="flex:1; height:9px; background:rgba(255,255,255,0.08); border-radius:5px; overflow:hidden;">
+              <div style="width:${Math.min(100, activeSkuRow.rate)}%; height:100%; background:${barColor}; border-radius:5px; transition:width 0.25s;"></div>
+            </div>
+            <span style="font-size:16px; font-weight:bold; color:#fff; min-width:44px; text-align:right;">${activeSkuRow.totalReq > 0 ? activeSkuRow.rate + '%' : '-'}</span>
+          </div>
+
+          <div style="display:flex; align-items:center; justify-content:space-between; gap:8px;">
+            <div style="display:flex; gap:18px;">
+              <div>
+                <div style="font-size:10px; color:rgba(255,255,255,0.5);">必要数</div>
+                <div style="font-size:20px; font-weight:bold; color:#fff;">${activeSkuRow.totalReq}</div>
+              </div>
+              <div>
+                <div style="font-size:10px; color:rgba(255,255,255,0.5);">現在庫</div>
+                <div style="font-size:20px; font-weight:bold; color:#10b981;">${activeSkuRow.currentStock}</div>
+              </div>
+              <div>
+                <div style="font-size:10px; color:rgba(255,255,255,0.5);">不足数</div>
+                <div style="font-size:20px; font-weight:bold; color:${activeSkuRow.shortage > 0 ? '#ef4444' : '#10b981'};">${activeSkuRow.shortage}</div>
+              </div>
+            </div>
+
+            <div style="background:${isComplete ? 'rgba(16,185,129,0.14)' : (activeSkuRow.shortage > 0 ? 'rgba(239,68,68,0.14)' : 'rgba(255,255,255,0.05)')}; border:1px solid ${isComplete ? 'rgba(16,185,129,0.4)' : (activeSkuRow.shortage > 0 ? 'rgba(239,68,68,0.4)' : 'rgba(255,255,255,0.1)')}; border-radius:8px; padding:8px 12px; display:flex; align-items:center; gap:8px;">
+              <span style="font-size:16px;">${isComplete ? '✅' : (activeSkuRow.shortage > 0 ? '⚠️' : 'ℹ️')}</span>
+              <div>
+                <div style="font-size:12px; font-weight:bold; color:${isComplete ? '#34d399' : (activeSkuRow.shortage > 0 ? '#f87171' : '#ccc')};">
+                  ${isComplete ? '準備完了' : (activeSkuRow.shortage > 0 ? `あと ${activeSkuRow.shortage} 個不足` : '必要数未設定')}
+                </div>
+                <div style="font-size:9px; color:rgba(255,255,255,0.5);">
+                  ${isComplete ? '目標数を達成しています' : (activeSkuRow.shortage > 0 ? '優先的に制作が必要です' : '下部から必要数を設定可能')}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 3. Stock Adjustment Section -->
+        <div style="background:rgba(0,0,0,0.28); border:1px solid rgba(255,255,255,0.07); border-radius:10px; padding:12px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+            <span style="font-size:12px; font-weight:bold; color:#fff;">在庫調整 <span style="font-size:10px; color:#f1c40f; font-weight:normal;">(対象枠: ${refEvLabel})</span></span>
+            <button type="button" onclick="promptSetExactStockInDetail('${targetStockId}')" style="background:rgba(0,210,255,0.12); border:1px solid rgba(0,210,255,0.35); color:var(--accent); font-size:10px; font-weight:bold; padding:3px 8px; border-radius:6px; cursor:pointer;">🔢 実数に直接セット</button>
+          </div>
+          <div style="display:grid; grid-template-columns: 95px 1fr; gap:8px; margin-bottom:8px;">
+            <div>
+              <label style="font-size:10px; color:rgba(255,255,255,0.5); display:block; margin-bottom:3px;">数量変更</label>
+              <div style="display:flex; align-items:center; background:#0d0f17; border:1px solid rgba(255,255,255,0.18); border-radius:6px; padding:0 6px;">
+                <span style="font-size:10px; color:rgba(255,255,255,0.4);">+/-</span>
+                <input type="number" id="detail-adj-qty" placeholder="例: 5" style="width:100%; padding:7px 4px; background:transparent; border:none; color:#fff; font-weight:bold; font-size:13px; text-align:right; outline:none;">
+              </div>
+            </div>
+            <div>
+              <label style="font-size:10px; color:rgba(255,255,255,0.5); display:block; margin-bottom:3px;">調整理由</label>
+              <select id="detail-adj-reason" style="width:100%; padding:7px 8px; background:#0d0f17; border:1px solid rgba(255,255,255,0.18); border-radius:6px; color:#fff; font-size:12px;">
+                <option value="初期搬入">初期搬入</option>
+                <option value="追加制作">追加制作</option>
+                <option value="在庫発見">在庫発見</option>
+                <option value="フリマ・他販売">フリマ・他販売(-)</option>
+                <option value="プレゼント・破損">プレゼント・破損(-)</option>
+                <option value="不良品破棄">不良品破棄(-)</option>
+                <option value="その他">その他</option>
+              </select>
+            </div>
+          </div>
+          <div style="display:flex; gap:8px;">
+            <button type="button" onclick="applyStockAdjustmentFromDetail('${targetStockId}')" style="flex:1; padding:8px 12px; border:none; border-radius:6px; background:#10b981; color:#fff; font-weight:bold; font-size:13px; cursor:pointer;">適用</button>
+            <button type="button" onclick="resetStockFromDetail('${targetStockId}')" style="padding:8px 14px; border:1px solid #ef4444; border-radius:6px; background:rgba(239,68,68,0.1); color:#f87171; font-weight:bold; font-size:12px; cursor:pointer;">リセット</button>
+          </div>
+        </div>
+
+        <!-- 4. Pickup / Status / Edit Controls (100% Preserved from Classic Card) -->
+        <div style="background:rgba(0,0,0,0.28); border:1px solid rgba(255,255,255,0.07); border-radius:10px; padding:12px;">
+          <div style="font-size:11px; color:rgba(255,255,255,0.6); margin-bottom:8px;">ピックアップ・ステータス・作品情報</div>
+          <div style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom:8px;">
+            <button type="button" onclick="cycleRecommendStatus('${parentId}')" style="${badgeStyle} font-size:11px; font-weight:bold; padding:5px 10px; border-radius:6px; cursor:pointer; flex:1;">
+              ${badgeLabel}
+            </button>
+            <button type="button" onclick="cycleManualStock('${parentId}')" style="${stockStyle} font-size:11px; font-weight:bold; padding:5px 10px; border-radius:6px; cursor:pointer; flex:1;">
+              ${stockLabel}
+            </button>
+            <button type="button" onclick="toggleProductHidden('${parentId}')" style="${hiddenStyle} font-size:11px; font-weight:bold; padding:5px 10px; border-radius:6px; cursor:pointer;">
+              ${hiddenLabel}
+            </button>
+          </div>
+          <div style="display:flex; gap:6px;">
+            <button type="button" onclick="openEditModal('${parentId}', 'desc')" style="flex:1; font-size:11px; padding:6px 10px; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.12); color:#ddd; border-radius:6px; cursor:pointer;">✏️ 作品説明を編集</button>
+            <button type="button" onclick="openEditModal('${parentId}', 'announce')" style="flex:1; font-size:11px; padding:6px 10px; background:rgba(59,130,246,0.15); border:1px solid rgba(59,130,246,0.35); color:#60a5fa; border-radius:6px; cursor:pointer;">📢 告知を編集</button>
+          </div>
+        </div>
+
+        <!-- 5. Per-Event Required Quantities Breakdown & Direct Edit -->
+        <div style="background:rgba(0,0,0,0.28); border:1px solid rgba(255,255,255,0.07); border-radius:10px; padding:12px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+            <span style="font-size:11px; color:rgba(255,255,255,0.6);">イベント別必要数（数値を変更すると自動保存）</span>
+          </div>
+          ${perEventRowsHtml}
+        </div>
+      `;
+    }
+
+    // Stock Adjustment from Right Detail Panel (supports any selected multiAggStockSourceEvent)
+    window.applyStockAdjustmentFromDetail = async (targetId) => {
+      if (!auth.currentUser) return alert("ログインが必要です");
+      const qtyInput = document.getElementById('detail-adj-qty');
+      const reasonEl = document.getElementById('detail-adj-reason');
+      const qty = parseInt(qtyInput ? qtyInput.value : 0);
+      if (!qty || qty === 0) return alert("増減数を入力してください（例: 5 または -2）");
+      const reason = reasonEl ? reasonEl.value : 'その他';
+
+      const targetEvKey = multiAggStockSourceEvent || currentEventKey;
+      const sourceInvMap = (targetEvKey === currentEventKey)
+        ? inventoryData
+        : (multiAggInvCache[targetEvKey] || {});
+
+      const parsed = window.parseSkuId ? window.parseSkuId(targetId) : { parentId: targetId, skuObj: null };
+      const parentId = parsed.parentId;
+      const skuObj = parsed.skuObj;
+
+      const oldInv = skuObj
+        ? window.getSkuInventory(sourceInvMap, parentId, skuObj)
+        : (sourceInvMap[targetId] || { price: 0, initial: 0, current: 0 });
+
+      const isDecreaseReason = qty < 0 && (reason.includes('フリマ') || reason.includes('プレゼント') || reason.includes('破損') || reason.includes('不良品'));
+      const newInitial = isDecreaseReason ? Math.max(0, oldInv.initial || 0) : Math.max(0, (oldInv.initial || 0) + qty);
+      const newCurrent = Math.max(0, (oldInv.current || 0) + qty);
+      const newInventory = { ...sourceInvMap };
+
+      newInventory[targetId] = { price: oldInv.price, initial: newInitial, current: newCurrent };
+      if (skuObj) {
+        const sumInv = window.getParentInventorySummary(newInventory, parentId);
+        newInventory[parentId] = { price: sumInv.price, initial: sumInv.initial, current: sumInv.current };
+      }
+
+      const allMaster = window.getFullMasterProducts ? window.getFullMasterProducts(window.customProductsData) : MASTER_PRODUCTS;
+      const pName = allMaster.find(x => x.id === parentId)?.name || parentId;
+      const displayLabel = skuObj ? `${pName.replace(/\n/g, ' ')} (${skuObj.name})` : pName.replace(/\n/g, ' ');
+      const logRecord = {
+        timestamp: new Date().toISOString(),
+        type: 'adjust',
+        productId: targetId,
+        parentId: parentId,
+        productName: displayLabel,
+        qty: qty,
+        reason: reason
+      };
+
+      try {
+        multiAggInvCache[targetEvKey] = newInventory;
+        if (targetEvKey === currentEventKey) inventoryData = newInventory;
+        await setDoc(doc(db, "settings", "inventory_" + targetEvKey), newInventory);
+
+        const logDocRef = doc(db, "settings", "inventory_log_" + targetEvKey);
+        try {
+          await updateDoc(logDocRef, { records: arrayUnion(logRecord) });
+        } catch(e) {
+          await setDoc(logDocRef, { records: [logRecord] });
+        }
+
+        let newStockStatus = {};
+        const parentSummary = skuObj ? window.getParentInventorySummary(newInventory, parentId) : newInventory[parentId];
+        const ratio = parentSummary.current / (parentSummary.initial || 1);
+        if (parentSummary.current <= 0) newStockStatus[parentId] = 'soldout';
+        else if (ratio <= 0.3) newStockStatus[parentId] = 'few';
+        else newStockStatus[parentId] = 'onsale';
+        await setDoc(doc(db, "settings", "stock"), newStockStatus, { merge: true });
+
+        if (qtyInput) qtyInput.value = '';
+        await window.renderMultiEventAggregation();
+      } catch(e) {
+        console.error(e);
+        alert("在庫調整エラーが発生しました。");
+      }
+    };
+
+    window.promptSetExactStockInDetail = async (targetId) => {
+      if (!auth.currentUser) return alert("ログインが必要です");
+      const targetEvKey = multiAggStockSourceEvent || currentEventKey;
+      const sourceInvMap = (targetEvKey === currentEventKey)
+        ? inventoryData
+        : (multiAggInvCache[targetEvKey] || {});
+
+      const parsed = window.parseSkuId ? window.parseSkuId(targetId) : { parentId: targetId, skuObj: null };
+      const parentId = parsed.parentId;
+      const skuObj = parsed.skuObj;
+      const allMaster = window.getFullMasterProducts ? window.getFullMasterProducts(window.customProductsData) : MASTER_PRODUCTS;
+      const pName = allMaster.find(x => x.id === parentId)?.name || parentId;
+      const displayLabel = skuObj ? `${pName.replace(/\n/g, ' ')} (${skuObj.name})` : pName.replace(/\n/g, ' ');
+      const oldInv = skuObj
+        ? window.getSkuInventory(sourceInvMap, parentId, skuObj)
+        : (sourceInvMap[targetId] || { price: 0, initial: 0, current: 0 });
+
+      const inputStr = prompt(`【実数セット】
+「${displayLabel}」の現在の手元在庫数を入力してください:
+（変更前 現在庫: ${oldInv.current}個）`, String(oldInv.current));
+      if (inputStr === null) return;
+      const exactVal = parseInt(inputStr);
+      if (isNaN(exactVal) || exactVal < 0) return alert("0以上の数値を入力してください。");
+
+      const diff = exactVal - (oldInv.current || 0);
+      const newInitial = Math.max(exactVal, oldInv.initial || 0);
+      const newInventory = { ...sourceInvMap };
+      newInventory[targetId] = { price: oldInv.price, initial: newInitial, current: exactVal };
+      if (skuObj) {
+        const sumInv = window.getParentInventorySummary(newInventory, parentId);
+        newInventory[parentId] = { price: sumInv.price, initial: sumInv.initial, current: sumInv.current };
+      }
+
+      multiAggInvCache[targetEvKey] = newInventory;
+      if (targetEvKey === currentEventKey) inventoryData = newInventory;
+      await setDoc(doc(db, "settings", "inventory_" + targetEvKey), newInventory);
+      await window.renderMultiEventAggregation();
+    };
+
+    window.resetStockFromDetail = async (targetId) => {
+      if (!auth.currentUser) return alert("ログインが必要です");
+      const targetEvKey = multiAggStockSourceEvent || currentEventKey;
+      const sourceInvMap = (targetEvKey === currentEventKey)
+        ? inventoryData
+        : (multiAggInvCache[targetEvKey] || {});
+
+      const parsed = window.parseSkuId ? window.parseSkuId(targetId) : { parentId: targetId, skuObj: null };
+      const parentId = parsed.parentId;
+      const skuObj = parsed.skuObj;
+      const allMaster = window.getFullMasterProducts ? window.getFullMasterProducts(window.customProductsData) : MASTER_PRODUCTS;
+      const pName = allMaster.find(x => x.id === parentId)?.name || parentId;
+      const displayLabel = skuObj ? `${pName.replace(/\n/g, ' ')} (${skuObj.name})` : pName.replace(/\n/g, ' ');
+      if (!confirm(`「${displayLabel}」の現在庫を 0 にリセットしますか？`)) return;
+
+      const oldInv = skuObj
+        ? window.getSkuInventory(sourceInvMap, parentId, skuObj)
+        : (sourceInvMap[targetId] || { price: 0, initial: 0, current: 0 });
+      const newInventory = { ...sourceInvMap };
+      newInventory[targetId] = { price: oldInv.price, initial: 0, current: 0 };
+      if (skuObj) {
+        const sumInv = window.getParentInventorySummary(newInventory, parentId);
+        newInventory[parentId] = { price: sumInv.price, initial: sumInv.initial, current: sumInv.current };
+      }
+
+      multiAggInvCache[targetEvKey] = newInventory;
+      if (targetEvKey === currentEventKey) inventoryData = newInventory;
+      await setDoc(doc(db, "settings", "inventory_" + targetEvKey), newInventory);
+      await window.renderMultiEventAggregation();
+    };
+
+    // Update Event Required Preparation Quantity directly from Right Detail Panel
+    window.updateEventPrepQtyFromDetail = async (evKey, targetId, newVal) => {
+      if (!auth.currentUser) return alert("ログインが必要です");
+      const qty = Math.max(0, parseInt(newVal) || 0);
+      const parsed = window.parseSkuId ? window.parseSkuId(targetId) : { parentId: targetId, skuObj: null };
+      const parentId = parsed.parentId;
+      const skuObj = parsed.skuObj;
+
+      let simDoc = (evKey === currentEventKey && currentSimulationData)
+        ? currentSimulationData
+        : (multiAggSimCache[evKey] || { activePatternId: 'default', patterns: { default: { name: '基本パターン', target: 150000, simQty: {}, prepQty: {} } } });
+
+      const patId = simDoc.activePatternId || Object.keys(simDoc.patterns || {})[0] || 'default';
+      if (!simDoc.patterns) simDoc.patterns = {};
+      if (!simDoc.patterns[patId]) simDoc.patterns[patId] = { name: '基本パターン', target: 150000, simQty: {}, prepQty: {} };
+      const prepMap = simDoc.patterns[patId].prepQty || (simDoc.patterns[patId].prepQty = {});
+
+      if (skuObj) {
+        const vars = window.getProductVariants(parentId, false);
+        vars.forEach(v => {
+          if (prepMap[v.skuId] === undefined) {
+            prepMap[v.skuId] = window.getSkuSimQty(prepMap, parentId, v);
+          }
+        });
+        prepMap[targetId] = qty;
+        let pSum = 0;
+        vars.forEach(v => { pSum += (Number(prepMap[v.skuId]) || 0); });
+        prepMap[parentId] = pSum;
+      } else {
+        prepMap[targetId] = qty;
+      }
+
+      multiAggSimCache[evKey] = simDoc;
+      if (evKey === currentEventKey) {
+        currentSimulationData = simDoc;
+        if (currentPatternId === patId) {
+          preparationQuantities = { ...prepMap };
+        }
+      }
+
+      try {
+        await setDoc(doc(db, "settings", "simulation_" + evKey), simDoc);
+        await window.renderMultiEventAggregation();
+      } catch(e) {
+        console.error("Failed updating prepQty from detail:", e);
+        alert("必要数の保存に失敗しました。");
+      }
     };
 
     // Open Modal
