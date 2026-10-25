@@ -12170,9 +12170,7 @@
       const skuObj = parsed.skuObj;
       const allMaster = window.getFullMasterProducts ? window.getFullMasterProducts(window.customProductsData) : MASTER_PRODUCTS;
       const pName = allMaster.find(x => x.id === parentId)?.name || parentId;
-      const displayLabel = skuObj ? `${pName.replace(/
-/g, ' ')} (${skuObj.name})` : pName.replace(/
-/g, ' ');
+      const displayLabel = skuObj ? `${pName.replace(/\n/g, ' ')} (${skuObj.name})` : pName.replace(/\n/g, ' ');
 
       const isFinishing = (targetMode === 'finishing');
       const confirmMsg = isFinishing
@@ -12287,9 +12285,7 @@
       const skuObj = parsed.skuObj;
       const allMaster = window.getFullMasterProducts ? window.getFullMasterProducts(window.customProductsData) : MASTER_PRODUCTS;
       const pName = allMaster.find(x => x.id === parentId)?.name || parentId;
-      const displayLabel = skuObj ? `${pName.replace(/
-/g, ' ')} (${skuObj.name})` : pName.replace(/
-/g, ' ');
+      const displayLabel = skuObj ? `${pName.replace(/\n/g, ' ')} (${skuObj.name})` : pName.replace(/\n/g, ' ');
 
       const sourceInvMap = (targetEvKey === currentEventKey)
         ? inventoryData
