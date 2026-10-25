@@ -10190,11 +10190,12 @@
       const isCementWork = lower.includes('一輪挿し') || lower.includes('一輪差し') ||
                            lower.includes('黄昏') || lower.includes('内省') ||
                            lower.includes('内政') || lower.includes('セメント') || lower.includes('モルタル');
+      const isResinWork = lower.includes('レジン') || lower.includes('robo') || lower.includes('ロボ') || lower.includes('エレク');
       if (!defaultPrinters) {
         if (isCementWork) {
           defaultPrinters = ['cement'];
-        } else if (lower.includes('レジン') || lower.includes('robo') || lower.includes('ロボ') || lower.includes('エレク')) {
-          defaultPrinters = ['mini1', 'mini2', 'creator5', 'resin1'];
+        } else if (isResinWork) {
+          defaultPrinters = ['resin1'];
         } else {
           defaultPrinters = ['mini1', 'mini2', 'creator5'];
         }
@@ -10202,11 +10203,45 @@
       const isManualCement = defaultPrinters && defaultPrinters.includes('cement') && defaultPrinters.length === 1;
       const fallbackHours = isManualCement ? 0.8 : 2.5;
       const defaultUnitHours = sEntry.unitHours !== undefined ? Number(sEntry.unitHours) : fallbackHours;
+      const defaultBatchHours = sEntry.batchHours !== undefined ? Number(sEntry.batchHours) : 4.0;
+      const defaultBatchCapacity = sEntry.batchCapacity !== undefined ? Math.max(1, parseInt(sEntry.batchCapacity)) : 4;
       return {
         unitHours: defaultUnitHours > 0 ? defaultUnitHours : fallbackHours,
+        batchHours: defaultBatchHours > 0 ? defaultBatchHours : 4.0,
+        batchCapacity: defaultBatchCapacity > 0 ? defaultBatchCapacity : 4,
         printers: defaultPrinters,
         printerUnitHours: sEntry.printerUnitHours || {}
       };
+    };
+
+    // Calculate production hours considering FDM (linear) vs Resin SLA/LCD (batch-based 1-layer simultaneous exposure)
+    window.calcMfgJobHours = (jobOrSku, qty, printerId) => {
+      const printers = window.getMfgPrinters(true);
+      const pr = printers.find(p => p.id === printerId);
+      const isResin = pr ? pr.type === 'resin' : (printerId === 'resin1');
+      const q = Math.max(1, parseInt(qty) || 1);
+
+      if (isResin) {
+        const batchCap = Math.max(1, parseInt(jobOrSku.batchCapacity) || 4);
+        const batchH = Number(jobOrSku.batchHours) || 4.0;
+        const batches = Math.ceil(q / batchCap);
+        return {
+          isResin: true,
+          batches: batches,
+          batchCapacity: batchCap,
+          batchHours: batchH,
+          totalHours: +(batches * batchH).toFixed(1)
+        };
+      } else {
+        const unitH = Number(jobOrSku.unitHours) || 2.5;
+        return {
+          isResin: false,
+          batches: 1,
+          batchCapacity: 1,
+          batchHours: unitH,
+          totalHours: +(q * unitH).toFixed(1)
+        };
+      }
     };
 
     window.getMfgScheduledJobs = () => {
@@ -10218,15 +10253,19 @@
         if (!item || typeof item !== 'object') return;
         // New format has printerId and date
         if (item.printerId && item.date) {
+          const qty = Math.max(1, parseInt(item.qty) || 1);
+          const calc = window.calcMfgJobHours(item, qty, item.printerId);
           jobs.push({
             id: k,
             productId: item.productId,
             skuId: item.skuId || item.productId,
             printerId: item.printerId,
             date: item.date,
-            qty: Math.max(1, parseInt(item.qty) || 1),
+            qty: qty,
             unitHours: Number(item.unitHours) || 2.5,
-            totalHours: Number(item.totalHours) || ((Math.max(1, parseInt(item.qty) || 1)) * (Number(item.unitHours) || 2.5)),
+            batchHours: Number(item.batchHours) || calc.batchHours,
+            batchCapacity: parseInt(item.batchCapacity) || calc.batchCapacity,
+            totalHours: item.isCustomHours && item.totalHours !== undefined ? Number(item.totalHours) : (item.totalHours !== undefined ? Number(item.totalHours) : calc.totalHours),
             isCustomHours: Boolean(item.isCustomHours),
             status: item.status || 'planned', // 'planned' | 'printing' | 'completed'
             targetEvents: Array.isArray(item.targetEvents) ? item.targetEvents : [],
@@ -10596,6 +10635,10 @@
             const unplannedQty = Math.max(0, shortage - plannedQty);
             const spec = window.getMfgSkuSpec(v.skuId, p.id, cleanParentName);
 
+            const isResinOnly = spec.printers && spec.printers.length === 1 && spec.printers[0] === 'resin1';
+            const calcHours = isResinOnly
+              ? +(Math.ceil(unplannedQty / (spec.batchCapacity || 4)) * (spec.batchHours || 4.0)).toFixed(1)
+              : +(unplannedQty * spec.unitHours).toFixed(1);
             const item = {
               skuId: v.skuId,
               parentId: p.id,
@@ -10611,9 +10654,11 @@
               completedQty,
               unplannedQty,
               unitHours: spec.unitHours,
+              batchHours: spec.batchHours,
+              batchCapacity: spec.batchCapacity,
               compatiblePrinters: spec.printers,
               printerBreakdown: plannedBySkuPrinter[v.skuId] || {},
-              unplannedHours: +(unplannedQty * spec.unitHours).toFixed(1),
+              unplannedHours: calcHours,
               masterOrder: mIdx * 100 + vIdx,
               isSelectedInAnyEvent
             };
@@ -10636,6 +10681,10 @@
           const unplannedQty = Math.max(0, shortage - plannedQty);
           const spec = window.getMfgSkuSpec(p.id, p.id, cleanParentName);
 
+          const isResinOnlyBase = spec.printers && spec.printers.length === 1 && spec.printers[0] === 'resin1';
+          const calcHoursBase = isResinOnlyBase
+            ? +(Math.ceil(unplannedQty / (spec.batchCapacity || 4)) * (spec.batchHours || 4.0)).toFixed(1)
+            : +(unplannedQty * spec.unitHours).toFixed(1);
           const item = {
             skuId: p.id,
             parentId: p.id,
@@ -10651,9 +10700,11 @@
             completedQty,
             unplannedQty,
             unitHours: spec.unitHours,
+            batchHours: spec.batchHours,
+            batchCapacity: spec.batchCapacity,
             compatiblePrinters: spec.printers,
             printerBreakdown: plannedBySkuPrinter[p.id] || {},
-            unplannedHours: +(unplannedQty * spec.unitHours).toFixed(1),
+            unplannedHours: calcHoursBase,
             masterOrder: mIdx * 100,
             isSelectedInAnyEvent
           };
@@ -11190,7 +11241,7 @@
                     </div>
                     <div style="display:flex; align-items:center; gap:3px; margin-left:auto; flex-shrink:0;">
                       <span style="font-size:10.5px; font-weight:800; color:#fff; background:rgba(0,0,0,0.45); border:1px solid rgba(255,255,255,0.22); padding:0px 5px; border-radius:4px; line-height:1.3; letter-spacing:0.2px;">×${j.qty}</span>
-                      <span style="font-size:9.5px; opacity:0.85; white-space:nowrap;">${j.totalHours.toFixed(1)}h</span>
+                      <span style="font-size:9.5px; opacity:0.85; white-space:nowrap;">${j.totalHours.toFixed(1)}h${pr.type === 'resin' ? `<span style="opacity:0.8; font-size:8.5px; margin-left:1px;">(${Math.ceil(j.qty / (j.batchCapacity || 4))}面)</span>` : ''}</span>
                     </div>
                   </div>
                 </div>
@@ -11419,7 +11470,8 @@
 
       if (existingJob && explicitQty === null) {
         const newQty = existingJob.qty + 1;
-        const newTotal = existingJob.isCustomHours ? existingJob.totalHours : +(newQty * existingJob.unitHours).toFixed(1);
+        const calc = window.calcMfgJobHours(existingJob, newQty, printerId);
+        const newTotal = existingJob.isCustomHours ? existingJob.totalHours : calc.totalHours;
         updated[existingJob.id] = {
           ...updated[existingJob.id],
           qty: newQty,
@@ -11429,7 +11481,7 @@
         mfgSelectedJobId = existingJob.id;
       } else {
         const newId = 'prod_' + Date.now() + '_' + Math.random().toString(36).substring(2, 5);
-        const totalHours = +(qtyToPlace * unitHours).toFixed(1);
+        const calc = window.calcMfgJobHours(skuInfo, qtyToPlace, printerId);
         updated[newId] = {
           id: newId,
           productId: skuInfo.parentId,
@@ -11438,7 +11490,9 @@
           date: dateStr,
           qty: qtyToPlace,
           unitHours: unitHours,
-          totalHours: totalHours,
+          batchHours: skuInfo.batchHours || 4.0,
+          batchCapacity: skuInfo.batchCapacity || 4,
+          totalHours: calc.totalHours,
           isCustomHours: false,
           status: 'planned',
           targetEvents: [...(multiAggSelectedEvents || [currentEventKey])],
@@ -11589,7 +11643,7 @@
             </div>
           </div>
 
-          <!-- Quantity & Time Calculation -->
+          <!-- Quantity & Time Calculation (Smart FDM vs Resin Batch Calculation) -->
           <div style="background:rgba(0,0,0,0.3); border:1px solid rgba(255,255,255,0.07); border-radius:10px; padding:12px; display:flex; flex-direction:column; gap:10px;">
             <div style="display:flex; justify-content:space-between; align-items:center;">
               <span style="font-size:12px; color:rgba(255,255,255,0.8); font-weight:bold;">製造個数</span>
@@ -11600,23 +11654,52 @@
               </div>
             </div>
 
-            <div style="display:flex; justify-content:space-between; align-items:center; padding-top:8px; border-top:1px solid rgba(255,255,255,0.06);">
-              <span style="font-size:11px; color:rgba(255,255,255,0.65);">1個あたり目安時間</span>
-              <div style="display:flex; align-items:center; gap:5px;">
-                <input type="number" step="0.1" min="0.1" value="${activeJob.unitHours}" onchange="updateMfgJobField('${activeJob.id}', 'unitHours', this.value)" style="width:68px; padding:4px 6px; text-align:right; font-size:13px; font-weight:bold; background:#0d0f17; color:#fff; border:1px solid rgba(255,255,255,0.18); border-radius:6px;">
-                <span style="font-size:11px; color:rgba(255,255,255,0.6);">時間</span>
+            ${curPrinter.type === 'resin' ? `
+              <!-- Resin Batch Dedicated Controls -->
+              <div style="background:rgba(245,158,11,0.08); border:1px solid rgba(245,158,11,0.25); border-radius:8px; padding:10px; display:flex; flex-direction:column; gap:8px;">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                  <span style="font-size:11px; color:#fbbf24; font-weight:bold;">🧪 1プレート最大個数 (同時露光)</span>
+                  <div style="display:flex; align-items:center; gap:5px;">
+                    <input type="number" min="1" max="50" value="${activeJob.batchCapacity || 4}"
+                           onchange="updateMfgJobField('${activeJob.id}', 'batchCapacity', this.value)"
+                           style="width:55px; padding:4px 6px; text-align:center; font-size:13px; font-weight:bold; background:#0d0f17; color:#fbbf24; border:1px solid rgba(245,158,11,0.4); border-radius:6px;">
+                    <span style="font-size:11px; color:rgba(255,255,255,0.7);">個/面</span>
+                  </div>
+                </div>
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                  <span style="font-size:11px; color:#fbbf24; font-weight:bold;">⏱ 1プレート造形時間 (Z高さ基準)</span>
+                  <div style="display:flex; align-items:center; gap:5px;">
+                    <input type="number" step="0.5" min="0.5" value="${activeJob.batchHours || 4.0}"
+                           onchange="updateMfgJobField('${activeJob.id}', 'batchHours', this.value)"
+                           style="width:65px; padding:4px 6px; text-align:right; font-size:13px; font-weight:bold; background:#0d0f17; color:#fbbf24; border:1px solid rgba(245,158,11,0.4); border-radius:6px;">
+                    <span style="font-size:11px; color:rgba(255,255,255,0.7);">時間</span>
+                  </div>
+                </div>
+                <div style="font-size:10px; color:#fde68a; line-height:1.4; background:rgba(0,0,0,0.3); padding:6px 8px; border-radius:6px;">
+                  💡 光造形は1層一括露光のため、<strong>${activeJob.batchCapacity || 4}個以内なら何個作っても同じ${activeJob.batchHours || 4.0}時間</strong>で造形できます。<br>
+                  現在: <strong>${activeJob.qty}個 ➔ ${Math.ceil(activeJob.qty / (activeJob.batchCapacity || 4))}プレート (${Math.ceil(activeJob.qty / (activeJob.batchCapacity || 4))}バッチ ＝ 計${(Math.ceil(activeJob.qty / (activeJob.batchCapacity || 4)) * (Number(activeJob.batchHours) || 4.0)).toFixed(1)}h)</strong>
+                </div>
               </div>
-            </div>
+            ` : `
+              <!-- FDM & Manual Standard Controls -->
+              <div style="display:flex; justify-content:space-between; align-items:center; padding-top:8px; border-top:1px solid rgba(255,255,255,0.06);">
+                <span style="font-size:11px; color:rgba(255,255,255,0.65);">1個あたり目安時間</span>
+                <div style="display:flex; align-items:center; gap:5px;">
+                  <input type="number" step="0.1" min="0.1" value="${activeJob.unitHours}" onchange="updateMfgJobField('${activeJob.id}', 'unitHours', this.value)" style="width:68px; padding:4px 6px; text-align:right; font-size:13px; font-weight:bold; background:#0d0f17; color:#fff; border:1px solid rgba(255,255,255,0.18); border-radius:6px;">
+                  <span style="font-size:11px; color:rgba(255,255,255,0.6);">時間</span>
+                </div>
+              </div>
+            `}
 
             <div style="display:flex; justify-content:space-between; align-items:center; padding-top:8px; border-top:1px solid rgba(255,255,255,0.06);">
               <div>
                 <div style="font-size:12px; color:#fff; font-weight:bold;">合計製造時間</div>
                 <div style="font-size:9px; color:rgba(255,255,255,0.45);">
-                  ${activeJob.isCustomHours ? '🔒 実測・バッチ時間で上書き中' : `自動計算 (${activeJob.qty}個 × ${activeJob.unitHours}h)`}
+                  ${activeJob.isCustomHours ? '🔒 実測・手動時間で上書き中' : (curPrinter.type === 'resin' ? `一括自動計算 (${Math.ceil(activeJob.qty / (activeJob.batchCapacity || 4))}面 × ${activeJob.batchHours || 4.0}h)` : `自動計算 (${activeJob.qty}個 × ${activeJob.unitHours}h)`)}
                 </div>
               </div>
               <div style="display:flex; align-items:center; gap:5px;">
-                <input type="number" step="0.5" min="0.1" value="${activeJob.totalHours}" onchange="updateMfgJobField('${activeJob.id}', 'totalHours', this.value)" style="width:72px; padding:5px 6px; text-align:right; font-size:16px; font-weight:bold; background:#0d0f17; color:var(--accent); border:1px solid var(--accent); border-radius:6px;" title="プレートまとめ刷りや光造形バッチなど、実際の印刷時間に直接上書きできます">
+                <input type="number" step="0.5" min="0.1" value="${activeJob.totalHours}" onchange="updateMfgJobField('${activeJob.id}', 'totalHours', this.value)" style="width:72px; padding:5px 6px; text-align:right; font-size:16px; font-weight:bold; background:#0d0f17; color:var(--accent); border:1px solid var(--accent); border-radius:6px;" title="実際の印刷時間に直接上書きできます">
                 <span style="font-size:12px; color:var(--accent); font-weight:bold;">時間</span>
                 ${activeJob.isCustomHours ? `<button type="button" onclick="updateMfgJobField('${activeJob.id}', 'resetAutoHours', true)" style="background:rgba(255,255,255,0.08); border:none; color:#ccc; font-size:10px; padding:3px 6px; border-radius:4px; cursor:pointer;" title="自動計算に戻す">🔄</button>` : ''}
               </div>
@@ -11773,27 +11856,57 @@
         const q = Math.max(1, parseInt(value) || 1);
         updatedJob.qty = q;
         if (!updatedJob.isCustomHours) {
-          updatedJob.totalHours = +(q * (Number(updatedJob.unitHours) || 2.5)).toFixed(1);
+          const calc = window.calcMfgJobHours(updatedJob, q, updatedJob.printerId);
+          updatedJob.totalHours = calc.totalHours;
         }
       } else if (field === 'unitHours') {
         const uh = Math.max(0.1, parseFloat(value) || 2.5);
         updatedJob.unitHours = uh;
         if (!updatedJob.isCustomHours) {
-          updatedJob.totalHours = +((updatedJob.qty || 1) * uh).toFixed(1);
+          const calc = window.calcMfgJobHours(updatedJob, updatedJob.qty, updatedJob.printerId);
+          updatedJob.totalHours = calc.totalHours;
         }
-        // Also remember in _specs for this SKU
         const skuId = updatedJob.skuId || updatedJob.productId;
         const specs = { ...(updatedAll._specs || {}) };
         specs[skuId] = { ...(specs[skuId] || {}), unitHours: uh };
         updatedAll._specs = specs;
+      } else if (field === 'batchCapacity') {
+        const bc = Math.max(1, parseInt(value) || 4);
+        updatedJob.batchCapacity = bc;
+        if (!updatedJob.isCustomHours) {
+          const calc = window.calcMfgJobHours(updatedJob, updatedJob.qty, updatedJob.printerId);
+          updatedJob.totalHours = calc.totalHours;
+        }
+        const skuId = updatedJob.skuId || updatedJob.productId;
+        const specs = { ...(updatedAll._specs || {}) };
+        specs[skuId] = { ...(specs[skuId] || {}), batchCapacity: bc };
+        updatedAll._specs = specs;
+      } else if (field === 'batchHours') {
+        const bh = Math.max(0.1, parseFloat(value) || 4.0);
+        updatedJob.batchHours = bh;
+        if (!updatedJob.isCustomHours) {
+          const calc = window.calcMfgJobHours(updatedJob, updatedJob.qty, updatedJob.printerId);
+          updatedJob.totalHours = calc.totalHours;
+        }
+        const skuId = updatedJob.skuId || updatedJob.productId;
+        const specs = { ...(updatedAll._specs || {}) };
+        specs[skuId] = { ...(specs[skuId] || {}), batchHours: bh };
+        updatedAll._specs = specs;
+      } else if (field === 'printerId') {
+        updatedJob.printerId = value;
+        if (!updatedJob.isCustomHours) {
+          const calc = window.calcMfgJobHours(updatedJob, updatedJob.qty, value);
+          updatedJob.totalHours = calc.totalHours;
+        }
       } else if (field === 'totalHours') {
         const th = Math.max(0.1, parseFloat(value) || 1.0);
         updatedJob.totalHours = th;
         updatedJob.isCustomHours = true;
       } else if (field === 'resetAutoHours') {
         updatedJob.isCustomHours = false;
-        updatedJob.totalHours = +((updatedJob.qty || 1) * (Number(updatedJob.unitHours) || 2.5)).toFixed(1);
-      } else if (field === 'date' || field === 'printerId' || field === 'status' || field === 'memo') {
+        const calc = window.calcMfgJobHours(updatedJob, updatedJob.qty, updatedJob.printerId);
+        updatedJob.totalHours = calc.totalHours;
+      } else if (field === 'date' || field === 'status' || field === 'memo') {
         updatedJob[field] = value;
       }
 
@@ -11828,6 +11941,19 @@
       const specs = { ...(updated._specs || {}) };
       const curSpec = specs[skuId] || {};
       specs[skuId] = { ...curSpec, unitHours: uh };
+      updated._specs = specs;
+      window.productionPlansData = updated;
+      await setDoc(doc(db, "settings", "production_plans"), updated);
+      window.renderProductionPlans();
+    };
+
+    window.saveMfgSkuBatchSpec = async (skuId, field, val) => {
+      if (!auth.currentUser) return alert("ログインが必要です");
+      const num = field === 'batchCapacity' ? Math.max(1, parseInt(val) || 4) : Math.max(0.1, parseFloat(val) || 4.0);
+      const updated = { ...(window.productionPlansData || {}) };
+      const specs = { ...(updated._specs || {}) };
+      const curSpec = specs[skuId] || {};
+      specs[skuId] = { ...curSpec, [field]: num };
       updated._specs = specs;
       window.productionPlansData = updated;
       await setDoc(doc(db, "settings", "production_plans"), updated);
