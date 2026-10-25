@@ -2054,6 +2054,7 @@
                   </select>
                   <select id="mfg-left-filter" onchange="renderProductionPlans()" class="form-select" style="font-size:11px; padding:5px 6px; background:#0d0f17;">
                     <option value="unplanned">🔥 未計画ありのみ</option>
+                    <option value="finishing">⏳ 仕上げ待ちあり (手作業ToDo)</option>
                     <option value="shortage">⚠️ 不足ありすべて</option>
                     <option value="required">📦 必要数 &gt; 0 すべて</option>
                     <option value="all">全出品対象</option>
@@ -8327,7 +8328,8 @@
         return {
           price: entry.price !== undefined ? entry.price : (sku.priceOverride || fallbackPrice),
           initial: entry.initial || 0,
-          current: entry.current || 0
+          current: entry.current || 0,
+          finishing: Number(entry.finishing) || 0
         };
       }
 
@@ -8338,14 +8340,16 @@
         return {
           price: sku.priceOverride || fallbackPrice,
           initial: parentEntry.initial || 0,
-          current: parentEntry.current || 0
+          current: parentEntry.current || 0,
+          finishing: Number(parentEntry.finishing) || 0
         };
       }
 
       return {
         price: sku.priceOverride || fallbackPrice,
         initial: 0,
-        current: 0
+        current: 0,
+        finishing: 0
       };
     };
 
@@ -8354,16 +8358,18 @@
       const map = invMap || {};
       const vars = window.getProductVariants(parentId, false);
       if (vars.length === 0) {
-        const d = map[parentId] || { price: 0, initial: 0, current: 0 };
-        return { price: d.price || 0, initial: d.initial || 0, current: d.current || 0, hasPriceDiff: false };
+        const d = map[parentId] || { price: 0, initial: 0, current: 0, finishing: 0 };
+        return { price: d.price || 0, initial: d.initial || 0, current: d.current || 0, finishing: Number(d.finishing) || 0, hasPriceDiff: false };
       }
       let totalInitial = 0;
       let totalCurrent = 0;
+      let totalFinishing = 0;
       let prices = [];
       vars.forEach(v => {
         const vInv = window.getSkuInventory(map, parentId, v);
         totalInitial += (vInv.initial || 0);
         totalCurrent += (vInv.current || 0);
+        totalFinishing += (vInv.finishing || 0);
         if (vInv.price > 0) prices.push(vInv.price);
       });
       const parentBasePrice = map[parentId]?.price || (prices.length > 0 ? Math.min(...prices) : 0);
@@ -8372,6 +8378,7 @@
         price: parentBasePrice,
         initial: totalInitial,
         current: totalCurrent,
+        finishing: totalFinishing,
         hasPriceDiff
       };
     };
@@ -10629,7 +10636,9 @@
             });
             const vInv = window.getSkuInventory(refInvMap, p.id, v);
             const curStock = vInv.current || 0;
-            const shortage = Math.max(0, totalReq - curStock);
+            const finishingStock = vInv.finishing || 0;
+            const printedTotal = curStock + finishingStock;
+            const shortage = Math.max(0, totalReq - curStock - finishingStock);
             const plannedQty = plannedBySku[v.skuId] || 0;
             const completedQty = completedBySku[v.skuId] || 0;
             const unplannedQty = Math.max(0, shortage - plannedQty);
@@ -10649,6 +10658,8 @@
               hasVars: true,
               totalReq,
               currentStock: curStock,
+              finishingStock,
+              printedTotal,
               shortage,
               plannedQty,
               completedQty,
@@ -10663,7 +10674,7 @@
               isSelectedInAnyEvent
             };
             mfgSkuMapCache[v.skuId] = item;
-            if (isSelectedInAnyEvent || totalReq > 0 || curStock > 0 || plannedQty > 0) {
+            if (isSelectedInAnyEvent || totalReq > 0 || curStock > 0 || finishingStock > 0 || plannedQty > 0) {
               skuList.push(item);
             }
           });
@@ -10673,9 +10684,11 @@
             const prepMap = getEventAdoptedPrepMap(evKey);
             totalReq += Number(prepMap[p.id]) || 0;
           });
-          const pInv = refInvMap[p.id] || { current: 0 };
+          const pInv = refInvMap[p.id] || { current: 0, finishing: 0 };
           const curStock = pInv.current || 0;
-          const shortage = Math.max(0, totalReq - curStock);
+          const finishingStock = Number(pInv.finishing) || 0;
+          const printedTotal = curStock + finishingStock;
+          const shortage = Math.max(0, totalReq - curStock - finishingStock);
           const plannedQty = plannedBySku[p.id] || 0;
           const completedQty = completedBySku[p.id] || 0;
           const unplannedQty = Math.max(0, shortage - plannedQty);
@@ -10695,6 +10708,8 @@
             hasVars: false,
             totalReq,
             currentStock: curStock,
+            finishingStock,
+            printedTotal,
             shortage,
             plannedQty,
             completedQty,
@@ -10709,7 +10724,7 @@
             isSelectedInAnyEvent
           };
           mfgSkuMapCache[p.id] = item;
-          if (isSelectedInAnyEvent || totalReq > 0 || curStock > 0 || plannedQty > 0) {
+          if (isSelectedInAnyEvent || totalReq > 0 || curStock > 0 || finishingStock > 0 || plannedQty > 0) {
             skuList.push(item);
           }
         }
@@ -10751,6 +10766,10 @@
       }
 
       // Compute KPI totals
+      let totalReqQty = 0;
+      let totalCurrentStock = 0;
+      let totalFinishingStock = 0;
+      let totalPrintedQty = 0;
       let totalShortageQty = 0;
       let totalPlannedPendingQty = 0;
       let totalCappedPlannedQty = 0;
@@ -10758,6 +10777,10 @@
       let totalUnplannedHours = 0;
 
       skuList.forEach(s => {
+        totalReqQty += s.totalReq;
+        totalCurrentStock += s.currentStock;
+        totalFinishingStock += s.finishingStock;
+        totalPrintedQty += s.printedTotal;
         totalShortageQty += s.shortage;
         totalPlannedPendingQty += s.plannedQty;
         totalCappedPlannedQty += Math.min(s.shortage, s.plannedQty);
@@ -10811,60 +10834,69 @@
             </div>
           </div>
 
-          <!-- 2. 製造計画済み -->
+          <!-- 2. 製造計画済み (予定) -->
           <div class="prod-kpi-card" style="padding:12px 14px;">
-            <div class="prod-kpi-icon" style="background:rgba(16,185,129,0.16); color:#34d399; border:1px solid rgba(16,185,129,0.35); width:38px; height:38px; font-size:17px;">🗓️</div>
+            <div class="prod-kpi-icon" style="background:rgba(59,130,246,0.16); color:#38bdf8; border:1px solid rgba(59,130,246,0.35); width:38px; height:38px; font-size:17px;">🗓️</div>
             <div style="flex:1; min-width:0;">
-              <div style="font-size:11px; color:rgba(255,255,255,0.6);">製造計画済み</div>
-              <div style="font-size:22px; font-weight:bold; color:#34d399; line-height:1.2;">
+              <div style="font-size:11px; color:rgba(255,255,255,0.6);">製造予定・印刷中</div>
+              <div style="font-size:22px; font-weight:bold; color:#38bdf8; line-height:1.2;">
                 ${totalPlannedPendingQty} <span style="font-size:11px; font-weight:normal; color:rgba(255,255,255,0.5);">個 (未完予定)</span>
               </div>
             </div>
           </div>
 
-          <!-- 3. 本日の予定 -->
-          <div class="prod-kpi-card" style="padding:12px 14px;">
-            <div class="prod-kpi-icon" style="background:rgba(59,130,246,0.16); color:#60a5fa; border:1px solid rgba(59,130,246,0.35); width:38px; height:38px; font-size:17px;">⏱️</div>
-            <div style="flex:1; min-width:0;">
-              <div style="font-size:11px; color:rgba(255,255,255,0.6);">本日の予定</div>
-              <div style="font-size:22px; font-weight:bold; color:#60a5fa; line-height:1.2;">
-                ${todayScheduledHours.toFixed(1)} <span style="font-size:11px; font-weight:normal; color:rgba(255,255,255,0.5);">時間 (${todayJobCount}件)</span>
-              </div>
-            </div>
-          </div>
-
-          <!-- 4. 表示期間の予定 -->
-          <div class="prod-kpi-card" style="padding:12px 14px;">
-            <div class="prod-kpi-icon" style="background:rgba(6,182,212,0.16); color:#22d3ee; border:1px solid rgba(6,182,212,0.35); width:38px; height:38px; font-size:17px;">📅</div>
-            <div style="flex:1; min-width:0;">
-              <div style="font-size:11px; color:rgba(255,255,255,0.6);">期間内の予定 (${mfgDaysCount}日間)</div>
-              <div style="font-size:22px; font-weight:bold; color:#22d3ee; line-height:1.2;">
-                ${periodScheduledHours.toFixed(1)} <span style="font-size:11px; font-weight:normal; color:rgba(255,255,255,0.5);">/ ${periodTotalCapacity.toFixed(0)}h</span>
-              </div>
-            </div>
-          </div>
-
-          <!-- 5. 残り必要時間 (未計画分) -->
+          <!-- 3. 仕上げ待ち (手作業ToDo) -->
           <div class="prod-kpi-card" style="padding:12px 14px;">
             <div class="prod-kpi-icon" style="background:rgba(245,158,11,0.16); color:#fbbf24; border:1px solid rgba(245,158,11,0.35); width:38px; height:38px; font-size:17px;">⏳</div>
             <div style="flex:1; min-width:0;">
-              <div style="font-size:11px; color:rgba(255,255,255,0.6);">残り必要時間</div>
-              <div style="font-size:22px; font-weight:bold; color:#fbbf24; line-height:1.2;">
-                ${totalUnplannedHours.toFixed(1)} <span style="font-size:11px; font-weight:normal; color:rgba(255,255,255,0.5);">時間 (未計画分)</span>
+              <div style="font-size:11px; color:rgba(255,255,255,0.6);">仕上げ待ち</div>
+              <div style="font-size:22px; font-weight:bold; color:${totalFinishingStock > 0 ? '#fbbf24' : '#fff'}; line-height:1.2;">
+                ${totalFinishingStock} <span style="font-size:11px; font-weight:normal; color:rgba(255,255,255,0.5);">個 (研磨/組立待機)</span>
               </div>
             </div>
           </div>
 
-          <!-- 6. 予定達成率 -->
+          <!-- 4. 完成在庫 (販売可能) -->
+          <div class="prod-kpi-card" style="padding:12px 14px;">
+            <div class="prod-kpi-icon" style="background:rgba(16,185,129,0.16); color:#34d399; border:1px solid rgba(16,185,129,0.35); width:38px; height:38px; font-size:17px;">✨</div>
+            <div style="flex:1; min-width:0;">
+              <div style="font-size:11px; color:rgba(255,255,255,0.6);">完成在庫 (販売可能)</div>
+              <div style="font-size:22px; font-weight:bold; color:#34d399; line-height:1.2;">
+                ${totalCurrentStock} <span style="font-size:11px; font-weight:normal; color:rgba(255,255,255,0.5);">個</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 5. 印刷済 累計実績 (完成+仕上げ待ち) -->
+          <div class="prod-kpi-card" style="padding:12px 14px;">
+            <div class="prod-kpi-icon" style="background:rgba(6,182,212,0.16); color:#22d3ee; border:1px solid rgba(6,182,212,0.35); width:38px; height:38px; font-size:17px;">🖨️</div>
+            <div style="flex:1; min-width:0;">
+              <div style="font-size:11px; color:rgba(255,255,255,0.6);">印刷済 累計実績</div>
+              <div style="font-size:22px; font-weight:bold; color:#22d3ee; line-height:1.2;">
+                ${totalPrintedQty} <span style="font-size:11px; font-weight:normal; color:rgba(255,255,255,0.5);">/ 必要 ${totalReqQty}個</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 6. 制作進捗・4層積み上げバー -->
           <div class="prod-kpi-card" style="padding:10px 14px; flex-direction:column; align-items:stretch; justify-content:center; gap:6px;">
             <div style="display:flex; justify-content:space-between; align-items:baseline;">
-              <span style="font-size:11px; color:rgba(255,255,255,0.6);">🎯 計画カバー率</span>
-              <span style="font-size:20px; font-weight:bold; color:#34d399;">${planCoverRate}%</span>
+              <span style="font-size:11px; color:rgba(255,255,255,0.6);">🎯 制作進捗 / カバー率</span>
+              <span style="font-size:18px; font-weight:bold; color:#34d399;">${planCoverRate}%</span>
             </div>
-            <div style="background:rgba(255,255,255,0.08); height:6px; border-radius:4px; overflow:hidden;">
-              <div style="background:linear-gradient(90deg, #10b981, #06b6d4); width:${planCoverRate}%; height:100%; border-radius:4px;"></div>
+            <!-- 4-segment stacked gauge -->
+            <div style="display:flex; height:7px; border-radius:4px; overflow:hidden; background:rgba(255,255,255,0.08); gap:1px;">
+              <div style="background:#10b981; width:${totalReqQty > 0 ? Math.min(100, Math.round((totalCurrentStock / Math.max(1, totalReqQty, totalCurrentStock + totalFinishingStock + totalPlannedPendingQty)) * 100)) : 100}%; height:100%;" title="完成在庫: ${totalCurrentStock}個"></div>
+              <div style="background:#f59e0b; width:${totalReqQty > 0 ? Math.min(100, Math.round((totalFinishingStock / Math.max(1, totalReqQty, totalCurrentStock + totalFinishingStock + totalPlannedPendingQty)) * 100)) : 0}%; height:100%;" title="仕上げ待ち: ${totalFinishingStock}個"></div>
+              <div style="background:#38bdf8; width:${totalReqQty > 0 ? Math.min(100, Math.round((totalCappedPlannedQty / Math.max(1, totalReqQty, totalCurrentStock + totalFinishingStock + totalPlannedPendingQty)) * 100)) : 0}%; height:100%;" title="製造予定: ${totalPlannedPendingQty}個"></div>
+              <div style="background:#ef4444; width:${totalUnplannedQty > 0 ? Math.max(0, 100 - Math.round(((totalCurrentStock + totalFinishingStock + totalCappedPlannedQty) / Math.max(1, totalReqQty, totalCurrentStock + totalFinishingStock + totalPlannedPendingQty)) * 100)) : 0}%; height:100%;" title="未計画: ${totalUnplannedQty}個"></div>
             </div>
-            <div style="font-size:10px; color:rgba(255,255,255,0.45); text-align:right;">計画済 ${totalCappedPlannedQty} / 不足 ${totalShortageQty}個</div>
+            <div style="display:flex; justify-content:space-between; font-size:9.5px; color:rgba(255,255,255,0.5);">
+              <span style="color:#34d399;">完 ${totalCurrentStock}</span>
+              <span style="color:#fbbf24;">仕 ${totalFinishingStock}</span>
+              <span style="color:#38bdf8;">予 ${totalPlannedPendingQty}</span>
+              <span style="color:${totalUnplannedQty > 0 ? '#f87171' : 'rgba(255,255,255,0.45)'};">未 ${totalUnplannedQty}</span>
+            </div>
           </div>
         `;
       }
@@ -10958,6 +10990,7 @@
         // If this SKU is currently selected (e.g. from schedule click), ALWAYS show it so the user sees its status!
         if (mfgSelectedUnplannedSkuId && s.skuId === mfgSelectedUnplannedSkuId) return true;
         if (filterMode === 'unplanned' && s.unplannedQty <= 0) return false;
+        if (filterMode === 'finishing' && s.finishingStock <= 0) return false;
         if (filterMode === 'shortage' && s.shortage <= 0) return false;
         if (filterMode === 'required' && s.totalReq <= 0) return false;
         if (seriesFilter !== 'all' && s.parentId !== seriesFilter) return false;
@@ -10970,6 +11003,11 @@
       });
 
       filtered.sort((a, b) => {
+        if (filterMode === 'finishing') {
+          if ((b.finishingStock || 0) !== (a.finishingStock || 0)) {
+            return (b.finishingStock || 0) - (a.finishingStock || 0);
+          }
+        }
         if (sortMode === 'unplanned_desc') {
           if (b.unplannedQty !== a.unplannedQty) return b.unplannedQty - a.unplannedQty;
           if (b.shortage !== a.shortage) return b.shortage - a.shortage;
@@ -10988,11 +11026,23 @@
       });
 
       const totalUnplannedItems = skuList.filter(s => s.unplannedQty > 0).length;
-      if (countBadge) countBadge.textContent = `${totalUnplannedItems}件`;
+      const totalFinishingItems = skuList.filter(s => (s.finishingStock || 0) > 0).length;
+      if (countBadge) {
+        if (filterMode === 'finishing') {
+          countBadge.textContent = `${totalFinishingItems}件`;
+        } else {
+          countBadge.textContent = `${totalUnplannedItems}件`;
+        }
+      }
 
       if (hintBanner) {
         const selSku = mfgSelectedUnplannedSkuId ? mfgSkuMapCache[mfgSelectedUnplannedSkuId] : null;
-        if (selSku) {
+        if (filterMode === 'finishing') {
+          hintBanner.style.background = 'rgba(245,158,11,0.18)';
+          hintBanner.style.borderColor = 'rgba(245,158,11,0.45)';
+          hintBanner.style.color = '#fbbf24';
+          hintBanner.innerHTML = `🪚 <strong>仕上げ作業ToDo</strong>: 研磨・組立が完了したら、カードの「✨仕上げ完了」から完成在庫へ即座に移動できます`;
+        } else if (selSku) {
           hintBanner.style.background = 'rgba(0, 210, 255, 0.2)';
           hintBanner.style.borderColor = '#00d2ff';
           hintBanner.style.color = '#fff';
@@ -11008,7 +11058,7 @@
       if (filtered.length === 0) {
         container.innerHTML = `
           <div style="text-align:center; padding:32px 12px; color:rgba(255,255,255,0.45); font-size:12px;">
-            ${filterMode === 'unplanned' ? '🎉 未計画の不足作品はありません！<br>（上のフィルタを「全出品対象」に変えると全作品を表示できます）' : '条件に一致する作品がありません。'}
+            ${filterMode === 'finishing' ? '🎉 仕上げ待ちの作品はありません！<br>（印刷完了した作品はすべて完成在庫へ反映済みです）' : (filterMode === 'unplanned' ? '🎉 未計画の不足作品はありません！<br>（上のフィルタを「全出品対象」に変えると全作品を表示できます）' : '条件に一致する作品がありません。')}
           </div>
         `;
         return;
@@ -11021,31 +11071,31 @@
           .map(pid => `<span class="mfg-printer-badge">${printerShortMap[pid].replace('号機', '')}</span>`)
           .join('');
 
-        // 3-Segment Stacked Gauge Calculations (Image 2 style)
+        // 4-Segment Stacked Gauge Calculations (Completed[Green] + Finishing[Orange] + Planned[Blue] + Unplanned[Red])
         const totalReq = s.totalReq;
         const curStock = s.currentStock;
+        const finishing = s.finishingStock || 0;
+        const printedTotal = s.printedTotal || (curStock + finishing);
         const shortage = s.shortage;
         const planned = s.plannedQty;
         const unplanned = s.unplannedQty;
 
-        const totalBasis = Math.max(1, totalReq, (curStock + planned));
-        const stockAlloc = Math.min(totalReq > 0 ? totalReq : curStock, curStock);
-        const plannedAlloc = Math.min(shortage, planned);
-        const unplannedAlloc = unplanned;
+        const totalBasis = Math.max(1, totalReq, (curStock + finishing + planned));
+        let stockPct = Math.round((curStock / totalBasis) * 100);
+        let finishingPct = Math.round((finishing / totalBasis) * 100);
+        let plannedPct = Math.round((Math.min(shortage, planned) / totalBasis) * 100);
+        let unplannedPct = 100 - stockPct - finishingPct - plannedPct;
 
-        let stockPct = Math.round((stockAlloc / totalBasis) * 100);
-        let plannedPct = Math.round((plannedAlloc / totalBasis) * 100);
-        let unplannedPct = 100 - stockPct - plannedPct;
-
-        if (unplannedAlloc === 0) {
+        if (unplanned === 0) {
           unplannedPct = 0;
-          const sumSP = stockAlloc + plannedAlloc;
-          if (sumSP > 0) {
-            stockPct = Math.round((stockAlloc / sumSP) * 100);
-            plannedPct = 100 - stockPct;
+          const sumSFP = curStock + finishing + planned;
+          if (sumSFP > 0) {
+            stockPct = Math.round((curStock / sumSFP) * 100);
+            finishingPct = Math.round((finishing / sumSFP) * 100);
+            plannedPct = 100 - stockPct - finishingPct;
+            if (plannedPct < 0) plannedPct = 0;
           } else {
-            stockPct = 100;
-            plannedPct = 0;
+            stockPct = 100; finishingPct = 0; plannedPct = 0;
           }
         } else {
           if (unplannedPct < 0) unplannedPct = 0;
@@ -11057,45 +11107,54 @@
                draggable="true"
                ondragstart="onMfgDragStartSku(event, '${s.skuId}')"
                onclick="selectMfgUnplannedSku('${s.skuId}')">
-            <img src="${s.parentImage}" style="width:48px; height:48px; border-radius:8px; object-fit:cover; background:#222; flex-shrink:0;">
+            <img src="${s.parentImage}" style="width:50px; height:50px; border-radius:8px; object-fit:cover; background:#222; flex-shrink:0;">
             <div style="flex:1; min-width:0;">
-              <!-- Row 1: Product Name & +Add Button -->
+              <!-- Row 1: Product Name & Action Buttons -->
               <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:4px;">
                 <div style="font-size:12.5px; font-weight:bold; color:#fff; line-height:1.25; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="${s.parentName}">
                   ${s.parentName}
                 </div>
-                <button type="button" onclick="event.stopPropagation(); quickAutoPlaceSku('${s.skuId}')"
-                        style="background:rgba(59,130,246,0.18); border:1px solid #3b82f6; color:#93c5fd; font-size:10px; font-weight:bold; padding:2px 7px; border-radius:6px; cursor:pointer; white-space:nowrap; flex-shrink:0;"
-                        title="空いている対応プリンター枠へ自動配置">＋ 計画に追加</button>
+                <div style="display:flex; align-items:center; gap:4px; flex-shrink:0;">
+                  ${finishing > 0 ? `
+                    <button type="button" onclick="event.stopPropagation(); quickCompleteFinishing('${s.skuId}')"
+                            style="background:rgba(245,158,11,0.22); border:1px solid #f59e0b; color:#fbbf24; font-size:10px; font-weight:bold; padding:2px 6px; border-radius:6px; cursor:pointer; white-space:nowrap;"
+                            title="仕上げ完了して完成在庫へ移動">✨仕上げ完了</button>
+                  ` : ''}
+                  <button type="button" onclick="event.stopPropagation(); quickAutoPlaceSku('${s.skuId}')"
+                          style="background:rgba(59,130,246,0.18); border:1px solid #3b82f6; color:#93c5fd; font-size:10px; font-weight:bold; padding:2px 6px; border-radius:6px; cursor:pointer; white-space:nowrap;"
+                          title="空いている対応ライン枠へ自動配置">＋計画追加</button>
+                </div>
               </div>
 
-              <!-- Row 2: Variant Name & Planned / Shortage Count -->
-              <div style="display:flex; justify-content:space-between; align-items:center; gap:4px; margin-top:2px;">
+              <!-- Row 2: Variant Name & Printed Total / Shortage -->
+              <div style="display:flex; justify-content:space-between; align-items:center; gap:4px; margin-top:3px;">
                 <div style="font-size:11px; color:${s.isBase ? 'rgba(255,255,255,0.65)' : 'var(--accent)'}; font-weight:bold; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
                   ${s.variantName}
                 </div>
-                <div style="font-size:11px; font-weight:bold; white-space:nowrap; flex-shrink:0;">
+                <div style="font-size:10.5px; font-weight:bold; white-space:nowrap; flex-shrink:0;">
                   ${shortage === 0 ? `
-                    <span style="color:#34d399; font-size:10px;">✨ 在庫充足</span>
+                    <span style="color:#10b981;">✨ 印刷完了 (全${printedTotal}個)</span>
                   ` : `
-                    <span style="color:#fff;">計画 ${planned}</span> / <span style="color:#f87171;">不足 ${shortage}</span>
+                    <span style="color:rgba(255,255,255,0.7);">印刷済 <strong style="color:#fff;">${printedTotal}</strong>/${totalReq}</span> <span style="color:#f87171; margin-left:3px;">不足 ${shortage}</span>
                   `}
                 </div>
               </div>
 
-              <!-- Row 3: 3-Segment Stacked Gauge (Image 2 style: Blue Stock, Green Planned, Red Unplanned) -->
+              <!-- Row 3: 4-Segment Stacked Gauge (Green: Ready, Orange: Finishing, Blue: Planned, Red: Unplanned) -->
               <div style="margin-top:6px; display:flex; height:8px; border-radius:4px; overflow:hidden; background:rgba(255,255,255,0.06); gap:2px;"
-                   title="内訳: 在庫 ${curStock}個 (${stockPct}%) / 計画済み ${planned}個 (${plannedPct}%) / 未計画 ${unplanned}個 (${unplannedPct}%)">
-                ${stockPct > 0 ? `<div style="background:#38bdf8; width:${stockPct}%; height:100%; border-radius:2px; transition:width 0.2s;" title="手元在庫: ${curStock}個"></div>` : ''}
-                ${plannedPct > 0 ? `<div style="background:#34d399; width:${plannedPct}%; height:100%; border-radius:2px; transition:width 0.2s;" title="製造計画済み: ${planned}個"></div>` : ''}
+                   title="内訳: 完成 ${curStock}個 (${stockPct}%) / 仕上げ待ち ${finishing}個 (${finishingPct}%) / 製造予定 ${planned}個 (${plannedPct}%) / 未計画 ${unplanned}個 (${unplannedPct}%)">
+                ${stockPct > 0 ? `<div style="background:#10b981; width:${stockPct}%; height:100%; border-radius:2px; transition:width 0.2s;" title="完成在庫: ${curStock}個"></div>` : ''}
+                ${finishingPct > 0 ? `<div style="background:#f59e0b; width:${finishingPct}%; height:100%; border-radius:2px; transition:width 0.2s;" title="仕上げ待ち: ${finishing}個"></div>` : ''}
+                ${plannedPct > 0 ? `<div style="background:#38bdf8; width:${plannedPct}%; height:100%; border-radius:2px; transition:width 0.2s;" title="製造予定: ${planned}個"></div>` : ''}
                 ${unplannedPct > 0 ? `<div style="background:#f87171; width:${unplannedPct}%; height:100%; border-radius:2px; transition:width 0.2s;" title="未計画: ${unplanned}個"></div>` : ''}
               </div>
 
-              <!-- Row 4: 3-Value Labels (Under Gauge) -->
-              <div style="display:flex; justify-content:space-between; align-items:center; margin-top:4px; font-size:10px; font-weight:bold;">
-                <span style="color:rgba(255,255,255,0.65);">在庫 <strong style="color:#38bdf8;">${curStock}</strong></span>
-                <span style="color:rgba(255,255,255,0.65);">計画済み <strong style="color:#34d399;">${planned}</strong></span>
-                <span style="color:${unplanned > 0 ? '#f87171' : 'rgba(255,255,255,0.45)'};">未計画 <strong style="color:${unplanned > 0 ? '#f87171' : '#34d399'};">${unplanned}</strong></span>
+              <!-- Row 4: 4-Value Labels (Under Gauge) -->
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-top:4px; font-size:9.5px; font-weight:bold;">
+                <span style="color:rgba(255,255,255,0.65);">完成 <strong style="color:#10b981;">${curStock}</strong></span>
+                <span style="color:rgba(255,255,255,0.65);">仕上待 <strong style="color:#f59e0b;">${finishing}</strong></span>
+                <span style="color:rgba(255,255,255,0.65);">予定 <strong style="color:#38bdf8;">${planned}</strong></span>
+                <span style="color:${unplanned > 0 ? '#f87171' : 'rgba(255,255,255,0.45)'};">未計画 <strong style="color:${unplanned > 0 ? '#f87171' : '#10b981'};">${unplanned}</strong></span>
               </div>
 
               <!-- Row 5: Unit Hours & Compatible Printers -->
@@ -11615,23 +11674,25 @@
             </div>
           </div>
 
-          <!-- 3-Segment Stacked Gauge in Job Inspector (Image 2 style) -->
+          <!-- 4-Segment Stacked Gauge in Job Inspector -->
           <div style="background:rgba(0,0,0,0.3); padding:9px 11px; border-radius:10px; border:1px solid rgba(255,255,255,0.06);">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px; font-size:11px;">
-              <span style="color:rgba(255,255,255,0.7); font-weight:bold;">📊 作品全体の計画進捗</span>
+              <span style="color:rgba(255,255,255,0.7); font-weight:bold;">📊 作品全体の制作進捗</span>
               <span style="font-weight:bold;">
-                ${skuInfo.shortage === 0 ? '<span style="color:#34d399;">✨ 在庫充足</span>' : `<span style="color:#fff;">計画 ${skuInfo.plannedQty}</span> / <span style="color:#f87171;">不足 ${skuInfo.shortage}</span>`}
+                <span style="color:#fff;">印刷済 ${skuInfo.printedTotal || ((skuInfo.currentStock || 0) + (skuInfo.finishingStock || 0))}</span> / <span>必要 ${skuInfo.totalReq}</span>
               </span>
             </div>
             <div style="display:flex; height:8px; border-radius:4px; overflow:hidden; background:rgba(255,255,255,0.06); gap:2px;">
-              <div style="background:#38bdf8; width:${Math.max(1, skuInfo.totalReq || 1) > 0 ? Math.min(100, Math.round((Math.min(skuInfo.totalReq || 1, skuInfo.currentStock || 0) / Math.max(1, skuInfo.totalReq || 1, (skuInfo.currentStock || 0) + skuInfo.plannedQty)) * 100)) : 100}%; height:100%; border-radius:2px;" title="手元在庫"></div>
-              <div style="background:#34d399; width:${Math.max(1, skuInfo.totalReq || 1) > 0 ? Math.min(100, Math.round((Math.min(skuInfo.shortage, skuInfo.plannedQty) / Math.max(1, skuInfo.totalReq || 1, (skuInfo.currentStock || 0) + skuInfo.plannedQty)) * 100)) : 0}%; height:100%; border-radius:2px;" title="計画済み"></div>
-              <div style="background:#f87171; width:${skuInfo.unplannedQty > 0 ? Math.max(0, 100 - Math.round(((Math.min(skuInfo.totalReq || 1, skuInfo.currentStock || 0) + Math.min(skuInfo.shortage, skuInfo.plannedQty)) / Math.max(1, skuInfo.totalReq || 1, (skuInfo.currentStock || 0) + skuInfo.plannedQty)) * 100)) : 0}%; height:100%; border-radius:2px;" title="未計画"></div>
+              <div style="background:#10b981; width:${Math.max(1, skuInfo.totalReq || 1) > 0 ? Math.min(100, Math.round(((skuInfo.currentStock || 0) / Math.max(1, skuInfo.totalReq || 1, (skuInfo.currentStock || 0) + (skuInfo.finishingStock || 0) + skuInfo.plannedQty)) * 100)) : 100}%; height:100%; border-radius:2px;" title="完成在庫: ${skuInfo.currentStock || 0}個"></div>
+              <div style="background:#f59e0b; width:${Math.max(1, skuInfo.totalReq || 1) > 0 ? Math.min(100, Math.round(((skuInfo.finishingStock || 0) / Math.max(1, skuInfo.totalReq || 1, (skuInfo.currentStock || 0) + (skuInfo.finishingStock || 0) + skuInfo.plannedQty)) * 100)) : 0}%; height:100%; border-radius:2px;" title="仕上げ待ち: ${skuInfo.finishingStock || 0}個"></div>
+              <div style="background:#38bdf8; width:${Math.max(1, skuInfo.totalReq || 1) > 0 ? Math.min(100, Math.round((Math.min(skuInfo.shortage, skuInfo.plannedQty) / Math.max(1, skuInfo.totalReq || 1, (skuInfo.currentStock || 0) + (skuInfo.finishingStock || 0) + skuInfo.plannedQty)) * 100)) : 0}%; height:100%; border-radius:2px;" title="製造予定: ${skuInfo.plannedQty}個"></div>
+              <div style="background:#f87171; width:${skuInfo.unplannedQty > 0 ? Math.max(0, 100 - Math.round((((skuInfo.currentStock || 0) + (skuInfo.finishingStock || 0) + Math.min(skuInfo.shortage, skuInfo.plannedQty)) / Math.max(1, skuInfo.totalReq || 1, (skuInfo.currentStock || 0) + (skuInfo.finishingStock || 0) + skuInfo.plannedQty)) * 100)) : 0}%; height:100%; border-radius:2px;" title="未計画: ${skuInfo.unplannedQty}個"></div>
             </div>
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-top:4px; font-size:10px; font-weight:bold;">
-              <span style="color:rgba(255,255,255,0.65);">在庫 <strong style="color:#38bdf8;">${skuInfo.currentStock || 0}</strong></span>
-              <span style="color:rgba(255,255,255,0.65);">計画済み <strong style="color:#34d399;">${skuInfo.plannedQty}</strong></span>
-              <span style="color:${skuInfo.unplannedQty > 0 ? '#f87171' : 'rgba(255,255,255,0.45)'};">未計画 <strong style="color:${skuInfo.unplannedQty > 0 ? '#f87171' : '#34d399'};">${skuInfo.unplannedQty}</strong></span>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-top:4px; font-size:9.5px; font-weight:bold;">
+              <span style="color:rgba(255,255,255,0.65);">完成 <strong style="color:#10b981;">${skuInfo.currentStock || 0}</strong></span>
+              <span style="color:rgba(255,255,255,0.65);">仕上待 <strong style="color:#f59e0b;">${skuInfo.finishingStock || 0}</strong></span>
+              <span style="color:rgba(255,255,255,0.65);">予定 <strong style="color:#38bdf8;">${skuInfo.plannedQty}</strong></span>
+              <span style="color:${skuInfo.unplannedQty > 0 ? '#f87171' : 'rgba(255,255,255,0.45)'};">未計画 <strong style="color:${skuInfo.unplannedQty > 0 ? '#f87171' : '#10b981'};">${skuInfo.unplannedQty}</strong></span>
             </div>
           </div>
 
@@ -11736,9 +11797,18 @@
           <!-- Complete -> Stock Conversion & Delete Buttons -->
           <div style="display:flex; flex-direction:column; gap:8px; margin-top:2px;">
             ${activeJob.status !== 'completed' ? `
-              <button type="button" onclick="completeMfgJobAndAddStock('${activeJob.id}')" style="width:100%; padding:10px; border:none; border-radius:8px; background:linear-gradient(90deg, #10b981, #059669); color:#fff; font-weight:bold; font-size:13px; cursor:pointer; box-shadow:0 4px 12px rgba(16,185,129,0.3);">
-                ✅ 印刷完了 → 在庫に反映 (+${activeJob.qty}個 / ${refEvLabel})
-              </button>
+              <!-- 2-Step Completion Workflow: Finishing WIP vs Direct Finished Stock -->
+              <div style="display:flex; flex-direction:column; gap:7px;">
+                <button type="button" onclick="completeMfgJobAndAddStock('${activeJob.id}', 'finishing')"
+                        style="width:100%; padding:10px; border:none; border-radius:8px; background:linear-gradient(90deg, #f59e0b, #d97706); color:#fff; font-weight:bold; font-size:12.5px; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:6px; box-shadow:0 4px 14px rgba(245,158,11,0.35);">
+                  <span>🟠 印刷完了 ➔ 仕上げ待ちへ (+${activeJob.qty}個)</span>
+                </button>
+                <button type="button" onclick="completeMfgJobAndAddStock('${activeJob.id}', 'stock')"
+                        style="width:100%; padding:8px; border:1px solid rgba(16,185,129,0.45); border-radius:8px; background:rgba(16,185,129,0.12); color:#34d399; font-weight:bold; font-size:11.5px; cursor:pointer;"
+                        title="バリ取りや研磨が不要で、すぐに販売可能な状態の場合はこちら">
+                  <span>🟢 印刷完了 ➔ 直に完成在庫へ (+${activeJob.qty}個)</span>
+                </button>
+              </div>
             ` : `
               <div style="text-align:center; padding:8px; border-radius:8px; background:rgba(16,185,129,0.15); border:1px solid rgba(16,185,129,0.4); color:#34d399; font-size:12px; font-weight:bold;">
                 ✔ この製造予定は完了済みです
@@ -11781,25 +11851,41 @@
             </div>
           </div>
 
-          <!-- 3-Segment Stacked Gauge in Inspector (Image 2 style) -->
+          <!-- 4-Segment Stacked Gauge in SKU Inspector -->
           <div style="background:rgba(0,0,0,0.3); padding:10px; border-radius:10px; border:1px solid rgba(255,255,255,0.06);">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px; font-size:11px;">
-              <span style="color:rgba(255,255,255,0.7); font-weight:bold;">📊 作品全体の計画進捗</span>
+              <span style="color:rgba(255,255,255,0.7); font-weight:bold;">📊 制作・印刷の進捗状況</span>
               <span style="font-weight:bold;">
-                ${selSku.shortage === 0 ? '<span style="color:#34d399;">✨ 在庫充足</span>' : `<span style="color:#fff;">計画 ${selSku.plannedQty}</span> / <span style="color:#f87171;">不足 ${selSku.shortage}</span>`}
+                <span style="color:#fff;">印刷済 ${selSku.printedTotal || (selSku.currentStock + (selSku.finishingStock || 0))}</span> / <span>必要 ${selSku.totalReq}個</span>
               </span>
             </div>
             <div style="display:flex; height:8px; border-radius:4px; overflow:hidden; background:rgba(255,255,255,0.06); gap:2px;">
-              <div style="background:#38bdf8; width:${Math.max(1, selSku.totalReq) > 0 ? Math.min(100, Math.round((Math.min(selSku.totalReq, selSku.currentStock) / Math.max(1, selSku.totalReq, selSku.currentStock + selSku.plannedQty)) * 100)) : 100}%; height:100%; border-radius:2px;" title="手元在庫: ${selSku.currentStock}個"></div>
-              <div style="background:#34d399; width:${Math.max(1, selSku.totalReq) > 0 ? Math.min(100, Math.round((Math.min(selSku.shortage, selSku.plannedQty) / Math.max(1, selSku.totalReq, selSku.currentStock + selSku.plannedQty)) * 100)) : 0}%; height:100%; border-radius:2px;" title="計画済み: ${selSku.plannedQty}個"></div>
-              <div style="background:#f87171; width:${selSku.unplannedQty > 0 ? Math.max(0, 100 - Math.round(((Math.min(selSku.totalReq, selSku.currentStock) + Math.min(selSku.shortage, selSku.plannedQty)) / Math.max(1, selSku.totalReq, selSku.currentStock + selSku.plannedQty)) * 100)) : 0}%; height:100%; border-radius:2px;" title="未計画: ${selSku.unplannedQty}個"></div>
+              <div style="background:#10b981; width:${Math.max(1, selSku.totalReq) > 0 ? Math.min(100, Math.round((selSku.currentStock / Math.max(1, selSku.totalReq, selSku.currentStock + (selSku.finishingStock || 0) + selSku.plannedQty)) * 100)) : 100}%; height:100%; border-radius:2px;" title="完成在庫: ${selSku.currentStock}個"></div>
+              <div style="background:#f59e0b; width:${Math.max(1, selSku.totalReq) > 0 ? Math.min(100, Math.round(((selSku.finishingStock || 0) / Math.max(1, selSku.totalReq, selSku.currentStock + (selSku.finishingStock || 0) + selSku.plannedQty)) * 100)) : 0}%; height:100%; border-radius:2px;" title="仕上げ待ち: ${selSku.finishingStock || 0}個"></div>
+              <div style="background:#38bdf8; width:${Math.max(1, selSku.totalReq) > 0 ? Math.min(100, Math.round((Math.min(selSku.shortage, selSku.plannedQty) / Math.max(1, selSku.totalReq, selSku.currentStock + (selSku.finishingStock || 0) + selSku.plannedQty)) * 100)) : 0}%; height:100%; border-radius:2px;" title="製造予定: ${selSku.plannedQty}個"></div>
+              <div style="background:#f87171; width:${selSku.unplannedQty > 0 ? Math.max(0, 100 - Math.round(((selSku.currentStock + (selSku.finishingStock || 0) + Math.min(selSku.shortage, selSku.plannedQty)) / Math.max(1, selSku.totalReq, selSku.currentStock + (selSku.finishingStock || 0) + selSku.plannedQty)) * 100)) : 0}%; height:100%; border-radius:2px;" title="未計画: ${selSku.unplannedQty}個"></div>
             </div>
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-top:5px; font-size:10px; font-weight:bold;">
-              <span style="color:rgba(255,255,255,0.65);">在庫 <strong style="color:#38bdf8;">${selSku.currentStock}</strong></span>
-              <span style="color:rgba(255,255,255,0.65);">計画済み <strong style="color:#34d399;">${selSku.plannedQty}</strong></span>
-              <span style="color:${selSku.unplannedQty > 0 ? '#f87171' : 'rgba(255,255,255,0.45)'};">未計画 <strong style="color:${selSku.unplannedQty > 0 ? '#f87171' : '#34d399'};">${selSku.unplannedQty}</strong></span>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-top:5px; font-size:9.5px; font-weight:bold;">
+              <span style="color:rgba(255,255,255,0.65);">完成 <strong style="color:#10b981;">${selSku.currentStock}</strong></span>
+              <span style="color:rgba(255,255,255,0.65);">仕上待 <strong style="color:#f59e0b;">${selSku.finishingStock || 0}</strong></span>
+              <span style="color:rgba(255,255,255,0.65);">予定 <strong style="color:#38bdf8;">${selSku.plannedQty}</strong></span>
+              <span style="color:${selSku.unplannedQty > 0 ? '#f87171' : 'rgba(255,255,255,0.45)'};">未計画 <strong style="color:${selSku.unplannedQty > 0 ? '#f87171' : '#10b981'};">${selSku.unplannedQty}</strong></span>
             </div>
           </div>
+
+          ${(selSku.finishingStock || 0) > 0 ? `
+            <!-- Finishing Work In Progress Banner & Action -->
+            <div style="background:rgba(245,158,11,0.12); border:1px solid rgba(245,158,11,0.35); border-radius:8px; padding:10px; display:flex; justify-content:space-between; align-items:center;">
+              <div>
+                <div style="font-size:12px; font-weight:bold; color:#fbbf24;">⏳ 仕上げ待ち: ${selSku.finishingStock}個</div>
+                <div style="font-size:9.5px; color:rgba(255,255,255,0.6); margin-top:1px;">バリ取り・研磨が完了したら在庫へ移動</div>
+              </div>
+              <button type="button" onclick="quickCompleteFinishing('${selSku.skuId}')"
+                      style="background:#f59e0b; color:#000; border:none; padding:6px 12px; border-radius:6px; font-weight:bold; font-size:11.5px; cursor:pointer;">
+                ✨ 仕上げ完了 ➔ 在庫へ
+              </button>
+            </div>
+          ` : ''}
 
           <!-- Master Spec: Unit Hours & Compatible Printers -->
           <div style="background:rgba(0,0,0,0.28); border:1px solid rgba(255,255,255,0.07); border-radius:10px; padding:12px; display:flex; flex-direction:column; gap:10px;">
@@ -12066,8 +12152,8 @@
       window.renderProductionPlans();
     };
 
-    // ✅ Complete a scheduled print job AND automatically add its quantity to actual stock (Zero double-counting!)
-    window.completeMfgJobAndAddStock = async (jobId) => {
+    // ✅ Complete a scheduled print job AND automatically add its quantity to finishing WIP or finished stock (Zero double-counting!)
+    window.completeMfgJobAndAddStock = async (jobId, targetMode = 'finishing') => {
       if (!auth.currentUser) return alert("ログインが必要です");
       const raw = window.productionPlansData && window.productionPlansData[jobId];
       if (!raw) return;
@@ -12084,14 +12170,25 @@
       const skuObj = parsed.skuObj;
       const allMaster = window.getFullMasterProducts ? window.getFullMasterProducts(window.customProductsData) : MASTER_PRODUCTS;
       const pName = allMaster.find(x => x.id === parentId)?.name || parentId;
-      const displayLabel = skuObj ? `${pName.replace(/\n/g, ' ')} (${skuObj.name})` : pName.replace(/\n/g, ' ');
+      const displayLabel = skuObj ? `${pName.replace(/
+/g, ' ')} (${skuObj.name})` : pName.replace(/
+/g, ' ');
 
-      if (!confirm(`【印刷完了 → 在庫への自動反映】
-「${displayLabel}」× ${qty}個 を完成として記録し、「${evLabel}」の現在庫に +${qty}個 追加しますか？
+      const isFinishing = (targetMode === 'finishing');
+      const confirmMsg = isFinishing
+        ? `【印刷完了 ➔ 仕上げ待ちへ登録】
+「${displayLabel}」× ${qty}個 の印刷完了を記録し、
+「${evLabel}」の【仕上げ待ち】に +${qty}個 登録しますか？
 
-※製造計画は「完了」となり、未完の計画済み数から自動で外れるため二重計上されません。`)) {
-        return;
-      }
+※バリ取りや研磨・組立が完了したら、ワンクリックで完成在庫へ移動できます。
+※製造計画は完了となり、二重計上されません。`
+        : `【印刷完了 ➔ 直に完成在庫へ反映】
+「${displayLabel}」× ${qty}個 を完成として記録し、
+「${evLabel}」の【完成在庫】に +${qty}個 追加しますか？
+
+※製造計画は完了となり、二重計上されません。`;
+
+      if (!confirm(confirmMsg)) return;
 
       try {
         // 1. Update stock in targetEvKey
@@ -12100,15 +12197,37 @@
           : (multiAggInvCache[targetEvKey] || {});
         const oldInv = skuObj
           ? window.getSkuInventory(sourceInvMap, parentId, skuObj)
-          : (sourceInvMap[targetId] || { price: 0, initial: 0, current: 0 });
+          : (sourceInvMap[targetId] || { price: 0, initial: 0, current: 0, finishing: 0 });
 
-        const newInitial = Math.max(0, (oldInv.initial || 0) + qty);
-        const newCurrent = Math.max(0, (oldInv.current || 0) + qty);
         const newInventory = { ...sourceInvMap };
-        newInventory[targetId] = { price: oldInv.price, initial: newInitial, current: newCurrent };
+        if (isFinishing) {
+          const newFinishing = Math.max(0, (Number(oldInv.finishing) || 0) + qty);
+          newInventory[targetId] = {
+            price: oldInv.price,
+            initial: oldInv.initial || 0,
+            current: oldInv.current || 0,
+            finishing: newFinishing
+          };
+        } else {
+          const newInitial = Math.max(0, (oldInv.initial || 0) + qty);
+          const newCurrent = Math.max(0, (oldInv.current || 0) + qty);
+          const oldFinishing = Number(oldInv.finishing) || 0;
+          newInventory[targetId] = {
+            price: oldInv.price,
+            initial: newInitial,
+            current: newCurrent,
+            finishing: oldFinishing
+          };
+        }
+
         if (skuObj) {
           const sumInv = window.getParentInventorySummary(newInventory, parentId);
-          newInventory[parentId] = { price: sumInv.price, initial: sumInv.initial, current: sumInv.current };
+          newInventory[parentId] = {
+            price: sumInv.price,
+            initial: sumInv.initial,
+            current: sumInv.current,
+            finishing: sumInv.finishing
+          };
         }
 
         multiAggInvCache[targetEvKey] = newInventory;
@@ -12126,7 +12245,9 @@
           parentId: parentId,
           productName: displayLabel,
           qty: qty,
-          reason: `追加制作 (${prName} ${raw.date} 完了)`
+          reason: isFinishing
+            ? `印刷完了 (仕上げ待ちへ +${qty}個: ${prName} ${raw.date})`
+            : `印刷完了 (直納完成在庫へ +${qty}個: ${prName} ${raw.date})`
         };
         try {
           await updateDoc(logDocRef, { records: arrayUnion(logRecord) });
@@ -12139,6 +12260,7 @@
         updatedPlans[jobId] = {
           ...raw,
           status: 'completed',
+          completionMode: isFinishing ? 'finishing' : 'stock',
           completedAt: Date.now(),
           updatedAt: Date.now()
         };
@@ -12152,6 +12274,105 @@
         alert("完了反映中にエラーが発生しました: " + e.message);
       }
     };
+
+    // ✨ Quick Move Finishing WIP to Finished Saleable Stock
+    window.quickCompleteFinishing = async (skuId, explicitQty = null) => {
+      if (!auth.currentUser) return alert("ログインが必要です");
+      const targetEvKey = multiAggStockSourceEvent || currentEventKey;
+      const allEvents = window.getAllEvents ? window.getAllEvents(eventConfigData) : {};
+      const evLabel = allEvents[targetEvKey]?.label || targetEvKey;
+
+      const parsed = window.parseSkuId ? window.parseSkuId(skuId) : { parentId: skuId, skuObj: null };
+      const parentId = parsed.parentId || skuId;
+      const skuObj = parsed.skuObj;
+      const allMaster = window.getFullMasterProducts ? window.getFullMasterProducts(window.customProductsData) : MASTER_PRODUCTS;
+      const pName = allMaster.find(x => x.id === parentId)?.name || parentId;
+      const displayLabel = skuObj ? `${pName.replace(/
+/g, ' ')} (${skuObj.name})` : pName.replace(/
+/g, ' ');
+
+      const sourceInvMap = (targetEvKey === currentEventKey)
+        ? inventoryData
+        : (multiAggInvCache[targetEvKey] || {});
+      const oldInv = skuObj
+        ? window.getSkuInventory(sourceInvMap, parentId, skuObj)
+        : (sourceInvMap[skuId] || { price: 0, initial: 0, current: 0, finishing: 0 });
+
+      const currentFinishing = Number(oldInv.finishing) || 0;
+      if (currentFinishing <= 0) {
+        return alert(`「${displayLabel}」に仕上げ待ちの在庫はありません。`);
+      }
+
+      let moveQty = currentFinishing;
+      if (explicitQty === null) {
+        const input = prompt(
+          `【仕上げ作業完了 ➔ 完成在庫へ移動】
+作品: 「${displayLabel}」
+現在仕上げ待ち: ${currentFinishing}個
+
+仕上げ作業（バリ取り・研磨・組立など）が完了し、完成在庫へ移動する数量を入力してください:`,
+          `${currentFinishing}`
+        );
+        if (input === null) return;
+        moveQty = parseInt(input);
+        if (isNaN(moveQty) || moveQty <= 0) return alert("1以上の有効な数量を入力してください。");
+        if (moveQty > currentFinishing) return alert(`仕上げ待ち数量（${currentFinishing}個）以下の数値を入力してください。`);
+      } else {
+        moveQty = Math.min(currentFinishing, Math.max(1, parseInt(explicitQty) || 1));
+      }
+
+      try {
+        const newFinishing = Math.max(0, currentFinishing - moveQty);
+        const newCurrent = Math.max(0, (oldInv.current || 0) + moveQty);
+        const newInitial = Math.max(0, (oldInv.initial || 0) + moveQty);
+
+        const newInventory = { ...sourceInvMap };
+        newInventory[skuId] = {
+          price: oldInv.price,
+          initial: newInitial,
+          current: newCurrent,
+          finishing: newFinishing
+        };
+
+        if (skuObj) {
+          const sumInv = window.getParentInventorySummary(newInventory, parentId);
+          newInventory[parentId] = {
+            price: sumInv.price,
+            initial: sumInv.initial,
+            current: sumInv.current,
+            finishing: sumInv.finishing
+          };
+        }
+
+        multiAggInvCache[targetEvKey] = newInventory;
+        if (targetEvKey === currentEventKey) inventoryData = newInventory;
+        await setDoc(doc(db, "settings", "inventory_" + targetEvKey), newInventory);
+
+        // Record Inventory Log
+        const logDocRef = doc(db, "settings", "inventory_log_" + targetEvKey);
+        const logRecord = {
+          timestamp: new Date().toISOString(),
+          type: 'adjust',
+          productId: skuId,
+          parentId: parentId,
+          productName: displayLabel,
+          qty: moveQty,
+          reason: `仕上げ作業完了 (仕上げ待ち -${moveQty}個 ➔ 完成在庫 +${moveQty}個)`
+        };
+        try {
+          await updateDoc(logDocRef, { records: arrayUnion(logRecord) });
+        } catch(e) {
+          await setDoc(logDocRef, { records: [logRecord] });
+        }
+
+        await window.renderMultiEventAggregation();
+        await window.renderProductionPlans();
+      } catch(e) {
+        console.error(e);
+        alert("仕上げ完了の反映中にエラーが発生しました: " + e.message);
+      }
+    };
+
 
     // Mode B: Printer Allocation Matrix View (Image 2 style: SKU rows x 4 Printer columns)
     function renderMfgMatrixView(skuList, printers, allJobs, dateList) {
