@@ -412,7 +412,7 @@
     }
     .mfg-printer-grid {
       display: grid;
-      grid-template-columns: repeat(4, minmax(220px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
       gap: 12px;
     }
     .mfg-printer-card {
@@ -1805,7 +1805,7 @@
         <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:14px;">
           <div style="display:flex; background:rgba(0,0,0,0.35); border-radius:8px; padding:4px; width:fit-content; flex-wrap:wrap; gap:4px; border:1px solid rgba(255,255,255,0.08);">
             <button class="btn settings-subtab-btn active" id="btn-settings-subtab-multi-agg" onclick="switchSettingsSubTab('multi-agg')" style="padding:7px 16px; font-size:12px; font-weight:bold; background:var(--accent); color:#000; border-radius:6px;">📊 イベント制作状況・在庫一覧</button>
-            <button class="btn settings-subtab-btn" id="btn-settings-subtab-production" onclick="switchSettingsSubTab('production')" style="padding:7px 16px; font-size:12px; color:#fff; background:none; border-radius:6px;">🗓️ 製造計画ボード (3Dプリンター)</button>
+            <button class="btn settings-subtab-btn" id="btn-settings-subtab-production" onclick="switchSettingsSubTab('production')" style="padding:7px 16px; font-size:12px; color:#fff; background:none; border-radius:6px;">🗓️ 制作・製造計画ボード (プリンター ＆ 手作業)</button>
             <button class="btn settings-subtab-btn" id="btn-settings-subtab-stock" onclick="switchSettingsSubTab('stock')" style="padding:7px 16px; font-size:12px; color:#fff; background:none; border-radius:6px;">🃏 従来カード表示</button>
           </div>
 
@@ -1995,7 +1995,7 @@
                 <button type="button" id="btn-mfg-mode-legacy" onclick="switchMfgBoardMode('legacy')" style="padding:6px 14px; font-size:12px; color:rgba(255,255,255,0.75); background:none; border:none; border-radius:6px; cursor:pointer;">🕒 従来チャート</button>
               </div>
               <button type="button" onclick="openMfgPrinterSettingsModal()" style="background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.16); color:#ddd; font-size:11px; font-weight:bold; padding:6px 12px; border-radius:8px; cursor:pointer;">
-                ⚙️ プリンター・稼働時間設定
+                ⚙️ プリンター・制作ライン設定
               </button>
             </div>
 
@@ -2064,7 +2064,7 @@
                     <option value="all">全シリーズ</option>
                   </select>
                   <select id="mfg-left-printer" onchange="renderProductionPlans()" class="form-select" style="font-size:11px; padding:4px 6px; background:#0d0f17;">
-                    <option value="all">全プリンター対応</option>
+                    <option value="all">全ライン（プリンター＆手作業）</option>
                   </select>
                 </div>
                 <input type="text" id="mfg-left-search" oninput="renderProductionPlans()" class="form-input" placeholder="🔍 作品名・バリエーション検索..." style="font-size:11px; padding:5px 8px; background:#0d0f17;">
@@ -10117,7 +10117,8 @@
       { id: 'mini1', name: 'Bambu A1 mini 1号機', shortName: 'mini 1号機', type: 'fdm', defaultHours: 12.0, weekendHours: 12.0, dateOverrides: {}, color: '#3b82f6', icon: '🖨️', active: true },
       { id: 'mini2', name: 'Bambu A1 mini 2号機', shortName: 'mini 2号機', type: 'fdm', defaultHours: 12.0, weekendHours: 12.0, dateOverrides: {}, color: '#06b6d4', icon: '🖨️', active: true },
       { id: 'creator5', name: 'FlashForge Creator5', shortName: 'Creator5', type: 'fdm', defaultHours: 12.0, weekendHours: 12.0, dateOverrides: {}, color: '#a855f7', icon: '⚡', active: true },
-      { id: 'resin1', name: '光造形プリンター', shortName: '光造形', type: 'resin', defaultHours: 8.0, weekendHours: 8.0, dateOverrides: {}, color: '#f59e0b', icon: '🧪', active: true }
+      { id: 'resin1', name: '光造形プリンター', shortName: '光造形', type: 'resin', defaultHours: 8.0, weekendHours: 8.0, dateOverrides: {}, color: '#f59e0b', icon: '🧪', active: true },
+      { id: 'cement', name: '手作業・セメント成型', shortName: 'セメント成型', type: 'manual', defaultHours: 3.0, weekendHours: 5.0, dateOverrides: {}, color: '#10b981', icon: '🏺', active: true }
     ];
 
     let mfgBoardMode = 'daily'; // 'daily' | 'matrix' | 'legacy'
@@ -10153,7 +10154,18 @@
       const raw = window.productionPlansData && Array.isArray(window.productionPlansData._printers)
         ? window.productionPlansData._printers
         : null;
-      const list = (raw && raw.length > 0) ? raw : DEFAULT_MFG_PRINTERS;
+      let list = [];
+      if (raw && raw.length > 0) {
+        list = [...raw];
+        // Ensure default lines like 'cement' are present if not already added
+        DEFAULT_MFG_PRINTERS.forEach(defPr => {
+          if (!list.some(p => p.id === defPr.id)) {
+            list.push(defPr);
+          }
+        });
+      } else {
+        list = [...DEFAULT_MFG_PRINTERS];
+      }
       return includeInactive ? list : list.filter(p => p.active !== false);
     };
 
@@ -10173,18 +10185,25 @@
     window.getMfgSkuSpec = (skuId, parentId, parentName = '') => {
       const specs = (window.productionPlansData && window.productionPlansData._specs) || {};
       const sEntry = specs[skuId] || specs[parentId] || {};
-      const defaultUnitHours = sEntry.unitHours !== undefined ? Number(sEntry.unitHours) : 2.5;
       let defaultPrinters = Array.isArray(sEntry.printers) && sEntry.printers.length > 0 ? sEntry.printers : null;
+      const lower = (parentName || '').toLowerCase();
+      const isCementWork = lower.includes('一輪挿し') || lower.includes('一輪差し') ||
+                           lower.includes('黄昏') || lower.includes('内省') ||
+                           lower.includes('内政') || lower.includes('セメント') || lower.includes('モルタル');
       if (!defaultPrinters) {
-        const lower = (parentName || '').toLowerCase();
-        if (lower.includes('レジン') || lower.includes('robo') || lower.includes('ロボ') || lower.includes('エレク')) {
+        if (isCementWork) {
+          defaultPrinters = ['cement'];
+        } else if (lower.includes('レジン') || lower.includes('robo') || lower.includes('ロボ') || lower.includes('エレク')) {
           defaultPrinters = ['mini1', 'mini2', 'creator5', 'resin1'];
         } else {
           defaultPrinters = ['mini1', 'mini2', 'creator5'];
         }
       }
+      const isManualCement = defaultPrinters && defaultPrinters.includes('cement') && defaultPrinters.length === 1;
+      const fallbackHours = isManualCement ? 0.8 : 2.5;
+      const defaultUnitHours = sEntry.unitHours !== undefined ? Number(sEntry.unitHours) : fallbackHours;
       return {
-        unitHours: defaultUnitHours > 0 ? defaultUnitHours : 2.5,
+        unitHours: defaultUnitHours > 0 ? defaultUnitHours : fallbackHours,
         printers: defaultPrinters,
         printerUnitHours: sEntry.printerUnitHours || {}
       };
@@ -10825,7 +10844,7 @@
                   <span style="font-size:11px; color:${isOver ? '#f87171' : '#34d399'}; font-weight:bold;">本日の予定 ${todayUsed.toFixed(1)}h</span>
                 </div>
                 <div style="display:flex; justify-content:space-between; align-items:center; font-size:10px; color:rgba(255,255,255,0.55); margin:3px 0 5px 0;">
-                  <span style="color:#34d399;">● 稼働中 (${todayCap.toFixed(1)}h/日)</span>
+                  <span style="color:#34d399;">● ${pr.type === 'manual' ? '作業可能' : '稼働中'} (${todayCap.toFixed(1)}h/日)</span>
                   <span>${isOver ? `<strong style="color:#f87171;">⚠️ +${(todayUsed - todayCap).toFixed(1)}h 超過</strong>` : `残り <strong style="color:#fff;">${todayRemain.toFixed(1)}h</strong> (${todayPct}%)`}</span>
                 </div>
                 <div style="background:rgba(255,255,255,0.08); height:6px; border-radius:4px; overflow:hidden;">
@@ -10849,7 +10868,7 @@
       const leftPrinterEl = document.getElementById('mfg-left-printer');
       if (leftPrinterEl) {
         const curP = leftPrinterEl.value || 'all';
-        leftPrinterEl.innerHTML = `<option value="all">全プリンター対応</option>` +
+        leftPrinterEl.innerHTML = `<option value="all">全ライン（プリンター＆手作業）</option>` +
           printers.map(pr => `<option value="${pr.id}" ${pr.id === curP ? 'selected' : ''}>${pr.shortName || pr.name}</option>`).join('');
       }
 
@@ -11229,7 +11248,7 @@
                 <div style="min-width:0;">
                   <div style="font-size:12px; font-weight:bold; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${pr.shortName || pr.name}</div>
                   <div style="font-size:10px; color:rgba(255,255,255,0.5);">${pr.defaultHours}h / 日</div>
-                  <div style="font-size:10px; color:#34d399; margin-top:2px;">● 稼働中</div>
+                  <div style="font-size:10px; color:#34d399; margin-top:2px;">${pr.type === 'manual' ? '● 手作業ライン' : '● 稼働中'}</div>
                 </div>
               </div>
             </td>
@@ -11246,7 +11265,7 @@
           <thead>
             <tr>
               <th style="width:128px; position:sticky; left:0; z-index:15; background:#10131d; vertical-align:middle;">
-                <div style="font-size:12px; color:rgba(255,255,255,0.7); font-weight:bold;">プリンター</div>
+                <div style="font-size:12px; color:rgba(255,255,255,0.7); font-weight:bold;">制作ライン / プリンター</div>
               </th>
               ${dateHeaderCols}
               <th style="width:74px; text-align:right; vertical-align:middle;">
