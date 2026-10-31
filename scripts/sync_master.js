@@ -99,7 +99,7 @@ async function main() {
   const productKeys = Array.from(new Set([
     ...Object.keys(customProducts),
     ...Object.keys(worksMaster)
-  ]));
+  ])).filter(k => k && !k.startsWith('dev_') && !k.startsWith('temp_') && !/^\d+$/.test(k));
 
   console.log(`   → 対象作品ID数: ${productKeys.length}件\n`);
 

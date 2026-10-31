@@ -32,7 +32,7 @@ function checkAndSync() {
       try {
         const json = JSON.parse(body);
         const fields = json.fields || {};
-        const remoteIds = Object.keys(fields);
+        const remoteIds = Object.keys(fields).filter(k => k && !k.startsWith('dev_') && !k.startsWith('temp_') && !/^\d+$/.test(k));
 
         // ローカルに存在しないフォルダがあるかチェック
         let hasNew = false;
