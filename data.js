@@ -613,6 +613,8 @@ window.getFullMasterProducts = function(customProductsData) {
   
   if (customProductsData) {
     Object.keys(customProductsData).forEach(key => {
+      // 不正なメタデータキー（ドット付きなど）やオブジェクトでないものは除外
+      if (key.includes('.') || !customProductsData[key] || typeof customProductsData[key] !== 'object') return;
       const p = customProductsData[key];
       const normalize = (s) => s ? s.replace(/\s+/g, '').replace(/\n/g, '') : '';
       const masterItem = list.find(m => {

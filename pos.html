@@ -2921,7 +2921,22 @@
         });
         window.customProductsData = {}; // Restore customProductsData definition
         onSnapshot(doc(db, "settings", "custom_products"), (snap) => {
-          if (snap.exists()) window.customProductsData = snap.data();
+          if (snap.exists()) {
+            const raw = snap.data() || {};
+            const cleaned = {};
+            let hasCorrupt = false;
+            for (const k of Object.keys(raw)) {
+              if (k.includes('.')) {
+                hasCorrupt = true;
+              } else {
+                cleaned[k] = raw[k];
+              }
+            }
+            window.customProductsData = cleaned;
+            if (hasCorrupt) {
+              setDoc(doc(db, "settings", "custom_products"), cleaned).catch(e => console.warn(e));
+            }
+          }
           renderAll();
         });
         onSnapshot(doc(db, "settings", "topics_master"), (snap) => {
@@ -14054,18 +14069,35 @@
         });
         if (currentBackups.length > 5) currentBackups = currentBackups.slice(-5);
 
-        const updateObj = {};
-        updateObj[`${pId}.image`] = mainImg;
-        updateObj[`${pId}.images`] = subImgs;
-        updateObj[`${pId}.optimizedCover`] = optimizedMain || mainImg;
-        updateObj[`${pId}.optimizedImages`] = optimizedSubs;
-        updateObj[`${pId}.imageBackups`] = currentBackups;
-        updateObj[`${pId}.updatedAt`] = Date.now();
+        // ネスト構造を正しく更新（ドット付きの不正キーは完全除去）
+        const cpData = { ...window.customProductsData };
+        Object.keys(cpData).forEach(k => { if (k.includes('.')) delete cpData[k]; });
+        if (!cpData[pId]) cpData[pId] = {};
+        Object.assign(cpData[pId], {
+          image: mainImg,
+          images: subImgs,
+          optimizedCover: optimizedMain || mainImg,
+          optimizedImages: optimizedSubs,
+          imageBackups: currentBackups,
+          updatedAt: Date.now()
+        });
 
-        // Firebase v9+ setDoc with merge: true
+        const wmData = { ...window.worksMasterData };
+        Object.keys(wmData).forEach(k => { if (k.includes('.')) delete wmData[k]; });
+        if (!wmData[pId]) wmData[pId] = {};
+        Object.assign(wmData[pId], {
+          image: mainImg,
+          images: subImgs,
+          optimizedCover: optimizedMain || mainImg,
+          optimizedImages: optimizedSubs,
+          imageBackups: currentBackups,
+          updatedAt: Date.now()
+        });
+
+        // 丸ごと setDoc で安全にクラウド保存
         await Promise.all([
-          setDoc(doc(targetDb, 'settings', 'custom_products'), updateObj, { merge: true }),
-          setDoc(doc(targetDb, 'settings', 'works_master'), updateObj, { merge: true })
+          setDoc(doc(targetDb, 'settings', 'custom_products'), cpData),
+          setDoc(doc(targetDb, 'settings', 'works_master'), wmData)
         ]);
 
         if (window.customProductsData && window.customProductsData[pId]) {
