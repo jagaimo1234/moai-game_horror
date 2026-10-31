@@ -679,7 +679,9 @@
 
     // ============================================================
 
-    let currentEventKey = DEFAULT_EVENT;
+    // URLパラメータでイベント指定があれば取得 (?event=...)。無ければデザフェスをデフォルトにする
+    const urlEventParam = new URLSearchParams(window.location.search).get('event');
+    let currentEventKey = urlEventParam || DEFAULT_EVENT;
     let currentSlide = 0;
     window.eventProductsData = {};
     window.eventConfigData = {};
@@ -1333,19 +1335,23 @@
     // Listen to event config (visibility)
     onSnapshot(doc(db, "settings", "event_config"), (docSnap) => {
       if (docSnap.exists()) window.eventConfigData = docSnap.data();
-      buildTabs();
+      const allEvents = window.getAllEvents(window.eventConfigData);
       
-      // If current event becomes invisible, switch to default or first visible
+      // If current event becomes invisible or not found, switch to public Design Festa or DEFAULT_EVENT
       const config = window.eventConfigData[currentEventKey];
-      let status = 'public';
+      let status = allEvents[currentEventKey]?.defaultStatus || 'public';
       if (config) {
         if (config.status) status = config.status;
         else if (config.visible === false) status = 'hidden';
       }
       
-      if (status === 'hidden' && !IS_PREVIEW_MODE) {
-        switchEvent(DEFAULT_EVENT);
+      if ((status === 'hidden' || !allEvents[currentEventKey]) && !IS_PREVIEW_MODE) {
+        const targetDf = (allEvents['designfesta64'] && window.eventConfigData['designfesta64']?.status !== 'hidden')
+          ? 'designfesta64'
+          : ((allEvents['designfesta'] && window.eventConfigData['designfesta']?.status !== 'hidden') ? 'designfesta' : DEFAULT_EVENT);
+        switchEvent(targetDf);
       } else {
+        buildTabs();
         buildViews();
       }
     });
