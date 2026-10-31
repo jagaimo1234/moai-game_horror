@@ -8809,7 +8809,7 @@
               <span>有効</span>
             </label>
             ${baseBadge}
-            <input type="text" id="var-draft-name-${idx}" class="form-input" value="${v.name.replace(/"/g, '&quot;')}" placeholder="バリエーション名 (例: U字タンクトップ・白)" style="flex:1; min-width:150px; font-size:13px; padding:6px 8px; font-weight:bold;">
+            <input type="text" id="var-draft-name-${idx}" class="form-input" value="${(v.name || '').replace(/"/g, '&quot;')}" placeholder="バリエーション名 (例: U字タンクトップ・白)" style="flex:1; min-width:150px; font-size:13px; padding:6px 8px; font-weight:bold;">
             <input type="number" id="var-draft-price-${idx}" class="form-input" value="${v.priceOverride || ''}" placeholder="親価格と同じ" style="width:95px; font-size:12px; padding:6px 8px; text-align:right;" title="空欄の場合は親商品の価格が適用されます">
             <input type="text" id="var-draft-note-${idx}" class="form-input" value="${(v.statusNote || '').replace(/"/g, '&quot;')}" placeholder="メモ(検討中など)" style="width:105px; font-size:11px; padding:6px 8px;">
             <div style="display:flex; gap:4px;">

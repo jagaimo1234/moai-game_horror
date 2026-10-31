@@ -23,7 +23,16 @@ const MASTER_PRODUCTS = [
   },
 
   {
-    image: 'images/kurima/dot_osuwari_keyholder.jpg',
+    image: 'images/kurima/dot_osuwari_keyholder/cover.jpg',
+    images: [
+      'images/kurima/dot_osuwari_keyholder/cover.jpg',
+      'images/kurima/dot_osuwari_keyholder.jpg',
+      'images/kurima/dot_osuwari_keyholder/studio/20261031_ボクセルモアイキーホルダー_001_studio.png',
+      'images/kurima/dot_osuwari_keyholder/studio/20261031_ボクセルモアイキーホルダー_002_studio.png',
+      'images/kurima/dot_osuwari_keyholder/studio/20261031_ボクセルモアイキーホルダー_003_studio.png',
+      'images/kurima/dot_osuwari_keyholder/studio/20261031_ボクセルモアイキーホルダー_004_studio.png',
+      'images/kurima/dot_osuwari_keyholder/studio/Moataro (1).jpg'
+    ],
     name: 'おすわりドットキーホルダー',
     desc: 'ドット風でかわよい',
   },
@@ -592,6 +601,9 @@ window.getFullMasterProducts = function(customProductsData) {
       if (masterItem) {
         masterItem.id = key;
         if (p.image) masterItem.image = p.image;
+        if (p.images) masterItem.images = p.images;
+        if (p.optimizedCover) masterItem.optimizedCover = p.optimizedCover;
+        if (p.optimizedImages) masterItem.optimizedImages = p.optimizedImages;
         if (p.isDev !== undefined) masterItem.isDev = p.isDev;
         if (p.isTempImage !== undefined) masterItem.isTempImage = p.isTempImage;
       } else {
@@ -599,7 +611,10 @@ window.getFullMasterProducts = function(customProductsData) {
           id: key,
           name: p.name,
           desc: p.desc || '鋭意制作中...！',
-          image: p.image || null,
+          image: p.image || p.optimizedCover || null,
+          images: p.images || (p.image ? [p.image] : []),
+          optimizedCover: p.optimizedCover || null,
+          optimizedImages: p.optimizedImages || [],
           status: p.status !== undefined ? p.status : 0,
           isDev: p.isDev !== undefined ? p.isDev : true,
           isTempImage: p.isTempImage !== undefined ? p.isTempImage : true
