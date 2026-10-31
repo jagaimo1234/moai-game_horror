@@ -6736,6 +6736,36 @@
       });
     };
 
+    window.applyDefaultPrice = function(pId, defaultPrice) {
+      const input = document.getElementById(`price-${pId}`);
+      if (input) {
+        input.value = defaultPrice;
+        input.style.transition = 'box-shadow 0.2s, background-color 0.2s';
+        input.style.boxShadow = '0 0 12px var(--accent)';
+        input.style.backgroundColor = 'rgba(0, 210, 255, 0.2)';
+        setTimeout(() => {
+          input.style.boxShadow = 'none';
+          input.style.backgroundColor = 'rgba(0,0,0,0.5)';
+        }, 500);
+      }
+      const vars = window.getProductVariants ? window.getProductVariants(pId, true) : [];
+      if (vars.length > 0) {
+        vars.forEach(v => {
+          const sInput = document.getElementById(`price-${v.skuId}`);
+          if (sInput) {
+            sInput.value = defaultPrice;
+            sInput.style.transition = 'box-shadow 0.2s, background-color 0.2s';
+            sInput.style.boxShadow = '0 0 8px var(--accent)';
+            sInput.style.backgroundColor = 'rgba(0, 210, 255, 0.2)';
+            setTimeout(() => {
+              sInput.style.boxShadow = 'none';
+              sInput.style.backgroundColor = 'rgba(0,0,0,0.5)';
+            }, 500);
+          }
+        });
+      }
+    };
+
     window.renderPriceSettings = function() {
       const list = document.getElementById('price-settings-list');
       if(!list) return;
@@ -6747,6 +6777,13 @@
         const inv = inventoryData[p.id] || { price: p.price || 0 };
         const vars = window.getProductVariants ? window.getProductVariants(p.id, false) : [];
         const hasVars = vars.length > 0;
+
+        // 作品図鑑（マスター）から現在の基準価格を取得
+        const wData = (window.worksMasterData && window.worksMasterData[p.id]) || {};
+        const rawDefaultPrice = (wData.defaultPrice !== undefined && wData.defaultPrice !== null && wData.defaultPrice !== '') 
+          ? parseInt(wData.defaultPrice) 
+          : ((p.price !== undefined && p.price !== null) ? parseInt(p.price) : 0);
+        const hasDefaultPrice = !isNaN(rawDefaultPrice) && rawDefaultPrice > 0;
 
         let skuPriceHtml = '';
         if (hasVars) {
@@ -6776,7 +6813,7 @@
           <div class="settings-row" style="display:flex; flex-direction:column; align-items:stretch; padding:12px; border-bottom:1px solid rgba(255,255,255,0.05); background:rgba(0,0,0,0.2);">
             <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; width:100%;">
               <div style="display:flex; align-items:center; gap:12px;">
-                <img src="${p.image}" alt="" style="width:50px; height:50px; border-radius:6px; object-fit:cover;">
+                <img src="${p.image || window.NO_IMAGE_PLACEHOLDER}" alt="" style="width:50px; height:50px; border-radius:6px; object-fit:cover;" onerror="this.src=window.NO_IMAGE_PLACEHOLDER||this.src">
                 <div>
                   <div style="font-weight:bold;">${p.name.replace(/\n/g, ' ')}</div>
                   <span class="variant-badge-pill" style="margin-top:4px;" onclick="openVariantManagerModal('${p.id}')">
@@ -6784,9 +6821,19 @@
                   </span>
                 </div>
               </div>
-              <div style="display:flex; align-items:center; gap:8px;">
-                <span style="font-size:11px; opacity:0.65;">${hasVars ? '基準:' : ''} ¥</span>
-                <input type="number" id="price-${p.id}" value="${inv.price}" style="width:100px; padding:10px; font-size:18px; font-weight:bold; text-align:right; border-radius:6px; border:1px solid var(--accent); background:rgba(0,0,0,0.5); color:var(--accent);">
+              <div style="display:flex; flex-direction:column; align-items:flex-end; gap:6px;">
+                ${hasDefaultPrice ? `
+                  <div style="display:flex; align-items:center; gap:6px; font-size:11px;">
+                    <span style="color:rgba(255,255,255,0.65);">基準価格: <strong style="color:var(--accent);">¥${rawDefaultPrice.toLocaleString()}</strong></span>
+                    <button type="button" onclick="applyDefaultPrice('${p.id}', ${rawDefaultPrice})" class="btn" style="background:rgba(0,210,255,0.12); border:1px solid rgba(0,210,255,0.35); color:var(--accent); font-size:10px; padding:2px 8px; border-radius:4px; cursor:pointer; line-height:1.2; font-weight:bold; white-space:nowrap;" title="作品図鑑の基準価格をこのイベントの販売価格に反映">
+                      基準価格を採用
+                    </button>
+                  </div>
+                ` : ''}
+                <div style="display:flex; align-items:center; gap:8px;">
+                  <span style="font-size:11px; opacity:0.65;">${hasVars ? '基準販売価格:' : '販売価格:'} ¥</span>
+                  <input type="number" id="price-${p.id}" value="${inv.price}" style="width:110px; padding:8px 10px; font-size:17px; font-weight:bold; text-align:right; border-radius:6px; border:1px solid var(--accent); background:rgba(0,0,0,0.5); color:var(--accent);">
+                </div>
               </div>
             </div>
             ${skuPriceHtml}
