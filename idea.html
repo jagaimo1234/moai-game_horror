@@ -5866,7 +5866,8 @@
         desc: features,
         image: (item && item.coverImage) ? item.coverImage : '',
         status: status,
-        isDevWork: (status === 'development')
+        isDevWork: (status === 'development'),
+        isTempImage: true
       };
       const worksMasterItem = {
         name: name,
@@ -5876,7 +5877,8 @@
         image: (item && item.coverImage) ? item.coverImage : '',
         size: '50x50x80',
         material: 'PLA',
-        status: status
+        status: status,
+        isTempImage: true
       };
 
       try {

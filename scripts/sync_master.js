@@ -1,16 +1,19 @@
 /**
  * ====================================================================
- * OMOAI ⇄ POS 作品マスター自動同期スクリプト (scripts/sync_master.js)
+ * OMOAI ⇄ POS 作品マスター一括本登録＆同期スクリプト (scripts/sync_master.js)
  * ====================================================================
  * 
  * 使い方:
  *   node scripts/sync_master.js
  * 
  * 役割:
- *   1. Firestore (custom_products, works_master) から新作・登録作品を取得
- *   2. 作品IDごとに `images/kurima/<作品ID>/` フォルダ（受け皿）を自動作成
- *   3. Omoaiのカバー画像（DataURL）があれば初期画像として保存
- *   4. フォルダ内に放り込まれた背景処理済み画像を検知し、`data.js` (MASTER_PRODUCTS) に1発登録・更新
+ *   1. 【受け皿フォルダ自動作成】
+ *      OMOAIで新作仮登録された作品IDの受け皿フォルダ `images/kurima/<作品ID>/` を自動作成。
+ *   2. 【マスター本登録】
+ *      ユーザーが背景処理した画像を配置後、「マスター登録」の指示により、
+ *      未登録の作品（複数作品でも可）を一括検知して `data.js` へ安全に本登録。
+ *   3. 【既存作品の安全性維持】
+ *      既存作品のデータを破壊することなく、新規作品のみを確実に登録します。
  */
 
 const fs = require('fs');
@@ -21,11 +24,10 @@ const ROOT_DIR = path.resolve(__dirname, '..');
 const KURIMA_DIR = path.join(ROOT_DIR, 'images', 'kurima');
 const DATA_JS_PATH = path.join(ROOT_DIR, 'data.js');
 
-// Firestore REST エンドポイント
 const FIRESTORE_BASE = 'https://firestore.googleapis.com/v1/projects/moai-catalog/databases/(default)/documents/settings';
 
 function fetchJson(url) {
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve) => {
     https.get(url, (res) => {
       let data = '';
       res.on('data', chunk => data += chunk);
@@ -34,17 +36,16 @@ function fetchJson(url) {
           try {
             resolve(JSON.parse(data));
           } catch (e) {
-            reject(new Error(`JSON parse error: ${e.message}`));
+            resolve(null);
           }
         } else {
-          resolve(null); // ドキュメントがない場合など
+          resolve(null);
         }
       });
-    }).on('error', reject);
+    }).on('error', () => resolve(null));
   });
 }
 
-// Firestoreの型付きJSONを通常オブジェクトに変換
 function decodeFirestoreValue(val) {
   if (!val) return null;
   if ('stringValue' in val) return val.stringValue;
@@ -76,18 +77,22 @@ function decodeFirestoreDoc(docJson) {
   return res;
 }
 
+function isImageOrMedia(file) {
+  const ext = path.extname(file).toLowerCase();
+  return ['.jpg', '.jpeg', '.png', '.webp', '.mp4'].includes(ext);
+}
+
 async function main() {
   console.log('🗿 ========================================================');
-  console.log('🗿  OMOAI ⇄ POS 作品マスター自動同期 & 受け皿作成スクリプト');
+  console.log('🗿  OMOAI ⇄ POS 作品マスター一括本登録＆同期システム');
   console.log('🗿 ========================================================\n');
 
-  // 1. images/kurima フォルダ確認
   if (!fs.existsSync(KURIMA_DIR)) {
     fs.mkdirSync(KURIMA_DIR, { recursive: true });
   }
 
-  // 2. Firestore から custom_products と works_master を取得
-  console.log('📡 1. Firestore から作品マスター設定を取得中...');
+  // 1. クラウド設定を取得
+  console.log('📡 1. クラウド設定を取得中...');
   const [cpDoc, wmDoc] = await Promise.all([
     fetchJson(`${FIRESTORE_BASE}/custom_products`),
     fetchJson(`${FIRESTORE_BASE}/works_master`)
@@ -96,144 +101,107 @@ async function main() {
   const customProducts = decodeFirestoreDoc(cpDoc);
   const worksMaster = decodeFirestoreDoc(wmDoc);
 
-  const productKeys = Array.from(new Set([
+  // 2. OMOAIで仮登録された作品IDの受け皿フォルダを作成
+  const remoteProductKeys = Array.from(new Set([
     ...Object.keys(customProducts),
     ...Object.keys(worksMaster)
-  ])).filter(k => k && !k.startsWith('dev_') && !k.startsWith('temp_') && !/^\d+$/.test(k));
+  ])).filter(k => k && !k.startsWith('dev_') && !k.startsWith('temp_') && !/^\d+$/.test(k) && k !== 'moai_lure_stand' && k !== 'moai_robo_mk2_gray');
 
-  console.log(`   → 対象作品ID数: ${productKeys.length}件\n`);
-
-  let createdFolderCount = 0;
-  let savedInitialImgCount = 0;
-  const newMasterEntries = [];
-
-  // 3. 各作品IDの受け皿フォルダ確認＆作成
-  console.log('📁 2. 各作品の受け皿フォルダ・画像チェック中...');
-  for (const posId of productKeys) {
-    const cp = customProducts[posId] || {};
-    const wm = worksMaster[posId] || {};
-    const name = wm.name || cp.name || posId;
-    const desc = wm.desc || cp.desc || '';
-    const price = wm.price || cp.price || 0;
-
+  for (const posId of remoteProductKeys) {
     const itemFolder = path.join(KURIMA_DIR, posId);
     if (!fs.existsSync(itemFolder)) {
       fs.mkdirSync(itemFolder, { recursive: true });
-      console.log(`   ✨ 新規フォルダ作成: images/kurima/${posId}/ (作品名: ${name})`);
-      createdFolderCount++;
+      const name = worksMaster[posId]?.name || customProducts[posId]?.name || posId;
+      console.log(`   📁 新規受け皿フォルダを自動作成: images/kurima/${posId}/ (作品名: ${name})`);
+    }
+  }
+
+  // 3. data.js を読み込み、未登録の新作を一括検出
+  console.log('\n🔍 2. 未登録の新作をスキャン中...');
+  if (!fs.existsSync(DATA_JS_PATH)) {
+    console.error('❌ data.js が見つかりません');
+    return;
+  }
+
+  let dataJsContent = fs.readFileSync(DATA_JS_PATH, 'utf8');
+
+  // kurima ディレクトリ内の全作品フォルダをチェック
+  const subDirs = fs.readdirSync(KURIMA_DIR).filter(f => {
+    if (f.startsWith('dev_') || f.startsWith('.')) return false;
+    const full = path.join(KURIMA_DIR, f);
+    return fs.statSync(full).isDirectory();
+  });
+
+  const newlyAdded = [];
+
+  for (const posId of subDirs) {
+    const wm = worksMaster[posId] || {};
+    const cp = customProducts[posId] || {};
+    const name = wm.name || cp.name || posId.replace(/_/g, ' ');
+    const desc = wm.desc || cp.desc || wm.features || '';
+
+    // 既に data.js に登録されているか確認
+    // 1) 画像パスやIDとして含まれているか
+    const existsPathPattern = new RegExp(`['"]images/kurima/${escapeRegex(posId)}(?:\\.[a-zA-Z0-9]+|/)`, 'i');
+    const idPattern = new RegExp(`['"]${escapeRegex(posId)}['"]`, 'i');
+    
+    // 2) 作品名で既に登録されているか
+    const namePattern = name ? new RegExp(`name:\\s*['"]${escapeRegex(name)}['"]`, 'i') : null;
+
+    if (existsPathPattern.test(dataJsContent) || idPattern.test(dataJsContent) || (namePattern && namePattern.test(dataJsContent))) {
+      continue; // 既に登録済みなら安全のためスキップ
     }
 
-    // カバー画像（DataURL）がある場合、ローカルに未保存なら保存
-    const rawImage = wm.image || cp.image || '';
-    const mainImgJpg = path.join(KURIMA_DIR, `${posId}.jpg`);
-    const mainImgPng = path.join(KURIMA_DIR, `${posId}.png`);
+    const itemFolder = path.join(KURIMA_DIR, posId);
+    const subFiles = fs.readdirSync(itemFolder).filter(isImageOrMedia);
+
+    // カバー画像（メイン画像）の決定
     let mainImgRel = '';
-
-    if (fs.existsSync(mainImgPng)) {
+    const directPng = path.join(KURIMA_DIR, `${posId}.png`);
+    const directJpg = path.join(KURIMA_DIR, `${posId}.jpg`);
+    if (fs.existsSync(directPng)) {
       mainImgRel = `images/kurima/${posId}.png`;
-    } else if (fs.existsSync(mainImgJpg)) {
+    } else if (fs.existsSync(directJpg)) {
       mainImgRel = `images/kurima/${posId}.jpg`;
-    } else if (rawImage && rawImage.startsWith('data:image/')) {
-      const match = rawImage.match(/^data:image\/(\w+);base64,(.+)$/);
-      if (match) {
-        const ext = match[1] === 'png' ? 'png' : 'jpg';
-        const targetPath = path.join(KURIMA_DIR, `${posId}.${ext}`);
-        fs.writeFileSync(targetPath, Buffer.from(match[2], 'base64'));
-        mainImgRel = `images/kurima/${posId}.${ext}`;
-        console.log(`   📷 OMOAIカバー画像を保存: ${mainImgRel}`);
-        savedInitialImgCount++;
-      }
-    }
-
-    // フォルダ内のサブ画像をスキャン
-    const subFiles = fs.readdirSync(itemFolder).filter(f => {
-      const ext = path.extname(f).toLowerCase();
-      return ['.jpg', '.jpeg', '.png', '.webp', '.mp4'].includes(ext);
-    });
-
-    // メイン画像が未定でサブ画像がある場合、1枚目をメイン画像に採用
-    if (!mainImgRel && subFiles.length > 0) {
+    } else if (subFiles.length > 0) {
       mainImgRel = `images/kurima/${posId}/${subFiles[0]}`;
+    } else {
+      mainImgRel = `images/kurima/${posId}.jpg`;
     }
 
     const subImgPaths = subFiles.map(f => `images/kurima/${posId}/${f}`);
 
-    newMasterEntries.push({
-      posId,
-      name,
-      desc,
-      price,
-      mainImgRel: mainImgRel || `images/kurima/${posId}.jpg`,
-      subImgPaths
-    });
-  }
+    const imagesCode = subImgPaths.length > 0
+      ? `\n    images: [\n${subImgPaths.map(p => `      '${p}',`).join('\n')}\n    ],`
+      : '';
 
-  // 4. data.js (MASTER_PRODUCTS) への同期
-  console.log('\n📝 3. data.js の MASTER_PRODUCTS と同期確認中...');
-  if (!fs.existsSync(DATA_JS_PATH)) {
-    console.error('❌ data.js が見つかりません。');
-    return;
-  }
-
-  const dataJsContent = fs.readFileSync(DATA_JS_PATH, 'utf8');
-
-  // バックアップ作成
-  fs.writeFileSync(DATA_JS_PATH + '.bak', dataJsContent, 'utf8');
-
-  let updatedCount = 0;
-  let addedCount = 0;
-  let modifiedDataJs = dataJsContent;
-
-  for (const entry of newMasterEntries) {
-    // 既に data.js に存在するかチェック (posId または画像名で照合)
-    const existsRegex = new RegExp(`['"]images/kurima/${entry.posId}(?:\\.(?:jpg|png)|/)`, 'i');
-    const nameRegex = new RegExp(`name\\s*:\\s*['"]${escapeRegex(entry.name)}['"]`, 'i');
-
-    if (existsRegex.test(modifiedDataJs)) {
-      // 既存作品: フォルダ内のサブ画像が更新されている場合、images 配列を更新
-      if (entry.subImgPaths.length > 0) {
-        // 必要に応じて置換ロジック
-        console.log(`   🔄 既存作品を検出: ${entry.name} (${entry.posId}) - 画像数: ${entry.subImgPaths.length}枚`);
-      }
-    } else {
-      // 新規登録作品: MASTER_PRODUCTS 配列の先頭（または末尾）に追加
-      const imagesListCode = entry.subImgPaths.length > 0
-        ? `\n    images: [\n${entry.subImgPaths.map(p => `      '${p}',`).join('\n')}\n    ],`
-        : '';
-
-      const newEntryCode = `  {
-    image: '${entry.mainImgRel}',${imagesListCode}
-    name: '${entry.name.replace(/'/g, "\\'")}',
-    desc: '${entry.desc.replace(/'/g, "\\'")}',
+    const newEntry = `  {
+    image: '${mainImgRel}',${imagesCode}
+    name: '${name.replace(/'/g, "\\'")}',
+    desc: '${desc.replace(/'/g, "\\'")}',
   },
 `;
-      // const MASTER_PRODUCTS = [ の直後に挿入
-      const insertMarker = 'const MASTER_PRODUCTS = [';
-      const markerIdx = modifiedDataJs.indexOf(insertMarker);
-      if (markerIdx !== -1) {
-        const insertPos = markerIdx + insertMarker.length;
-        modifiedDataJs = modifiedDataJs.slice(0, insertPos) + '\n' + newEntryCode + modifiedDataJs.slice(insertPos);
-        addedCount++;
-        console.log(`   ➕ MASTER_PRODUCTS へ追加: ${entry.name} (${entry.posId})`);
-      }
+    // MASTER_PRODUCTS の先頭に安全に挿入
+    const marker = 'const MASTER_PRODUCTS = [';
+    const mIdx = dataJsContent.indexOf(marker);
+    if (mIdx !== -1) {
+      const insertAt = mIdx + marker.length;
+      dataJsContent = dataJsContent.slice(0, insertAt) + '\n' + newEntry + dataJsContent.slice(insertAt);
+      newlyAdded.push(`✨ ${name} (${posId}) - サブ画像: ${subImgPaths.length}枚`);
     }
   }
 
-  if (addedCount > 0) {
-    fs.writeFileSync(DATA_JS_PATH, modifiedDataJs, 'utf8');
-    console.log(`\n💾 data.js を更新しました！（新規追加: ${addedCount}件）`);
+  if (newlyAdded.length > 0) {
+    fs.writeFileSync(DATA_JS_PATH, dataJsContent, 'utf8');
+    console.log(`\n💾 data.js に新作を一括本登録しました！（${newlyAdded.length}作品）`);
+    newlyAdded.forEach(msg => console.log(`   ${msg}`));
   } else {
-    console.log('\n✅ data.js は最新です（追加の必要はありません）。');
+    console.log('\n✅ 新規に本登録する作品はありませんでした（すべて最新です）。');
   }
 
   console.log('\n========================================================');
-  console.log(`🎉 同期完了！`);
-  console.log(`   - 新規作成フォルダ: ${createdFolderCount}件`);
-  console.log(`   - 保存したOMOAI画像: ${savedInitialImgCount}件`);
-  console.log(`   - data.js 新規追加: ${addedCount}件`);
+  console.log('🎉 処理が完了しました！');
   console.log('========================================================\n');
-  console.log('💡 ヒント: 背景処理した画像を `images/kurima/<作品ID>/` に放り込んで');
-  console.log('   再度 `node scripts/sync_master.js` を実行すると画像リストが自動反映されます！\n');
 }
 
 function escapeRegex(string) {
@@ -241,5 +209,5 @@ function escapeRegex(string) {
 }
 
 main().catch(err => {
-  console.error('❌ エラーが発生しました:', err);
+  console.error('❌ エラー:', err);
 });

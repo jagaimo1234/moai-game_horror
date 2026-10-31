@@ -560,15 +560,20 @@ window.getAllEvents = function(configData) {
 
 // Firestoreのcustom_productsをマージして全作品マスターリストを返すヘルパー
 window.getFullMasterProducts = function(customProductsData) {
-  // MASTER_PRODUCTSのコピーを作成し、IDを初期化
-  const list = MASTER_PRODUCTS.map(m => ({ ...m }));
+  // MASTER_PRODUCTSのコピーを作成し、先にIDを確定させる
+  const list = MASTER_PRODUCTS.map((m, i) => {
+    const item = { ...m };
+    if (!item.id) {
+      item.id = item.image ? item.image.split('/').pop().split('.')[0] : "item_" + i;
+    }
+    return item;
+  });
   
   if (customProductsData) {
     Object.keys(customProductsData).forEach(key => {
       const p = customProductsData[key];
       const normalize = (s) => s ? s.replace(/\s+/g, '').replace(/\n/g, '') : '';
       const masterItem = list.find(m => {
-        // 先に明示的なIDやproductIdでの一致を確認し、なければ名前での一致を確認
         const idMatches = (p.productId && m.id === p.productId) || (m.id === key);
         const nameMatches = (normalize(m.name) === normalize(p.name)) || 
                             (m.id === 'moai_lure_stand' && normalize(p.name) === 'モアイルアースタンド');
@@ -576,28 +581,23 @@ window.getFullMasterProducts = function(customProductsData) {
       });
       
       if (masterItem) {
-        // 重要：FirestoreのID（dev_xxxなど）をマスターデータに引き継ぐ
         masterItem.id = key;
+        if (p.image) masterItem.image = p.image;
+        if (p.isDev !== undefined) masterItem.isDev = p.isDev;
+        if (p.isTempImage !== undefined) masterItem.isTempImage = p.isTempImage;
       } else {
-        // 重複がない場合は新規カスタム作品として追加
         list.push({
           id: key,
           name: p.name,
           desc: p.desc || '鋭意制作中...！',
           image: p.image || null,
           status: p.status !== undefined ? p.status : 0,
-          isDev: p.isDev !== undefined ? p.isDev : true
+          isDev: p.isDev !== undefined ? p.isDev : true,
+          isTempImage: p.isTempImage !== undefined ? p.isTempImage : true
         });
       }
     });
   }
-  
-  // まだIDがないものにデフォルトIDを付与
-  list.forEach((p, i) => {
-    if (!p.id) {
-      p.id = p.image ? p.image.split('/').pop().split('.')[0] : "item_" + i;
-    }
-  });
 
   return list;
 };
