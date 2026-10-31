@@ -5864,7 +5864,7 @@
           renderDetailLeft(item);
           if (threadViewMode === 'x') renderChatTimeline(item);
         }
-        alert(`✅ POS作品図鑑・作品マスターへの登録が完了しました！\n作品ID: ${posId}\nPOS側の「作品図鑑」に即時反映されます。`);
+        alert(`✅ 作品図鑑（マスター）への仮登録が完了しました！\n作品ID: ${posId}\n\n💡 PC起動時やAI起動時に、受け皿フォルダ（images/kurima/${posId}/）が完全自動で生成されます。ユーザー様からの指示がなくても自動準備されますのでご安心ください！`);
         closePosLinkModal();
       } catch (err) {
         alert(`❌ POS登録エラー: ${err.message || err}`);
