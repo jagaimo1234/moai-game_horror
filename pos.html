@@ -1434,6 +1434,116 @@
       </div>
     </div>
 
+    <!-- =========================================================
+         4列 お品書き画像管理モーダル (Studio Moai × RAW × お品書き)
+         ========================================================= -->
+    <div id="work-image-selector-modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.88); z-index:2300; align-items:center; justify-content:center; padding:16px;">
+      <div style="background:var(--panel-bg); width:100%; max-width:1150px; max-height:94vh; border-radius:14px; border:1.5px solid var(--accent); display:flex; flex-direction:column; box-shadow:0 15px 45px rgba(0,0,0,0.9); overflow:hidden;">
+        
+        <!-- Header -->
+        <div style="display:flex; justify-content:space-between; align-items:center; padding:14px 20px; border-bottom:1px solid rgba(255,255,255,0.1); background:rgba(0,0,0,0.35);">
+          <div>
+            <h3 style="color:var(--accent); font-size:18px; margin:0; display:flex; align-items:center; gap:8px;">
+              <span>🖼️</span> お品書き画像管理 (<span id="img-manager-work-name"></span>)
+            </h3>
+            <p style="font-size:11px; opacity:0.65; margin-top:2px;">
+              ③Studio生成画像や④RAW画像をタップして②へ追加し、並び替え・代表設定をして「お品書きに反映」してください。
+            </p>
+          </div>
+          <button style="background:none; border:none; color:white; font-size:24px; cursor:pointer;" onclick="closeWorkImageSelectorModal()">✕</button>
+        </div>
+
+        <!-- Work Switcher & Quick Integration Bar (在庫設定 & トピックス) -->
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; padding:10px 20px; background:rgba(0,0,0,0.25); border-bottom:1px solid rgba(255,255,255,0.08);">
+          <!-- Work Switcher -->
+          <div style="display:flex; align-items:center; gap:8px;">
+            <span style="font-size:11px; opacity:0.75; font-weight:bold;">🗿 対象作品切替:</span>
+            <select id="img-manager-work-select" onchange="openWorkImageSelectorModal(this.value)" class="form-select" style="font-size:12px; padding:4px 10px; width:auto; max-width:280px; background:rgba(0,0,0,0.6); color:#fff; border:1px solid rgba(255,255,255,0.25); border-radius:6px; font-weight:bold;">
+            </select>
+          </div>
+
+          <!-- Quick Access: 在庫設定 & トピックス連携 -->
+          <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+            <!-- 在庫設定 Status & Jump -->
+            <div style="display:flex; align-items:center; gap:6px; background:rgba(255,255,255,0.05); padding:4px 10px; border-radius:6px; border:1px solid rgba(255,255,255,0.1);">
+              <span style="font-size:11px; color:#f1c40f; font-weight:bold;">📦 在庫設定:</span>
+              <span id="img-manager-stock-badge" style="font-size:11px; color:#fff;">確認中...</span>
+              <button type="button" onclick="jumpToSettingsFromImageManager()" style="background:rgba(241,196,15,0.18); border:1px solid #f1c40f; color:#f1c40f; font-size:10px; padding:2px 8px; border-radius:4px; cursor:pointer; font-weight:bold;">在庫タブへ →</button>
+            </div>
+
+            <!-- トピックス Status & Jump -->
+            <div style="display:flex; align-items:center; gap:6px; background:rgba(255,255,255,0.05); padding:4px 10px; border-radius:6px; border:1px solid rgba(255,255,255,0.1);">
+              <span style="font-size:11px; color:#ff9f1c; font-weight:bold;">🔥 トピックス:</span>
+              <span id="img-manager-topics-badge" style="font-size:11px; color:#fff;">未連動</span>
+              <button type="button" onclick="jumpToTopicsFromImageManager()" style="background:rgba(255,159,28,0.18); border:1px solid #ff9f1c; color:#ff9f1c; font-size:10px; padding:2px 8px; border-radius:4px; cursor:pointer; font-weight:bold;">トピックスへ →</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 4 Columns Grid Body -->
+        <div style="display:grid; grid-template-columns: repeat(4, 1fr); gap:12px; padding:16px; flex:1; overflow-y:auto; min-height:420px; background:rgba(0,0,0,0.15);">
+          
+          <!-- Column 1: 現在の表示（公開中） -->
+          <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.1); border-radius:10px; padding:12px; display:flex; flex-direction:column;">
+            <div style="font-size:13px; font-weight:bold; color:#aaa; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center;">
+              <span>① 現在の表示</span>
+              <span style="font-size:10px; background:rgba(255,255,255,0.1); padding:2px 6px; border-radius:4px;">参照専用</span>
+            </div>
+            <div id="col-current-display" style="display:flex; flex-direction:column; gap:8px; overflow-y:auto; flex:1; max-height:460px; padding-right:4px;">
+              <!-- JS rendered -->
+            </div>
+          </div>
+
+          <!-- Column 2: 変更後の構成（編集用） -->
+          <div style="background:rgba(0,210,255,0.04); border:1.5px solid var(--accent); border-radius:10px; padding:12px; display:flex; flex-direction:column;">
+            <div style="font-size:13px; font-weight:bold; color:var(--accent); margin-bottom:10px; display:flex; justify-content:space-between; align-items:center;">
+              <span>② 変更後の構成</span>
+              <span style="font-size:10px; background:rgba(0,210,255,0.2); padding:2px 6px; border-radius:4px;">編集可能</span>
+            </div>
+            <div id="col-draft-display" style="display:flex; flex-direction:column; gap:8px; overflow-y:auto; flex:1; max-height:460px; padding-right:4px;">
+              <!-- JS rendered -->
+            </div>
+          </div>
+
+          <!-- Column 3: Studio Moai 生成画像 -->
+          <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.1); border-radius:10px; padding:12px; display:flex; flex-direction:column;">
+            <div style="font-size:13px; font-weight:bold; color:#70d6ff; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center;">
+              <span>③ Studio Moai 生成画像</span>
+              <span style="font-size:10px; opacity:0.6;">タップで②に追加</span>
+            </div>
+            <div id="col-studio-images" style="display:grid; grid-template-columns: repeat(2, 1fr); gap:8px; overflow-y:auto; flex:1; max-height:460px; padding-right:4px;">
+              <!-- JS rendered -->
+            </div>
+          </div>
+
+          <!-- Column 4: 元画像（RAW） -->
+          <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.1); border-radius:10px; padding:12px; display:flex; flex-direction:column;">
+            <div style="font-size:13px; font-weight:bold; color:#ff9f1c; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center;">
+              <span>④ 元画像 (RAW)</span>
+              <span style="font-size:10px; opacity:0.6;">タップで②に追加</span>
+            </div>
+            <div id="col-raw-images" style="display:grid; grid-template-columns: repeat(2, 1fr); gap:8px; overflow-y:auto; flex:1; max-height:460px; padding-right:4px;">
+              <!-- JS rendered -->
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Footer -->
+        <div style="display:flex; justify-content:space-between; align-items:center; padding:14px 20px; border-top:1px solid rgba(255,255,255,0.1); background:rgba(0,0,0,0.3);">
+          <button type="button" class="btn" style="background:rgba(255,255,255,0.1); color:#ccc;" onclick="closeWorkImageSelectorModal()">変更を破棄して閉じる</button>
+          <div style="display:flex; gap:10px; align-items:center;">
+            <span id="img-manager-status" style="font-size:12px; color:var(--accent);"></span>
+            <button type="button" class="btn btn-primary" onclick="applyWorkImageConfigToPos()" style="padding:8px 24px; font-weight:bold; font-size:14px; box-shadow:0 4px 15px rgba(0,210,255,0.4);">
+              ✨ お品書きに反映・確定
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+
     <!-- Variant (SKU) Manager Modal -->
     <div id="variant-manager-modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); z-index:2200; align-items:center; justify-content:center; padding:16px;">
       <div style="background:var(--panel-bg); width:100%; max-width:640px; border-radius:14px; padding:22px; border:1px solid var(--accent); max-height:92vh; display:flex; flex-direction:column; box-shadow:0 15px 40px rgba(0,0,0,0.85);">
@@ -1738,7 +1848,12 @@
       <div class="scroll-container" style="padding-bottom: 50px;">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px;">
           <h2>🔥 トピックス設定 (<span id="topics-event-name"></span>)</h2>
-          <button class="btn btn-primary" onclick="saveEventTopics()" style="font-size: 14px; padding: 8px 20px;">トピックス表示設定を保存</button>
+          <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+            <button class="btn" type="button" onclick="openWorkImageSelectorFromTopics()" style="background:rgba(0,210,255,0.15); border:1.5px solid var(--accent); color:var(--accent); font-size:13px; font-weight:bold; padding:8px 16px; border-radius:8px; cursor:pointer;">
+              🖼️ 作品の画像管理
+            </button>
+            <button class="btn btn-primary" onclick="saveEventTopics()" style="font-size: 14px; padding: 8px 20px;">トピックス表示設定を保存</button>
+          </div>
         </div>
 
         <!-- Topics selection / listing -->
@@ -1768,7 +1883,12 @@
             <textarea id="new-topic-desc" class="form-input" rows="3" placeholder="例：〇〇をイメージした愛らしいモアイペン立て。スマホをかざすと..."></textarea>
           </div>
           <div class="form-group" style="margin-top:10px;">
-            <label>紐付け作品 (任意)</label>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+              <label style="margin:0;">紐付け作品 (任意)</label>
+              <button type="button" onclick="openWorkImageSelectorFromSelect()" style="background:none; border:none; color:var(--accent); font-size:11px; cursor:pointer; font-weight:bold; text-decoration:underline;">
+                🖼️ 選択作品の画像管理を開く
+              </button>
+            </div>
             <select id="new-topic-product-id" class="form-select">
               <option value="">-- 紐付けなし --</option>
             </select>
@@ -6532,6 +6652,7 @@
               </div>
             </div>
             <div style="display:flex; align-items:center; gap:8px; flex-shrink:0;">
+              ${topic.productId ? `<button type="button" onclick="event.stopPropagation(); openWorkImageSelectorModal('${topic.productId}')" style="background:rgba(0,210,255,0.15); border:1px solid var(--accent); color:var(--accent); font-size:11px; padding:4px 8px; border-radius:4px; cursor:pointer; font-weight:bold;">🖼️ 画像管理</button>` : ''}
               ${topic.isBuiltin ? '<span style="font-size:10px; background:rgba(255,255,255,0.1); padding:2px 6px; border-radius:4px; opacity:0.6;">システム組み込み</span>' : ''}
               ${aiToggleBtn}
               ${deleteBtn}
@@ -13389,15 +13510,62 @@
     let currentDraftImages = []; // Array of image URLs/paths in column 2
 
     window.openWorkImageSelectorModal = function(pId) {
-      if (!pId) return;
+      if (!pId) {
+        const allMaster = window.getFullMasterProducts ? window.getFullMasterProducts(window.customProductsData) : MASTER_PRODUCTS;
+        pId = (allMaster[0] && allMaster[0].id) || 'moai_robo_mk2_gray';
+      }
       currentSelectorPosId = pId;
 
       const allProducts = window.getFullMasterProducts ? window.getFullMasterProducts(window.customProductsData) : MASTER_PRODUCTS;
       const p = allProducts.find(item => item.id === pId) || { id: pId, name: pId, image: null, images: [] };
       const wData = (window.worksMasterData && window.worksMasterData[pId]) || {};
 
-      document.getElementById('img-manager-work-name').textContent = p.name ? p.name.replace(/\n/g, ' ') : pId;
-      document.getElementById('img-manager-status').textContent = '';
+      const nameEl = document.getElementById('img-manager-work-name');
+      if (nameEl) nameEl.textContent = p.name ? p.name.replace(/\n/g, ' ') : pId;
+
+      const statusEl = document.getElementById('img-manager-status');
+      if (statusEl) statusEl.textContent = '';
+
+      // 対象作品プルダウン更新
+      const workSelect = document.getElementById('img-manager-work-select');
+      if (workSelect) {
+        let optHtml = '';
+        allProducts.forEach(prod => {
+          const sName = prod.name ? prod.name.replace(/\n/g, ' ') : prod.id;
+          optHtml += `<option value="${prod.id}" ${prod.id === pId ? 'selected' : ''}>${sName}</option>`;
+        });
+        workSelect.innerHTML = optHtml;
+        workSelect.value = pId;
+      }
+
+      // 在庫バッジ更新
+      const stockBadgeEl = document.getElementById('img-manager-stock-badge');
+      if (stockBadgeEl) {
+        const inv = (typeof inventoryData !== 'undefined' && inventoryData[pId]) || {};
+        const count = inv.current !== undefined ? inv.current : (inv.initial !== undefined ? inv.initial : '-');
+        const st = (typeof stockData !== 'undefined' && stockData[pId]) || 'none';
+        let stLabel = count !== '-' ? `${count}点` : '未登録';
+        if (st === 'out' || count === 0) stLabel += ' (完売)';
+        else if (st === 'few') stLabel += ' (残少)';
+        stockBadgeEl.textContent = stLabel;
+      }
+
+      // トピックスバッジ更新
+      const topicsBadgeEl = document.getElementById('img-manager-topics-badge');
+      if (topicsBadgeEl) {
+        const eventTopics = (window.eventTopicsData && window.eventTopicsData[currentEventKey]) || [];
+        const tMaster = window.topicsMasterData || {};
+        const linkedTopics = Object.keys(tMaster).filter(tId => tMaster[tId]?.productId === pId);
+        const activeTopics = linkedTopics.filter(tId => eventTopics.includes(tId));
+        if (activeTopics.length > 0) {
+          const t = tMaster[activeTopics[0]];
+          topicsBadgeEl.innerHTML = `<span style="color:#2ecc71; font-weight:bold;">✅ 掲載中: ${t.title || 'トピックス'}</span>`;
+        } else if (linkedTopics.length > 0) {
+          topicsBadgeEl.innerHTML = `<span style="color:#aaa;">連動あり(非掲載)</span>`;
+        } else {
+          topicsBadgeEl.innerHTML = `<span style="color:#666;">未連動</span>`;
+        }
+      }
 
       // 1. 現在公開中の画像一覧 (代表画像 + サブ画像)
       const currentList = [];
@@ -13420,13 +13588,50 @@
       renderColDraft();
       loadAndRenderCandidateImages(pId);
 
-      document.getElementById('work-image-selector-modal').style.display = 'flex';
+      const modalEl = document.getElementById('work-image-selector-modal');
+      if (modalEl) modalEl.style.display = 'flex';
     };
 
     window.closeWorkImageSelectorModal = function() {
-      document.getElementById('work-image-selector-modal').style.display = 'none';
+      const modalEl = document.getElementById('work-image-selector-modal');
+      if (modalEl) modalEl.style.display = 'none';
       currentSelectorPosId = null;
       currentDraftImages = [];
+    };
+
+    window.jumpToSettingsFromImageManager = function() {
+      closeWorkImageSelectorModal();
+      if (typeof window.switchSysTab === 'function') {
+        window.switchSysTab('settings');
+      }
+    };
+
+    window.jumpToTopicsFromImageManager = function() {
+      closeWorkImageSelectorModal();
+      if (typeof window.switchSysTab === 'function') {
+        window.switchSysTab('topics');
+      }
+    };
+
+    window.openWorkImageSelectorFromTopics = function() {
+      const prodSelect = document.getElementById('new-topic-product-id');
+      const selectedId = prodSelect ? prodSelect.value : null;
+      if (selectedId) {
+        openWorkImageSelectorModal(selectedId);
+      } else {
+        const allMaster = window.getFullMasterProducts ? window.getFullMasterProducts(window.customProductsData) : MASTER_PRODUCTS;
+        const firstId = (allMaster[0] && allMaster[0].id) || 'moai_robo_mk2_gray';
+        openWorkImageSelectorModal(firstId);
+      }
+    };
+
+    window.openWorkImageSelectorFromSelect = function() {
+      const prodSelect = document.getElementById('new-topic-product-id');
+      if (!prodSelect || !prodSelect.value) {
+        alert('先に紐付け作品を選択してください');
+        return;
+      }
+      openWorkImageSelectorModal(prodSelect.value);
     };
 
     function renderColCurrent(list) {
@@ -13496,8 +13701,8 @@
     function loadAndRenderCandidateImages(pId) {
       const colStudio = document.getElementById('col-studio-images');
       const colRaw = document.getElementById('col-raw-images');
+      if (!colStudio || !colRaw) return;
 
-      // 既存の作品データやディレクトリ候補から抽出
       const allProducts = window.getFullMasterProducts ? window.getFullMasterProducts(window.customProductsData) : MASTER_PRODUCTS;
       const p = allProducts.find(item => item.id === pId) || { images: [] };
       const wData = (window.worksMasterData && window.worksMasterData[pId]) || {};
@@ -13526,11 +13731,10 @@
         } else if (lower.includes('raw') || lower.includes('/raw/')) {
           rawImgs.push(url);
         } else {
-          studioImgs.push(url); // 通常の処理済み画像もstudio側へ
+          studioImgs.push(url);
         }
       });
 
-      // レンダリング
       colStudio.innerHTML = studioImgs.length > 0 ? studioImgs.map(src => `
         <div onclick="addDraftImage('${src}')" style="cursor:pointer; position:relative; aspect-ratio:1; border-radius:6px; overflow:hidden; border:1px solid rgba(112,214,255,0.3); background:#000;" title="タップして追加">
           <img src="${src}" style="width:100%; height:100%; object-fit:cover;" onerror="this.src=window.NO_IMAGE_PLACEHOLDER||this.src">
@@ -13578,7 +13782,6 @@
             wmRef.set(updateObj, { merge: true })
           ]);
 
-          // ローカルステート更新
           if (window.customProductsData && window.customProductsData[pId]) {
             window.customProductsData[pId].image = mainImg;
             window.customProductsData[pId].images = subImgs;
@@ -13588,7 +13791,6 @@
             window.worksMasterData[pId].images = subImgs;
           }
 
-          // プレビューと一覧の即時再描画
           const previewImg = document.getElementById('work-detail-img-preview');
           if (previewImg) previewImg.src = mainImg || window.NO_IMAGE_PLACEHOLDER;
 
