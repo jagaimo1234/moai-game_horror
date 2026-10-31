@@ -16,6 +16,42 @@
 // 全作品のマスターリスト
 const MASTER_PRODUCTS = [
   {
+    image: 'images/kurima/dot_osuwari_keyholder.updatedAt.jpg',
+    name: 'dot osuwari keyholder.updatedAt',
+    desc: '',
+  },
+
+  {
+    image: 'images/kurima/dot_osuwari_keyholder.optimizedImages.jpg',
+    name: 'dot osuwari keyholder.optimizedImages',
+    desc: '',
+  },
+
+  {
+    image: 'images/kurima/dot_osuwari_keyholder.optimizedCover.jpg',
+    name: 'dot osuwari keyholder.optimizedCover',
+    desc: '',
+  },
+
+  {
+    image: 'images/kurima/dot_osuwari_keyholder.images.jpg',
+    name: 'dot osuwari keyholder.images',
+    desc: '',
+  },
+
+  {
+    image: 'images/kurima/dot_osuwari_keyholder.imageBackups.jpg',
+    name: 'dot osuwari keyholder.imageBackups',
+    desc: '',
+  },
+
+  {
+    image: 'images/kurima/dot_osuwari_keyholder.image.jpg',
+    name: 'dot osuwari keyholder.image',
+    desc: '',
+  },
+
+  {
     image: 'images/kurima/moai_dance_test.jpg',
     name: 'ダンシングモアイ_テスト',
     desc: '',
@@ -615,7 +651,10 @@ window.NO_IMAGE_PLACEHOLDER = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3
 // === WORK_FOLDER_ASSETS_START ===
 window.WORK_FOLDER_ASSETS = {
   "dot_osuwari_keyholder": {
-    "raw": [],
+    "raw": [
+      "images/kurima/dot_osuwari_keyholder/raw/dot_osuwari_keyholder_RAW_20261031_153943_003.jpg",
+      "images/kurima/dot_osuwari_keyholder/raw/dot_osuwari_keyholder_RAW_20261031_153953_004.jpg"
+    ],
     "studio": [
       "images/kurima/dot_osuwari_keyholder/studio/20261031_ボクセルモアイキーホルダー_001_studio.png",
       "images/kurima/dot_osuwari_keyholder/studio/20261031_ボクセルモアイキーホルダー_002_studio.png",
