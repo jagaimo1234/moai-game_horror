@@ -654,7 +654,10 @@ window.WORK_FOLDER_ASSETS = {
     "raw": [
       "images/kurima/dot_osuwari_keyholder/raw/dot_osuwari_keyholder_RAW_20261031_153943_003.jpg",
       "images/kurima/dot_osuwari_keyholder/raw/dot_osuwari_keyholder_RAW_20261031_153953_004.jpg",
-      "images/kurima/dot_osuwari_keyholder/raw/dot_osuwari_keyholder_RAW_20261031_154024_005.jpg"
+      "images/kurima/dot_osuwari_keyholder/raw/dot_osuwari_keyholder_RAW_20261031_154024_005.jpg",
+      "images/kurima/dot_osuwari_keyholder/raw/dot_osuwari_keyholder_RAW_20261031_154102_006.jpg",
+      "images/kurima/dot_osuwari_keyholder/raw/dot_osuwari_keyholder_RAW_20261031_154103_007.jpg",
+      "images/kurima/dot_osuwari_keyholder/raw/dot_osuwari_keyholder_RAW_20261031_154130_008.jpg"
     ],
     "studio": [
       "images/kurima/dot_osuwari_keyholder/studio/20261031_ボクセルモアイキーホルダー_001_studio.png",
