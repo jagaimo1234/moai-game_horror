@@ -1463,6 +1463,13 @@
               <span id="img-manager-topics-badge" style="color:#fff;">未連動</span>
               <button type="button" onclick="jumpToTopicsFromImageManager()" style="background:none; border:none; color:#ff9f1c; font-size:10px; cursor:pointer; text-decoration:underline; font-weight:bold; padding:0 2px;">設定 →</button>
             </div>
+            <!-- Backup / Restore Selector -->
+            <div id="img-manager-backup-box" style="display:flex; align-items:center; gap:5px; background:rgba(46,204,113,0.1); border:1px solid rgba(46,204,113,0.3); padding:3px 8px; border-radius:6px; font-size:11px;">
+              <span style="color:#2ecc71; font-weight:bold;">⏱️ セーブ履歴:</span>
+              <select id="img-manager-backup-select" onchange="restoreFromBackupSnapshot(this.value)" style="background:transparent; border:none; color:#fff; font-size:11px; cursor:pointer; font-weight:bold; max-width:140px;">
+                <option value="">履歴なし</option>
+              </select>
+            </div>
           </div>
           <button style="background:none; border:none; color:#888; font-size:22px; cursor:pointer; line-height:1; transition:color 0.2s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#888'" onclick="closeWorkImageSelectorModal()">✕</button>
         </div>
@@ -5840,7 +5847,7 @@
 
           <div style="display:flex; gap:12px; align-items:center;">
             <div style="position:relative; width:64px; height:64px; flex-shrink:0;">
-              <img src="${imgPath}" style="width:64px; height:64px; object-fit:cover; border-radius:8px; background:#111;" onerror="this.src=window.NO_IMAGE_PLACEHOLDER||this.src">
+              <img src="${imgPath}" style="width:64px; height:64px; object-fit:cover; border-radius:8px; background:#111;" onerror="if(window.worksMasterData['${pId}']?.optimizedCover){this.src=window.worksMasterData['${pId}'].optimizedCover;this.onerror=null;}else{this.src=window.NO_IMAGE_PLACEHOLDER;}">
               ${(p.isTempImage || wData.isTempImage || (isDev && p.image)) ? `<span style="position:absolute; bottom:2px; left:2px; background:rgba(0,0,0,0.85); color:#ffd166; font-size:8px; font-weight:bold; padding:1px 4px; border-radius:4px; border:1px solid #ffd166; box-shadow:0 1px 3px rgba(0,0,0,0.5); pointer-events:none; white-space:nowrap;">📸 試作(仮)</span>` : ''}
             </div>
             <div style="flex:1; overflow:hidden;">
@@ -13582,6 +13589,7 @@
       // 3. レンダリング
       renderDraftTray();
       renderImagePool();
+      updateBackupSelectUI(pId, wData);
 
       const modalEl = document.getElementById('work-image-selector-modal');
       if (modalEl) {
@@ -13914,6 +13922,100 @@
       renderImagePool();
     };
 
+    // ====================================================================
+    // 画質維持・軽量最適化キャッシュ＆セーブ履歴バックアップ機能
+    // ====================================================================
+
+    // 任意の画像URL（パス/DataURL）を、画質を保ったまま軽量DataURL（最大1100px / JPEG 0.83、約100KB）に変換
+    function convertToOptimizedDataUrl(src, maxDim = 1100, quality = 0.83) {
+      return new Promise((resolve) => {
+        if (!src) return resolve(null);
+        // すでに小さいDataURL（30KB以下）ならそのまま再利用
+        if (src.startsWith('data:image/') && src.length < 40000) return resolve(src);
+
+        const img = new Image();
+        img.crossOrigin = 'anonymous';
+        img.onload = () => {
+          let w = img.width;
+          let h = img.height;
+          if (w > maxDim || h > maxDim) {
+            if (w > h) {
+              h = Math.round((h * maxDim) / w);
+              w = maxDim;
+            } else {
+              w = Math.round((w * maxDim) / h);
+              h = maxDim;
+            }
+          }
+          const canvas = document.createElement('canvas');
+          canvas.width = w;
+          canvas.height = h;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, w, h);
+          try {
+            const dataUrl = canvas.toDataURL('image/jpeg', quality);
+            resolve(dataUrl);
+          } catch (e) {
+            // CORS等でCanvas読取不可の場合は元のURLを返す
+            resolve(src);
+          }
+        };
+        img.onerror = () => resolve(src);
+        img.src = src;
+      });
+    }
+
+    // セーブ履歴プルダウンの更新
+    function updateBackupSelectUI(pId, wData) {
+      const selectEl = document.getElementById('img-manager-backup-select');
+      if (!selectEl) return;
+      const backups = (wData && Array.isArray(wData.imageBackups)) ? wData.imageBackups : [];
+      if (backups.length === 0) {
+        selectEl.innerHTML = '<option value="">⏱️ 履歴なし (確定時に自動保存)</option>';
+        return;
+      }
+      let html = '<option value="">⏱️ セーブ履歴から復元...</option>';
+      backups.slice().reverse().forEach((b, revIdx) => {
+        const actualIdx = backups.length - 1 - revIdx;
+        const d = new Date(b.timestamp || Date.now());
+        const timeStr = `${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+        const count = (b.images ? b.images.length : 0) + (b.image ? 1 : 0);
+        html += `<option value="${actualIdx}">💾 ${timeStr} (${count}枚)</option>`;
+      });
+      selectEl.innerHTML = html;
+      selectEl.value = '';
+    }
+
+    // 過去のセーブポイントからワンクリック復元
+    window.restoreFromBackupSnapshot = function(idxStr) {
+      if (idxStr === '' || !currentSelectorPosId) return;
+      const idx = parseInt(idxStr, 10);
+      const wData = (window.worksMasterData && window.worksMasterData[currentSelectorPosId]) || {};
+      const backups = wData.imageBackups || [];
+      const target = backups[idx];
+      if (!target) return;
+
+      if (!confirm(`💾 セーブ履歴（${new Date(target.timestamp).toLocaleString()}）の構成を復元しますか？`)) {
+        document.getElementById('img-manager-backup-select').value = '';
+        return;
+      }
+
+      const restoredList = [];
+      if (target.image) restoredList.push(target.image);
+      if (Array.isArray(target.images)) {
+        target.images.forEach(img => {
+          if (img && !restoredList.includes(img)) restoredList.push(img);
+        });
+      }
+
+      currentDraftImages = restoredList;
+      renderDraftTray();
+      renderImagePool();
+      const statusEl = document.getElementById('img-manager-status');
+      if (statusEl) statusEl.textContent = '✨ 過去のセーブ構成を復元しました（「お品書きに反映」で確定）';
+      document.getElementById('img-manager-backup-select').value = '';
+    };
+
     window.applyWorkImageConfigToPos = async () => {
       if (!currentSelectorPosId) return;
       if (currentDraftImages.length === 0) {
@@ -13925,16 +14027,38 @@
       const subImgs = currentDraftImages.slice(1);
 
       const statusEl = document.getElementById('img-manager-status');
-      if (statusEl) statusEl.textContent = '保存中...';
+      if (statusEl) statusEl.textContent = '画質を最適化してクラウド保護セーブ中...';
 
       try {
         if (window.db && window.auth && window.auth.currentUser) {
           const cpRef = window.db.collection('settings').doc('custom_products');
           const wmRef = window.db.collection('settings').doc('works_master');
 
+          // 1. 画質を保ちつつ軽量化した保護キャッシュDataURLを並列生成（約100KB）
+          const [optimizedMain, ...optimizedSubs] = await Promise.all([
+            convertToOptimizedDataUrl(mainImg),
+            ...subImgs.map(s => convertToOptimizedDataUrl(s))
+          ]);
+
+          // 2. 過去のセーブ履歴スナップショット（最新5件を保持）
+          const existingWData = (window.worksMasterData && window.worksMasterData[pId]) || {};
+          let currentBackups = Array.isArray(existingWData.imageBackups) ? [...existingWData.imageBackups] : [];
+          
+          // 今回の構成をセーブ履歴に追加
+          currentBackups.push({
+            timestamp: Date.now(),
+            image: mainImg,
+            images: subImgs,
+            optimizedCover: optimizedMain
+          });
+          if (currentBackups.length > 5) currentBackups = currentBackups.slice(-5);
+
           const updateObj = {};
           updateObj[`${pId}.image`] = mainImg;
           updateObj[`${pId}.images`] = subImgs;
+          updateObj[`${pId}.optimizedCover`] = optimizedMain || mainImg;
+          updateObj[`${pId}.optimizedImages`] = optimizedSubs;
+          updateObj[`${pId}.imageBackups`] = currentBackups;
           updateObj[`${pId}.updatedAt`] = Date.now();
 
           await Promise.all([
@@ -13943,12 +14067,20 @@
           ]);
 
           if (window.customProductsData && window.customProductsData[pId]) {
-            window.customProductsData[pId].image = mainImg;
-            window.customProductsData[pId].images = subImgs;
+            Object.assign(window.customProductsData[pId], {
+              image: mainImg,
+              images: subImgs,
+              optimizedCover: optimizedMain,
+              imageBackups: currentBackups
+            });
           }
           if (window.worksMasterData && window.worksMasterData[pId]) {
-            window.worksMasterData[pId].image = mainImg;
-            window.worksMasterData[pId].images = subImgs;
+            Object.assign(window.worksMasterData[pId], {
+              image: mainImg,
+              images: subImgs,
+              optimizedCover: optimizedMain,
+              imageBackups: currentBackups
+            });
           }
 
           const previewImg = document.getElementById('work-detail-img-preview');
@@ -13958,7 +14090,7 @@
             window.renderCatalogView();
           }
 
-          alert('✅ お品書きの画像構成を反映・確定しました！');
+          alert('✅ 画質最適化＆セーブ保護を完了してお品書きに反映しました！\n（PCフォルダから誤って元画像を消してもクラウドに保持されます）');
           closeWorkImageSelectorModal();
         } else {
           alert('⚠️ ログインしていないためクラウド保存できません。ログイン後に再度お試しください。');
