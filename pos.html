@@ -14030,71 +14030,70 @@
       if (statusEl) statusEl.textContent = '画質を最適化してクラウド保護セーブ中...';
 
       try {
-        if (window.db && window.auth && window.auth.currentUser) {
-          const cpRef = window.db.collection('settings').doc('custom_products');
-          const wmRef = window.db.collection('settings').doc('works_master');
+        const targetDb = db || window.db;
+        if (!targetDb) {
+          throw new Error('Firestoreデータベースに接続できませんでした');
+        }
 
-          // 1. 画質を保ちつつ軽量化した保護キャッシュDataURLを並列生成（約100KB）
-          const [optimizedMain, ...optimizedSubs] = await Promise.all([
-            convertToOptimizedDataUrl(mainImg),
-            ...subImgs.map(s => convertToOptimizedDataUrl(s))
-          ]);
+        // 1. 画質を保ちつつ軽量化した保護キャッシュDataURLを並列生成（約100KB）
+        const [optimizedMain, ...optimizedSubs] = await Promise.all([
+          convertToOptimizedDataUrl(mainImg),
+          ...subImgs.map(s => convertToOptimizedDataUrl(s))
+        ]);
 
-          // 2. 過去のセーブ履歴スナップショット（最新5件を保持）
-          const existingWData = (window.worksMasterData && window.worksMasterData[pId]) || {};
-          let currentBackups = Array.isArray(existingWData.imageBackups) ? [...existingWData.imageBackups] : [];
-          
-          // 今回の構成をセーブ履歴に追加
-          currentBackups.push({
-            timestamp: Date.now(),
+        // 2. 過去のセーブ履歴スナップショット（最新5件を保持）
+        const existingWData = (window.worksMasterData && window.worksMasterData[pId]) || {};
+        let currentBackups = Array.isArray(existingWData.imageBackups) ? [...existingWData.imageBackups] : [];
+        
+        // 今回の構成をセーブ履歴に追加
+        currentBackups.push({
+          timestamp: Date.now(),
+          image: mainImg,
+          images: subImgs,
+          optimizedCover: optimizedMain
+        });
+        if (currentBackups.length > 5) currentBackups = currentBackups.slice(-5);
+
+        const updateObj = {};
+        updateObj[`${pId}.image`] = mainImg;
+        updateObj[`${pId}.images`] = subImgs;
+        updateObj[`${pId}.optimizedCover`] = optimizedMain || mainImg;
+        updateObj[`${pId}.optimizedImages`] = optimizedSubs;
+        updateObj[`${pId}.imageBackups`] = currentBackups;
+        updateObj[`${pId}.updatedAt`] = Date.now();
+
+        // Firebase v9+ setDoc with merge: true
+        await Promise.all([
+          setDoc(doc(targetDb, 'settings', 'custom_products'), updateObj, { merge: true }),
+          setDoc(doc(targetDb, 'settings', 'works_master'), updateObj, { merge: true })
+        ]);
+
+        if (window.customProductsData && window.customProductsData[pId]) {
+          Object.assign(window.customProductsData[pId], {
             image: mainImg,
             images: subImgs,
-            optimizedCover: optimizedMain
+            optimizedCover: optimizedMain,
+            imageBackups: currentBackups
           });
-          if (currentBackups.length > 5) currentBackups = currentBackups.slice(-5);
-
-          const updateObj = {};
-          updateObj[`${pId}.image`] = mainImg;
-          updateObj[`${pId}.images`] = subImgs;
-          updateObj[`${pId}.optimizedCover`] = optimizedMain || mainImg;
-          updateObj[`${pId}.optimizedImages`] = optimizedSubs;
-          updateObj[`${pId}.imageBackups`] = currentBackups;
-          updateObj[`${pId}.updatedAt`] = Date.now();
-
-          await Promise.all([
-            cpRef.set(updateObj, { merge: true }),
-            wmRef.set(updateObj, { merge: true })
-          ]);
-
-          if (window.customProductsData && window.customProductsData[pId]) {
-            Object.assign(window.customProductsData[pId], {
-              image: mainImg,
-              images: subImgs,
-              optimizedCover: optimizedMain,
-              imageBackups: currentBackups
-            });
-          }
-          if (window.worksMasterData && window.worksMasterData[pId]) {
-            Object.assign(window.worksMasterData[pId], {
-              image: mainImg,
-              images: subImgs,
-              optimizedCover: optimizedMain,
-              imageBackups: currentBackups
-            });
-          }
-
-          const previewImg = document.getElementById('work-detail-img-preview');
-          if (previewImg) previewImg.src = mainImg || window.NO_IMAGE_PLACEHOLDER;
-
-          if (typeof window.renderCatalogView === 'function') {
-            window.renderCatalogView();
-          }
-
-          alert('✅ 画質最適化＆セーブ保護を完了してお品書きに反映しました！\n（PCフォルダから誤って元画像を消してもクラウドに保持されます）');
-          closeWorkImageSelectorModal();
-        } else {
-          alert('⚠️ ログインしていないためクラウド保存できません。ログイン後に再度お試しください。');
         }
+        if (window.worksMasterData && window.worksMasterData[pId]) {
+          Object.assign(window.worksMasterData[pId], {
+            image: mainImg,
+            images: subImgs,
+            optimizedCover: optimizedMain,
+            imageBackups: currentBackups
+          });
+        }
+
+        const previewImg = document.getElementById('work-detail-img-preview');
+        if (previewImg) previewImg.src = mainImg || window.NO_IMAGE_PLACEHOLDER;
+
+        if (typeof window.renderCatalogView === 'function') {
+          window.renderCatalogView();
+        }
+
+        alert('✅ 画質最適化＆セーブ保護を完了してお品書きに反映しました！\n（PCフォルダから誤って元画像を消してもクラウドに保持されます）');
+        closeWorkImageSelectorModal();
       } catch (err) {
         console.error('お品書き画像保存エラー:', err);
         alert('保存に失敗しました: ' + err.message);
