@@ -613,5 +613,21 @@ window.getFullMasterProducts = function(customProductsData) {
 window.NO_IMAGE_PLACEHOLDER = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120' viewBox='0 0 120 120'><rect width='120' height='120' fill='%231c1c24' rx='12'/><text x='60' y='55' font-size='40' text-anchor='middle' dominant-baseline='middle'>🗿</text><text x='60' y='95' font-size='11' fill='%23888' font-weight='bold' text-anchor='middle' font-family='sans-serif'>NO IMAGE</text></svg>";
 
 // === WORK_FOLDER_ASSETS_START ===
-window.WORK_FOLDER_ASSETS = {};
+window.WORK_FOLDER_ASSETS = {
+  "dot_osuwari_keyholder": {
+    "raw": [],
+    "studio": [
+      "images/kurima/dot_osuwari_keyholder/studio/20261031_ボクセルモアイキーホルダー_001_studio.png",
+      "images/kurima/dot_osuwari_keyholder/studio/20261031_ボクセルモアイキーホルダー_002_studio.png",
+      "images/kurima/dot_osuwari_keyholder/studio/20261031_ボクセルモアイキーホルダー_003_studio.png",
+      "images/kurima/dot_osuwari_keyholder/studio/20261031_ボクセルモアイキーホルダー_004_studio.png"
+    ]
+  },
+  "osuwari_moai_pen": {
+    "raw": [
+      "images/kurima/osuwari_moai_pen/raw/osuwari_moai_pen_RAW_20261031_150436_001.jpg"
+    ],
+    "studio": []
+  }
+};
 // === WORK_FOLDER_ASSETS_END ===
