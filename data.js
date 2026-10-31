@@ -16,6 +16,12 @@
 // 全作品のマスターリスト
 const MASTER_PRODUCTS = [
   {
+    image: 'images/kurima/moai_dance_test.jpg',
+    name: 'ダンシングモアイ_テスト',
+    desc: '',
+  },
+
+  {
     image: 'images/kurima/dot_osuwari_keyholder.jpg',
     name: 'おすわりドットキーホルダー',
     desc: 'ドット風でかわよい',
