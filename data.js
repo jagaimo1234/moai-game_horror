@@ -658,7 +658,8 @@ window.WORK_FOLDER_ASSETS = {
       "images/kurima/dot_osuwari_keyholder/raw/dot_osuwari_keyholder_RAW_20261031_154102_006.jpg",
       "images/kurima/dot_osuwari_keyholder/raw/dot_osuwari_keyholder_RAW_20261031_154103_007.jpg",
       "images/kurima/dot_osuwari_keyholder/raw/dot_osuwari_keyholder_RAW_20261031_154130_008.jpg",
-      "images/kurima/dot_osuwari_keyholder/raw/dot_osuwari_keyholder_RAW_20261031_154412_009.jpg"
+      "images/kurima/dot_osuwari_keyholder/raw/dot_osuwari_keyholder_RAW_20261031_154412_009.jpg",
+      "images/kurima/dot_osuwari_keyholder/raw/dot_osuwari_keyholder_RAW_20261031_154514_011.jpg"
     ],
     "studio": [
       "images/kurima/dot_osuwari_keyholder/studio/20261031_ボクセルモアイキーホルダー_001_studio.png",
@@ -666,7 +667,8 @@ window.WORK_FOLDER_ASSETS = {
       "images/kurima/dot_osuwari_keyholder/studio/20261031_ボクセルモアイキーホルダー_003_studio.png",
       "images/kurima/dot_osuwari_keyholder/studio/20261031_ボクセルモアイキーホルダー_004_studio.png",
       "images/kurima/dot_osuwari_keyholder/studio/ChatGPT 画像 2026年10月31日 15_42_06.png",
-      "images/kurima/dot_osuwari_keyholder/studio/Moataro (1).jpg"
+      "images/kurima/dot_osuwari_keyholder/studio/Moataro (1).jpg",
+      "images/kurima/dot_osuwari_keyholder/studio/バッグに揺れるモノクロチャーム集.png"
     ]
   },
   "osuwari_moai_pen": {
