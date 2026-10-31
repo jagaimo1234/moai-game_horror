@@ -1515,7 +1515,7 @@
 
     .status-select-pill {
       background: var(--bg-elevated);
-      color: #fff;
+      color: var(--text-main);
       border: 1px solid var(--border-strong);
       padding: 6px 12px;
       border-radius: 999px;
@@ -1529,7 +1529,7 @@
       width: 100%;
       background: transparent;
       border: 1px solid transparent;
-      color: #fff;
+      color: var(--text-main);
       font-size: 1.2rem;
       font-weight: 800;
       padding: 6px 8px;
@@ -1541,12 +1541,16 @@
       background: var(--bg-elevated);
       border-color: var(--border-strong);
     }
+    .inline-input-title::placeholder {
+      color: var(--text-muted);
+      opacity: 0.7;
+    }
 
     .inline-input-subtitle {
       width: 100%;
       background: transparent;
       border: 1px solid transparent;
-      color: var(--accent);
+      color: var(--text-sub);
       font-size: 0.85rem;
       font-weight: 600;
       padding: 5px 8px;
@@ -1557,6 +1561,11 @@
     .inline-input-subtitle:focus {
       background: var(--bg-elevated);
       border-color: var(--border-strong);
+      color: var(--text-main);
+    }
+    .inline-input-subtitle::placeholder {
+      color: var(--text-muted);
+      opacity: 0.7;
     }
 
     .info-section-label {
@@ -1572,10 +1581,10 @@
     .inline-textarea-desc {
       width: 100%;
       min-height: 80px;
-      background: rgba(255,255,255,0.03);
-      border: 1px solid var(--border);
+      background: var(--bg-surface);
+      border: 1px solid var(--border-strong);
       border-radius: 12px;
-      color: var(--text-sub);
+      color: var(--text-main);
       font-size: 0.86rem;
       line-height: 1.55;
       padding: 10px 12px;
@@ -1586,7 +1595,11 @@
     .inline-textarea-desc:focus {
       border-color: var(--accent);
       background: var(--bg-elevated);
-      color: #fff;
+      color: var(--text-main);
+    }
+    .inline-textarea-desc::placeholder {
+      color: var(--text-muted);
+      opacity: 0.7;
     }
 
     .detail-delete-row {
@@ -2389,6 +2402,11 @@
       border-color: var(--accent);
     }
 
+    .chat-textarea::placeholder {
+      color: var(--text-muted);
+      opacity: 0.7;
+    }
+
     .btn-quick-ai {
       width: 38px;
       height: 38px;
@@ -2472,13 +2490,22 @@
 
     .field-input {
       width: 100%;
-      background: var(--bg-main);
+      background: var(--bg-surface);
       border: 1px solid var(--border-strong);
-      color: #fff;
+      color: var(--text-main);
       padding: 10px 14px;
       border-radius: 12px;
       font-size: 0.88rem;
       outline: none;
+    }
+    .field-input:focus {
+      border-color: var(--accent);
+      background: var(--bg-elevated);
+      color: var(--text-main);
+    }
+    .field-input::placeholder {
+      color: var(--text-muted);
+      opacity: 0.7;
     }
 
     .add-modal-actions {
@@ -2911,7 +2938,7 @@
         <img id="addPreviewImg" class="dropzone-preview-img" alt="プレビュー">
         <div id="addDropzonePrompt">
           <div style="font-size:2rem; margin-bottom:6px;">📸</div>
-          <div style="font-weight:700; font-size:0.92rem; color:#fff;">タップして画像を選択・撮影</div>
+          <div style="font-weight:700; font-size:0.92rem; color:var(--text-main);">タップして画像を選択・撮影</div>
           <div style="font-size:0.74rem; color:var(--text-muted); margin-top:4px;">名前を入力しなくてもそのまま登録できます</div>
         </div>
         <input type="file" id="addImageInput" accept="image/*" style="display:none;">
