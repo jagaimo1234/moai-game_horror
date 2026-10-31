@@ -824,9 +824,8 @@
           const badgeHtml = `<div class="badge" id="badge-${p.id}" style="display:none;margin-right:4px;"></div>`;
           const stockHtml = `<div class="badge" id="stock-${p.id}" style="display:none;"></div>`;
 
-          const imageHtml = p.isDev 
-            ? `<img class="main-product-img" src="images/dev_placeholder.gif" style="border-radius:12px 12px 0 0; border:1px dashed rgba(255,255,255,0.1);" alt="開発中">`
-            : `<img class="main-product-img" src="${p.image}" alt="${p.name.replace(/\n/g,' ')}">`;
+          const imgSrc = p.image || (p.isDev ? 'images/dev_placeholder.gif' : (window.NO_IMAGE_PLACEHOLDER || 'images/dev_placeholder.gif'));
+          const imageHtml = `<img class="main-product-img" src="${imgSrc}" style="border-radius:12px 12px 0 0; ${(!p.image && p.isDev) ? 'border:1px dashed rgba(255,255,255,0.1);' : ''}" alt="${p.name.replace(/\n/g,' ')}" onerror="this.src=window.NO_IMAGE_PLACEHOLDER||'images/dev_placeholder.gif'">`;
 
           tileGrid.innerHTML += `
             <div class="product-card-tile" onclick="openDetail(${i})">
@@ -882,9 +881,8 @@
           const badgeLargeHtml = `<div class="badge" id="badge-large-${p.id}" style="display:none;"></div>`;
           const stockLargeHtml = `<div class="badge" id="stock-large-${p.id}" style="display:none;"></div>`;
 
-          const largeImageHtml = p.isDev
-            ? `<img class="main-product-img" src="images/dev_placeholder.gif" style="width:100%; aspect-ratio:1; object-fit:cover; border-radius:12px; border:1px dashed rgba(255,255,255,0.1);" alt="開発中">`
-            : `<img class="main-product-img" id="main-img-${i}" src="${p.image}" alt="${p.name.replace(/\n/g,' ')}">
+          const largeImgSrc = p.image || (p.isDev ? 'images/dev_placeholder.gif' : (window.NO_IMAGE_PLACEHOLDER || 'images/dev_placeholder.gif'));
+          const largeImageHtml = `<img class="main-product-img" id="main-img-${i}" src="${largeImgSrc}" style="width:100%; aspect-ratio:1; object-fit:cover; border-radius:12px; ${(!p.image && p.isDev) ? 'border:1px dashed rgba(255,255,255,0.1);' : ''}" alt="${p.name.replace(/\n/g,' ')}" onerror="this.src=window.NO_IMAGE_PLACEHOLDER||'images/dev_placeholder.gif'">
                <video class="main-product-img" id="main-video-${i}" style="display:none; width:100%; height:auto; aspect-ratio:1/1; object-fit:cover;" loop muted playsinline controls></video>`;
 
           track.innerHTML += `
