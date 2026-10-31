@@ -1434,107 +1434,102 @@
       </div>
     </div>
 
-    <!-- =========================================================
-         4列 お品書き画像管理モーダル (Studio Moai × RAW × お品書き)
+        <!-- =========================================================
+         新デザイン: お品書き画像管理モーダル (2段スタジオ＆RAW統合UI)
          ========================================================= -->
     <div id="work-image-selector-modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.88); z-index:2300; align-items:center; justify-content:center; padding:16px;">
-      <div style="background:var(--panel-bg); width:100%; max-width:1150px; max-height:94vh; border-radius:14px; border:1.5px solid var(--accent); display:flex; flex-direction:column; box-shadow:0 15px 45px rgba(0,0,0,0.9); overflow:hidden;">
+      <div style="background:#161822; width:100%; max-width:1100px; max-height:92vh; border-radius:16px; border:1px solid rgba(0,210,255,0.4); display:flex; flex-direction:column; box-shadow:0 20px 60px rgba(0,0,0,0.9); overflow:hidden;">
         
-        <!-- Header -->
-        <div style="display:flex; justify-content:space-between; align-items:center; padding:14px 20px; border-bottom:1px solid rgba(255,255,255,0.1); background:rgba(0,0,0,0.35);">
-          <div>
-            <h3 style="color:var(--accent); font-size:18px; margin:0; display:flex; align-items:center; gap:8px;">
+        <!-- Top Header & Work Switcher -->
+        <div style="padding:14px 20px; background:rgba(0,0,0,0.4); border-bottom:1px solid rgba(255,255,255,0.08); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
+          <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
+            <h3 style="color:var(--accent); font-size:17px; margin:0; display:flex; align-items:center; gap:8px;">
               <span>🖼️</span> お品書き画像管理 (<span id="img-manager-work-name"></span>)
             </h3>
-            <p style="font-size:11px; opacity:0.65; margin-top:2px;">
-              ③Studio生成画像や④RAW画像をタップして②へ追加し、並び替え・代表設定をして「お品書きに反映」してください。
-            </p>
-          </div>
-          <button style="background:none; border:none; color:white; font-size:24px; cursor:pointer;" onclick="closeWorkImageSelectorModal()">✕</button>
-        </div>
-
-        <!-- Work Switcher & Quick Integration Bar (在庫設定 & トピックス) -->
-        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; padding:10px 20px; background:rgba(0,0,0,0.25); border-bottom:1px solid rgba(255,255,255,0.08);">
-          <!-- Work Switcher -->
-          <div style="display:flex; align-items:center; gap:8px;">
-            <span style="font-size:11px; opacity:0.75; font-weight:bold;">🗿 対象作品切替:</span>
-            <select id="img-manager-work-select" onchange="openWorkImageSelectorModal(this.value)" class="form-select" style="font-size:12px; padding:4px 10px; width:auto; max-width:280px; background:rgba(0,0,0,0.6); color:#fff; border:1px solid rgba(255,255,255,0.25); border-radius:6px; font-weight:bold;">
-            </select>
-          </div>
-
-          <!-- Quick Access: 在庫設定 & トピックス連携 -->
-          <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
-            <!-- 在庫設定 Status & Jump -->
-            <div style="display:flex; align-items:center; gap:6px; background:rgba(255,255,255,0.05); padding:4px 10px; border-radius:6px; border:1px solid rgba(255,255,255,0.1);">
-              <span style="font-size:11px; color:#f1c40f; font-weight:bold;">📦 在庫設定:</span>
-              <span id="img-manager-stock-badge" style="font-size:11px; color:#fff;">確認中...</span>
-              <button type="button" onclick="jumpToSettingsFromImageManager()" style="background:rgba(241,196,15,0.18); border:1px solid #f1c40f; color:#f1c40f; font-size:10px; padding:2px 8px; border-radius:4px; cursor:pointer; font-weight:bold;">在庫タブへ →</button>
+            <!-- Work Selector -->
+            <div style="display:flex; align-items:center; gap:6px; background:rgba(255,255,255,0.06); padding:4px 10px; border-radius:8px; border:1px solid rgba(255,255,255,0.12);">
+              <span style="font-size:11px; opacity:0.75; font-weight:bold;">🗿 作品切替:</span>
+              <select id="img-manager-work-select" onchange="openWorkImageSelectorModal(this.value)" class="form-select" style="font-size:12px; padding:3px 8px; width:auto; max-width:240px; background:transparent; color:#fff; border:none; font-weight:bold; cursor:pointer;">
+              </select>
             </div>
-
-            <!-- トピックス Status & Jump -->
-            <div style="display:flex; align-items:center; gap:6px; background:rgba(255,255,255,0.05); padding:4px 10px; border-radius:6px; border:1px solid rgba(255,255,255,0.1);">
-              <span style="font-size:11px; color:#ff9f1c; font-weight:bold;">🔥 トピックス:</span>
-              <span id="img-manager-topics-badge" style="font-size:11px; color:#fff;">未連動</span>
-              <button type="button" onclick="jumpToTopicsFromImageManager()" style="background:rgba(255,159,28,0.18); border:1px solid #ff9f1c; color:#ff9f1c; font-size:10px; padding:2px 8px; border-radius:4px; cursor:pointer; font-weight:bold;">トピックスへ →</button>
+            <!-- Quick Badges -->
+            <div id="img-manager-stock-box" style="display:flex; align-items:center; gap:5px; background:rgba(241,196,15,0.1); border:1px solid rgba(241,196,15,0.3); padding:3px 8px; border-radius:6px; font-size:11px;">
+              <span style="color:#f1c40f; font-weight:bold;">📦 在庫:</span>
+              <span id="img-manager-stock-badge" style="color:#fff;">確認中...</span>
+              <button type="button" onclick="jumpToSettingsFromImageManager()" style="background:none; border:none; color:#f1c40f; font-size:10px; cursor:pointer; text-decoration:underline; font-weight:bold; padding:0 2px;">設定 →</button>
+            </div>
+            <div id="img-manager-topics-box" style="display:flex; align-items:center; gap:5px; background:rgba(255,159,28,0.1); border:1px solid rgba(255,159,28,0.3); padding:3px 8px; border-radius:6px; font-size:11px;">
+              <span style="color:#ff9f1c; font-weight:bold;">🔥 トピックス:</span>
+              <span id="img-manager-topics-badge" style="color:#fff;">未連動</span>
+              <button type="button" onclick="jumpToTopicsFromImageManager()" style="background:none; border:none; color:#ff9f1c; font-size:10px; cursor:pointer; text-decoration:underline; font-weight:bold; padding:0 2px;">設定 →</button>
             </div>
           </div>
+          <button style="background:none; border:none; color:#888; font-size:22px; cursor:pointer; line-height:1; transition:color 0.2s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#888'" onclick="closeWorkImageSelectorModal()">✕</button>
         </div>
 
-        <!-- 4 Columns Grid Body -->
-        <div style="display:grid; grid-template-columns: repeat(4, 1fr); gap:12px; padding:16px; flex:1; overflow-y:auto; min-height:420px; background:rgba(0,0,0,0.15);">
+        <!-- Scrollable Main Container -->
+        <div style="flex:1; overflow-y:auto; padding:16px 20px; display:flex; flex-direction:column; gap:20px;">
           
-          <!-- Column 1: 現在の表示（公開中） -->
-          <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.1); border-radius:10px; padding:12px; display:flex; flex-direction:column;">
-            <div style="font-size:13px; font-weight:bold; color:#aaa; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center;">
-              <span>① 現在の表示</span>
-              <span style="font-size:10px; background:rgba(255,255,255,0.1); padding:2px 6px; border-radius:4px;">参照専用</span>
+          <!-- Section 1: 現在のお品書き公開構成 (トレイ) -->
+          <div style="background:rgba(0,0,0,0.3); border:1.5px solid rgba(0,210,255,0.3); border-radius:12px; padding:14px 16px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+              <div style="display:flex; align-items:center; gap:8px;">
+                <span style="font-size:14px; font-weight:bold; color:var(--accent);">📋 お品書き掲載順（左端が★代表カバー画像）</span>
+                <span id="img-manager-count-badge" style="font-size:11px; background:rgba(0,210,255,0.15); color:var(--accent); padding:2px 8px; border-radius:10px; font-weight:bold;">0枚選択中</span>
+              </div>
+              <span style="font-size:11px; opacity:0.6;">◀ ▶ で並び替え、✕ で除外</span>
             </div>
-            <div id="col-current-display" style="display:flex; flex-direction:column; gap:8px; overflow-y:auto; flex:1; max-height:460px; padding-right:4px;">
+
+            <!-- Selected Images Horizontal Flex Container -->
+            <div id="col-draft-display" style="display:flex; gap:12px; overflow-x:auto; padding:6px 2px 12px 2px; min-height:130px; align-items:center;">
               <!-- JS rendered -->
             </div>
           </div>
 
-          <!-- Column 2: 変更後の構成（編集用） -->
-          <div style="background:rgba(0,210,255,0.04); border:1.5px solid var(--accent); border-radius:10px; padding:12px; display:flex; flex-direction:column;">
-            <div style="font-size:13px; font-weight:bold; color:var(--accent); margin-bottom:10px; display:flex; justify-content:space-between; align-items:center;">
-              <span>② 変更後の構成</span>
-              <span style="font-size:10px; background:rgba(0,210,255,0.2); padding:2px 6px; border-radius:4px;">編集可能</span>
+          <!-- Section 2: 画像プール・ライブラリ -->
+          <div style="background:rgba(0,0,0,0.25); border:1px solid rgba(255,255,255,0.08); border-radius:12px; padding:16px; flex:1; display:flex; flex-direction:column;">
+            
+            <!-- Library Tabs & Sub-info -->
+            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:14px; border-bottom:1px solid rgba(255,255,255,0.08); padding-bottom:10px;">
+              <div style="display:flex; gap:8px;">
+                <button type="button" class="btn" id="btn-pool-studio" onclick="switchImagePoolTab('studio')" style="background:rgba(112,214,255,0.2); border:1px solid #70d6ff; color:#70d6ff; font-size:12px; font-weight:bold; padding:6px 14px; border-radius:6px; cursor:pointer;">
+                  🎨 Studio Moai 背景処理済 (<span id="pool-count-studio">0</span>)
+                </button>
+                <button type="button" class="btn" id="btn-pool-raw" onclick="switchImagePoolTab('raw')" style="background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.2); color:#aaa; font-size:12px; font-weight:bold; padding:6px 14px; border-radius:6px; cursor:pointer;">
+                  📸 RAW 元画像 (<span id="pool-count-raw">0</span>)
+                </button>
+                <button type="button" class="btn" id="btn-pool-all" onclick="switchImagePoolTab('all')" style="background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.2); color:#aaa; font-size:12px; font-weight:bold; padding:6px 14px; border-radius:6px; cursor:pointer;">
+                  📁 すべての候補 (<span id="pool-count-all">0</span>)
+                </button>
+              </div>
+              <div style="display:flex; align-items:center; gap:10px;">
+                <input type="file" id="img-manager-file-input" accept="image/*,video/*" multiple style="display:none;" onchange="handleDirectFileSelect(event)">
+                <button type="button" onclick="document.getElementById('img-manager-file-input').click()" style="background:rgba(255,159,28,0.15); border:1px solid #ff9f1c; color:#ff9f1c; font-size:11px; padding:6px 12px; border-radius:6px; cursor:pointer; font-weight:bold; display:flex; align-items:center; gap:5px;">
+                  <span>📸</span> 写真を直接追加 (RAW/アップロード)
+                </button>
+                <div style="font-size:11px; opacity:0.65;">
+                  💡 タップでお品書きに追加／除外
+                </div>
+              </div>
             </div>
-            <div id="col-draft-display" style="display:flex; flex-direction:column; gap:8px; overflow-y:auto; flex:1; max-height:460px; padding-right:4px;">
-              <!-- JS rendered -->
-            </div>
-          </div>
 
-          <!-- Column 3: Studio Moai 生成画像 -->
-          <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.1); border-radius:10px; padding:12px; display:flex; flex-direction:column;">
-            <div style="font-size:13px; font-weight:bold; color:#70d6ff; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center;">
-              <span>③ Studio Moai 生成画像</span>
-              <span style="font-size:10px; opacity:0.6;">タップで②に追加</span>
-            </div>
-            <div id="col-studio-images" style="display:grid; grid-template-columns: repeat(2, 1fr); gap:8px; overflow-y:auto; flex:1; max-height:460px; padding-right:4px;">
+            <!-- Pool Images Grid -->
+            <div id="image-pool-grid" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(130px, 1fr)); gap:12px; max-height:360px; overflow-y:auto; padding-right:4px;">
               <!-- JS rendered -->
             </div>
-          </div>
 
-          <!-- Column 4: 元画像（RAW） -->
-          <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.1); border-radius:10px; padding:12px; display:flex; flex-direction:column;">
-            <div style="font-size:13px; font-weight:bold; color:#ff9f1c; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center;">
-              <span>④ 元画像 (RAW)</span>
-              <span style="font-size:10px; opacity:0.6;">タップで②に追加</span>
-            </div>
-            <div id="col-raw-images" style="display:grid; grid-template-columns: repeat(2, 1fr); gap:8px; overflow-y:auto; flex:1; max-height:460px; padding-right:4px;">
-              <!-- JS rendered -->
-            </div>
           </div>
 
         </div>
 
         <!-- Footer -->
-        <div style="display:flex; justify-content:space-between; align-items:center; padding:14px 20px; border-top:1px solid rgba(255,255,255,0.1); background:rgba(0,0,0,0.3);">
-          <button type="button" class="btn" style="background:rgba(255,255,255,0.1); color:#ccc;" onclick="closeWorkImageSelectorModal()">変更を破棄して閉じる</button>
-          <div style="display:flex; gap:10px; align-items:center;">
-            <span id="img-manager-status" style="font-size:12px; color:var(--accent);"></span>
-            <button type="button" class="btn btn-primary" onclick="applyWorkImageConfigToPos()" style="padding:8px 24px; font-weight:bold; font-size:14px; box-shadow:0 4px 15px rgba(0,210,255,0.4);">
+        <div style="padding:14px 20px; background:rgba(0,0,0,0.4); border-top:1px solid rgba(255,255,255,0.08); display:flex; justify-content:space-between; align-items:center;">
+          <button type="button" class="btn" style="background:rgba(255,255,255,0.08); color:#bbb; border:1px solid rgba(255,255,255,0.15); font-size:12px; padding:8px 16px;" onclick="closeWorkImageSelectorModal()">
+            変更を破棄して閉じる
+          </button>
+          <div style="display:flex; align-items:center; gap:12px;">
+            <span id="img-manager-status" style="font-size:12px; color:var(--accent); font-weight:bold;"></span>
+            <button type="button" class="btn btn-primary" onclick="applyWorkImageConfigToPos()" style="padding:9px 24px; font-weight:bold; font-size:14px; box-shadow:0 4px 15px rgba(0,210,255,0.4);">
               ✨ お品書きに反映・確定
             </button>
           </div>
@@ -13504,10 +13499,12 @@
     };
 
     // =========================================================
-    // 🖼️ 4列 お品書き画像管理コントローラー (Studio Moai × RAW × POS)
+    // 🖼️ お品書き画像管理コントローラー (2段スタジオ＆RAW統合UI)
     // =========================================================
     let currentSelectorPosId = null;
-    let currentDraftImages = []; // Array of image URLs/paths in column 2
+    let currentDraftImages = []; // Array of image URLs/paths in the selected tray
+    let currentPoolTab = 'studio'; // 'studio' | 'raw' | 'all'
+    let currentCandidateImages = { studio: [], raw: [], all: [] };
 
     window.openWorkImageSelectorModal = function(pId) {
       if (!pId) {
@@ -13520,13 +13517,10 @@
       const p = allProducts.find(item => item.id === pId) || { id: pId, name: pId, image: null, images: [] };
       const wData = (window.worksMasterData && window.worksMasterData[pId]) || {};
 
-      const nameEl = document.getElementById('img-manager-work-name');
-      if (nameEl) nameEl.textContent = p.name ? p.name.replace(/\n/g, ' ') : pId;
-
       const statusEl = document.getElementById('img-manager-status');
       if (statusEl) statusEl.textContent = '';
 
-      // 対象作品プルダウン更新
+      // 作品切替プルダウン更新
       const workSelect = document.getElementById('img-manager-work-select');
       if (workSelect) {
         let optHtml = '';
@@ -13567,7 +13561,7 @@
         }
       }
 
-      // 1. 現在公開中の画像一覧 (代表画像 + サブ画像)
+      // 1. 現在公開中・選択中のお品書き画像一覧
       const currentList = [];
       const mainImg = p.image || wData.image;
       if (mainImg) currentList.push(mainImg);
@@ -13580,13 +13574,14 @@
         if (url && !currentList.includes(url)) currentList.push(url);
       });
 
-      // 2. 変更後の構成（初期値は現在の表示のクローン）
       currentDraftImages = [...currentList];
 
+      // 2. 候補プールの分類と構築
+      buildCandidatePool(pId, p, wData);
+
       // 3. レンダリング
-      renderColCurrent(currentList);
-      renderColDraft();
-      loadAndRenderCandidateImages(pId);
+      renderDraftTray();
+      renderImagePool();
 
       const modalEl = document.getElementById('work-image-selector-modal');
       if (modalEl) modalEl.style.display = 'flex';
@@ -13601,16 +13596,12 @@
 
     window.jumpToSettingsFromImageManager = function() {
       closeWorkImageSelectorModal();
-      if (typeof window.switchSysTab === 'function') {
-        window.switchSysTab('settings');
-      }
+      if (typeof window.switchSysTab === 'function') window.switchSysTab('settings');
     };
 
     window.jumpToTopicsFromImageManager = function() {
       closeWorkImageSelectorModal();
-      if (typeof window.switchSysTab === 'function') {
-        window.switchSysTab('topics');
-      }
+      if (typeof window.switchSysTab === 'function') window.switchSysTab('topics');
     };
 
     window.openWorkImageSelectorFromTopics = function() {
@@ -13634,60 +13625,215 @@
       openWorkImageSelectorModal(prodSelect.value);
     };
 
-    function renderColCurrent(list) {
-      const col = document.getElementById('col-current-display');
-      if (!col) return;
-      if (list.length === 0) {
-        col.innerHTML = '<div style="color:#666; font-size:12px; text-align:center; padding:30px 10px;">画像が設定されていません</div>';
-        return;
+    window.handleDirectFileSelect = function(e) {
+      const files = e.target.files;
+      if (!files || files.length === 0) return;
+      const readPromises = Array.from(files).map(file => {
+        return new Promise(resolve => {
+          const reader = new FileReader();
+          reader.onload = ev => {
+            resolve({ name: file.name, dataUrl: ev.target.result });
+          };
+          reader.readAsDataURL(file);
+        });
+      });
+
+      Promise.all(readPromises).then(results => {
+        results.forEach(res => {
+          const url = res.dataUrl;
+          if (!currentCandidateImages.all.includes(url)) {
+            currentCandidateImages.all.push(url);
+            currentCandidateImages.raw.push(url);
+          }
+          if (!currentDraftImages.includes(url)) {
+            currentDraftImages.push(url);
+          }
+        });
+        currentPoolTab = 'raw';
+        renderDraftTray();
+        renderImagePool();
+        switchImagePoolTab('raw');
+      });
+      e.target.value = '';
+    };
+
+    // 候補画像の分類
+    function buildCandidatePool(pId, p, wData) {
+      const allKnown = [];
+      const addSafe = (url) => {
+        if (url && typeof url === 'string' && !allKnown.includes(url)) allKnown.push(url);
+      };
+
+      if (p.image) addSafe(p.image);
+      if (Array.isArray(p.images)) p.images.forEach(addSafe);
+      if (Array.isArray(p.rawImages)) p.rawImages.forEach(addSafe);
+      if (Array.isArray(p.studioImages)) p.studioImages.forEach(addSafe);
+      if (wData.image) addSafe(wData.image);
+      if (Array.isArray(wData.images)) wData.images.forEach(addSafe);
+      if (Array.isArray(wData.rawImages)) wData.rawImages.forEach(addSafe);
+      if (Array.isArray(wData.studioImages)) wData.studioImages.forEach(addSafe);
+
+      // WORK_FOLDER_ASSETS (data.js からのディスクスキャン)
+      if (window.WORK_FOLDER_ASSETS) {
+        const assetObj = window.WORK_FOLDER_ASSETS[pId] || window.WORK_FOLDER_ASSETS[pId.replace('_gray', '')] || {};
+        if (Array.isArray(assetObj.raw)) assetObj.raw.forEach(addSafe);
+        if (Array.isArray(assetObj.studio)) assetObj.studio.forEach(addSafe);
       }
-      col.innerHTML = list.map((src, idx) => `
-        <div style="display:flex; align-items:center; gap:8px; background:rgba(0,0,0,0.3); padding:6px; border-radius:6px; border:1px solid ${idx === 0 ? 'var(--accent)' : 'rgba(255,255,255,0.1)'};">
-          <img src="${src}" style="width:48px; height:48px; object-fit:cover; border-radius:4px; background:#111;" onerror="this.src=window.NO_IMAGE_PLACEHOLDER||this.src">
-          <div style="flex:1; overflow:hidden;">
-            <div style="font-size:10px; font-weight:bold; color:${idx === 0 ? 'var(--accent)' : '#aaa'};">${idx === 0 ? '★ 代表画像' : `サブ画像 ${idx}`}</div>
-            <div style="font-size:9px; color:#666; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${src.split('/').pop()}</div>
-          </div>
-        </div>
-      `).join('');
+
+      const studioList = [];
+      const rawList = [];
+
+      allKnown.forEach(url => {
+        const lower = url.toLowerCase();
+        if (lower.includes('/raw/') || lower.includes('_raw_') || lower.includes('_raw.')) {
+          rawList.push(url);
+        } else {
+          // studio処理済、または通常の作品画像
+          studioList.push(url);
+        }
+      });
+
+      currentCandidateImages = {
+        studio: studioList,
+        raw: rawList,
+        all: allKnown
+      };
+
+      // カウントバッジ更新
+      const cStudio = document.getElementById('pool-count-studio');
+      const cRaw = document.getElementById('pool-count-raw');
+      const cAll = document.getElementById('pool-count-all');
+      if (cStudio) cStudio.textContent = studioList.length;
+      if (cRaw) cRaw.textContent = rawList.length;
+      if (cAll) cAll.textContent = allKnown.length;
     }
 
-    function renderColDraft() {
-      const col = document.getElementById('col-draft-display');
-      if (!col) return;
+    // 上段トレイのレンダリング
+    function renderDraftTray() {
+      const tray = document.getElementById('col-draft-display');
+      const countBadge = document.getElementById('img-manager-count-badge');
+      if (countBadge) countBadge.textContent = `${currentDraftImages.length}枚選択中`;
+      if (!tray) return;
+
       if (currentDraftImages.length === 0) {
-        col.innerHTML = '<div style="color:#888; font-size:12px; text-align:center; padding:30px 10px;">③または④の画像をタップして<br>お品書き画像を追加してください</div>';
+        tray.innerHTML = '<div style="color:#888; font-size:12px; text-align:center; width:100%; padding:30px 10px;">下の写真ライブラリから画像を選んでタップしてください</div>';
         return;
       }
-      col.innerHTML = currentDraftImages.map((src, idx) => `
-        <div style="display:flex; align-items:center; gap:8px; background:rgba(0,0,0,0.4); padding:6px; border-radius:6px; border:1px solid ${idx === 0 ? 'var(--accent)' : 'rgba(255,255,255,0.15)'};">
-          <img src="${src}" style="width:48px; height:48px; object-fit:cover; border-radius:4px; background:#111;" onerror="this.src=window.NO_IMAGE_PLACEHOLDER||this.src">
-          <div style="flex:1; overflow:hidden;">
-            <div style="font-size:10px; font-weight:bold; color:${idx === 0 ? 'var(--accent)' : '#ddd'};">${idx === 0 ? '★ 代表画像' : `サブ ${idx}`}</div>
-            <div style="font-size:9px; color:#888; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${src.split('/').pop()}</div>
+
+      tray.innerHTML = currentDraftImages.map((src, idx) => {
+        const isMain = idx === 0;
+        const filename = src.split('/').pop();
+        return `
+          <div style="flex-shrink:0; width:110px; background:rgba(0,0,0,0.5); border-radius:10px; border:1.5px solid ${isMain ? 'gold' : 'rgba(255,255,255,0.18)'}; padding:6px; display:flex; flex-direction:column; gap:4px; box-shadow:0 4px 12px rgba(0,0,0,0.4); position:relative;">
+            <!-- Badge -->
+            <div style="font-size:10px; font-weight:bold; color:${isMain ? 'gold' : '#ccc'}; text-align:center; background:${isMain ? 'rgba(255,215,0,0.15)' : 'rgba(255,255,255,0.08)'}; padding:2px 4px; border-radius:4px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
+              ${isMain ? '★ 代表カバー' : `サブ ${idx}`}
+            </div>
+            
+            <!-- Thumbnail Image -->
+            <div style="width:100%; aspect-ratio:1; border-radius:6px; overflow:hidden; background:#000; position:relative;">
+              <img src="${src}" style="width:100%; height:100%; object-fit:cover;" onerror="this.src=window.NO_IMAGE_PLACEHOLDER||this.src">
+              <!-- Promote to Main Button -->
+              ${!isMain ? `<button type="button" onclick="promoteToMainImage(${idx})" title="代表画像にする" style="position:absolute; bottom:2px; left:2px; background:rgba(0,0,0,0.85); border:1px solid gold; color:gold; font-size:9px; padding:2px 5px; border-radius:3px; cursor:pointer; font-weight:bold;">★代表へ</button>` : ''}
+            </div>
+
+            <!-- Filename -->
+            <div style="font-size:9px; color:#888; text-align:center; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="${filename}">
+              ${filename}
+            </div>
+
+            <!-- Action Controls (Left / Right / Delete) -->
+            <div style="display:flex; justify-content:space-between; align-items:center; gap:2px; margin-top:2px;">
+              <button type="button" onclick="moveDraftImage(${idx}, -1)" ${idx === 0 ? 'disabled style="opacity:0.2; cursor:default;"' : ''} style="background:rgba(255,255,255,0.1); border:none; color:#fff; border-radius:3px; font-size:10px; flex:1; height:22px; cursor:pointer;">◀</button>
+              <button type="button" onclick="moveDraftImage(${idx}, 1)" ${idx === currentDraftImages.length - 1 ? 'disabled style="opacity:0.2; cursor:default;"' : ''} style="background:rgba(255,255,255,0.1); border:none; color:#fff; border-radius:3px; font-size:10px; flex:1; height:22px; cursor:pointer;">▶</button>
+              <button type="button" onclick="removeDraftImage(${idx})" title="お品書きから除外" style="background:rgba(231,76,60,0.25); border:1px solid #e74c3c; color:#ff6b6b; border-radius:3px; width:22px; height:22px; font-size:10px; cursor:pointer; display:flex; align-items:center; justify-content:center;">✕</button>
+            </div>
           </div>
-          <div style="display:flex; flex-direction:column; gap:2px;">
-            ${idx > 0 ? `<button type="button" onclick="moveDraftImage(${idx}, -1)" style="background:rgba(255,255,255,0.1); border:none; color:#fff; border-radius:3px; font-size:9px; width:20px; height:18px; cursor:pointer;">▲</button>` : ''}
-            ${idx < currentDraftImages.length - 1 ? `<button type="button" onclick="moveDraftImage(${idx}, 1)" style="background:rgba(255,255,255,0.1); border:none; color:#fff; border-radius:3px; font-size:9px; width:20px; height:18px; cursor:pointer;">▼</button>` : ''}
-          </div>
-          <button type="button" onclick="removeDraftImage(${idx})" style="background:rgba(231,76,60,0.25); border:1px solid #e74c3c; color:#ff6b6b; border-radius:4px; width:24px; height:24px; font-size:11px; cursor:pointer; display:flex; align-items:center; justify-content:center;" title="除外">✕</button>
-        </div>
-      `).join('');
+        `;
+      }).join('');
     }
 
-    window.addDraftImage = function(src) {
-      if (!src) return;
-      if (currentDraftImages.includes(src)) {
-        alert('この画像はすでに追加されています');
+    // 下段ライブラリのレンダリング
+    function renderImagePool() {
+      const grid = document.getElementById('image-pool-grid');
+      if (!grid) return;
+
+      const list = currentCandidateImages[currentPoolTab] || [];
+
+      if (list.length === 0) {
+        const tabName = currentPoolTab === 'studio' ? 'Studio Moai背景処理済' : (currentPoolTab === 'raw' ? 'RAW元画像' : '候補');
+        grid.innerHTML = `<div style="grid-column:1 / -1; color:#888; font-size:13px; text-align:center; padding:40px 10px;">
+          ${tabName}画像がまだありません。<br>
+          ${currentPoolTab === 'raw' ? '<span style="font-size:11px; opacity:0.7;">「➕ 写真ファイルを追加」から選択するか、iPhoneアプリで撮影してください</span>' : ''}
+        </div>`;
         return;
       }
-      currentDraftImages.push(src);
-      renderColDraft();
+
+      grid.innerHTML = list.map(src => {
+        const isSelected = currentDraftImages.includes(src);
+        const filename = src.split('/').pop();
+        const isRaw = src.toLowerCase().includes('/raw/') || src.toLowerCase().includes('_raw');
+
+        return `
+          <div onclick="togglePoolImage('${src}')" style="cursor:pointer; position:relative; aspect-ratio:1; border-radius:10px; overflow:hidden; border:2px solid ${isSelected ? 'var(--accent)' : 'rgba(255,255,255,0.12)'}; background:#0a0c10; box-shadow:${isSelected ? '0 0 12px rgba(0,210,255,0.4)' : 'none'}; transition:all 0.2s;" title="${isSelected ? 'タップしてお品書きから除外' : 'タップしてお品書きに追加'}">
+            <img src="${src}" style="width:100%; height:100%; object-fit:cover;" onerror="this.src=window.NO_IMAGE_PLACEHOLDER||this.src">
+            
+            <!-- Selected Check Badge -->
+            ${isSelected ? `
+              <div style="position:absolute; top:6px; right:6px; background:var(--accent); color:#000; font-size:10px; font-weight:bold; border-radius:12px; padding:2px 7px; box-shadow:0 2px 6px rgba(0,0,0,0.6); display:flex; align-items:center; gap:2px;">
+                ✓ 選択中
+              </div>
+            ` : ''}
+
+            <!-- Type Tag -->
+            <div style="position:absolute; top:6px; left:6px; background:rgba(0,0,0,0.65); color:${isRaw ? '#ff9f1c' : '#70d6ff'}; font-size:9px; padding:2px 5px; border-radius:4px; font-weight:bold;">
+              ${isRaw ? 'RAW' : 'Studio'}
+            </div>
+
+            <!-- Filename Bar -->
+            <div style="position:absolute; bottom:0; inset-x:0; background:linear-gradient(transparent, rgba(0,0,0,0.85)); font-size:9px; color:#ddd; padding:8px 6px 4px 6px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; text-align:center;">
+              ${filename}
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    window.switchImagePoolTab = function(tabName) {
+      currentPoolTab = tabName;
+      ['studio', 'raw', 'all'].forEach(t => {
+        const btn = document.getElementById(`btn-pool-${t}`);
+        if (btn) {
+          if (t === tabName) {
+            btn.style.background = 'rgba(112,214,255,0.25)';
+            btn.style.borderColor = 'var(--accent)';
+            btn.style.color = 'var(--accent)';
+          } else {
+            btn.style.background = 'rgba(255,255,255,0.05)';
+            btn.style.borderColor = 'rgba(255,255,255,0.2)';
+            btn.style.color = '#aaa';
+          }
+        }
+      });
+      renderImagePool();
+    };
+
+    window.togglePoolImage = function(src) {
+      if (!src) return;
+      const idx = currentDraftImages.indexOf(src);
+      if (idx !== -1) {
+        currentDraftImages.splice(idx, 1);
+      } else {
+        currentDraftImages.push(src);
+      }
+      renderDraftTray();
+      renderImagePool();
     };
 
     window.removeDraftImage = function(idx) {
       currentDraftImages.splice(idx, 1);
-      renderColDraft();
+      renderDraftTray();
+      renderImagePool();
     };
 
     window.moveDraftImage = function(idx, direction) {
@@ -13695,64 +13841,17 @@
       if (targetIdx < 0 || targetIdx >= currentDraftImages.length) return;
       const item = currentDraftImages.splice(idx, 1)[0];
       currentDraftImages.splice(targetIdx, 0, item);
-      renderColDraft();
+      renderDraftTray();
+      renderImagePool();
     };
 
-    function loadAndRenderCandidateImages(pId) {
-      const colStudio = document.getElementById('col-studio-images');
-      const colRaw = document.getElementById('col-raw-images');
-      if (!colStudio || !colRaw) return;
-
-      const allProducts = window.getFullMasterProducts ? window.getFullMasterProducts(window.customProductsData) : MASTER_PRODUCTS;
-      const p = allProducts.find(item => item.id === pId) || { images: [] };
-      const wData = (window.worksMasterData && window.worksMasterData[pId]) || {};
-
-      const allKnownImages = [];
-      const addSafe = (url) => {
-        if (url && typeof url === 'string' && !allKnownImages.includes(url)) {
-          allKnownImages.push(url);
-        }
-      };
-
-      if (p.image) addSafe(p.image);
-      if (Array.isArray(p.images)) p.images.forEach(addSafe);
-      if (wData.image) addSafe(wData.image);
-      if (Array.isArray(wData.images)) wData.images.forEach(addSafe);
-      if (Array.isArray(wData.rawImages)) wData.rawImages.forEach(addSafe);
-      if (Array.isArray(wData.studioImages)) wData.studioImages.forEach(addSafe);
-
-      const studioImgs = [];
-      const rawImgs = [];
-
-      allKnownImages.forEach(url => {
-        const lower = url.toLowerCase();
-        if (lower.includes('studio') || lower.includes('/studio/')) {
-          studioImgs.push(url);
-        } else if (lower.includes('raw') || lower.includes('/raw/')) {
-          rawImgs.push(url);
-        } else {
-          studioImgs.push(url);
-        }
-      });
-
-      colStudio.innerHTML = studioImgs.length > 0 ? studioImgs.map(src => `
-        <div onclick="addDraftImage('${src}')" style="cursor:pointer; position:relative; aspect-ratio:1; border-radius:6px; overflow:hidden; border:1px solid rgba(112,214,255,0.3); background:#000;" title="タップして追加">
-          <img src="${src}" style="width:100%; height:100%; object-fit:cover;" onerror="this.src=window.NO_IMAGE_PLACEHOLDER||this.src">
-          <div style="position:absolute; bottom:0; inset-x:0; background:rgba(0,0,0,0.7); font-size:8px; color:#70d6ff; padding:2px; text-align:center; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
-            ＋追加
-          </div>
-        </div>
-      `).join('') : '<div style="grid-column:span 2; color:#666; font-size:11px; text-align:center; padding:20px;">Studio画像なし</div>';
-
-      colRaw.innerHTML = rawImgs.length > 0 ? rawImgs.map(src => `
-        <div onclick="addDraftImage('${src}')" style="cursor:pointer; position:relative; aspect-ratio:1; border-radius:6px; overflow:hidden; border:1px solid rgba(255,159,28,0.3); background:#000;" title="タップして追加">
-          <img src="${src}" style="width:100%; height:100%; object-fit:cover;" onerror="this.src=window.NO_IMAGE_PLACEHOLDER||this.src">
-          <div style="position:absolute; bottom:0; inset-x:0; background:rgba(0,0,0,0.7); font-size:8px; color:#ff9f1c; padding:2px; text-align:center; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
-            ＋追加
-          </div>
-        </div>
-      `).join('') : '<div style="grid-column:span 2; color:#666; font-size:11px; text-align:center; padding:20px;">RAW画像なし</div>';
-    }
+    window.promoteToMainImage = function(idx) {
+      if (idx <= 0 || idx >= currentDraftImages.length) return;
+      const item = currentDraftImages.splice(idx, 1)[0];
+      currentDraftImages.unshift(item);
+      renderDraftTray();
+      renderImagePool();
+    };
 
     window.applyWorkImageConfigToPos = async () => {
       if (!currentSelectorPosId) return;

@@ -19,6 +19,7 @@
 const fs = require('fs');
 const path = require('path');
 const https = require('https');
+const { syncDriveToLocal } = require('./sync_drive_to_local');
 
 const ROOT_DIR = path.resolve(__dirname, '..');
 const KURIMA_DIR = path.join(ROOT_DIR, 'images', 'kurima');
@@ -91,6 +92,16 @@ async function main() {
     fs.mkdirSync(KURIMA_DIR, { recursive: true });
   }
 
+  // 0. Google Driveからローカル images/kurima/<ID>/raw への同期を実行
+  try {
+    const driveSynced = syncDriveToLocal();
+    if (driveSynced > 0) {
+      console.log(`📥 Google Driveから ${driveSynced} 件のRAW写真をローカル同期しました`);
+    }
+  } catch (e) {
+    // Gドライブ未マウント時はスキップ
+  }
+
   // 1. クラウド設定を取得
   console.log('📡 1. クラウド設定を取得中...');
   const [cpDoc, wmDoc] = await Promise.all([
@@ -105,7 +116,7 @@ async function main() {
   const remoteProductKeys = Array.from(new Set([
     ...Object.keys(customProducts),
     ...Object.keys(worksMaster)
-  ])).filter(k => k && !k.startsWith('dev_') && !k.startsWith('temp_') && !/^\d+$/.test(k) && k !== 'moai_lure_stand' && k !== 'moai_robo_mk2_gray');
+  ])).filter(k => k && !k.startsWith('dev_') && !k.startsWith('temp_') && !/^\d+$/.test(k));
 
   for (const posId of remoteProductKeys) {
     const itemFolder = path.join(KURIMA_DIR, posId);
@@ -215,13 +226,40 @@ async function main() {
     }
   }
 
+  // 4. ローカル内の全作品フォルダの raw / studio 画像アセット辞書を更新
+  const workAssets = {};
+  for (const posId of subDirs) {
+    const itemFolder = path.join(KURIMA_DIR, posId);
+    const rawDir = path.join(itemFolder, 'raw');
+    const studioDir = path.join(itemFolder, 'studio');
+    const rawFiles = fs.existsSync(rawDir) ? fs.readdirSync(rawDir).filter(isImageOrMedia).map(f => `images/kurima/${posId}/raw/${f}`) : [];
+    const studioFiles = fs.existsSync(studioDir) ? fs.readdirSync(studioDir).filter(isImageOrMedia).map(f => `images/kurima/${posId}/studio/${f}`) : [];
+    if (rawFiles.length > 0 || studioFiles.length > 0) {
+      workAssets[posId] = { raw: rawFiles, studio: studioFiles };
+    }
+  }
+
+  const assetsMarker = '// === WORK_FOLDER_ASSETS_START ===';
+  const assetsEndMarker = '// === WORK_FOLDER_ASSETS_END ===';
+  const assetsBlock = `${assetsMarker}\nwindow.WORK_FOLDER_ASSETS = ${JSON.stringify(workAssets, null, 2)};\n${assetsEndMarker}`;
+
+  if (dataJsContent.includes(assetsMarker) && dataJsContent.includes(assetsEndMarker)) {
+    const aStart = dataJsContent.indexOf(assetsMarker);
+    const aEnd = dataJsContent.indexOf(assetsEndMarker) + assetsEndMarker.length;
+    dataJsContent = dataJsContent.slice(0, aStart) + assetsBlock + dataJsContent.slice(aEnd);
+  } else {
+    dataJsContent = dataJsContent.trimEnd() + '\n\n' + assetsBlock + '\n';
+  }
+
+  fs.writeFileSync(DATA_JS_PATH, dataJsContent, 'utf8');
+
   if (newlyAdded.length > 0) {
-    fs.writeFileSync(DATA_JS_PATH, dataJsContent, 'utf8');
     console.log(`\n💾 data.js に新作を一括本登録しました！（${newlyAdded.length}作品）`);
     newlyAdded.forEach(msg => console.log(`   ${msg}`));
   } else {
     console.log('\n✅ 新規に本登録する作品はありませんでした（すべて最新です）。');
   }
+  console.log(`📸 ローカル画像アセット（raw / studio）を data.js へ同期しました。`);
 
   console.log('\n========================================================');
   console.log('🎉 処理が完了しました！');

@@ -13,6 +13,7 @@ const { exec } = require('child_process');
 const path = require('path');
 const https = require('https');
 const fs = require('fs');
+const { syncDriveToLocal } = require('./sync_drive_to_local');
 
 const ROOT_DIR = path.resolve(__dirname, '..');
 const KURIMA_DIR = path.join(ROOT_DIR, 'images', 'kurima');
@@ -24,6 +25,18 @@ const CHECK_INTERVAL_MS = 30 * 1000; // 30秒ごとにチェック
 console.log('🗿 [OMOAI Watcher] 新作マスター常駐監視デーモンを起動しました (30秒間隔)');
 
 function checkAndSync() {
+  // 1. Google Drive の images/kurima/<ID>/raw からローカルへ自動同期
+  try {
+    const driveCount = syncDriveToLocal();
+    if (driveCount > 0) {
+      console.log(`📥 [OMOAI Watcher] Google Driveから ${driveCount} 件のRAW写真を同期しました`);
+      exec(`node "${SYNC_SCRIPT}"`, () => {});
+    }
+  } catch (e) {
+    // Gドライブ未マウント時はスキップ
+  }
+
+  // 2. Firestore をチェック
   https.get(FIRESTORE_URL, (res) => {
     let body = '';
     res.on('data', chunk => body += chunk);
