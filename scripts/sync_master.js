@@ -109,8 +109,17 @@ async function main() {
 
   for (const posId of remoteProductKeys) {
     const itemFolder = path.join(KURIMA_DIR, posId);
+    let created = false;
     if (!fs.existsSync(itemFolder)) {
       fs.mkdirSync(itemFolder, { recursive: true });
+      created = true;
+    }
+    const rawFolder = path.join(itemFolder, 'raw');
+    const studioFolder = path.join(itemFolder, 'studio');
+    if (!fs.existsSync(rawFolder)) fs.mkdirSync(rawFolder, { recursive: true });
+    if (!fs.existsSync(studioFolder)) fs.mkdirSync(studioFolder, { recursive: true });
+
+    if (created) {
       const name = worksMaster[posId]?.name || customProducts[posId]?.name || posId;
       console.log(`   📁 新規受け皿フォルダを自動作成: images/kurima/${posId}/ (作品名: ${name})`);
     }
@@ -153,9 +162,20 @@ async function main() {
     }
 
     const itemFolder = path.join(KURIMA_DIR, posId);
-    const subFiles = fs.readdirSync(itemFolder).filter(isImageOrMedia);
+    
+    // 直下ファイル、studio内、raw内を走査
+    const directFiles = fs.existsSync(itemFolder) ? fs.readdirSync(itemFolder).filter(f => {
+      const full = path.join(itemFolder, f);
+      return !fs.statSync(full).isDirectory() && isImageOrMedia(f);
+    }).map(f => `images/kurima/${posId}/${f}`) : [];
 
-    // カバー画像（メイン画像）の決定
+    const studioDir = path.join(itemFolder, 'studio');
+    const studioFiles = fs.existsSync(studioDir) ? fs.readdirSync(studioDir).filter(isImageOrMedia).map(f => `images/kurima/${posId}/studio/${f}`) : [];
+
+    const rawDir = path.join(itemFolder, 'raw');
+    const rawFiles = fs.existsSync(rawDir) ? fs.readdirSync(rawDir).filter(isImageOrMedia).map(f => `images/kurima/${posId}/raw/${f}`) : [];
+
+    // カバー画像（メイン画像）の決定: studio > direct > raw
     let mainImgRel = '';
     const directPng = path.join(KURIMA_DIR, `${posId}.png`);
     const directJpg = path.join(KURIMA_DIR, `${posId}.jpg`);
@@ -163,13 +183,17 @@ async function main() {
       mainImgRel = `images/kurima/${posId}.png`;
     } else if (fs.existsSync(directJpg)) {
       mainImgRel = `images/kurima/${posId}.jpg`;
-    } else if (subFiles.length > 0) {
-      mainImgRel = `images/kurima/${posId}/${subFiles[0]}`;
+    } else if (studioFiles.length > 0) {
+      mainImgRel = studioFiles[0];
+    } else if (directFiles.length > 0) {
+      mainImgRel = directFiles[0];
+    } else if (rawFiles.length > 0) {
+      mainImgRel = rawFiles[0];
     } else {
       mainImgRel = `images/kurima/${posId}.jpg`;
     }
 
-    const subImgPaths = subFiles.map(f => `images/kurima/${posId}/${f}`);
+    const subImgPaths = [...studioFiles, ...directFiles, ...rawFiles];
 
     const imagesCode = subImgPaths.length > 0
       ? `\n    images: [\n${subImgPaths.map(p => `      '${p}',`).join('\n')}\n    ],`

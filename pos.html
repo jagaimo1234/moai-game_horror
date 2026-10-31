@@ -1377,6 +1377,9 @@
               </div>
             </div>
           </div>
+          <button type="button" class="btn" onclick="openWorkImageSelectorModal(document.getElementById('work-detail-id').value)" style="background:rgba(0,210,255,0.15); border:1px solid var(--accent); color:var(--accent); font-size:12px; padding:8px 14px; font-weight:bold;">
+            🖼️ お品書き画像管理
+          </button>
           <button type="button" class="btn" onclick="openVariantManagerModal(document.getElementById('work-detail-id').value)" style="background:rgba(0,210,255,0.15); border:1px solid var(--accent); color:var(--accent); font-size:12px; padding:8px 14px; font-weight:bold;">
             🎨 バリエーション管理
           </button>
@@ -13378,6 +13381,234 @@
         window.renderExhibitionView();
       }
     };
+
+    // =========================================================
+    // 🖼️ 4列 お品書き画像管理コントローラー (Studio Moai × RAW × POS)
+    // =========================================================
+    let currentSelectorPosId = null;
+    let currentDraftImages = []; // Array of image URLs/paths in column 2
+
+    window.openWorkImageSelectorModal = function(pId) {
+      if (!pId) return;
+      currentSelectorPosId = pId;
+
+      const allProducts = window.getFullMasterProducts ? window.getFullMasterProducts(window.customProductsData) : MASTER_PRODUCTS;
+      const p = allProducts.find(item => item.id === pId) || { id: pId, name: pId, image: null, images: [] };
+      const wData = (window.worksMasterData && window.worksMasterData[pId]) || {};
+
+      document.getElementById('img-manager-work-name').textContent = p.name ? p.name.replace(/\n/g, ' ') : pId;
+      document.getElementById('img-manager-status').textContent = '';
+
+      // 1. 現在公開中の画像一覧 (代表画像 + サブ画像)
+      const currentList = [];
+      const mainImg = p.image || wData.image;
+      if (mainImg) currentList.push(mainImg);
+
+      const subList = Array.isArray(wData.images) && wData.images.length > 0 
+        ? wData.images 
+        : (Array.isArray(p.images) ? p.images : []);
+
+      subList.forEach(url => {
+        if (url && !currentList.includes(url)) currentList.push(url);
+      });
+
+      // 2. 変更後の構成（初期値は現在の表示のクローン）
+      currentDraftImages = [...currentList];
+
+      // 3. レンダリング
+      renderColCurrent(currentList);
+      renderColDraft();
+      loadAndRenderCandidateImages(pId);
+
+      document.getElementById('work-image-selector-modal').style.display = 'flex';
+    };
+
+    window.closeWorkImageSelectorModal = function() {
+      document.getElementById('work-image-selector-modal').style.display = 'none';
+      currentSelectorPosId = null;
+      currentDraftImages = [];
+    };
+
+    function renderColCurrent(list) {
+      const col = document.getElementById('col-current-display');
+      if (!col) return;
+      if (list.length === 0) {
+        col.innerHTML = '<div style="color:#666; font-size:12px; text-align:center; padding:30px 10px;">画像が設定されていません</div>';
+        return;
+      }
+      col.innerHTML = list.map((src, idx) => `
+        <div style="display:flex; align-items:center; gap:8px; background:rgba(0,0,0,0.3); padding:6px; border-radius:6px; border:1px solid ${idx === 0 ? 'var(--accent)' : 'rgba(255,255,255,0.1)'};">
+          <img src="${src}" style="width:48px; height:48px; object-fit:cover; border-radius:4px; background:#111;" onerror="this.src=window.NO_IMAGE_PLACEHOLDER||this.src">
+          <div style="flex:1; overflow:hidden;">
+            <div style="font-size:10px; font-weight:bold; color:${idx === 0 ? 'var(--accent)' : '#aaa'};">${idx === 0 ? '★ 代表画像' : `サブ画像 ${idx}`}</div>
+            <div style="font-size:9px; color:#666; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${src.split('/').pop()}</div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function renderColDraft() {
+      const col = document.getElementById('col-draft-display');
+      if (!col) return;
+      if (currentDraftImages.length === 0) {
+        col.innerHTML = '<div style="color:#888; font-size:12px; text-align:center; padding:30px 10px;">③または④の画像をタップして<br>お品書き画像を追加してください</div>';
+        return;
+      }
+      col.innerHTML = currentDraftImages.map((src, idx) => `
+        <div style="display:flex; align-items:center; gap:8px; background:rgba(0,0,0,0.4); padding:6px; border-radius:6px; border:1px solid ${idx === 0 ? 'var(--accent)' : 'rgba(255,255,255,0.15)'};">
+          <img src="${src}" style="width:48px; height:48px; object-fit:cover; border-radius:4px; background:#111;" onerror="this.src=window.NO_IMAGE_PLACEHOLDER||this.src">
+          <div style="flex:1; overflow:hidden;">
+            <div style="font-size:10px; font-weight:bold; color:${idx === 0 ? 'var(--accent)' : '#ddd'};">${idx === 0 ? '★ 代表画像' : `サブ ${idx}`}</div>
+            <div style="font-size:9px; color:#888; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${src.split('/').pop()}</div>
+          </div>
+          <div style="display:flex; flex-direction:column; gap:2px;">
+            ${idx > 0 ? `<button type="button" onclick="moveDraftImage(${idx}, -1)" style="background:rgba(255,255,255,0.1); border:none; color:#fff; border-radius:3px; font-size:9px; width:20px; height:18px; cursor:pointer;">▲</button>` : ''}
+            ${idx < currentDraftImages.length - 1 ? `<button type="button" onclick="moveDraftImage(${idx}, 1)" style="background:rgba(255,255,255,0.1); border:none; color:#fff; border-radius:3px; font-size:9px; width:20px; height:18px; cursor:pointer;">▼</button>` : ''}
+          </div>
+          <button type="button" onclick="removeDraftImage(${idx})" style="background:rgba(231,76,60,0.25); border:1px solid #e74c3c; color:#ff6b6b; border-radius:4px; width:24px; height:24px; font-size:11px; cursor:pointer; display:flex; align-items:center; justify-content:center;" title="除外">✕</button>
+        </div>
+      `).join('');
+    }
+
+    window.addDraftImage = function(src) {
+      if (!src) return;
+      if (currentDraftImages.includes(src)) {
+        alert('この画像はすでに追加されています');
+        return;
+      }
+      currentDraftImages.push(src);
+      renderColDraft();
+    };
+
+    window.removeDraftImage = function(idx) {
+      currentDraftImages.splice(idx, 1);
+      renderColDraft();
+    };
+
+    window.moveDraftImage = function(idx, direction) {
+      const targetIdx = idx + direction;
+      if (targetIdx < 0 || targetIdx >= currentDraftImages.length) return;
+      const item = currentDraftImages.splice(idx, 1)[0];
+      currentDraftImages.splice(targetIdx, 0, item);
+      renderColDraft();
+    };
+
+    function loadAndRenderCandidateImages(pId) {
+      const colStudio = document.getElementById('col-studio-images');
+      const colRaw = document.getElementById('col-raw-images');
+
+      // 既存の作品データやディレクトリ候補から抽出
+      const allProducts = window.getFullMasterProducts ? window.getFullMasterProducts(window.customProductsData) : MASTER_PRODUCTS;
+      const p = allProducts.find(item => item.id === pId) || { images: [] };
+      const wData = (window.worksMasterData && window.worksMasterData[pId]) || {};
+
+      const allKnownImages = [];
+      const addSafe = (url) => {
+        if (url && typeof url === 'string' && !allKnownImages.includes(url)) {
+          allKnownImages.push(url);
+        }
+      };
+
+      if (p.image) addSafe(p.image);
+      if (Array.isArray(p.images)) p.images.forEach(addSafe);
+      if (wData.image) addSafe(wData.image);
+      if (Array.isArray(wData.images)) wData.images.forEach(addSafe);
+      if (Array.isArray(wData.rawImages)) wData.rawImages.forEach(addSafe);
+      if (Array.isArray(wData.studioImages)) wData.studioImages.forEach(addSafe);
+
+      const studioImgs = [];
+      const rawImgs = [];
+
+      allKnownImages.forEach(url => {
+        const lower = url.toLowerCase();
+        if (lower.includes('studio') || lower.includes('/studio/')) {
+          studioImgs.push(url);
+        } else if (lower.includes('raw') || lower.includes('/raw/')) {
+          rawImgs.push(url);
+        } else {
+          studioImgs.push(url); // 通常の処理済み画像もstudio側へ
+        }
+      });
+
+      // レンダリング
+      colStudio.innerHTML = studioImgs.length > 0 ? studioImgs.map(src => `
+        <div onclick="addDraftImage('${src}')" style="cursor:pointer; position:relative; aspect-ratio:1; border-radius:6px; overflow:hidden; border:1px solid rgba(112,214,255,0.3); background:#000;" title="タップして追加">
+          <img src="${src}" style="width:100%; height:100%; object-fit:cover;" onerror="this.src=window.NO_IMAGE_PLACEHOLDER||this.src">
+          <div style="position:absolute; bottom:0; inset-x:0; background:rgba(0,0,0,0.7); font-size:8px; color:#70d6ff; padding:2px; text-align:center; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
+            ＋追加
+          </div>
+        </div>
+      `).join('') : '<div style="grid-column:span 2; color:#666; font-size:11px; text-align:center; padding:20px;">Studio画像なし</div>';
+
+      colRaw.innerHTML = rawImgs.length > 0 ? rawImgs.map(src => `
+        <div onclick="addDraftImage('${src}')" style="cursor:pointer; position:relative; aspect-ratio:1; border-radius:6px; overflow:hidden; border:1px solid rgba(255,159,28,0.3); background:#000;" title="タップして追加">
+          <img src="${src}" style="width:100%; height:100%; object-fit:cover;" onerror="this.src=window.NO_IMAGE_PLACEHOLDER||this.src">
+          <div style="position:absolute; bottom:0; inset-x:0; background:rgba(0,0,0,0.7); font-size:8px; color:#ff9f1c; padding:2px; text-align:center; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
+            ＋追加
+          </div>
+        </div>
+      `).join('') : '<div style="grid-column:span 2; color:#666; font-size:11px; text-align:center; padding:20px;">RAW画像なし</div>';
+    }
+
+    window.applyWorkImageConfigToPos = async () => {
+      if (!currentSelectorPosId) return;
+      if (currentDraftImages.length === 0) {
+        if (!confirm('画像が1枚も選択されていません。お品書きに画像なしで反映しますか？')) return;
+      }
+
+      const pId = currentSelectorPosId;
+      const mainImg = currentDraftImages[0] || '';
+      const subImgs = currentDraftImages.slice(1);
+
+      const statusEl = document.getElementById('img-manager-status');
+      if (statusEl) statusEl.textContent = '保存中...';
+
+      try {
+        if (window.db && window.auth && window.auth.currentUser) {
+          const cpRef = window.db.collection('settings').doc('custom_products');
+          const wmRef = window.db.collection('settings').doc('works_master');
+
+          const updateObj = {};
+          updateObj[`${pId}.image`] = mainImg;
+          updateObj[`${pId}.images`] = subImgs;
+          updateObj[`${pId}.updatedAt`] = Date.now();
+
+          await Promise.all([
+            cpRef.set(updateObj, { merge: true }),
+            wmRef.set(updateObj, { merge: true })
+          ]);
+
+          // ローカルステート更新
+          if (window.customProductsData && window.customProductsData[pId]) {
+            window.customProductsData[pId].image = mainImg;
+            window.customProductsData[pId].images = subImgs;
+          }
+          if (window.worksMasterData && window.worksMasterData[pId]) {
+            window.worksMasterData[pId].image = mainImg;
+            window.worksMasterData[pId].images = subImgs;
+          }
+
+          // プレビューと一覧の即時再描画
+          const previewImg = document.getElementById('work-detail-img-preview');
+          if (previewImg) previewImg.src = mainImg || window.NO_IMAGE_PLACEHOLDER;
+
+          if (typeof window.renderCatalogView === 'function') {
+            window.renderCatalogView();
+          }
+
+          alert('✅ お品書きの画像構成を反映・確定しました！');
+          closeWorkImageSelectorModal();
+        } else {
+          alert('⚠️ ログインしていないためクラウド保存できません。ログイン後に再度お試しください。');
+        }
+      } catch (err) {
+        console.error('お品書き画像保存エラー:', err);
+        alert('保存に失敗しました: ' + err.message);
+      } finally {
+        if (statusEl) statusEl.textContent = '';
+      }
+    };
+
   </script>
 
   <!-- Print Tile Modal -->
