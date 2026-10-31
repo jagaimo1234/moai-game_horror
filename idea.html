@@ -5758,24 +5758,31 @@
       } else if (cropMode === 'detail') {
         const item = ideas.find(i => i.id === activeIdeaId);
         if (item) {
-          item.coverImage = croppedDataUrl;
+          if (activeImageIndex >= 0 && item.subImages && item.subImages[activeImageIndex]) {
+            // 2枚目以降のサブ画像をクロップ更新
+            item.subImages[activeImageIndex] = croppedDataUrl;
+          } else {
+            // 1枚目（カバー画像）をクロップ更新
+            item.coverImage = croppedDataUrl;
+
+            // ★重要：すでにPOS連携済みの作品なら、POS側（Firestore）へも自動即時連動！
+            if (item.linkedPosId && window.omoaiCloud && window.omoaiCloud.linkProductToPos) {
+              window.omoaiCloud.linkProductToPos(
+                item.linkedPosId,
+                { image: croppedDataUrl, isTempImage: true },
+                { image: croppedDataUrl, isTempImage: true }
+              ).then(() => {
+                console.log('✅ POS側（作品図鑑・お品書き）へクロップ画像を自動連動しました:', item.linkedPosId);
+              }).catch(e => {
+                console.error('POS連動エラー:', e);
+              });
+            }
+          }
+
           item.updatedAt = Date.now();
           saveIdeasToStorage();
           renderDetailLeft(item);
           if (threadViewMode === 'x') renderChatTimeline(item);
-
-          // ★重要：すでにPOS連携済みの作品なら、POS側（Firestore）へも自動即時連動！
-          if (item.linkedPosId && window.omoaiCloud && window.omoaiCloud.linkProductToPos) {
-            window.omoaiCloud.linkProductToPos(
-              item.linkedPosId,
-              { image: croppedDataUrl, isTempImage: true },
-              { image: croppedDataUrl, isTempImage: true }
-            ).then(() => {
-              console.log('✅ POS側（作品図鑑・お品書き）へクロップ画像を自動連動しました:', item.linkedPosId);
-            }).catch(e => {
-              console.error('POS連動エラー:', e);
-            });
-          }
         }
       }
       closeCropModal();
@@ -5783,10 +5790,17 @@
 
     function openCropModalForActiveIdea() {
       const item = ideas.find(i => i.id === activeIdeaId);
-      if (item && item.coverImage) {
-        openCropModal(item.coverImage, 'detail');
+      if (!item) return;
+
+      // 現在プレビューに表示されている画像（メインカバーまたは選択中のサブ画像）を取得
+      const currentTargetImg = (activeImageIndex >= 0 && item.subImages && item.subImages[activeImageIndex])
+        ? item.subImages[activeImageIndex]
+        : item.coverImage;
+
+      if (currentTargetImg) {
+        openCropModal(currentTargetImg, 'detail');
       } else {
-        alert('カバー画像が登録されていません');
+        alert('調整する画像が登録されていません');
       }
     }
 
