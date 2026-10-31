@@ -16,6 +16,54 @@
 // 全作品のマスターリスト
 const MASTER_PRODUCTS = [
   {
+    image: 'images/kurima/moai_lure_stand.jpg',
+    name: 'まちょいモアイルアースタンド',
+    desc: '',
+  },
+
+  {
+    image: 'images/kurima/dev_1785041252821.jpg',
+    name: 'モアイの財布',
+    desc: '',
+  },
+
+  {
+    image: 'images/kurima/dev_1792332209364.jpg',
+    name: 'ハイレグモアイ（マルチカラー)',
+    desc: '',
+  },
+
+  {
+    image: 'images/kurima/dev_1781328378337.jpg',
+    name: '？？のメガネスタンド',
+    desc: '',
+  },
+
+  {
+    image: 'images/kurima/dev_1777653497790.jpg',
+    name: 'ミニおすわりモアイの キーホルダー',
+    desc: '',
+  },
+
+  {
+    image: 'images/kurima/dev_1792332244357.jpg',
+    name: '考えるモアイ（別の姿勢）',
+    desc: '',
+  },
+
+  {
+    image: 'images/kurima/dev_1790082032332.jpg',
+    name: 'エレクトロモアイロボ',
+    desc: '',
+  },
+
+  {
+    image: 'images/kurima/dev_1792330502908.jpg',
+    name: 'エレクモアイロボ',
+    desc: '',
+  },
+
+  {
     image: 'images/kurima/moai_robo_mk2_gray.jpg',
     images: [
       'images/kurima/moai_robo_mk2/movie.mp4',
