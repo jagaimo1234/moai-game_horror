@@ -664,6 +664,7 @@ window.WORK_FOLDER_ASSETS = {
       "images/kurima/dot_osuwari_keyholder/studio/20261031_ボクセルモアイキーホルダー_002_studio.png",
       "images/kurima/dot_osuwari_keyholder/studio/20261031_ボクセルモアイキーホルダー_003_studio.png",
       "images/kurima/dot_osuwari_keyholder/studio/20261031_ボクセルモアイキーホルダー_004_studio.png",
+      "images/kurima/dot_osuwari_keyholder/studio/ChatGPT 画像 2026年10月31日 15_42_06.png",
       "images/kurima/dot_osuwari_keyholder/studio/Moataro (1).jpg"
     ]
   },
