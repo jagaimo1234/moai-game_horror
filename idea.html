@@ -3352,7 +3352,7 @@
   <!-- =========================================================
        2.8 ✂️ 正方形画像切り抜き・枠調整モーダル (Square Cropper)
        ========================================================= -->
-  <div id="cropModalBackdrop" class="modal-backdrop">
+  <div id="cropModalBackdrop" class="modal-backdrop" style="z-index: 2500;">
     <div class="add-modal-card" style="max-width: 420px;" onclick="event.stopPropagation()">
       <div style="display:flex; justify-content:space-between; align-items:center;">
         <div>
@@ -5656,13 +5656,31 @@
     let cropInitialOffsetY = 0;
 
     function openCropModal(dataUrl, mode = 'add') {
+      if (!dataUrl) {
+        alert('調整する画像がありません');
+        return;
+      }
       cropMode = mode;
+      const modal = document.getElementById('cropModalBackdrop');
+      if (modal) modal.classList.add('open');
+
       cropRawImg = new Image();
       cropRawImg.onload = () => {
         resetCropTransform();
-        document.getElementById('cropModalBackdrop').classList.add('open');
+        requestAnimationFrame(() => {
+          renderCropCanvas();
+        });
+      };
+      cropRawImg.onerror = () => {
+        alert('画像の読み込みに失敗しました');
+        closeCropModal();
       };
       cropRawImg.src = dataUrl;
+      // すでにロード完了している場合への対応
+      if (cropRawImg.complete && cropRawImg.naturalWidth) {
+        resetCropTransform();
+        renderCropCanvas();
+      }
     }
 
     function closeCropModal() {
@@ -5745,6 +5763,19 @@
           saveIdeasToStorage();
           renderDetailLeft(item);
           if (threadViewMode === 'x') renderChatTimeline(item);
+
+          // ★重要：すでにPOS連携済みの作品なら、POS側（Firestore）へも自動即時連動！
+          if (item.linkedPosId && window.omoaiCloud && window.omoaiCloud.linkProductToPos) {
+            window.omoaiCloud.linkProductToPos(
+              item.linkedPosId,
+              { image: croppedDataUrl, isTempImage: true },
+              { image: croppedDataUrl, isTempImage: true }
+            ).then(() => {
+              console.log('✅ POS側（作品図鑑・お品書き）へクロップ画像を自動連動しました:', item.linkedPosId);
+            }).catch(e => {
+              console.error('POS連動エラー:', e);
+            });
+          }
         }
       }
       closeCropModal();
@@ -6708,6 +6739,7 @@
 
       // 正方形画像クロップのビューポートイベント初期化
       initCropViewportEvents();
+      safeOn('btnCropCover', 'click', openCropModalForActiveIdea);
 
       // 端末間データ共有
       safeOn('btnOpenSyncModal', 'click', openSyncModal);
