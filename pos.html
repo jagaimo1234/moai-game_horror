@@ -13584,7 +13584,31 @@
       renderImagePool();
 
       const modalEl = document.getElementById('work-image-selector-modal');
-      if (modalEl) modalEl.style.display = 'flex';
+      if (modalEl) {
+        modalEl.style.display = 'flex';
+        // ドラッグ＆ドロップ受付の初期化（重複登録防止フラグ）
+        if (!modalEl.dataset.dropBound) {
+          modalEl.dataset.dropBound = 'true';
+          modalEl.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            modalEl.style.background = 'rgba(0,100,200,0.3)';
+          });
+          modalEl.addEventListener('dragleave', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            modalEl.style.background = 'rgba(0,0,0,0.88)';
+          });
+          modalEl.addEventListener('drop', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            modalEl.style.background = 'rgba(0,0,0,0.88)';
+            if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+              processIncomingFiles(Array.from(e.dataTransfer.files));
+            }
+          });
+        }
+      }
     };
 
     window.closeWorkImageSelectorModal = function() {
@@ -13625,37 +13649,74 @@
       openWorkImageSelectorModal(prodSelect.value);
     };
 
+    // 画像を最大長辺1200px / JPEG品質0.85にクライアント側で最適化（Firestore 1MB上限回避）
+    function compressImageFile(file, maxWidth = 1200, maxHeight = 1200, quality = 0.85) {
+      return new Promise((resolve, reject) => {
+        if (!file.type.startsWith('image/')) {
+          // 動画や画像以外はそのままDataURL化
+          const reader = new FileReader();
+          reader.onload = ev => resolve({ name: file.name, dataUrl: ev.target.result });
+          reader.onerror = reject;
+          reader.readAsDataURL(file);
+          return;
+        }
+        const img = new Image();
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          img.onload = () => {
+            let width = img.width;
+            let height = img.height;
+            if (width > maxWidth || height > maxHeight) {
+              if (width > height) {
+                height = Math.round((height * maxWidth) / width);
+                width = maxWidth;
+              } else {
+                width = Math.round((width * maxHeight) / height);
+                height = maxHeight;
+              }
+            }
+            const canvas = document.createElement('canvas');
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, width, height);
+            const dataUrl = canvas.toDataURL('image/jpeg', quality);
+            resolve({ name: file.name, dataUrl });
+          };
+          img.onerror = () => resolve({ name: file.name, dataUrl: e.target.result });
+          img.src = e.target.result;
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+    }
+
     window.handleDirectFileSelect = function(e) {
       const files = e.target.files;
       if (!files || files.length === 0) return;
-      const readPromises = Array.from(files).map(file => {
-        return new Promise(resolve => {
-          const reader = new FileReader();
-          reader.onload = ev => {
-            resolve({ name: file.name, dataUrl: ev.target.result });
-          };
-          reader.readAsDataURL(file);
-        });
-      });
+      processIncomingFiles(Array.from(files));
+      e.target.value = '';
+    };
 
+    function processIncomingFiles(fileList) {
+      const readPromises = fileList.map(f => compressImageFile(f));
       Promise.all(readPromises).then(results => {
         results.forEach(res => {
           const url = res.dataUrl;
           if (!currentCandidateImages.all.includes(url)) {
             currentCandidateImages.all.push(url);
-            currentCandidateImages.raw.push(url);
+            currentCandidateImages.studio.push(url);
           }
           if (!currentDraftImages.includes(url)) {
             currentDraftImages.push(url);
           }
         });
-        currentPoolTab = 'raw';
+        currentPoolTab = 'studio';
         renderDraftTray();
         renderImagePool();
-        switchImagePoolTab('raw');
+        switchImagePoolTab('studio');
       });
-      e.target.value = '';
-    };
+    }
 
     // 候補画像の分類
     function buildCandidatePool(pId, p, wData) {

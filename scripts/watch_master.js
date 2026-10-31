@@ -82,3 +82,52 @@ checkAndSync();
 
 // 30秒ごとに定期監視
 setInterval(checkAndSync, CHECK_INTERVAL_MS);
+
+// ====================================================================
+// 3. ローカル images/kurima フォルダのリアルタイムファイル監視 (fs.watch)
+//    スタジオ生成画像やRAW画像が配置された瞬間に即検知し、
+//    data.js更新 ＆ 自動Gitコミット・プッシュを実行します。
+// ====================================================================
+
+let localSyncTimer = null;
+let autoGitPushTimer = null;
+
+if (fs.existsSync(KURIMA_DIR)) {
+  try {
+    fs.watch(KURIMA_DIR, { recursive: true }, (eventType, filename) => {
+      if (!filename) return;
+      const lower = filename.toLowerCase();
+      // 画像または動画ファイルの変更のみ対象
+      if (!/\.(jpg|jpeg|png|webp|jfif|gif|mp4|mov)$/i.test(lower)) return;
+
+      console.log(`📸 [OMOAI Watcher] ローカル画像変更を検知: ${filename} (${eventType})`);
+
+      // 1.5秒デバウンスで sync_master.js 実行
+      if (localSyncTimer) clearTimeout(localSyncTimer);
+      localSyncTimer = setTimeout(() => {
+        console.log('⚡ [OMOAI Watcher] sync_master.js を実行してローカルマスターを即時更新します...');
+        exec(`node "${SYNC_SCRIPT}"`, (err, stdout) => {
+          if (err) console.error('❌ sync_master 実行エラー:', err);
+          else console.log('✅ ローカルマスター同期完了');
+        });
+      }, 1500);
+
+      // 画像配置後、30秒間追加がなければ自動で GitHub にプッシュ（恒久保存）
+      if (autoGitPushTimer) clearTimeout(autoGitPushTimer);
+      autoGitPushTimer = setTimeout(() => {
+        console.log('🚀 [OMOAI Watcher] 画像更新が安定したため、自動で GitHub にプッシュします...');
+        const gitCmd = 'git add data.js images/ && git commit -m "auto(sync): 画像自動同期 (OMOAI Watcher)" && git push origin dev-escort-npc && git push origin HEAD:main';
+        exec(gitCmd, { cwd: ROOT_DIR }, (err, stdout, stderr) => {
+          if (err) {
+            console.warn('⚠️ 自動プッシュ保留 (差分なし、またはネットワーク等):', err.message);
+          } else {
+            console.log('🎉 [OMOAI Watcher] GitHub Pagesへの自動プッシュが完了しました！');
+          }
+        });
+      }, 30 * 1000);
+    });
+    console.log('👀 [OMOAI Watcher] images/kurima/ のローカル変更監視を開始しました');
+  } catch (err) {
+    console.warn('⚠️ fs.watch 開始エラー:', err.message);
+  }
+}
