@@ -116,7 +116,7 @@ async function main() {
   const remoteProductKeys = Array.from(new Set([
     ...Object.keys(customProducts),
     ...Object.keys(worksMaster)
-  ])).filter(k => k && !k.startsWith('dev_') && !k.startsWith('temp_') && !/^\d+$/.test(k));
+  ])).filter(k => k && !k.startsWith('dev_') && !k.startsWith('temp_') && !k.includes('.') && !/^\d+$/.test(k));
 
   for (const posId of remoteProductKeys) {
     const itemFolder = path.join(KURIMA_DIR, posId);

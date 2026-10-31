@@ -15,41 +15,6 @@
 
 // 全作品のマスターリスト
 const MASTER_PRODUCTS = [
-  {
-    image: 'images/kurima/dot_osuwari_keyholder.updatedAt.jpg',
-    name: 'dot osuwari keyholder.updatedAt',
-    desc: '',
-  },
-
-  {
-    image: 'images/kurima/dot_osuwari_keyholder.optimizedImages.jpg',
-    name: 'dot osuwari keyholder.optimizedImages',
-    desc: '',
-  },
-
-  {
-    image: 'images/kurima/dot_osuwari_keyholder.optimizedCover.jpg',
-    name: 'dot osuwari keyholder.optimizedCover',
-    desc: '',
-  },
-
-  {
-    image: 'images/kurima/dot_osuwari_keyholder.images.jpg',
-    name: 'dot osuwari keyholder.images',
-    desc: '',
-  },
-
-  {
-    image: 'images/kurima/dot_osuwari_keyholder.imageBackups.jpg',
-    name: 'dot osuwari keyholder.imageBackups',
-    desc: '',
-  },
-
-  {
-    image: 'images/kurima/dot_osuwari_keyholder.image.jpg',
-    name: 'dot osuwari keyholder.image',
-    desc: '',
-  },
 
   {
     image: 'images/kurima/moai_dance_test.jpg',
