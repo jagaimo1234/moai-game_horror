@@ -670,7 +670,8 @@ window.WORK_FOLDER_ASSETS = {
       "images/kurima/dot_osuwari_keyholder/studio/ChatGPT 画像 2026年10月31日 15_42_06.png",
       "images/kurima/dot_osuwari_keyholder/studio/Moataro (1).jpg",
       "images/kurima/dot_osuwari_keyholder/studio/バッグに揺れるモノクロチャーム集.png",
-      "images/kurima/dot_osuwari_keyholder/studio/日常に寄り添うモアイチャーム.png"
+      "images/kurima/dot_osuwari_keyholder/studio/日常に寄り添うモアイチャーム.png",
+      "images/kurima/dot_osuwari_keyholder/studio/日常に寄り添うモアイチャーム1.png"
     ]
   },
   "osuwari_moai_pen": {
