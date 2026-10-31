@@ -659,6 +659,7 @@ window.WORK_FOLDER_ASSETS = {
       "images/kurima/dot_osuwari_keyholder/raw/dot_osuwari_keyholder_RAW_20261031_154103_007.jpg",
       "images/kurima/dot_osuwari_keyholder/raw/dot_osuwari_keyholder_RAW_20261031_154130_008.jpg",
       "images/kurima/dot_osuwari_keyholder/raw/dot_osuwari_keyholder_RAW_20261031_154412_009.jpg",
+      "images/kurima/dot_osuwari_keyholder/raw/dot_osuwari_keyholder_RAW_20261031_154439_010.jpg",
       "images/kurima/dot_osuwari_keyholder/raw/dot_osuwari_keyholder_RAW_20261031_154514_011.jpg"
     ],
     "studio": [
