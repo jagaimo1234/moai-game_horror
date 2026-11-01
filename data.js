@@ -844,6 +844,7 @@ window.WORK_FOLDER_ASSETS = {
   "nitto_osuwari_moai_penstand": {
     "raw": [],
     "studio": [
+      "images/kurima/nitto_osuwari_moai_penstand/studio/20261101.png",
       "images/kurima/nitto_osuwari_moai_penstand/studio/雪白と黒のモアイ型ペンホルダー.png"
     ]
   },
