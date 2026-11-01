@@ -626,6 +626,149 @@ window.getFullMasterProducts = function(customProductsData) {
   return list;
 };
 
+// おすわりモアイペン立てのデフォルトバリエーション定義（Firestore読込前のフォールバック用）
+const DEFAULT_OSUWARI_VARIANTS = [
+  { skuId: 'osuwari_moai_pen__base', name: '無印（通常版）', isBase: true, active: true, sortOrder: 0 },
+  { skuId: 'osuwari_moai_pen__var_mvmdzljg_a4s0', name: 'U字タンクトップ・白', isBase: false, active: true, priceOverride: 2000, sortOrder: 1 },
+  { skuId: 'osuwari_moai_pen__var_mvmdzljg_n2m1', name: 'U字タンクトップ・黒', isBase: false, active: true, priceOverride: 2000, sortOrder: 2 },
+  { skuId: 'osuwari_moai_pen__var_mvmdzqrl_4zv0', name: 'V字タンクトップ・白', isBase: false, active: true, priceOverride: 2000, sortOrder: 3 },
+  { skuId: 'osuwari_moai_pen__var_mvmdzqrl_ela1', name: 'V字タンクトップ・黒', isBase: false, active: true, priceOverride: 2000, sortOrder: 4 },
+  { skuId: 'osuwari_moai_pen__var_mvmdzvn0_ke00', name: 'V字袖付き・白', isBase: false, active: true, priceOverride: 2000, sortOrder: 5 },
+  { skuId: 'osuwari_moai_pen__var_mvmdzvn0_o881', name: 'V字袖付き・黒', isBase: false, active: true, priceOverride: 2000, sortOrder: 6 },
+  { skuId: 'osuwari_moai_pen__var_mvmdzxjm_tby0', name: '長袖ヒートテック風', isBase: false, active: true, priceOverride: 2000, statusNote: '検討中', sortOrder: 7 }
+];
+
+// お品書き（catalog.html）向けに、POSのworks_masterバリエーション設定を展開して表示用リストを返すヘルパー
+window.expandProductsForCatalog = function(baseProducts, worksMasterData, hiddenProductsData, isPreviewMode) {
+  const wmMap = worksMasterData || window.worksMasterData || {};
+  const hiddenMap = hiddenProductsData || window.hiddenProductsData || {};
+  const expanded = [];
+
+  (baseProducts || []).forEach(orig => {
+    if (!orig) return;
+    const p = { ...orig };
+    const wData = wmMap[p.id] || {};
+
+    // works_master側の画像・説明文設定があれば反映
+    if (wData.image && !p.image) p.image = wData.image;
+    if (wData.optimizedCover && !p.optimizedCover) p.optimizedCover = wData.optimizedCover;
+    if (Array.isArray(wData.images) && wData.images.length > 0 && (!p.images || p.images.length <= 1)) {
+      p.images = [wData.image || p.image, ...wData.images.filter(u => u && u !== (wData.image || p.image))].filter(Boolean);
+    }
+
+    const rawVars = (Array.isArray(wData.variants) && wData.variants.length > 0)
+      ? wData.variants
+      : (p.id === 'osuwari_moai_pen' ? DEFAULT_OSUWARI_VARIANTS : []);
+
+    const activeVars = [...rawVars]
+      .filter(v => v && v.active !== false)
+      .sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0));
+
+    const baseVar = activeVars.find(v => v.isBase) || null;
+    const nonBaseVars = activeVars.filter(v => !v.isBase);
+    const displayMode = wData.catalogDisplayMode || (p.id === 'osuwari_moai_pen' ? 'split_group' : 'integrated');
+
+    if (displayMode === 'split_group' && nonBaseVars.length > 0) {
+      const groupId = `${p.id}__variant_group`;
+      const groupTitle = wData.catalogGroupTitle || (p.id === 'osuwari_moai_pen' ? '肌着おすわり\nモアイペン立て' : `${p.name}\nバリエーション`);
+      const groupDesc = wData.catalogGroupDesc || (p.id === 'osuwari_moai_pen'
+        ? 'タンクトップやVネック・袖付きなど、いろんな肌着を着こなすおすわりモアイペン立てシリーズ。\n詳細画面で各肌着バリエーションの写真や在庫状況をご確認いただけます。'
+        : (p.desc || ''));
+
+      // 1. 通常版（無印）カード
+      p.baseSkuId = baseVar ? baseVar.skuId : `${p.id}__base`;
+      p.linkedVariantGroupId = groupId;
+      p.linkedVariantGroupTitle = groupTitle.replace(/\n/g, ' ');
+      p.linkedVariantCount = nonBaseVars.length;
+      expanded.push(p);
+
+      // 2. バリエーション代表枠カード（例：肌着おすわりモアイペン立て）
+      if (isPreviewMode || !hiddenMap[groupId]) {
+        const varImages = [];
+        const addImg = (u) => { if (u && typeof u === 'string' && !varImages.includes(u)) varImages.push(u); };
+        if (wData.catalogGroupImage) addImg(wData.catalogGroupImage);
+        if (typeof window !== 'undefined' && window.WORK_FOLDER_ASSETS) {
+          const folderKey = p.id === 'osuwari_moai_pen' ? 'hadagi_osuwari_moai_pen' : `${p.id}_variants`;
+          const fAssets = window.WORK_FOLDER_ASSETS[folderKey];
+          if (fAssets) {
+            if (Array.isArray(fAssets.studio)) fAssets.studio.forEach(addImg);
+            if (Array.isArray(fAssets.raw)) fAssets.raw.forEach(addImg);
+          }
+        }
+        nonBaseVars.forEach(v => {
+          if (v.image) addImg(v.image);
+          if (Array.isArray(v.images)) v.images.forEach(addImg);
+        });
+        if (Array.isArray(wData.catalogGroupImages)) wData.catalogGroupImages.forEach(addImg);
+        if (varImages.length === 0) {
+          if (p.image) addImg(p.image);
+          if (Array.isArray(p.images)) p.images.forEach(addImg);
+        }
+
+        expanded.push({
+          id: groupId,
+          parentProductId: p.id,
+          isVariantGroupCard: true,
+          linkedBaseProductId: p.id,
+          linkedBaseProductTitle: (p.name || '').replace(/\n/g, ' '),
+          name: groupTitle,
+          desc: groupDesc,
+          image: varImages[0] || p.image || p.optimizedCover || null,
+          catalogGroupImage: wData.catalogGroupImage || varImages[0] || null,
+          images: varImages.length > 0 ? varImages : (p.images || []),
+          catalogVariants: nonBaseVars,
+          variantBadgeLabel: p.id === 'osuwari_moai_pen' ? `👕 肌着 全${nonBaseVars.length}種` : `🎨 全${nonBaseVars.length}種`,
+          variantSummaryText: nonBaseVars.slice(0, 3).map(v => v.name).join(' / ') + (nonBaseVars.length > 3 ? ' 他' : '')
+        });
+      }
+    } else if (displayMode === 'individual_cards' && nonBaseVars.length > 0) {
+      // 各バリエーション単独カード表示モード（通常版＋各バリエーションを独立カードとして一覧に並べる）
+      p.baseSkuId = baseVar ? baseVar.skuId : `${p.id}__base`;
+      expanded.push(p);
+      nonBaseVars.forEach(v => {
+        if (!isPreviewMode && hiddenMap[v.skuId]) return;
+        const vImgs = (Array.isArray(v.images) && v.images.length > 0)
+          ? v.images
+          : (v.image ? [v.image] : (wData.catalogGroupImage ? [wData.catalogGroupImage] : (p.images || [])));
+        expanded.push({
+          ...p,
+          id: v.skuId,
+          baseSkuId: v.skuId,
+          parentProductId: p.id,
+          isStandaloneVariantCard: true,
+          name: `${(p.name || '').replace(/\n/g, ' ')}\n(${v.name})`,
+          image: v.image || wData.catalogGroupImage || p.image,
+          images: vImgs,
+          variantBadgeLabel: `🎨 ${v.name}`
+        });
+      });
+    } else if (displayMode === 'base_only') {
+      // 通常版のみお品書きに表示（バリエーションはPOS管理のみ）
+      if (baseVar) p.baseSkuId = baseVar.skuId;
+      expanded.push(p);
+    } else if (activeVars.length > 1) {
+      // 1枠統合モード（親カード内で通常版＋各バリエーションを切替）
+      p.parentProductId = p.id;
+      p.isVariantGroupCard = false;
+      p.catalogVariants = activeVars;
+      p.variantBadgeLabel = `🎨 全${activeVars.length}種`;
+      p.variantSummaryText = activeVars.filter(v => !v.isBase).slice(0, 3).map(v => v.name).join(' / ');
+      p.catalogGroupImage = wData.catalogGroupImage || null;
+      const mergedImgs = Array.isArray(p.images) ? [...p.images] : (p.image ? [p.image] : []);
+      if (wData.catalogGroupImage && !mergedImgs.includes(wData.catalogGroupImage)) mergedImgs.push(wData.catalogGroupImage);
+      activeVars.forEach(v => {
+        if (v.image && !mergedImgs.includes(v.image)) mergedImgs.push(v.image);
+      });
+      if (mergedImgs.length > 1) p.images = mergedImgs;
+      expanded.push(p);
+    } else {
+      expanded.push(p);
+    }
+  });
+
+  return expanded;
+};
+
 
 // 画像未登録時・読み込み失敗時の共通プレースホルダー（NO IMAGE）
 window.NO_IMAGE_PLACEHOLDER = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120' viewBox='0 0 120 120'><rect width='120' height='120' fill='%231c1c24' rx='12'/><text x='60' y='55' font-size='40' text-anchor='middle' dominant-baseline='middle'>🗿</text><text x='60' y='95' font-size='11' fill='%23888' font-weight='bold' text-anchor='middle' font-family='sans-serif'>NO IMAGE</text></svg>";

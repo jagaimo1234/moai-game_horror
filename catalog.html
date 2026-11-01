@@ -433,6 +433,115 @@
       100% { transform: scale(1); box-shadow: 0 0 8px rgba(0,210,255,0.6); }
     }
 
+    /* ===== VARIANT BADGES & SELECTOR UI ===== */
+    .variant-badge-tile {
+      position: absolute; top: 10px; left: 10px;
+      background: linear-gradient(135deg, rgba(0,210,255,0.92), rgba(58,123,213,0.92));
+      border: 1px solid rgba(255,255,255,0.55); color: #fff;
+      padding: 4px 9px; border-radius: 10px; font-size: 10.5px; font-weight: 900;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.45); backdrop-filter: blur(4px);
+      pointer-events: none; letter-spacing: 0.5px;
+    }
+    .variant-summary-tile {
+      font-size: 10.5px; color: rgba(255,255,255,0.55);
+      margin-bottom: 6px; line-height: 1.35;
+      display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+    }
+    .variant-selector-box {
+      margin: 16px 0 18px;
+      background: linear-gradient(145deg, rgba(0,210,255,0.07), rgba(255,255,255,0.02));
+      border: 1px solid rgba(0,210,255,0.3);
+      border-radius: 16px;
+      padding: 14px 14px 16px;
+    }
+    .variant-selector-header {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 10px; gap: 8px; flex-wrap: wrap;
+    }
+    .variant-selector-title {
+      font-size: 12.5px; font-weight: 900; color: #00d2ff; letter-spacing: 1px;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .variant-selector-sub {
+      font-size: 11px; color: rgba(255,255,255,0.5);
+    }
+    .variant-active-banner {
+      background: rgba(0,0,0,0.45);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 12px;
+      padding: 10px 12px;
+      margin-bottom: 12px;
+      display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap;
+    }
+    .variant-active-name {
+      font-size: 14px; font-weight: 800; color: #fff;
+      display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
+    }
+    .variant-note-tag {
+      font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 8px;
+      background: rgba(243,156,18,0.2); border: 1px solid rgba(243,156,18,0.5); color: #f39c12;
+    }
+    .variant-chips-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      gap: 8px;
+    }
+    .variant-chip {
+      display: flex; align-items: center; gap: 8px;
+      background: rgba(255,255,255,0.04);
+      border: 1.5px solid rgba(255,255,255,0.12);
+      border-radius: 12px;
+      padding: 7px 10px;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-align: left;
+      color: #ddd;
+      font-family: inherit;
+    }
+    .variant-chip:hover {
+      background: rgba(0,210,255,0.1);
+      border-color: rgba(0,210,255,0.45);
+    }
+    .variant-chip.active {
+      background: rgba(0,210,255,0.18);
+      border-color: #00d2ff;
+      color: #fff;
+      box-shadow: 0 0 12px rgba(0,210,255,0.28);
+    }
+    .variant-chip-thumb {
+      width: 34px; height: 34px; border-radius: 8px; object-fit: cover;
+      background: #111; border: 1px solid rgba(255,255,255,0.15); flex-shrink: 0;
+    }
+    .variant-chip-icon {
+      width: 34px; height: 34px; border-radius: 8px;
+      background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px; flex-shrink: 0;
+    }
+    .variant-chip-info {
+      flex: 1; min-width: 0;
+    }
+    .variant-chip-name {
+      font-size: 12px; font-weight: 700; line-height: 1.25;
+      word-break: break-word;
+    }
+    .variant-chip-status {
+      font-size: 10px; margin-top: 2px; font-weight: 700;
+      display: flex; align-items: center; gap: 4px; flex-wrap: wrap;
+    }
+    .btn-linked-product {
+      display: flex; align-items: center; justify-content: space-between;
+      width: 100%; margin-top: 12px; padding: 11px 14px;
+      background: linear-gradient(135deg, rgba(0,210,255,0.14), rgba(58,123,213,0.14));
+      border: 1px solid rgba(0,210,255,0.45); border-radius: 12px;
+      color: #00d2ff; font-size: 12.5px; font-weight: 800;
+      cursor: pointer; font-family: inherit; transition: all 0.2s;
+    }
+    .btn-linked-product:hover {
+      background: linear-gradient(135deg, rgba(0,210,255,0.25), rgba(58,123,213,0.25));
+      transform: translateY(-1px);
+    }
+
     /* ===== HOT TOPICS BOX ===== */
     .topics-container {
       margin: 16px auto 28px; max-width: 660px;
@@ -727,9 +836,133 @@
     function switchEvent(key) {
       currentEventKey = key;
       currentSlide = 0;
+      if (typeof window.subscribeEventInventory === 'function') {
+        window.subscribeEventInventory(currentEventKey);
+      }
       buildTabs();
       buildViews();
     }
+
+    // ===== Render Variant Selector Box inside Detail Card =====
+    function renderVariantSelectorHtml(p, slideIdx) {
+      const vars = Array.isArray(p.catalogVariants) ? p.catalogVariants : [];
+      if (vars.length === 0) return '';
+
+      const firstVar = vars[0];
+      const titleIcon = (p.parentProductId === 'osuwari_moai_pen' || p.id.includes('osuwari_moai_pen')) ? '👕' : '🎨';
+      const sectionTitle = p.isVariantGroupCard
+        ? `${titleIcon} バリエーション一覧（全${vars.length}種）`
+        : `${titleIcon} バリエーション切替（全${vars.length}種）`;
+
+      const chipsHtml = vars.map((v, vIdx) => {
+        const isFirst = vIdx === 0;
+        const thumbPart = v.image
+          ? `<img src="${v.image}" class="variant-chip-thumb" alt="${(v.name || '').replace(/"/g, '&quot;')}" onerror="this.style.display='none'">`
+          : `<div class="variant-chip-icon">${v.isBase ? '🗿' : titleIcon}</div>`;
+        const noteTag = v.statusNote
+          ? `<span class="variant-note-tag">${v.statusNote}</span>`
+          : '';
+        return `
+          <button type="button"
+                  class="variant-chip ${isFirst ? 'active' : ''}"
+                  id="var-chip-${slideIdx}-${vIdx}"
+                  onclick="selectCatalogVariant(${slideIdx}, ${vIdx})">
+            ${thumbPart}
+            <div class="variant-chip-info">
+              <div class="variant-chip-name">${v.name || `バリエーション${vIdx + 1}`}</div>
+              <div class="variant-chip-status">
+                <span id="var-chip-stock-${slideIdx}-${v.skuId}" style="font-size:10px; color:rgba(255,255,255,0.5);"></span>
+                ${noteTag}
+              </div>
+            </div>
+          </button>
+        `;
+      }).join('');
+
+      const linkedBaseBtnHtml = p.linkedBaseProductId ? `
+        <button type="button" class="btn-linked-product" onclick="openProductById('${p.linkedBaseProductId}')">
+          <span>🗿 ノーマル版（${p.linkedBaseProductTitle || '通常版'}）を見る</span>
+          <span>→</span>
+        </button>
+      ` : '';
+
+      return `
+        <div class="variant-selector-box" id="variant-box-${slideIdx}">
+          <div class="variant-selector-header">
+            <div class="variant-selector-title">${sectionTitle}</div>
+            <div class="variant-selector-sub">タップで表示切替</div>
+          </div>
+          <div class="variant-active-banner" id="var-active-banner-${slideIdx}">
+            <div class="variant-active-name">
+              <span style="font-size:11px; color:#00d2ff; font-weight:700;">選択中:</span>
+              <span id="var-selected-name-${slideIdx}">${firstVar.name || ''}</span>
+              <span id="var-selected-note-${slideIdx}" class="variant-note-tag" style="display:${firstVar.statusNote ? 'inline-block' : 'none'};">${firstVar.statusNote || ''}</span>
+            </div>
+            <div class="badge" id="var-selected-stock-${slideIdx}" style="display:none;"></div>
+          </div>
+          <div class="variant-chips-grid" id="var-chips-grid-${slideIdx}">
+            ${chipsHtml}
+          </div>
+          ${linkedBaseBtnHtml}
+        </div>
+      `;
+    }
+
+    // ===== Select a Variant inside Detail Card =====
+    window.selectedVariantIndexMap = {};
+    function selectCatalogVariant(slideIdx, varIdx) {
+      const products = window.currentRenderedProducts || [];
+      const p = products[slideIdx];
+      if (!p || !Array.isArray(p.catalogVariants)) return;
+      const v = p.catalogVariants[varIdx];
+      if (!v) return;
+
+      window.selectedVariantIndexMap[slideIdx] = varIdx;
+
+      // Update active state on chips
+      const grid = document.getElementById(`var-chips-grid-${slideIdx}`);
+      if (grid) {
+        grid.querySelectorAll('.variant-chip').forEach((btn, idx) => {
+          btn.classList.toggle('active', idx === varIdx);
+        });
+      }
+
+      // Update selected name & note
+      const nameEl = document.getElementById(`var-selected-name-${slideIdx}`);
+      if (nameEl) nameEl.textContent = v.name || '';
+      const noteEl = document.getElementById(`var-selected-note-${slideIdx}`);
+      if (noteEl) {
+        if (v.statusNote) {
+          noteEl.textContent = v.statusNote;
+          noteEl.style.display = 'inline-block';
+        } else {
+          noteEl.textContent = '';
+          noteEl.style.display = 'none';
+        }
+      }
+
+      // Switch main image if variant has its own image, or fallback to 1 shared group image / product image
+      const targetImg = v.image || (v.isBase ? p.image : (p.catalogGroupImage || (p.isVariantGroupCard ? p.image : null)));
+      if (targetImg) {
+        const strip = document.getElementById(`thumbs-${slideIdx}`);
+        let matchingThumb = null;
+        if (strip) {
+          strip.querySelectorAll('.thumb-item').forEach(t => {
+            const imgTag = t.querySelector('img');
+            if (imgTag && imgTag.getAttribute('src') === targetImg) {
+              matchingThumb = t;
+            }
+          });
+        }
+        setMainImg(slideIdx, targetImg, matchingThumb);
+      }
+
+      // Refresh stock badges for selected variant
+      if (typeof window.refreshSlideVariantStock === 'function') {
+        window.refreshSlideVariantStock(slideIdx);
+      }
+    }
+    window.selectCatalogVariant = selectCatalogVariant;
 
     // ===== Build tile & carousel =====
     function buildViews() {
@@ -792,8 +1025,13 @@
         if (!IS_PREVIEW_MODE) {
           products = products.filter(p => !window.hiddenProductsData[p.id]);
         }
+        // Expand variations (e.g. 肌着おすわりモアイペン立て代表枠 & POS works_master連動)
+        if (typeof window.expandProductsForCatalog === 'function') {
+          products = window.expandProductsForCatalog(products, window.worksMasterData, window.hiddenProductsData, IS_PREVIEW_MODE);
+        }
       }
       window.currentRenderedProducts = products;
+      window.selectedVariantIndexMap = {};
 
       // Item count & Tab description
       const eventData = allEvents[currentEventKey];
@@ -829,17 +1067,26 @@
           const imgSrc = p.image || p.optimizedCover || (p.isDev ? 'images/dev_placeholder.gif' : (window.NO_IMAGE_PLACEHOLDER || 'images/dev_placeholder.gif'));
           const imageHtml = `<img class="main-product-img" src="${imgSrc}" style="border-radius:12px 12px 0 0; ${(!p.image && !p.optimizedCover && p.isDev) ? 'border:1px dashed rgba(255,255,255,0.1);' : ''}" alt="${(p.name || p.id || '').replace(/\n/g,' ')}" onerror="this.src=window.NO_IMAGE_PLACEHOLDER||'images/dev_placeholder.gif'">`;
 
+          const topLeftBadgeHtml = p.isDev
+            ? `<div class="dev-badge-tile">${DEV_STATUSES[parseInt(p.status) || 0].label}</div>`
+            : (p.variantBadgeLabel ? `<div class="variant-badge-tile">${p.variantBadgeLabel}</div>` : '');
+
+          const summarySubHtml = p.variantSummaryText
+            ? `<div class="variant-summary-tile">${p.variantSummaryText}</div>`
+            : '';
+
           tileGrid.innerHTML += `
             <div class="product-card-tile" onclick="openDetail(${i})">
               <div style="position:relative;">
                 ${imageHtml}
-                ${p.isDev ? `<div class="dev-badge-tile">${DEV_STATUSES[parseInt(p.status) || 0].label}</div>` : ''}
+                ${topLeftBadgeHtml}
                 ${p.demoUrl ? `<div class="demo-badge-tile">🎮 体験版あり</div>` : ''}
               </div>
               <div class="product-info-tile">
                 <div class="product-name-tile">${p.isDev ? '❓ [新作] ' : ''}${p.name.replace(/\n/g,'<br>')}</div>
+                ${summarySubHtml}
                 <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:4px;">
-                  <div class="tile-hint">詳細を見る →</div>
+                  <div class="tile-hint">${p.catalogVariants ? 'バリエーションを見る →' : '詳細を見る →'}</div>
                   <div style="display:flex; gap:4px;">
                     ${badgeHtml}
                     ${stockHtml}
@@ -887,6 +1134,17 @@
           const largeImageHtml = `<img class="main-product-img" id="main-img-${i}" src="${largeImgSrc}" style="width:100%; aspect-ratio:1; object-fit:cover; border-radius:12px; ${(!p.image && !p.optimizedCover && p.isDev) ? 'border:1px dashed rgba(255,255,255,0.1);' : ''}" alt="${(p.name || p.id || '').replace(/\n/g,' ')}" onerror="this.src=window.NO_IMAGE_PLACEHOLDER||'images/dev_placeholder.gif'">
                <video class="main-product-img" id="main-video-${i}" style="display:none; width:100%; height:auto; aspect-ratio:1/1; object-fit:cover;" loop muted playsinline controls></video>`;
 
+          // バリエーション切替UI（代表枠カードまたは統合バリエーションカード用）
+          const variantSelectorHtml = renderVariantSelectorHtml(p, i);
+
+          // 通常版カードから肌着バリエーション代表枠へジャンプするボタン
+          const linkedGroupJumpHtml = p.linkedVariantGroupId ? `
+            <button type="button" class="btn-linked-product" onclick="openProductById('${p.linkedVariantGroupId}')">
+              <span>👕 ${p.linkedVariantGroupTitle || 'バリエーション'}（全${p.linkedVariantCount || ''}種）を見る</span>
+              <span>→</span>
+            </button>
+          ` : '';
+
           track.innerHTML += `
             <div class="carousel-slide">
               <div class="product-card-large">
@@ -904,6 +1162,9 @@
                   </div>
                   <div class="product-desc" id="desc-text-${p.id}">${(p.desc || '').replace(/\n/g, '<br>')}</div>
                   
+                  ${variantSelectorHtml}
+                  ${linkedGroupJumpHtml}
+
                   <!-- 体験版ボタン -->
                   ${p.demoUrl ? `
                     <div style="text-align: center;">
@@ -1188,16 +1449,14 @@
 
     // ===== Carousel logic =====
     function updateCarousel() {
-      const allEvents = window.getAllEvents(window.eventConfigData);
-      const products = allEvents[currentEventKey]?.products || [];
+      const products = window.currentRenderedProducts || [];
       document.getElementById('carousel-track').style.transform = `translateX(-${currentSlide * 100}%)`;
       document.getElementById('carousel-counter').textContent =
         products.length > 0 ? `${currentSlide + 1} / ${products.length}` : '';
       document.querySelectorAll('.dot').forEach((d, i) => d.classList.toggle('active', i === currentSlide));
     }
     function moveCarousel(dir) {
-      const allEvents = window.getAllEvents(window.eventConfigData);
-      const products = allEvents[currentEventKey]?.products || [];
+      const products = window.currentRenderedProducts || [];
       const len = products.length;
       if (len === 0) return;
       currentSlide = (currentSlide + dir + len) % len;
@@ -1281,6 +1540,8 @@
     const provider = new GoogleAuthProvider();
     
     window.customProductsData = {};
+    window.worksMasterData = {};
+    window.eventInventoryData = {};
     window.eventProductsData = {};
     window.eventConfigData = {};
     window.hiddenProductsData = {};
@@ -1293,6 +1554,35 @@
     let isMasterLoaded = false;
     let isEventTopicsLoaded = false;
     let currentEditingProductId = null;
+    let unsubscribeEventInventory = null;
+
+    // Listen to works_master (POS variations & master metadata)
+    onSnapshot(doc(db, "settings", "works_master"), (docSnap) => {
+      window.worksMasterData = docSnap.exists() ? docSnap.data() : {};
+      buildViews();
+    }, (error) => {
+      console.error("Firestore works_master read error:", error);
+    });
+
+    // Listen to current event's inventory for SKU-level stock status
+    window.subscribeEventInventory = function(evKey) {
+      if (unsubscribeEventInventory) {
+        unsubscribeEventInventory();
+        unsubscribeEventInventory = null;
+      }
+      if (!evKey || evKey === 'moairoom' || evKey === 'history') {
+        window.eventInventoryData = {};
+        updateAllStock();
+        return;
+      }
+      unsubscribeEventInventory = onSnapshot(doc(db, "settings", "inventory_" + evKey), (docSnap) => {
+        window.eventInventoryData = docSnap.exists() ? docSnap.data() : {};
+        updateAllStock();
+      }, (error) => {
+        console.error("Firestore inventory read error:", error);
+      });
+    };
+    window.subscribeEventInventory(currentEventKey);
 
     // Listen to topics master list
     onSnapshot(doc(db, "settings", "topics_master"), (docSnap) => {
@@ -1369,13 +1659,15 @@
     });
 
     function updateAllAnnouncements() {
-      const allMaster = window.getFullMasterProducts(window.customProductsData);
-      allMaster.forEach(p => {
+      const rendered = window.currentRenderedProducts || window.getFullMasterProducts(window.customProductsData);
+      rendered.forEach(p => {
         if (!p.id) return;
         const container = document.getElementById(`announce-container-${p.id}`);
         const textEl = document.getElementById(`announce-text-${p.id}`);
         if (container && textEl) {
-          const text = announcementsData[p.id];
+          const text = announcementsData[p.id] !== undefined
+            ? announcementsData[p.id]
+            : (p.parentProductId ? announcementsData[p.parentProductId] : undefined);
           if (text && text.trim() !== '') {
             textEl.innerHTML = text.replace(/\n/g, '<br>');
             container.classList.add('has-content');
@@ -1400,43 +1692,131 @@
       console.error("Firestore stock read error:", error);
     });
 
-    function updateAllStock() {
-      const displayStock = stockData._displayStock !== false; // true by default
-      const allMaster = window.getFullMasterProducts(window.customProductsData);
-
-      allMaster.forEach(p => {
-        const id = p.id;
-        if (!id) return;
-        const status = stockData[id] || 'none';
-        const els = [document.getElementById(`stock-${id}`), document.getElementById(`stock-large-${id}`)];
-        els.forEach(el => {
-          if (!el) return;
-          
-          if (!displayStock) {
-            el.style.display = 'none';
-            return;
-          }
-
-          if (status === 'onsale') {
-            el.className = 'badge badge-onsale';
-            el.textContent = '✅ 販売中';
-            el.style.display = 'inline-block';
-          } else if (status === 'few') {
-            el.className = 'badge badge-few';
-            el.textContent = '⚠️ 残りわずか';
-            el.style.display = 'inline-block';
-          } else if (status === 'soldout') {
-            el.className = 'badge badge-soldout';
-            el.textContent = '❌ 売り切れ';
-            el.style.display = 'inline-block';
-          } else {
-            el.style.display = 'none';
-          }
-        });
-      });
+    // Compute stock status ('onsale' | 'few' | 'soldout' | 'none') for a single SKU or product ID
+    function resolveSkuStockStatus(skuId, parentId, isBase) {
+      if (stockData[skuId] && stockData[skuId] !== 'none') return stockData[skuId];
+      const invMap = window.eventInventoryData || {};
+      const entry = invMap[skuId];
+      if (entry && (entry.initial > 0 || entry.current > 0)) {
+        if (entry.current <= 0) return 'soldout';
+        if (entry.current / (entry.initial || 1) <= 0.3) return 'few';
+        return 'onsale';
+      }
+      if (isBase && parentId && invMap[parentId] && (invMap[parentId].initial > 0 || invMap[parentId].current > 0)) {
+        const pe = invMap[parentId];
+        if (pe.current <= 0) return 'soldout';
+        if (pe.current / (pe.initial || 1) <= 0.3) return 'few';
+        return 'onsale';
+      }
+      return 'none';
     }
 
+    function applyStockBadgeElement(el, status, displayStock) {
+      if (!el) return;
+      if (!displayStock) {
+        el.style.display = 'none';
+        return;
+      }
+      if (status === 'onsale') {
+        el.className = 'badge badge-onsale';
+        el.textContent = '✅ 販売中';
+        el.style.display = 'inline-block';
+      } else if (status === 'few') {
+        el.className = 'badge badge-few';
+        el.textContent = '⚠️ 残りわずか';
+        el.style.display = 'inline-block';
+      } else if (status === 'soldout') {
+        el.className = 'badge badge-soldout';
+        el.textContent = '❌ 売り切れ';
+        el.style.display = 'inline-block';
+      } else {
+        el.style.display = 'none';
+      }
+    }
 
+    window.refreshSlideVariantStock = function(slideIdx) {
+      const displayStock = stockData._displayStock !== false;
+      const products = window.currentRenderedProducts || [];
+      const p = products[slideIdx];
+      if (!p || !Array.isArray(p.catalogVariants)) return;
+      const parentId = p.parentProductId || p.id;
+      const selIdx = window.selectedVariantIndexMap[slideIdx] || 0;
+      const selVar = p.catalogVariants[selIdx] || p.catalogVariants[0];
+
+      // Update each chip's inline stock label
+      p.catalogVariants.forEach(v => {
+        const chipStockEl = document.getElementById(`var-chip-stock-${slideIdx}-${v.skuId}`);
+        if (!chipStockEl) return;
+        if (!displayStock) {
+          chipStockEl.innerHTML = '';
+          return;
+        }
+        const st = resolveSkuStockStatus(v.skuId, parentId, v.isBase);
+        if (st === 'onsale') {
+          chipStockEl.innerHTML = '<span style="color:#2ecc71;">● 販売中</span>';
+        } else if (st === 'few') {
+          chipStockEl.innerHTML = '<span style="color:#f39c12;">▲ 残りわずか</span>';
+        } else if (st === 'soldout') {
+          chipStockEl.innerHTML = '<span style="color:#95a5a6;">× 売り切れ</span>';
+        } else {
+          chipStockEl.innerHTML = '';
+        }
+      });
+
+      // Update active banner stock badge
+      if (selVar) {
+        const selStatus = resolveSkuStockStatus(selVar.skuId, parentId, selVar.isBase) || stockData[parentId] || 'none';
+        const bannerBadgeEl = document.getElementById(`var-selected-stock-${slideIdx}`);
+        applyStockBadgeElement(bannerBadgeEl, selStatus, displayStock);
+      }
+    };
+
+    function updateAllStock() {
+      const displayStock = stockData._displayStock !== false; // true by default
+      const rendered = window.currentRenderedProducts || window.getFullMasterProducts(window.customProductsData);
+      const invMap = window.eventInventoryData || {};
+
+      rendered.forEach((p, slideIdx) => {
+        const id = p.id;
+        if (!id) return;
+        let status = stockData[id] || 'none';
+
+        if (p.isVariantGroupCard && Array.isArray(p.catalogVariants)) {
+          // Aggregate stock status across the group's variants
+          let totalInit = 0;
+          let totalCur = 0;
+          let anyInventoryFound = false;
+          p.catalogVariants.forEach(v => {
+            const e = invMap[v.skuId];
+            if (e && (e.initial > 0 || e.current > 0)) {
+              anyInventoryFound = true;
+              totalInit += (e.initial || 0);
+              totalCur += (e.current || 0);
+            }
+          });
+          if (status === 'none') {
+            if (anyInventoryFound) {
+              if (totalCur <= 0) status = 'soldout';
+              else if (totalCur / (totalInit || 1) <= 0.3) status = 'few';
+              else status = 'onsale';
+            } else if (p.parentProductId && stockData[p.parentProductId]) {
+              status = stockData[p.parentProductId];
+            }
+          }
+        } else if (p.baseSkuId) {
+          // Split normal card: check base SKU inventory first
+          const baseSt = resolveSkuStockStatus(p.baseSkuId, p.id, true);
+          if (baseSt !== 'none') status = baseSt;
+        }
+
+        const els = [document.getElementById(`stock-${id}`), document.getElementById(`stock-large-${id}`)];
+        els.forEach(el => applyStockBadgeElement(el, status, displayStock));
+
+        if (Array.isArray(p.catalogVariants) && p.catalogVariants.length > 0) {
+          window.refreshSlideVariantStock(slideIdx);
+        }
+      });
+    }
 
     // Listen to descriptions
     onSnapshot(doc(db, "settings", "descriptions"), (docSnap) => {
@@ -1451,8 +1831,8 @@
     });
 
     function updateAllDescriptions() {
-      const allMaster = window.getFullMasterProducts(window.customProductsData);
-      allMaster.forEach(p => {
+      const rendered = window.currentRenderedProducts || window.getFullMasterProducts(window.customProductsData);
+      rendered.forEach(p => {
         if (!p.id) return;
         const el = document.getElementById(`desc-text-${p.id}`);
         if (el) {
@@ -1478,11 +1858,11 @@
     });
 
     function updateAllBadges() {
-      const allMaster = window.getFullMasterProducts(window.customProductsData);
-      allMaster.forEach(p => {
+      const rendered = window.currentRenderedProducts || window.getFullMasterProducts(window.customProductsData);
+      rendered.forEach(p => {
         const id = p.id;
         if (!id) return;
-        const status = badgesData[id] || 'none';
+        const status = badgesData[id] || (p.parentProductId ? badgesData[p.parentProductId] : 'none') || 'none';
         
         const els = [document.getElementById(`badge-${id}`), document.getElementById(`badge-large-${id}`)];
         els.forEach(el => {

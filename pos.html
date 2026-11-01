@@ -556,6 +556,10 @@
     .mfg-job-chip.mfg-job-selected {
       box-shadow: 0 0 0 2px #fff, 0 4px 14px rgba(59, 130, 246, 0.5) !important;
     }
+    select option, select optgroup {
+      background-color: #161822 !important;
+      color: #ffffff !important;
+    }
     .mfg-add-slot-btn {
       margin-top: auto;
       width: 100%;
@@ -1475,8 +1479,38 @@
         </div>
 
         <!-- Scrollable Main Container -->
-        <div style="flex:1; overflow-y:auto; padding:16px 20px; display:flex; flex-direction:column; gap:20px;">
+        <div style="flex:1; overflow-y:auto; padding:16px 20px; display:flex; flex-direction:column; gap:16px;">
           
+          <!-- Section 0: バリエーション表示方法 ＆ 画像編集対象の切替パネル -->
+          <div id="img-manager-variant-panel" style="display:none; background:rgba(0,210,255,0.06); border:1.5px solid rgba(0,210,255,0.35); border-radius:12px; padding:12px 16px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:10px;">
+              <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+                <span style="font-size:12px; font-weight:bold; color:var(--accent);">📋 お品書きでのバリエーション表示方法:</span>
+                <select id="img-manager-var-mode-select" onchange="onChangeImgManagerVarMode(this.value)" class="form-select" style="font-size:12px; padding:5px 10px; width:auto; max-width:100%; background:#161822; color:#fff; border:1px solid rgba(0,210,255,0.4); font-weight:bold;">
+                  <option value="split_group">👕 別枠で「バリエーションまとめカード」を追加（1枚のまとめ画像で全種紹介）</option>
+                  <option value="individual_cards">🗂️ 各バリエーションを単独カードとしてお品書き一覧に並べる</option>
+                  <option value="integrated">🎨 親カード1枠に統合（一覧は増やさず詳細画面内で切替）</option>
+                  <option value="base_only">🚫 お品書きにはバリエーションを出さない（通常版のみ表示）</option>
+                </select>
+              </div>
+              <button type="button" onclick="openVariantManagerModal(currentSelectorPosId)" style="background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.25); color:#fff; font-size:11px; padding:5px 10px; border-radius:6px; cursor:pointer; font-weight:bold;">🎨 バリエーション種類・名前を編集</button>
+            </div>
+            <div id="img-manager-var-group-inputs" style="display:grid; grid-template-columns:1fr 1.6fr; gap:8px; margin-bottom:10px;">
+              <div>
+                <label style="font-size:10px; color:#aaa;">まとめカード名（改行は \n）</label>
+                <input type="text" id="img-manager-var-group-title" class="form-input" style="font-size:12px; padding:5px 8px; margin-top:2px;" placeholder="例: 肌着おすわり\nモアイペン立て">
+              </div>
+              <div>
+                <label style="font-size:10px; color:#aaa;">まとめカード説明文</label>
+                <input type="text" id="img-manager-var-group-desc" class="form-input" style="font-size:12px; padding:5px 8px; margin-top:2px;" placeholder="例: いろんな肌着を着こなすシリーズ">
+              </div>
+            </div>
+            <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap; padding-top:8px; border-top:1px dashed rgba(255,255,255,0.12);">
+              <span style="font-size:11px; font-weight:bold; color:#ffd166;">🖼️ いま画像を設定する枠:</span>
+              <div id="img-manager-var-target-tabs" style="display:flex; gap:6px; flex-wrap:wrap;"></div>
+            </div>
+          </div>
+
           <!-- Section 1: 現在のお品書き公開構成 (トレイ) -->
           <div style="background:rgba(0,0,0,0.3); border:1.5px solid rgba(0,210,255,0.3); border-radius:12px; padding:14px 16px;">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
@@ -1559,7 +1593,7 @@
         <input type="hidden" id="variant-manager-parent-id">
 
         <!-- Parent Product Header -->
-        <div style="display:flex; gap:12px; align-items:center; background:rgba(0,0,0,0.35); padding:10px 12px; border-radius:8px; margin-bottom:12px;">
+        <div style="display:flex; gap:12px; align-items:center; background:rgba(0,0,0,0.35); padding:10px 12px; border-radius:8px; margin-bottom:10px;">
           <img id="variant-manager-img" src="" style="width:52px; height:52px; object-fit:cover; border-radius:6px; background:#222;">
           <div style="flex:1; min-width:0;">
             <div id="variant-manager-title" style="font-weight:bold; font-size:15px; color:white;"></div>
@@ -1567,6 +1601,60 @@
               ※1行目の「無印（通常版）」にこれまでの通常版データ（在庫・価格・必要数・過去売上）が自動で紐付きます。
             </div>
           </div>
+        </div>
+
+        <!-- Catalog Display Mode Config -->
+        <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.12); border-radius:8px; padding:10px 12px; margin-bottom:10px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; flex-wrap:wrap;">
+            <span style="font-size:12px; font-weight:bold; color:#00d2ff;">📋 お品書き（catalog.html）での表示方法:</span>
+            <select id="variant-catalog-mode-select" class="form-select" onchange="onChangeVariantCatalogMode(this.value)" style="font-size:12px; padding:4px 8px; width:auto; max-width:100%; background:#161822; color:#fff;">
+              <option value="split_group">👕 別枠で「バリエーションまとめカード」を追加（1枚の集合画像で全種紹介）</option>
+              <option value="individual_cards">🗂️ 各バリエーションを単独カードとしてお品書き一覧に並べる</option>
+              <option value="integrated">🎨 親カード1枠に統合（一覧は増やさず詳細画面内で切替）</option>
+              <option value="base_only">🚫 お品書きにはバリエーションを出さない（通常版のみ表示）</option>
+            </select>
+          </div>
+          <div id="variant-catalog-group-fields" style="margin-top:8px; display:grid; grid-template-columns:1fr 1.5fr; gap:8px;">
+            <div>
+              <label style="font-size:10px; opacity:0.7;">代表カード名（改行は \n）</label>
+              <input type="text" id="variant-catalog-group-title" class="form-input" style="font-size:12px; padding:5px 8px; margin-top:2px;" placeholder="例: 肌着おすわり\nモアイペン立て">
+            </div>
+            <div>
+              <label style="font-size:10px; opacity:0.7;">代表カード説明文</label>
+              <input type="text" id="variant-catalog-group-desc" class="form-input" style="font-size:12px; padding:5px 8px; margin-top:2px;" placeholder="例: タンクトップやVネックなど、いろんな肌着を着こなすシリーズ">
+            </div>
+          </div>
+          <!-- 1-Image All-Variations Summary Photo Setting -->
+          <div style="margin-top:10px; padding-top:10px; border-top:1px dashed rgba(255,255,255,0.12); display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
+            <div id="variant-group-img-box" onclick="triggerGroupImageUpload()" style="width:56px; height:56px; border-radius:8px; background:rgba(0,0,0,0.4); border:1.5px dashed rgba(0,210,255,0.5); display:flex; align-items:center; justify-content:center; overflow:hidden; cursor:pointer; flex-shrink:0;" title="クリックして全バリエーションまとめ画像を1枚設定">
+              <img id="variant-group-img-preview" src="" style="width:100%; height:100%; object-fit:cover; display:none;">
+              <span id="variant-group-img-empty" style="font-size:20px;">🖼️</span>
+            </div>
+            <div style="flex:1; min-width:200px;">
+              <div style="font-size:12px; font-weight:bold; color:#fff;">🖼️ バリエーションまとめ画像（1枚登録するだけでOK）</div>
+              <div style="font-size:10px; color:rgba(255,255,255,0.65); margin-top:2px;">全種類が載った一覧写真や代表写真を1枚登録すれば、各バリエーションに個別画像を設定する手間を省けます。</div>
+              <div style="display:flex; gap:6px; flex-wrap:wrap; margin-top:6px;">
+                <button type="button" onclick="triggerGroupImageUpload()" style="background:rgba(0,210,255,0.2); border:1px solid var(--accent); color:var(--accent); font-size:11px; font-weight:bold; padding:4px 10px; border-radius:6px; cursor:pointer;">📤 まとめ画像を1枚アップロード</button>
+                <button type="button" onclick="openVariantImgPicker('group')" style="background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.2); color:#ddd; font-size:11px; padding:4px 10px; border-radius:6px; cursor:pointer;">📷 候補画像から選ぶ</button>
+                <button type="button" id="btn-clear-group-img" onclick="clearVariantGroupImage()" style="display:none; background:rgba(231,76,60,0.18); border:1px solid #e74c3c; color:#ff6b6b; font-size:11px; padding:4px 8px; border-radius:6px; cursor:pointer;">✕ 解除</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Hidden file input for Variant Image Upload -->
+        <input type="file" id="variant-image-file-input" accept="image/*" style="display:none;" onchange="handleVariantImageFileSelect(event)">
+        <!-- Inline Variant Image Pool Picker Box -->
+        <div id="variant-img-picker-box" style="display:none; background:#111420; border:1px solid var(--accent); border-radius:8px; padding:10px; margin-bottom:10px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; flex-wrap:wrap; gap:6px;">
+            <span id="variant-img-picker-label" style="font-size:12px; font-weight:bold; color:var(--accent);">📷 バリエーション画像を選択</span>
+            <div style="display:flex; gap:6px;">
+              <button type="button" onclick="document.getElementById('variant-image-file-input').click()" style="background:rgba(255,159,28,0.2); border:1px solid #ff9f1c; color:#ff9f1c; font-size:11px; padding:3px 8px; border-radius:6px; cursor:pointer; font-weight:bold;">📤 写真ファイルから追加</button>
+              <button type="button" onclick="clearVariantDraftImage()" style="background:rgba(231,76,60,0.2); border:1px solid #e74c3c; color:#ff6b6b; font-size:11px; padding:3px 8px; border-radius:6px; cursor:pointer;">✕ 画像解除</button>
+              <button type="button" onclick="closeVariantImgPicker()" style="background:rgba(255,255,255,0.1); border:none; color:#ccc; font-size:11px; padding:3px 8px; border-radius:6px; cursor:pointer;">閉じる</button>
+            </div>
+          </div>
+          <div id="variant-img-picker-grid" style="display:flex; gap:8px; overflow-x:auto; padding-bottom:4px;"></div>
         </div>
 
         <!-- Add Variant Input Bar -->
@@ -2726,7 +2814,8 @@
     const rdb = getDatabase(rankingApp);
 
     // App State
-    let currentEventKey = DEFAULT_EVENT;
+    let currentEventKey = localStorage.getItem("moai_pos_current_event") || "designfesta64";
+    let lastListenedEventKey = null;
     let inventoryData = {};
     let stockData = {};
     let badgesData = {};
@@ -2781,6 +2870,7 @@
       if (activeBtn) activeBtn.classList.add('active');
       const prevEventKey = currentEventKey;
       currentEventKey = key;
+      try { localStorage.setItem("moai_pos_current_event", key); } catch(e) {}
       if (typeof multiAggSelectedEvents !== 'undefined') {
         if (multiAggSelectedEvents.length <= 1 && (!multiAggSelectedEvents[0] || multiAggSelectedEvents[0] === prevEventKey)) {
           multiAggSelectedEvents = [key];
@@ -2915,9 +3005,17 @@
         });
         onSnapshot(doc(db, "settings", "event_config"), (snap) => {
           if (snap.exists()) eventConfigData = snap.data();
+          const allEvs = window.getAllEvents ? window.getAllEvents(eventConfigData) : {};
+          if (!allEvs[currentEventKey]) {
+            currentEventKey = allEvs["designfesta64"] ? "designfesta64" : DEFAULT_EVENT;
+          }
           buildTabs();
           updateVisibilityUI();
-          renderAll();
+          if (lastListenedEventKey !== currentEventKey) {
+            listenToEventData();
+          } else {
+            renderAll();
+          }
         });
         window.customProductsData = {}; // Restore customProductsData definition
         onSnapshot(doc(db, "settings", "custom_products"), (snap) => {
@@ -3106,6 +3204,7 @@
       const allEvents = window.getAllEvents(eventConfigData);
       const currentEv = allEvents[currentEventKey];
       if (!currentEv) return; // Prevent errors if event is missing
+      lastListenedEventKey = currentEventKey;
       
       const evLabel = currentEv.label;
       document.getElementById('dash-event-name').textContent = evLabel;
@@ -8720,10 +8819,54 @@
     // -------- Variant Manager Modal Logic --------
     let variantDraftList = [];
     let variantDraftParentId = null;
+    let variantDraftGroupImage = null;
+    let activeVariantImgTargetIdx = null; // number (SKU index) or 'group'
+
+    function renderVariantGroupImgPreview() {
+      const prevEl = document.getElementById('variant-group-img-preview');
+      const emptyEl = document.getElementById('variant-group-img-empty');
+      const clearBtn = document.getElementById('btn-clear-group-img');
+      const boxEl = document.getElementById('variant-group-img-box');
+      if (variantDraftGroupImage) {
+        if (prevEl) { prevEl.src = variantDraftGroupImage; prevEl.style.display = 'block'; }
+        if (emptyEl) emptyEl.style.display = 'none';
+        if (clearBtn) clearBtn.style.display = 'inline-block';
+        if (boxEl) boxEl.style.border = '2px solid var(--accent)';
+      } else {
+        if (prevEl) { prevEl.src = ''; prevEl.style.display = 'none'; }
+        if (emptyEl) emptyEl.style.display = 'block';
+        if (clearBtn) clearBtn.style.display = 'none';
+        if (boxEl) boxEl.style.border = '1.5px dashed rgba(0,210,255,0.5)';
+      }
+    }
+
+    window.triggerGroupImageUpload = () => {
+      syncDraftInputsFromDOM();
+      activeVariantImgTargetIdx = 'group';
+      const fileInput = document.getElementById('variant-image-file-input');
+      if (fileInput) fileInput.click();
+    };
+
+    window.clearVariantGroupImage = () => {
+      variantDraftGroupImage = null;
+      renderVariantGroupImgPreview();
+      if (activeVariantImgTargetIdx === 'group') closeVariantImgPicker();
+    };
+
+    window.onChangeVariantCatalogMode = (mode) => {
+      const groupFields = document.getElementById('variant-catalog-group-fields');
+      if (groupFields) {
+        groupFields.style.display = mode === 'split_group' ? 'grid' : 'none';
+      }
+    };
 
     window.openVariantManagerModal = (parentId) => {
       if (!parentId) return;
       variantDraftParentId = parentId;
+      activeVariantImgTargetIdx = null;
+      const pickerBox = document.getElementById('variant-img-picker-box');
+      if (pickerBox) pickerBox.style.display = 'none';
+
       const allProducts = window.getFullMasterProducts ? window.getFullMasterProducts(window.customProductsData) : MASTER_PRODUCTS;
       const p = allProducts.find(x => x.id === parentId) || { id: parentId, name: parentId };
       const wData = (window.worksMasterData && window.worksMasterData[parentId]) || {};
@@ -8732,6 +8875,24 @@
       document.getElementById('variant-manager-title').textContent = `${(wData.name || p.name || parentId).replace(/\n/g, ' ')} (${parentId})`;
       const imgEl = document.getElementById('variant-manager-img');
       if (imgEl) imgEl.src = p.image || window.NO_IMAGE_PLACEHOLDER || window.NO_IMAGE_PLACEHOLDER;
+
+      // Catalog Display Mode fields
+      const defaultMode = wData.catalogDisplayMode || (parentId === 'osuwari_moai_pen' ? 'split_group' : 'integrated');
+      const modeSel = document.getElementById('variant-catalog-mode-select');
+      if (modeSel) modeSel.value = defaultMode;
+      window.onChangeVariantCatalogMode(defaultMode);
+
+      const gTitleEl = document.getElementById('variant-catalog-group-title');
+      if (gTitleEl) {
+        gTitleEl.value = wData.catalogGroupTitle || (parentId === 'osuwari_moai_pen' ? '肌着おすわり\\nモアイペン立て' : '');
+      }
+      const gDescEl = document.getElementById('variant-catalog-group-desc');
+      if (gDescEl) {
+        gDescEl.value = wData.catalogGroupDesc || (parentId === 'osuwari_moai_pen' ? 'タンクトップやVネック・袖付きなど、いろんな肌着を着こなすおすわりモアイペン立てシリーズ。' : '');
+      }
+
+      variantDraftGroupImage = wData.catalogGroupImage || null;
+      renderVariantGroupImgPreview();
 
       const existing = Array.isArray(wData.variants) ? wData.variants : [];
       if (existing.length > 0) {
@@ -8742,10 +8903,10 @@
           active: v.active !== false,
           priceOverride: v.priceOverride || null,
           statusNote: v.statusNote || '',
+          image: v.image || null,
           sortOrder: v.sortOrder !== undefined ? v.sortOrder : i
         }));
       } else {
-        // Initialize with 1st row as "無印（通常版）" (isBase: true) so existing stock/sales/sim bind to it
         variantDraftList = [
           {
             skuId: `${parentId}__base`,
@@ -8754,6 +8915,7 @@
             active: true,
             priceOverride: null,
             statusNote: '',
+            image: null,
             sortOrder: 0
           }
         ];
@@ -8771,6 +8933,7 @@
     window.closeVariantManagerModal = () => {
       document.getElementById('variant-manager-modal').style.display = 'none';
       variantDraftParentId = null;
+      activeVariantImgTargetIdx = null;
     };
 
     function syncDraftInputsFromDOM() {
@@ -8789,6 +8952,137 @@
       });
     }
 
+    function getVariantCandidateImages(parentId) {
+      const allProducts = window.getFullMasterProducts ? window.getFullMasterProducts(window.customProductsData) : MASTER_PRODUCTS;
+      const p = allProducts.find(x => x.id === parentId) || {};
+      const wData = (window.worksMasterData && window.worksMasterData[parentId]) || {};
+      const list = [];
+      const add = (u) => { if (u && typeof u === 'string' && !list.includes(u)) list.push(u); };
+      if (variantDraftGroupImage) add(variantDraftGroupImage);
+      if (wData.catalogGroupImage) add(wData.catalogGroupImage);
+      if (p.image) add(p.image);
+      if (Array.isArray(p.images)) p.images.forEach(add);
+      if (wData.image) add(wData.image);
+      if (Array.isArray(wData.images)) wData.images.forEach(add);
+      if (window.WORK_FOLDER_ASSETS) {
+        const a1 = window.WORK_FOLDER_ASSETS[parentId] || {};
+        if (Array.isArray(a1.studio)) a1.studio.forEach(add);
+        if (Array.isArray(a1.raw)) a1.raw.forEach(add);
+        if (parentId === 'osuwari_moai_pen') {
+          const a2 = window.WORK_FOLDER_ASSETS['hadagi_osuwari_moai_pen'] || {};
+          if (Array.isArray(a2.studio)) a2.studio.forEach(add);
+          if (Array.isArray(a2.raw)) a2.raw.forEach(add);
+        }
+      }
+      variantDraftList.forEach(v => { if (v.image) add(v.image); });
+      return list;
+    }
+
+    window.openVariantImgPicker = (idxOrGroup) => {
+      syncDraftInputsFromDOM();
+      activeVariantImgTargetIdx = idxOrGroup;
+      const isGroup = idxOrGroup === 'group';
+      const v = isGroup ? null : variantDraftList[idxOrGroup];
+      if (!isGroup && !v) return;
+      const box = document.getElementById('variant-img-picker-box');
+      const label = document.getElementById('variant-img-picker-label');
+      const grid = document.getElementById('variant-img-picker-grid');
+      if (!box || !grid) return;
+      if (label) {
+        label.textContent = isGroup
+          ? '🖼️ 全バリエーションまとめ画像（1枚で全種紹介）を選択'
+          : `📷 「${v.name || 'SKU #' + (idxOrGroup + 1)}」の個別画像を選択`;
+      }
+
+      const curSelectedImg = isGroup ? variantDraftGroupImage : v.image;
+      const candidates = getVariantCandidateImages(variantDraftParentId);
+      if (candidates.length === 0) {
+        grid.innerHTML = `<div style="font-size:11px; color:#888; padding:8px;">候補画像がありません。右上の「📤 写真ファイルから追加」で画像を選択してください。</div>`;
+      } else {
+        grid.innerHTML = candidates.map((src, cIdx) => {
+          const isCur = curSelectedImg === src;
+          return `
+            <div onclick="selectVariantPoolImg(${cIdx})" style="flex-shrink:0; width:64px; height:64px; border-radius:8px; overflow:hidden; border:2px solid ${isCur ? 'var(--accent)' : 'rgba(255,255,255,0.18)'}; cursor:pointer; background:#000; position:relative;" title="クリックでこの画像を割り当て">
+              <img src="${src}" style="width:100%; height:100%; object-fit:cover;">
+              ${isCur ? `<div style="position:absolute; bottom:0; inset-x:0; background:var(--accent); color:#000; font-size:9px; font-weight:bold; text-align:center;">選択中</div>` : ''}
+            </div>
+          `;
+        }).join('');
+      }
+      box.style.display = 'block';
+      renderVariantManagerList();
+    };
+
+    window.selectVariantPoolImg = (cIdx) => {
+      if (activeVariantImgTargetIdx === null) return;
+      const candidates = getVariantCandidateImages(variantDraftParentId);
+      const chosen = candidates[cIdx];
+      if (!chosen) return;
+      if (activeVariantImgTargetIdx === 'group') {
+        variantDraftGroupImage = chosen;
+        renderVariantGroupImgPreview();
+      } else if (variantDraftList[activeVariantImgTargetIdx]) {
+        variantDraftList[activeVariantImgTargetIdx].image = chosen;
+      }
+      openVariantImgPicker(activeVariantImgTargetIdx);
+    };
+
+    window.clearVariantDraftImage = () => {
+      if (activeVariantImgTargetIdx === 'group') {
+        variantDraftGroupImage = null;
+        renderVariantGroupImgPreview();
+      } else if (activeVariantImgTargetIdx !== null && variantDraftList[activeVariantImgTargetIdx]) {
+        variantDraftList[activeVariantImgTargetIdx].image = null;
+      }
+      closeVariantImgPicker();
+      renderVariantManagerList();
+    };
+
+    window.closeVariantImgPicker = () => {
+      activeVariantImgTargetIdx = null;
+      const box = document.getElementById('variant-img-picker-box');
+      if (box) box.style.display = 'none';
+      renderVariantManagerList();
+    };
+
+    window.handleVariantImageFileSelect = (e) => {
+      const file = e.target.files && e.target.files[0];
+      const targetKey = activeVariantImgTargetIdx !== null ? activeVariantImgTargetIdx : 'group';
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        const img = new Image();
+        img.onload = () => {
+          const maxDim = 850;
+          let w = img.width;
+          let h = img.height;
+          if (w > maxDim || h > maxDim) {
+            if (w > h) { h = Math.round((h * maxDim) / w); w = maxDim; }
+            else { w = Math.round((w * maxDim) / h); h = maxDim; }
+          }
+          const canvas = document.createElement('canvas');
+          canvas.width = w;
+          canvas.height = h;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, w, h);
+          const dataUrl = canvas.toDataURL('image/jpeg', 0.82);
+          if (targetKey === 'group') {
+            variantDraftGroupImage = dataUrl;
+            renderVariantGroupImgPreview();
+          } else if (variantDraftList[targetKey]) {
+            variantDraftList[targetKey].image = dataUrl;
+            renderVariantManagerList();
+          }
+          const box = document.getElementById('variant-img-picker-box');
+          if (box && box.style.display !== 'none') {
+            openVariantImgPicker(targetKey);
+          }
+        };
+        img.src = ev.target.result;
+      };
+      reader.readAsDataURL(file);
+      e.target.value = '';
+    };
     function renderVariantManagerList() {
       const container = document.getElementById('variant-manager-list');
       if (!container) return;
@@ -8802,16 +9096,24 @@
           ? `<span style="background:rgba(0,210,255,0.2); border:1px solid var(--accent); color:var(--accent); font-size:10px; font-weight:bold; padding:2px 6px; border-radius:8px; white-space:nowrap;" title="これまでの通常版データ（在庫・売上・必要数）を引き継ぐ基本枠">🔹 既存通常版枠</span>`
           : `<span style="background:rgba(255,255,255,0.08); color:#ccc; font-size:10px; padding:2px 6px; border-radius:8px; white-space:nowrap;">SKU #${idx + 1}</span>`;
 
+        const isPickingImg = activeVariantImgTargetIdx === idx;
+        const thumbHtml = v.image
+          ? `<div onclick="openVariantImgPicker(${idx})" style="width:36px; height:36px; border-radius:6px; overflow:hidden; border:1.5px solid ${isPickingImg ? 'var(--accent)' : 'rgba(0,210,255,0.5)'}; cursor:pointer; position:relative; flex-shrink:0;" title="クリックでバリエーション画像を変更">
+               <img src="${v.image}" style="width:100%; height:100%; object-fit:cover;">
+             </div>`
+          : `<button type="button" onclick="openVariantImgPicker(${idx})" style="width:36px; height:36px; border-radius:6px; background:rgba(255,255,255,0.06); border:1px dashed ${isPickingImg ? 'var(--accent)' : 'rgba(255,255,255,0.25)'}; color:#aaa; cursor:pointer; font-size:14px; display:flex; align-items:center; justify-content:center; flex-shrink:0;" title="お品書き用の個別画像を設定">📷</button>`;
+
         return `
           <div style="background:${v.active ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.4)'}; border:1px solid ${v.isBase ? 'rgba(0,210,255,0.4)' : 'rgba(255,255,255,0.1)'}; border-radius:8px; padding:10px; display:flex; align-items:center; gap:8px; flex-wrap:wrap; opacity:${v.active ? 1 : 0.55};">
             <label style="display:flex; align-items:center; gap:4px; font-size:11px; cursor:pointer;" title="チェックを外すと一時非表示（検討中・廃盤など）になります">
               <input type="checkbox" id="var-draft-active-${idx}" ${v.active ? 'checked' : ''} onchange="onToggleVariantDraftActive(${idx}, this.checked)" style="width:16px; height:16px; accent-color:var(--accent);">
               <span>有効</span>
             </label>
+            ${thumbHtml}
             ${baseBadge}
-            <input type="text" id="var-draft-name-${idx}" class="form-input" value="${(v.name || '').replace(/"/g, '&quot;')}" placeholder="バリエーション名 (例: U字タンクトップ・白)" style="flex:1; min-width:150px; font-size:13px; padding:6px 8px; font-weight:bold;">
-            <input type="number" id="var-draft-price-${idx}" class="form-input" value="${v.priceOverride || ''}" placeholder="親価格と同じ" style="width:95px; font-size:12px; padding:6px 8px; text-align:right;" title="空欄の場合は親商品の価格が適用されます">
-            <input type="text" id="var-draft-note-${idx}" class="form-input" value="${(v.statusNote || '').replace(/"/g, '&quot;')}" placeholder="メモ(検討中など)" style="width:105px; font-size:11px; padding:6px 8px;">
+            <input type="text" id="var-draft-name-${idx}" class="form-input" value="${(v.name || '').replace(/"/g, '&quot;')}" placeholder="バリエーション名 (例: U字タンクトップ・白)" style="flex:1; min-width:140px; font-size:13px; padding:6px 8px; font-weight:bold;">
+            <input type="number" id="var-draft-price-${idx}" class="form-input" value="${v.priceOverride || ''}" placeholder="親価格と同じ" style="width:90px; font-size:12px; padding:6px 8px; text-align:right;" title="空欄の場合は親商品の価格が適用されます">
+            <input type="text" id="var-draft-note-${idx}" class="form-input" value="${(v.statusNote || '').replace(/"/g, '&quot;')}" placeholder="メモ(検討中など)" style="width:95px; font-size:11px; padding:6px 8px;">
             <div style="display:flex; gap:4px;">
               <button type="button" onclick="moveVariantDraft(${idx}, -1)" ${idx === 0 ? 'disabled' : ''} style="background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.15); color:#fff; border-radius:4px; width:26px; height:26px; cursor:pointer; font-size:11px;">▲</button>
               <button type="button" onclick="moveVariantDraft(${idx}, 1)" ${idx === variantDraftList.length - 1 ? 'disabled' : ''} style="background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.15); color:#fff; border-radius:4px; width:26px; height:26px; cursor:pointer; font-size:11px;">▼</button>
@@ -8850,6 +9152,7 @@
           active: true,
           priceOverride: priceOverride,
           statusNote: '',
+          image: null,
           sortOrder: variantDraftList.length
         });
       });
@@ -8871,6 +9174,7 @@
           active: isActive,
           priceOverride: null,
           statusNote: isActive ? '' : '検討中',
+          image: null,
           sortOrder: variantDraftList.length
         });
       });
@@ -8942,8 +9246,13 @@
         active: v.active !== false,
         priceOverride: v.priceOverride || null,
         statusNote: v.statusNote || '',
+        image: v.image || null,
         sortOrder: i
       }));
+
+      const catalogDisplayMode = document.getElementById('variant-catalog-mode-select')?.value || 'integrated';
+      const rawGroupTitle = (document.getElementById('variant-catalog-group-title')?.value || '').trim().replace(/\\n/g, '\n');
+      const rawGroupDesc = (document.getElementById('variant-catalog-group-desc')?.value || '').trim().replace(/\\n/g, '\n');
 
       try {
         // 1. Save variants definition to settings/works_master
@@ -8958,6 +9267,10 @@
             profileStatus: 'unregistered'
           }),
           variants: cleaned,
+          catalogDisplayMode,
+          catalogGroupTitle: rawGroupTitle || null,
+          catalogGroupDesc: rawGroupDesc || null,
+          catalogGroupImage: variantDraftGroupImage || null,
           updatedAt: Date.now()
         };
         window.worksMasterData = updatedMaster;
@@ -13524,45 +13837,113 @@
     // 🖼️ お品書き画像管理コントローラー (2段スタジオ＆RAW統合UI)
     // =========================================================
     let currentSelectorPosId = null;
+    let currentSelectorTargetSlot = 'base'; // 'base' | 'group' | 'sku:<skuId>'
     let currentDraftImages = []; // Array of image URLs/paths in the selected tray
     let currentPoolTab = 'studio'; // 'studio' | 'raw' | 'all'
     let currentCandidateImages = { studio: [], raw: [], all: [] };
 
-    window.openWorkImageSelectorModal = function(pId) {
+    window.onChangeImgManagerVarMode = function(mode) {
+      const grpInputs = document.getElementById('img-manager-var-group-inputs');
+      if (grpInputs) grpInputs.style.display = mode === 'split_group' ? 'grid' : 'none';
+    };
+
+    window.switchImgManagerTargetSlot = function(slot) {
+      if (!currentSelectorPosId) return;
+      window.openWorkImageSelectorModal(currentSelectorPosId, slot);
+    };
+
+    window.openWorkImageSelectorModal = function(pId, targetSlot = null) {
+      if (pId && pId.includes('::')) {
+        const parts = pId.split('::');
+        pId = parts[0];
+        targetSlot = parts[1] || 'base';
+      }
       if (!pId) {
         const allMaster = window.getFullMasterProducts ? window.getFullMasterProducts(window.customProductsData) : MASTER_PRODUCTS;
         pId = (allMaster[0] && allMaster[0].id) || 'moai_robo_mk2_gray';
       }
       currentSelectorPosId = pId;
+      currentSelectorTargetSlot = targetSlot || 'base';
 
       const allProducts = window.getFullMasterProducts ? window.getFullMasterProducts(window.customProductsData) : MASTER_PRODUCTS;
       const p = allProducts.find(item => item.id === pId) || { id: pId, name: pId, image: null, images: [] };
       const wData = (window.worksMasterData && window.worksMasterData[pId]) || {};
+      const cleanName = (wData.name || p.name || pId).replace(/\n/g, ' ');
+
+      const nameHeaderEl = document.getElementById('img-manager-work-name');
+      if (nameHeaderEl) {
+        nameHeaderEl.textContent = currentSelectorTargetSlot === 'group'
+          ? `${cleanName} - バリエーションまとめ枠`
+          : cleanName;
+      }
 
       const statusEl = document.getElementById('img-manager-status');
       if (statusEl) statusEl.textContent = '';
 
-      // 作品切替プルダウン更新
+      // 作品切替プルダウン更新（バリエーションまとめ枠も直接選択可能に）
       const workSelect = document.getElementById('img-manager-work-select');
       if (workSelect) {
         let optHtml = '';
         allProducts.forEach(prod => {
           const sName = prod.name ? prod.name.replace(/\n/g, ' ') : prod.id;
-          optHtml += `<option value="${prod.id}" ${prod.id === pId ? 'selected' : ''}>${sName}</option>`;
+          const pwm = (window.worksMasterData && window.worksMasterData[prod.id]) || {};
+          const hasVars = (Array.isArray(pwm.variants) && pwm.variants.filter(v => !v.isBase && v.active !== false).length > 0) || prod.id === 'osuwari_moai_pen';
+          const isBaseSel = (prod.id === pId && currentSelectorTargetSlot === 'base');
+          optHtml += `<option value="${prod.id}::base" ${isBaseSel ? 'selected' : ''}>${sName}</option>`;
+          if (hasVars) {
+            const isGrpSel = (prod.id === pId && currentSelectorTargetSlot === 'group');
+            const grpTitle = (pwm.catalogGroupTitle || (prod.id === 'osuwari_moai_pen' ? '肌着おすわり モアイペン立て' : `${sName} バリエーション`)).replace(/\n/g, ' ');
+            optHtml += `<option value="${prod.id}::group" ${isGrpSel ? 'selected' : ''}>　└ 🖼️ ${grpTitle} (まとめ画像)</option>`;
+          }
         });
         workSelect.innerHTML = optHtml;
-        workSelect.value = pId;
+        if (currentSelectorTargetSlot === 'group') workSelect.value = `${pId}::group`;
+        else workSelect.value = `${pId}::base`;
       }
 
-      // 在庫バッジ更新
+      // バリエーション設定パネルの更新
+      const varPanel = document.getElementById('img-manager-variant-panel');
+      const rawVars = (Array.isArray(wData.variants) && wData.variants.length > 0)
+        ? wData.variants
+        : (pId === 'osuwari_moai_pen' && window.DEFAULT_OSUWARI_VARIANTS ? window.DEFAULT_OSUWARI_VARIANTS : []);
+      const nonBaseVars = rawVars.filter(v => v && !v.isBase && v.active !== false);
+      if (varPanel) {
+        varPanel.style.display = 'block';
+        const curMode = wData.catalogDisplayMode || (pId === 'osuwari_moai_pen' ? 'split_group' : 'integrated');
+        const modeSel = document.getElementById('img-manager-var-mode-select');
+        if (modeSel) modeSel.value = curMode;
+        window.onChangeImgManagerVarMode(curMode);
+
+        const gTitleInput = document.getElementById('img-manager-var-group-title');
+        if (gTitleInput) gTitleInput.value = wData.catalogGroupTitle || (pId === 'osuwari_moai_pen' ? '肌着おすわり\\nモアイペン立て' : `${cleanName}\\nバリエーション`);
+        const gDescInput = document.getElementById('img-manager-var-group-desc');
+        if (gDescInput) gDescInput.value = wData.catalogGroupDesc || (pId === 'osuwari_moai_pen' ? 'タンクトップやVネック・袖付きなど、いろんな肌着を着こなすおすわりモアイペン立てシリーズ。' : '');
+
+        const tabsEl = document.getElementById('img-manager-var-target-tabs');
+        if (tabsEl) {
+          const makeTabBtn = (slotKey, labelText) => {
+            const isAct = currentSelectorTargetSlot === slotKey;
+            return `<button type="button" onclick="switchImgManagerTargetSlot('${slotKey}')" style="padding:5px 12px; border-radius:20px; font-size:11px; font-weight:bold; cursor:pointer; border:1.5px solid ${isAct ? 'var(--accent)' : 'rgba(255,255,255,0.2)'}; background:${isAct ? 'rgba(0,210,255,0.22)' : 'rgba(0,0,0,0.4)'}; color:${isAct ? '#fff' : '#bbb'};">${labelText}</button>`;
+          };
+          let tabsHtml = makeTabBtn('base', '🗿 通常版（本体）の画像');
+          tabsHtml += makeTabBtn('group', '🖼️ バリエーションまとめ画像（1枚で全種紹介）');
+          nonBaseVars.forEach(v => {
+            tabsHtml += makeTabBtn(`sku:${v.skuId}`, `🎨 個別: ${v.name}${v.image ? ' ✓' : ''}`);
+          });
+          tabsEl.innerHTML = tabsHtml;
+        }
+      }
+
+      // 在庫バッジ更新（バリエーション合計にも対応）
       const stockBadgeEl = document.getElementById('img-manager-stock-badge');
       if (stockBadgeEl) {
-        const inv = (typeof inventoryData !== 'undefined' && inventoryData[pId]) || {};
-        const count = inv.current !== undefined ? inv.current : (inv.initial !== undefined ? inv.initial : '-');
-        const st = (typeof stockData !== 'undefined' && stockData[pId]) || 'none';
+        const invSummary = (typeof window.getParentInventorySummary === 'function' && typeof inventoryData !== 'undefined')
+          ? window.getParentInventorySummary(inventoryData, pId)
+          : ((typeof inventoryData !== 'undefined' && inventoryData[pId]) || {});
+        const count = invSummary.current !== undefined ? invSummary.current : (invSummary.initial !== undefined ? invSummary.initial : '-');
         let stLabel = count !== '-' ? `${count}点` : '未登録';
-        if (st === 'out' || count === 0) stLabel += ' (完売)';
-        else if (st === 'few') stLabel += ' (残少)';
+        if (count === 0) stLabel += ' (完売)';
+        else if (typeof count === 'number' && count <= 2) stLabel += ' (残少)';
         stockBadgeEl.textContent = stLabel;
       }
 
@@ -13583,18 +13964,36 @@
         }
       }
 
-      // 1. 現在公開中・選択中のお品書き画像一覧
+      // 1. 現在選択中のスロットに応じたお品書き画像一覧の取得
       const currentList = [];
-      const mainImg = p.image || wData.image;
-      if (mainImg) currentList.push(mainImg);
-
-      const subList = Array.isArray(wData.images) && wData.images.length > 0 
-        ? wData.images 
-        : (Array.isArray(p.images) ? p.images : []);
-
-      subList.forEach(url => {
-        if (url && !currentList.includes(url)) currentList.push(url);
-      });
+      if (currentSelectorTargetSlot === 'group') {
+        if (wData.catalogGroupImage) currentList.push(wData.catalogGroupImage);
+        if (Array.isArray(wData.catalogGroupImages)) {
+          wData.catalogGroupImages.forEach(u => { if (u && !currentList.includes(u)) currentList.push(u); });
+        }
+        if (currentList.length === 0 && pId === 'osuwari_moai_pen' && window.WORK_FOLDER_ASSETS && window.WORK_FOLDER_ASSETS['hadagi_osuwari_moai_pen']) {
+          const ha = window.WORK_FOLDER_ASSETS['hadagi_osuwari_moai_pen'];
+          if (Array.isArray(ha.studio)) ha.studio.forEach(u => { if (u && !currentList.includes(u)) currentList.push(u); });
+        }
+      } else if (currentSelectorTargetSlot.startsWith('sku:')) {
+        const skuId = currentSelectorTargetSlot.slice(4);
+        const targetVar = rawVars.find(v => v.skuId === skuId);
+        if (targetVar) {
+          if (targetVar.image) currentList.push(targetVar.image);
+          if (Array.isArray(targetVar.images)) {
+            targetVar.images.forEach(u => { if (u && !currentList.includes(u)) currentList.push(u); });
+          }
+        }
+      } else {
+        const mainImg = p.image || wData.image;
+        if (mainImg) currentList.push(mainImg);
+        const subList = Array.isArray(wData.images) && wData.images.length > 0 
+          ? wData.images 
+          : (Array.isArray(p.images) ? p.images : []);
+        subList.forEach(url => {
+          if (url && !currentList.includes(url)) currentList.push(url);
+        });
+      }
 
       currentDraftImages = [...currentList];
 
@@ -13757,11 +14156,24 @@
       if (Array.isArray(wData.rawImages)) wData.rawImages.forEach(addSafe);
       if (Array.isArray(wData.studioImages)) wData.studioImages.forEach(addSafe);
 
+      if (wData.catalogGroupImage) addSafe(wData.catalogGroupImage);
+      if (Array.isArray(wData.catalogGroupImages)) wData.catalogGroupImages.forEach(addSafe);
+      if (Array.isArray(wData.variants)) {
+        wData.variants.forEach(v => {
+          if (v && v.image) addSafe(v.image);
+          if (v && Array.isArray(v.images)) v.images.forEach(addSafe);
+        });
+      }
       // WORK_FOLDER_ASSETS (data.js からのディスクスキャン)
       if (window.WORK_FOLDER_ASSETS) {
         const assetObj = window.WORK_FOLDER_ASSETS[pId] || window.WORK_FOLDER_ASSETS[pId.replace('_gray', '')] || {};
         if (Array.isArray(assetObj.raw)) assetObj.raw.forEach(addSafe);
         if (Array.isArray(assetObj.studio)) assetObj.studio.forEach(addSafe);
+        if (pId === 'osuwari_moai_pen' && window.WORK_FOLDER_ASSETS['hadagi_osuwari_moai_pen']) {
+          const ha = window.WORK_FOLDER_ASSETS['hadagi_osuwari_moai_pen'];
+          if (Array.isArray(ha.raw)) ha.raw.forEach(addSafe);
+          if (Array.isArray(ha.studio)) ha.studio.forEach(addSafe);
+        }
       }
 
       const studioList = [];
@@ -14034,7 +14446,7 @@
     window.applyWorkImageConfigToPos = async () => {
       if (!currentSelectorPosId) return;
       if (currentDraftImages.length === 0) {
-        if (!confirm('画像が1枚も選択されていません。お品書きに画像なしで反映しますか？')) return;
+        if (!confirm('画像が1枚も選択されていません。このまま反映しますか？')) return;
       }
 
       const pId = currentSelectorPosId;
@@ -14050,82 +14462,97 @@
           throw new Error('Firestoreデータベースに接続できませんでした');
         }
 
-        // 1. 画質を保ちつつ軽量化した保護キャッシュDataURLを並列生成（約100KB）
         const [optimizedMain, ...optimizedSubs] = await Promise.all([
           convertToOptimizedDataUrl(mainImg),
           ...subImgs.map(s => convertToOptimizedDataUrl(s))
         ]);
 
-        // 2. 過去のセーブ履歴スナップショット（最新5件を保持）
         const existingWData = (window.worksMasterData && window.worksMasterData[pId]) || {};
-        let currentBackups = Array.isArray(existingWData.imageBackups) ? [...existingWData.imageBackups] : [];
-        
-        // 今回の構成をセーブ履歴に追加
-        currentBackups.push({
-          timestamp: Date.now(),
-          image: mainImg,
-          images: subImgs,
-          optimizedCover: optimizedMain
-        });
-        if (currentBackups.length > 5) currentBackups = currentBackups.slice(-5);
+        const modeSel = document.getElementById('img-manager-var-mode-select');
+        const catalogDisplayMode = modeSel ? modeSel.value : (existingWData.catalogDisplayMode || (pId === 'osuwari_moai_pen' ? 'split_group' : 'integrated'));
+        const rawGTitle = (document.getElementById('img-manager-var-group-title')?.value || '').trim().replace(/\\n/g, '\n');
+        const rawGDesc = (document.getElementById('img-manager-var-group-desc')?.value || '').trim().replace(/\\n/g, '\n');
 
-        // ネスト構造を正しく更新（ドット付きの不正キーは完全除去）
         const cpData = { ...window.customProductsData };
         Object.keys(cpData).forEach(k => { if (k.includes('.')) delete cpData[k]; });
         if (!cpData[pId]) cpData[pId] = {};
-        Object.assign(cpData[pId], {
-          image: mainImg,
-          images: subImgs,
-          optimizedCover: optimizedMain || mainImg,
-          optimizedImages: optimizedSubs,
-          imageBackups: currentBackups,
-          updatedAt: Date.now()
-        });
 
         const wmData = { ...window.worksMasterData };
         Object.keys(wmData).forEach(k => { if (k.includes('.')) delete wmData[k]; });
         if (!wmData[pId]) wmData[pId] = {};
-        Object.assign(wmData[pId], {
-          image: mainImg,
-          images: subImgs,
-          optimizedCover: optimizedMain || mainImg,
-          optimizedImages: optimizedSubs,
-          imageBackups: currentBackups,
-          updatedAt: Date.now()
-        });
 
-        // 丸ごと setDoc で安全にクラウド保存
-        await Promise.all([
-          setDoc(doc(targetDb, 'settings', 'custom_products'), cpData),
-          setDoc(doc(targetDb, 'settings', 'works_master'), wmData)
-        ]);
+        wmData[pId].catalogDisplayMode = catalogDisplayMode;
+        if (rawGTitle) wmData[pId].catalogGroupTitle = rawGTitle;
+        if (rawGDesc) wmData[pId].catalogGroupDesc = rawGDesc;
 
-        if (window.customProductsData && window.customProductsData[pId]) {
-          Object.assign(window.customProductsData[pId], {
+        if (currentSelectorTargetSlot === 'group') {
+          // バリエーションまとめ画像（1枚または複数枚）として保存
+          wmData[pId].catalogGroupImage = optimizedMain || mainImg || null;
+          wmData[pId].catalogGroupImages = [optimizedMain || mainImg, ...optimizedSubs].filter(Boolean);
+          wmData[pId].updatedAt = Date.now();
+          await setDoc(doc(targetDb, 'settings', 'works_master'), wmData);
+          window.worksMasterData = wmData;
+          alert('✅ バリエーションまとめ画像＆表示設定をお品書きに反映しました！');
+        } else if (currentSelectorTargetSlot.startsWith('sku:')) {
+          // 特定バリエーションの個別画像として保存
+          const skuId = currentSelectorTargetSlot.slice(4);
+          const vars = Array.isArray(wmData[pId].variants) && wmData[pId].variants.length > 0
+            ? [...wmData[pId].variants]
+            : (pId === 'osuwari_moai_pen' && window.DEFAULT_OSUWARI_VARIANTS ? [...window.DEFAULT_OSUWARI_VARIANTS] : []);
+          wmData[pId].variants = vars.map(v => {
+            if (v.skuId === skuId) {
+              return { ...v, image: optimizedMain || mainImg || null, images: [optimizedMain || mainImg, ...optimizedSubs].filter(Boolean) };
+            }
+            return v;
+          });
+          wmData[pId].updatedAt = Date.now();
+          await setDoc(doc(targetDb, 'settings', 'works_master'), wmData);
+          window.worksMasterData = wmData;
+          alert('✅ 個別バリエーション画像をお品書きに反映しました！');
+        } else {
+          // 通常版（本体）の画像として保存
+          let currentBackups = Array.isArray(existingWData.imageBackups) ? [...existingWData.imageBackups] : [];
+          currentBackups.push({
+            timestamp: Date.now(),
             image: mainImg,
             images: subImgs,
-            optimizedCover: optimizedMain,
-            imageBackups: currentBackups
+            optimizedCover: optimizedMain
           });
-        }
-        if (window.worksMasterData && window.worksMasterData[pId]) {
-          Object.assign(window.worksMasterData[pId], {
+          if (currentBackups.length > 5) currentBackups = currentBackups.slice(-5);
+
+          Object.assign(cpData[pId], {
             image: mainImg,
             images: subImgs,
-            optimizedCover: optimizedMain,
-            imageBackups: currentBackups
+            optimizedCover: optimizedMain || mainImg,
+            optimizedImages: optimizedSubs,
+            imageBackups: currentBackups,
+            updatedAt: Date.now()
           });
-        }
+          Object.assign(wmData[pId], {
+            image: mainImg,
+            images: subImgs,
+            optimizedCover: optimizedMain || mainImg,
+            optimizedImages: optimizedSubs,
+            imageBackups: currentBackups,
+            updatedAt: Date.now()
+          });
 
-        const previewImg = document.getElementById('work-detail-img-preview');
-        if (previewImg) previewImg.src = mainImg || window.NO_IMAGE_PLACEHOLDER;
+          await Promise.all([
+            setDoc(doc(targetDb, 'settings', 'custom_products'), cpData),
+            setDoc(doc(targetDb, 'settings', 'works_master'), wmData)
+          ]);
+          window.customProductsData = cpData;
+          window.worksMasterData = wmData;
+
+          const previewImg = document.getElementById('work-detail-img-preview');
+          if (previewImg) previewImg.src = mainImg || window.NO_IMAGE_PLACEHOLDER;
+          alert('✅ 画質最適化＆セーブ保護を完了してお品書きに反映しました！');
+        }
 
         if (typeof window.renderCatalogView === 'function') {
           window.renderCatalogView();
         }
-
-        alert('✅ 画質最適化＆セーブ保護を完了してお品書きに反映しました！\n（PCフォルダから誤って元画像を消してもクラウドに保持されます）');
-        closeWorkImageSelectorModal();
+        openWorkImageSelectorModal(pId, currentSelectorTargetSlot);
       } catch (err) {
         console.error('お品書き画像保存エラー:', err);
         alert('保存に失敗しました: ' + err.message);
@@ -14134,7 +14561,7 @@
       }
     };
 
-  </script>
+    </script>
 
   <!-- Print Tile Modal -->
   <div id="print-tile-modal" class="modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:2000; justify-content:center; align-items:center;">
