@@ -2501,15 +2501,20 @@
                   </span>
                 </div>
                 <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+                  <button type="button" onclick="exportMfgWeekToGoogleCalendar()"
+                          style="background:linear-gradient(135deg, #1a73e8, #4285f4); color:#fff; border:none; padding:5px 14px; border-radius:7px; font-size:11.5px; font-weight:bold; cursor:pointer; display:inline-flex; align-items:center; gap:5px; box-shadow:0 2px 8px rgba(66,133,244,0.4); transition:transform 0.1s ease;"
+                          title="ダウンロード不要！WebのGoogleカレンダーを直接開いて、今週の製造計画をポンと反映します">
+                    <span>🌐 GoogleカレンダーにWeb反映 (ポンと開く)</span>
+                  </button>
                   <button type="button" onclick="downloadMfgIcsFile('week')"
-                          style="background:linear-gradient(135deg, #10b981, #059669); color:#fff; border:none; padding:5px 13px; border-radius:7px; font-size:11.5px; font-weight:bold; cursor:pointer; display:inline-flex; align-items:center; gap:5px; box-shadow:0 2px 8px rgba(16,185,129,0.35); transition:transform 0.1s ease;"
-                          title="ワンタップで表示中の1週間の製造計画をカレンダーファイル(.ics)として保存（二重登録防止UID対応）">
-                    <span>📅 1週間の計画をカレンダー反映 (.ics)</span>
+                          style="background:rgba(16,185,129,0.18); border:1px solid #10b981; color:#34d399; padding:5px 11px; border-radius:7px; font-size:11.5px; font-weight:bold; cursor:pointer; display:inline-flex; align-items:center; gap:5px;"
+                          title="スマホやPCのカレンダーアプリ用にファイル (.ics) でダウンロード">
+                    <span>📥 ファイル出力 (.ics)</span>
                   </button>
                   <button type="button" onclick="openMfgGCalModal()"
                           style="background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.2); color:#ddd; padding:5px 10px; border-radius:7px; font-size:11.5px; cursor:pointer; display:inline-flex; align-items:center; gap:4px;"
-                          title="日別Googleカレンダー直接追加や全期間保存">
-                    <span>詳細連携...</span>
+                          title="日別登録や全体設定">
+                    <span>詳細...</span>
                   </button>
                   <label style="display:inline-flex; align-items:center; gap:4px; font-size:11px; color:rgba(255,255,255,0.7); cursor:pointer;">
                     <input type="checkbox" id="mfg-show-completed-jobs" checked onchange="renderProductionPlans()" style="accent-color:#10b981; cursor:pointer;">
@@ -2579,8 +2584,12 @@
 
             <!-- Quick Slots: Today & Tomorrow -->
             <div style="background:rgba(66,133,244,0.1); border:1px solid rgba(66,133,244,0.3); border-radius:12px; padding:14px; margin-bottom:14px;">
-              <div style="font-size:12px; font-weight:bold; color:#93c5fd; margin-bottom:8px; display:flex; align-items:center; gap:6px;">
-                <span>⚡ 直近の製造予定を反映（ブラウザでGoogleカレンダーが開きます）</span>
+              <div style="font-size:12px; font-weight:bold; color:#93c5fd; margin-bottom:8px; display:flex; align-items:center; justify-content:space-between;">
+                <span>⚡ GoogleカレンダーWebに直接反映（ダウンロード不要でポンと開きます）</span>
+                <button type="button" onclick="exportMfgWeekToGoogleCalendar()"
+                        style="background:linear-gradient(135deg, #1a73e8, #4285f4); color:#fff; border:none; padding:4px 10px; border-radius:6px; font-size:11px; font-weight:bold; cursor:pointer;">
+                  🌐 今週1週間分をポンと開く
+                </button>
               </div>
               <div id="mfg-gcal-quick-slots" style="display:flex; flex-direction:column; gap:8px;">
                 <!-- Dynamically populated -->
@@ -14430,7 +14439,76 @@
       window.open(url, '_blank');
     };
 
-    window.exportMfgDayToGoogleCalendar = function(dateStr) {
+
+    // One-click Google Calendar Web export for displayed 1-week schedule
+    window.exportMfgWeekToGoogleCalendar = function() {
+      const allJobs = window.getMfgScheduledJobs();
+      if (!allJobs.length) {
+        alert("カレンダーに反映する製造計画がありません。まずはボードに計画を配置してください。");
+        return;
+      }
+      const startStr = mfgStartDateStr || getLocalYmd();
+      const endStr = addDaysYmd(startStr, 6);
+      const weekJobs = allJobs.filter(j => j.date >= startStr && j.date <= endStr);
+
+      if (!weekJobs.length) {
+        alert(`表示中の1週間 (${startStr} 〜 ${endStr}) には製造計画がありません。`);
+        return;
+      }
+
+      const dStart = parseLocalYmd(startStr);
+      const dEnd = parseLocalYmd(endStr);
+      const totalHours = weekJobs.reduce((s, j) => s + j.totalHours, 0);
+      const totalQty = weekJobs.reduce((s, j) => s + j.qty, 0);
+
+      const title = `🖨️ MOAI 3D製造計画 [${dStart.getMonth()+1}/${dStart.getDate()}〜${dEnd.getMonth()+1}/${dEnd.getDate()}] (計${totalHours.toFixed(1)}h / ${totalQty}個)`;
+
+      const printers = window.getMfgPrinters();
+      const prMap = {};
+      printers.forEach(p => { prMap[p.id] = p.shortName || p.name; });
+
+      const dateList = [];
+      for (let i = 0; i < 7; i++) dateList.push(addDaysYmd(startStr, i));
+      const dowNames = ['日', '月', '火', '水', '木', '金', '土'];
+
+      let detailsList = [];
+      detailsList.push(`【MOAI 3Dプリンター製造計画 (1週間)】`);
+      detailsList.push(`期間: ${startStr} 〜 ${endStr}`);
+      detailsList.push(`合計稼働予定: ${totalHours.toFixed(1)}時間 / ${totalQty}個 (${weekJobs.length}ジョブ)`);
+      detailsList.push('');
+      detailsList.push('■ 日別プリント作業内訳:');
+
+      dateList.forEach(dStr => {
+        const dJobs = weekJobs.filter(j => j.date === dStr);
+        if (!dJobs.length) return;
+        const dObj = parseLocalYmd(dStr);
+        const dayLabel = `${dObj.getMonth()+1}/${dObj.getDate()}(${dowNames[dObj.getDay()]})`;
+        const dayHours = dJobs.reduce((s, j) => s + j.totalHours, 0);
+
+        detailsList.push(`\n▼ ${dayLabel} (計 ${dayHours.toFixed(1)}h):`);
+        dJobs.forEach(j => {
+          const sku = mfgSkuMapCache[j.skuId] || mfgSkuMapCache[j.productId] || { parentName: j.productId, variantName: '無印' };
+          const prName = prMap[j.printerId] || j.printerId;
+          const cleanTitle = window.getMfgSimpleEventTitle(sku);
+          const statusIcon = j.status === 'completed' ? '✅' : (j.status === 'printing' ? '🖨️' : '・');
+          detailsList.push(`  ${statusIcon} [${prName}] ${cleanTitle} ×${j.qty} (${j.totalHours.toFixed(1)}h)${j.memo ? ' ['+j.memo+']' : ''}`);
+        });
+      });
+
+      detailsList.push('\n※ MOAI POS製造計画ボードよりWeb連携');
+
+      const url = window.buildGoogleCalendarUrl({
+        title,
+        startDate: startStr,
+        allDay: true,
+        details: detailsList.join('\n'),
+        location: '3Dプリンター工房'
+      });
+
+      window.open(url, '_blank');
+    };
+
+        window.exportMfgDayToGoogleCalendar = function(dateStr) {
       if (!dateStr) return;
       const allJobs = window.getMfgScheduledJobs();
       const dayJobs = allJobs.filter(j => j.date === dateStr);
