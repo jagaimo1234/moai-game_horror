@@ -10422,7 +10422,39 @@
       }
     };
 
-    window.renderMultiEventAggregation = async () => {
+    // Get effective product / SKU price across inventory maps and master data
+    window.getEffectiveProductPrice = function(parentId, skuId, invMap) {
+      const map = invMap || (window.multiAggInvCache && typeof multiAggStockSourceEvent !== 'undefined' ? window.multiAggInvCache[multiAggStockSourceEvent] : null) || window.inventoryData || {};
+      if (skuId && map[skuId] && Number(map[skuId].price) > 0) {
+        return Number(map[skuId].price);
+      }
+      if (parentId && map[parentId] && Number(map[parentId].price) > 0) {
+        return Number(map[parentId].price);
+      }
+      if (window.inventoryData) {
+        if (skuId && window.inventoryData[skuId] && Number(window.inventoryData[skuId].price) > 0) {
+          return Number(window.inventoryData[skuId].price);
+        }
+        if (parentId && window.inventoryData[parentId] && Number(window.inventoryData[parentId].price) > 0) {
+          return Number(window.inventoryData[parentId].price);
+        }
+      }
+      if (window.multiAggInvCache) {
+        for (const evKey in window.multiAggInvCache) {
+          const c = window.multiAggInvCache[evKey] || {};
+          if (skuId && c[skuId] && Number(c[skuId].price) > 0) return Number(c[skuId].price);
+          if (parentId && c[parentId] && Number(c[parentId].price) > 0) return Number(c[parentId].price);
+        }
+      }
+      const allMaster = window.getFullMasterProducts ? window.getFullMasterProducts(window.customProductsData) : MASTER_PRODUCTS;
+      const p = allMaster.find(item => item.id === parentId);
+      if (p && Number(p.price) > 0) {
+        return Number(p.price);
+      }
+      return 0;
+    };
+
+        window.renderMultiEventAggregation = async () => {
       const targetRate = window.getTargetRate ? window.getTargetRate() : 70;
       const container = document.getElementById('multi-agg-table-container');
       const chkContainer = document.getElementById('multi-agg-event-checkboxes');
