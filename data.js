@@ -825,7 +825,9 @@ window.WORK_FOLDER_ASSETS = {
       "images/kurima/macho_moai_keyholder/raw/macho_moai_keyholder_RAW_20261101_162222_006.jpg",
       "images/kurima/macho_moai_keyholder/raw/macho_moai_keyholder_RAW_20261101_163048_007.jpg",
       "images/kurima/macho_moai_keyholder/raw/macho_moai_keyholder_RAW_20261101_163056_008.jpg",
-      "images/kurima/macho_moai_keyholder/raw/macho_moai_keyholder_RAW_20261101_163059_009.jpg"
+      "images/kurima/macho_moai_keyholder/raw/macho_moai_keyholder_RAW_20261101_163059_009.jpg",
+      "images/kurima/macho_moai_keyholder/raw/macho_moai_keyholder_RAW_20261101_205737_010.jpg",
+      "images/kurima/macho_moai_keyholder/raw/macho_moai_keyholder_RAW_20261101_205745_011.jpg"
     ],
     "studio": [
       "images/kurima/macho_moai_keyholder/studio/15704196-82ad-4bb5-ad26-3b43dda68172.png",
