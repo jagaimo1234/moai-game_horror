@@ -14429,11 +14429,11 @@
           `【3D製造プリント作業】`,
           `・作品名: ${skuInfo.parentName}`,
           `・バリエーション: ${skuInfo.variantName}`,
-          `・製造数量: ${job.qty}個`,
-          `・予定時間: ${job.totalHours.toFixed(1)}時間`,
+          `・製造数量: ${j.qty}個`,
+          `・予定時間: ${j.totalHours.toFixed(1)}時間`,
           `・ライン: ${prName}`,
-          `・ステータス: ${job.status === 'completed' ? '✅完了済み' : (job.status === 'printing' ? '🖨️印刷中' : '📋予定')}`,
-          job.memo ? `・メモ: ${job.memo}` : ''
+          `・ステータス: ${j.status === 'completed' ? '✅完了済み' : (j.status === 'printing' ? '🖨️印刷中' : '📋予定')}`,
+          j.memo ? `・メモ: ${j.memo}` : ''
         ].filter(Boolean).join('\\n');
 
         // Deterministic immutable UID per Job ID -> Guarantees NO duplicates on re-import
