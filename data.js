@@ -656,6 +656,12 @@ window.WORK_FOLDER_ASSETS = {
       "images/kurima/dot_osuwari_keyholder/studio/日常に寄り添うモアイチャーム1.png"
     ]
   },
+  "glasses_stand": {
+    "raw": [],
+    "studio": [
+      "images/kurima/glasses_stand/studio/Moataro.jpg"
+    ]
+  },
   "osuwari_moai_pen": {
     "raw": [
       "images/kurima/osuwari_moai_pen/raw/osuwari_moai_pen_RAW_20261031_150436_001.jpg"
