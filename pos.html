@@ -9589,22 +9589,25 @@
     })();
 
     window.getProductCategory = (item) => {
+      if (item.category && ['fdm', 'resin', 'cement'].includes(item.category)) return item.category;
+      if (item.method && ['fdm', 'resin', 'cement'].includes(item.method)) return item.method;
+
       const name = (item.parentName || item.name || item.id || item.parentId || '').toLowerCase();
       const skuId = (item.skuId || item.id || '').toLowerCase();
       const text = `${name} ${skuId}`;
 
-      // 1. セメント・手作業成型 (内省MOAI, 黄昏MOAI, 一輪挿し, セメント, モルタル)
+      // 1. セメント・手作業成型 (内省MOAI, 黄昏MOAI, ヘッドホン一輪挿し, セメント, モルタル)
       if (text.includes('一輪挿し') || text.includes('一輪差し') ||
           text.includes('黄昏') || text.includes('内省') ||
           text.includes('内政') || text.includes('セメント') || text.includes('モルタル')) {
         return 'cement';
       }
-      // 2. 光造形 3Dプリンター / SLA (考えるMOAI, レジン, robo, ロボ, エレク)
-      if (text.includes('考える') || text.includes('レジン') ||
-          text.includes('robo') || text.includes('ロボ') || text.includes('エレク')) {
+      // 2. 光造形 3Dプリンター / SLA (考えるMOAI, レジン作品, 光造形, SLA)
+      // ※ MOAI ROBO や MOAI ROBO STAND、ペン立て、メガネスタンド等は熱溶解積層式(FDM)
+      if (text.includes('考える') || text.includes('レジン') || text.includes('光造形') || text.includes('sla')) {
         return 'resin';
       }
-      // 3. 熱溶解積層式 3Dプリンター / FDM (ペン立て, メガネスタンド, ロゴ, その他通常3Dプリント)
+      // 3. 熱溶解積層式 3Dプリンター / FDM (MOAI ROBO, MOAI ROBO STAND, ペン立て, メガネスタンド, MOAIロゴ等)
       return 'fdm';
     };
 
