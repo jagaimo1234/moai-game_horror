@@ -2501,6 +2501,11 @@
                   </span>
                 </div>
                 <div style="display:flex; align-items:center; gap:8px;">
+                  <button type="button" onclick="openMfgGCalModal()"
+                          style="background:linear-gradient(135deg, #1a73e8, #4285f4); color:#fff; border:none; padding:5px 12px; border-radius:7px; font-size:11.5px; font-weight:bold; cursor:pointer; display:inline-flex; align-items:center; gap:5px; box-shadow:0 2px 8px rgba(66,133,244,0.35); transition:transform 0.1s ease;"
+                          title="製造計画をGoogleカレンダーに反映・通知連携">
+                    <span>📅 Googleカレンダー連携</span>
+                  </button>
                   <label style="display:inline-flex; align-items:center; gap:4px; font-size:11px; color:rgba(255,255,255,0.7); cursor:pointer;">
                     <input type="checkbox" id="mfg-show-completed-jobs" checked onchange="renderProductionPlans()" style="accent-color:#10b981; cursor:pointer;">
                     <span>完了済も表示</span>
@@ -2550,6 +2555,72 @@
             </div>
           </div>
 
+        </div>
+
+        <!-- 📅 Google Calendar Sync & Export Modal -->
+        <div id="mfg-gcal-modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); z-index:2650; align-items:center; justify-content:center; padding:16px;">
+          <div style="background:#141722; width:100%; max-width:600px; border-radius:14px; padding:22px; border:1px solid #4285f4; max-height:92vh; overflow-y:auto; box-shadow:0 16px 40px rgba(0,0,0,0.85);">
+            <!-- Header -->
+            <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:12px; margin-bottom:16px;">
+              <div style="display:flex; align-items:center; gap:8px;">
+                <span style="font-size:22px;">📅</span>
+                <div>
+                  <h3 style="margin:0; font-size:16px; color:#fff;">Googleカレンダー反映・製造スケジュール連携</h3>
+                  <p style="margin:2px 0 0 0; font-size:11px; color:rgba(255,255,255,0.6);">製造計画をカレンダーに登録して、毎日のプリント忘れを防止できます</p>
+                </div>
+              </div>
+              <button type="button" onclick="closeMfgGCalModal()" style="background:none; border:none; color:#aaa; font-size:22px; cursor:pointer;">✕</button>
+            </div>
+
+            <!-- Quick Slots: Today & Tomorrow -->
+            <div style="background:rgba(66,133,244,0.1); border:1px solid rgba(66,133,244,0.3); border-radius:12px; padding:14px; margin-bottom:14px;">
+              <div style="font-size:12px; font-weight:bold; color:#93c5fd; margin-bottom:8px; display:flex; align-items:center; gap:6px;">
+                <span>⚡ 直近の製造予定を反映（ブラウザでGoogleカレンダーが開きます）</span>
+              </div>
+              <div id="mfg-gcal-quick-slots" style="display:flex; flex-direction:column; gap:8px;">
+                <!-- Dynamically populated -->
+              </div>
+            </div>
+
+            <!-- Custom Date Selector -->
+            <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); border-radius:12px; padding:14px; margin-bottom:14px;">
+              <div style="font-size:12px; font-weight:bold; color:#fff; margin-bottom:8px;">🗓️ 特定の日付を選んで反映</div>
+              <div style="display:flex; gap:8px; align-items:center;">
+                <input type="date" id="mfg-gcal-date-input" onchange="updateMfgGCalDayPreview()" class="form-input" style="flex:1; font-size:13px; font-weight:bold; padding:6px 10px; background:#0d0f17; color:#fff; border:1px solid rgba(255,255,255,0.2); border-radius:6px;">
+                <button type="button" onclick="exportMfgDayToGoogleCalendar(document.getElementById('mfg-gcal-date-input').value)"
+                        style="background:linear-gradient(135deg, #1a73e8, #4285f4); color:#fff; border:none; padding:8px 14px; border-radius:8px; font-size:12px; font-weight:bold; cursor:pointer; white-space:nowrap;">
+                  📅 カレンダーを開く
+                </button>
+              </div>
+              <div id="mfg-gcal-date-summary" style="font-size:11px; color:rgba(255,255,255,0.65); margin-top:8px; line-height:1.4;">
+                <!-- Dynamically populated -->
+              </div>
+            </div>
+
+            <!-- Bulk Export .ics -->
+            <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); border-radius:12px; padding:14px; margin-bottom:16px;">
+              <div style="font-size:12px; font-weight:bold; color:#fff;">📥 全期間の製造スケジュールを一括保存 (.ics)</div>
+              <div style="font-size:11px; color:rgba(255,255,255,0.55); margin-top:3px; line-height:1.4;">
+                全期間の製造ジョブを標準カレンダー形式（iCalendar / .ics）でダウンロードします。<br>
+                Googleカレンダーへの一括インポートや、iPhone/Mac/Windowsのカレンダーアプリに一発で取り込めます。
+              </div>
+              <div style="display:flex; gap:8px; margin-top:10px; flex-wrap:wrap;">
+                <button type="button" onclick="downloadMfgIcsFile()"
+                        style="background:rgba(16,185,129,0.18); border:1px solid #10b981; color:#34d399; padding:8px 14px; border-radius:8px; font-size:12px; font-weight:bold; cursor:pointer; display:inline-flex; align-items:center; gap:6px;">
+                  <span>📥 .ics カレンダーファイルを保存</span>
+                </button>
+                <a href="https://calendar.google.com/calendar/u/0/r/settings/export" target="_blank" rel="noopener"
+                   style="background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.18); color:#ddd; padding:8px 14px; border-radius:8px; font-size:12px; text-decoration:none; display:inline-flex; align-items:center; gap:4px;">
+                  <span>🔗 Googleカレンダーのインポート設定画面を開く ↗</span>
+                </a>
+              </div>
+            </div>
+
+            <!-- Close button -->
+            <div style="text-align:right;">
+              <button type="button" class="btn" onclick="closeMfgGCalModal()" style="background:#333; color:#fff; padding:7px 18px; border-radius:8px; font-size:12px;">閉じる</button>
+            </div>
+          </div>
         </div>
 
         <!-- ⚙️ Printer Settings & Daily Capacity Modal -->
@@ -12854,7 +12925,16 @@
         return `
           <th style="min-width:142px; background:${isToday ? 'rgba(59,130,246,0.12)' : '#10131d'};">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
-              <span style="font-size:12px; font-weight:bold; color:${dowColor};">${label}</span>
+              <div style="display:flex; align-items:center; gap:4px;">
+                <span style="font-size:12px; font-weight:bold; color:${dowColor};">${label}</span>
+                ${dayUsedSum > 0 ? `
+                  <button type="button" onclick="event.stopPropagation(); exportMfgDayToGoogleCalendar('${dStr}')"
+                          title="${label} の製造予定をGoogleカレンダーに追加"
+                          style="background:rgba(66,133,244,0.22); border:1px solid rgba(66,133,244,0.45); color:#93c5fd; font-size:10px; padding:1px 4px; border-radius:4px; cursor:pointer; line-height:1;">
+                    📅
+                  </button>
+                ` : ''}
+              </div>
               ${isToday ? `<span style="background:#06b6d4; color:#000; font-size:9px; font-weight:bold; padding:1px 5px; border-radius:4px;">本日</span>` : ''}
             </div>
             <div style="font-size:10px; color:${dayOver ? '#f87171' : 'rgba(255,255,255,0.65)'}; margin-bottom:4px; font-weight:bold;">
@@ -13432,6 +13512,10 @@
                 ✔ この製造予定は完了済みです
               </div>
             `}
+            <button type="button" onclick="exportMfgJobToGoogleCalendar('${activeJob.id}')"
+                    style="width:100%; padding:9px 10px; border:1px solid rgba(66,133,244,0.45); border-radius:8px; background:rgba(66,133,244,0.15); color:#93c5fd; font-weight:bold; font-size:12px; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:6px;">
+              <span>📅 Googleカレンダーにこの予定を追加</span>
+            </button>
             <button type="button" onclick="deleteMfgJob('${activeJob.id}')" style="width:100%; padding:8px; border:1px solid rgba(239,68,68,0.5); border-radius:8px; background:rgba(239,68,68,0.12); color:#f87171; font-weight:bold; font-size:12px; cursor:pointer;">
               🗑️ この製造予定をクリア（削除）
             </button>
@@ -14157,7 +14241,302 @@
       window.renderProductionPlans();
     };
 
-    window.printSalesReport = () => {
+
+    // =========================================================================
+    // 📅 Google Calendar & iCalendar (.ics) Sync for 3D Manufacturing Plans
+    // =========================================================================
+
+    window.buildGoogleCalendarUrl = function({ title, startDate, endDate, allDay = true, details = '', location = '' }) {
+      let datesParam = '';
+      if (allDay) {
+        const s = startDate.replace(/-/g, '');
+        const d = new Date(startDate + 'T00:00:00');
+        d.setDate(d.getDate() + 1);
+        const y = d.getFullYear();
+        const m = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+        const e = `${y}${m}${day}`;
+        datesParam = `${s}/${e}`;
+      } else {
+        datesParam = `${startDate}/${endDate}`;
+      }
+      const base = 'https://calendar.google.com/calendar/render?action=TEMPLATE';
+      const q = new URLSearchParams();
+      q.set('text', title);
+      q.set('dates', datesParam);
+      if (details) q.set('details', details);
+      if (location) q.set('location', location);
+      return `${base}&${q.toString()}`;
+    };
+
+    window.exportMfgJobToGoogleCalendar = function(jobId) {
+      const allJobs = window.getMfgScheduledJobs();
+      const job = allJobs.find(j => j.id === jobId);
+      if (!job) return alert("指定された製造予定が見つかりません。");
+      const printers = window.getMfgPrinters();
+      const pr = printers.find(p => p.id === job.printerId) || { name: job.printerId, shortName: job.printerId };
+      const skuInfo = mfgSkuMapCache[job.skuId] || mfgSkuMapCache[job.productId] || {
+        parentName: job.productId,
+        variantName: '無印'
+      };
+
+      const title = `🖨️ [${pr.shortName || pr.name}] ${skuInfo.parentName}${skuInfo.variantName !== '無印' ? ' (' + skuInfo.variantName + ')' : ''} ×${job.qty} (${job.totalHours.toFixed(1)}h)`;
+      const details = [
+        `【MOAI 3D製造計画】`,
+        `・作品名: ${skuInfo.parentName}`,
+        `・バリエーション: ${skuInfo.variantName}`,
+        `・製造数量: ${job.qty}個`,
+        `・造形予定時間: ${job.totalHours.toFixed(1)}時間`,
+        `・制作ライン: ${pr.name} (${pr.shortName || ''})`,
+        `・ステータス: ${job.status === 'completed' ? '✅ 完了済み' : (job.status === 'printing' ? '🖨️ 印刷中' : '📋 予定')}`,
+        job.memo ? `・メモ: ${job.memo}` : ''
+      ].filter(Boolean).join('\n');
+
+      const url = window.buildGoogleCalendarUrl({
+        title,
+        startDate: job.date,
+        allDay: true,
+        details,
+        location: `3D制作ライン: ${pr.name}`
+      });
+
+      window.open(url, '_blank');
+    };
+
+    window.exportMfgDayToGoogleCalendar = function(dateStr) {
+      if (!dateStr) return;
+      const allJobs = window.getMfgScheduledJobs();
+      const dayJobs = allJobs.filter(j => j.date === dateStr);
+      const printers = window.getMfgPrinters();
+      const prMap = {};
+      printers.forEach(p => { prMap[p.id] = p; });
+
+      const dObj = parseLocalYmd(dateStr);
+      const dowNames = ['日', '月', '火', '水', '木', '金', '土'];
+      const dateLabel = `${dObj.getMonth() + 1}/${dObj.getDate()}(${dowNames[dObj.getDay()]})`;
+
+      if (dayJobs.length === 0) {
+        if (!confirm(`${dateLabel} の製造計画はまだありませんが、Googleカレンダーに予定枠を作成しますか？`)) {
+          return;
+        }
+      }
+
+      const totalHours = dayJobs.reduce((sum, j) => sum + j.totalHours, 0);
+      const totalQty = dayJobs.reduce((sum, j) => sum + j.qty, 0);
+
+      const title = `🖨️ 3D製造予定 [${dateLabel}] (計${totalHours.toFixed(1)}h / ${totalQty}個)`;
+
+      let detailsList = [];
+      detailsList.push(`【${dateLabel} 3Dプリンター製造計画】`);
+      detailsList.push(`・合計造形時間: ${totalHours.toFixed(1)}時間`);
+      detailsList.push(`・合計数量: ${totalQty}個 (${dayJobs.length}ジョブ)`);
+      detailsList.push('');
+      detailsList.push('■ ライン別作業内訳:');
+
+      if (dayJobs.length === 0) {
+        detailsList.push('（登録されたジョブはありません）');
+      } else {
+        printers.forEach(pr => {
+          const pJobs = dayJobs.filter(j => j.printerId === pr.id);
+          if (pJobs.length > 0) {
+            const pHours = pJobs.reduce((s, j) => s + j.totalHours, 0);
+            detailsList.push(`▼ ${pr.name} (計 ${pHours.toFixed(1)}h):`);
+            pJobs.forEach(j => {
+              const sku = mfgSkuMapCache[j.skuId] || mfgSkuMapCache[j.productId] || { parentName: j.productId, variantName: '無印' };
+              const statusIcon = j.status === 'completed' ? '✅' : (j.status === 'printing' ? '🖨️' : '・');
+              detailsList.push(`  ${statusIcon} ${sku.parentName}${sku.variantName !== '無印' ? ' ('+sku.variantName+')' : ''} ×${j.qty} (${j.totalHours.toFixed(1)}h)${j.memo ? ' ['+j.memo+']' : ''}`);
+            });
+          }
+        });
+      }
+
+      detailsList.push('');
+      detailsList.push('※ MOAI POS製造計画ボードより連携');
+
+      const url = window.buildGoogleCalendarUrl({
+        title,
+        startDate: dateStr,
+        allDay: true,
+        details: detailsList.join('\n'),
+        location: '3Dプリンター制作工房'
+      });
+
+      window.open(url, '_blank');
+    };
+
+    window.generateMfgIcsContent = function(jobs, printers) {
+      const prMap = {};
+      printers.forEach(p => { prMap[p.id] = p.shortName || p.name; });
+
+      const pad = n => String(n).padStart(2, '0');
+      const now = new Date();
+      const dtStamp = `${now.getUTCFullYear()}${pad(now.getUTCMonth()+1)}${pad(now.getUTCDate())}T${pad(now.getUTCHours())}${pad(now.getUTCMinutes())}${pad(now.getUTCSeconds())}Z`;
+
+      let ics = [
+        'BEGIN:VCALENDAR',
+        'VERSION:2.0',
+        'PRODID:-//MOAI Studio//Production Schedule//JA',
+        'CALSCALE:GREGORIAN',
+        'METHOD:PUBLISH',
+        'X-WR-CALNAME:MOAI 3D製造計画',
+        'X-WR-TIMEZONE:Asia/Tokyo'
+      ];
+
+      jobs.forEach((j, idx) => {
+        const prName = prMap[j.printerId] || j.printerId;
+        const skuInfo = mfgSkuMapCache[j.skuId] || mfgSkuMapCache[j.productId] || {
+          parentName: j.productId,
+          variantName: '無印'
+        };
+        const sDate = (j.date || '').replace(/-/g, '');
+        if (!sDate || sDate.length !== 8) return;
+
+        const dObj = new Date(j.date + 'T00:00:00');
+        dObj.setDate(dObj.getDate() + 1);
+        const eDate = `${dObj.getFullYear()}${pad(dObj.getMonth()+1)}${pad(dObj.getDate())}`;
+
+        const summary = `🖨️ [${prName}] ${skuInfo.parentName}${skuInfo.variantName !== '無印' ? ' (' + skuInfo.variantName + ')' : ''} ×${j.qty} (${j.totalHours.toFixed(1)}h)`;
+        const description = `【3D製造計画】\\n品名: ${skuInfo.parentName} (${skuInfo.variantName})\\n数量: ${j.qty}個\\n予定時間: ${j.totalHours.toFixed(1)}時間\\nライン: ${prName}\\nステータス: ${j.status || 'planned'}\\nメモ: ${(j.memo || 'なし').replace(/\n/g, ' ')}`;
+        const uid = `moai-mfg-${j.id || idx}-${sDate}@moaistudio.local`;
+
+        ics.push('BEGIN:VEVENT');
+        ics.push(`UID:${uid}`);
+        ics.push(`DTSTAMP:${dtStamp}`);
+        ics.push(`DTSTART;VALUE=DATE:${sDate}`);
+        ics.push(`DTEND;VALUE=DATE:${eDate}`);
+        ics.push(`SUMMARY:${summary}`);
+        ics.push(`DESCRIPTION:${description}`);
+        ics.push(`LOCATION:3Dライン: ${prName}`);
+        ics.push('STATUS:CONFIRMED');
+        ics.push('END:VEVENT');
+      });
+
+      ics.push('END:VCALENDAR');
+      return ics.join('\r\n');
+    };
+
+    window.downloadMfgIcsFile = function() {
+      const allJobs = window.getMfgScheduledJobs();
+      if (!allJobs.length) {
+        alert('カレンダーに出力する製造計画がありません。まずはボードに計画を配置してください。');
+        return;
+      }
+      const printers = window.getMfgPrinters();
+      const icsText = window.generateMfgIcsContent(allJobs, printers);
+      const blob = new Blob([icsText], { type: 'text/calendar;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `moai_3d_production_schedule_${new Date().toISOString().slice(0, 10)}.ics`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    };
+
+    window.openMfgGCalModal = function(preferredDate) {
+      const todayStr = getTodayLocalYmd();
+      const targetDate = preferredDate || todayStr;
+      const modal = document.getElementById('mfg-gcal-modal');
+      if (!modal) return;
+
+      const dateInput = document.getElementById('mfg-gcal-date-input');
+      if (dateInput) {
+        dateInput.value = targetDate;
+      }
+
+      window.renderMfgGCalModalContent();
+      modal.style.display = 'flex';
+    };
+
+    window.closeMfgGCalModal = function() {
+      const modal = document.getElementById('mfg-gcal-modal');
+      if (modal) modal.style.display = 'none';
+    };
+
+    window.renderMfgGCalModalContent = function() {
+      const allJobs = window.getMfgScheduledJobs();
+      const todayStr = getTodayLocalYmd();
+      
+      const tm = new Date();
+      tm.setDate(tm.getDate() + 1);
+      const tomorrowStr = `${tm.getFullYear()}-${String(tm.getMonth() + 1).padStart(2, '0')}-${String(tm.getDate()).padStart(2, '0')}`;
+
+      const dowNames = ['日', '月', '火', '水', '木', '金', '土'];
+      const tObj = parseLocalYmd(todayStr);
+      const tmObj = parseLocalYmd(tomorrowStr);
+      const todayLabel = `${tObj.getMonth() + 1}/${tObj.getDate()}(${dowNames[tObj.getDay()]})`;
+      const tmLabel = `${tmObj.getMonth() + 1}/${tmObj.getDate()}(${dowNames[tmObj.getDay()]})`;
+
+      const todayJobs = allJobs.filter(j => j.date === todayStr);
+      const todayHours = todayJobs.reduce((s, j) => s + j.totalHours, 0);
+
+      const tmJobs = allJobs.filter(j => j.date === tomorrowStr);
+      const tmHours = tmJobs.reduce((s, j) => s + j.totalHours, 0);
+
+      const quickSlotsEl = document.getElementById('mfg-gcal-quick-slots');
+      if (quickSlotsEl) {
+        quickSlotsEl.innerHTML = `
+          <div style="display:flex; justify-content:space-between; align-items:center; background:rgba(0,0,0,0.25); padding:10px 12px; border-radius:8px;">
+            <div>
+              <div style="font-size:12.5px; font-weight:bold; color:#fff;">本日 ${todayLabel} の製造予定</div>
+              <div style="font-size:11px; color:${todayJobs.length > 0 ? '#34d399' : 'rgba(255,255,255,0.45)'}; margin-top:2px;">
+                ${todayJobs.length > 0 ? `合計 ${todayJobs.length}件 (${todayHours.toFixed(1)}h)` : '登録された計画はありません'}
+              </div>
+            </div>
+            <button type="button" onclick="exportMfgDayToGoogleCalendar('${todayStr}')"
+                    style="background:linear-gradient(135deg, #1a73e8, #4285f4); color:#fff; border:none; padding:7px 12px; border-radius:6px; font-size:11.5px; font-weight:bold; cursor:pointer; display:inline-flex; align-items:center; gap:4px; box-shadow:0 2px 6px rgba(66,133,244,0.3);">
+              <span>📅 本日の予定を追加</span>
+            </button>
+          </div>
+          <div style="display:flex; justify-content:space-between; align-items:center; background:rgba(0,0,0,0.25); padding:10px 12px; border-radius:8px;">
+            <div>
+              <div style="font-size:12.5px; font-weight:bold; color:#fff;">明日 ${tmLabel} の製造予定</div>
+              <div style="font-size:11px; color:${tmJobs.length > 0 ? '#34d399' : 'rgba(255,255,255,0.45)'}; margin-top:2px;">
+                ${tmJobs.length > 0 ? `合計 ${tmJobs.length}件 (${tmHours.toFixed(1)}h)` : '登録された計画はありません'}
+              </div>
+            </div>
+            <button type="button" onclick="exportMfgDayToGoogleCalendar('${tomorrowStr}')"
+                    style="background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.2); color:#fff; padding:7px 12px; border-radius:6px; font-size:11.5px; font-weight:bold; cursor:pointer; display:inline-flex; align-items:center; gap:4px;">
+              <span>📅 明日の予定を追加</span>
+            </button>
+          </div>
+        `;
+      }
+
+      window.updateMfgGCalDayPreview();
+    };
+
+    window.updateMfgGCalDayPreview = function() {
+      const dateInput = document.getElementById('mfg-gcal-date-input');
+      const summaryEl = document.getElementById('mfg-gcal-date-summary');
+      if (!dateInput || !summaryEl) return;
+      const dStr = dateInput.value;
+      if (!dStr) {
+        summaryEl.innerHTML = '';
+        return;
+      }
+      const allJobs = window.getMfgScheduledJobs();
+      const dayJobs = allJobs.filter(j => j.date === dStr);
+      const totalHours = dayJobs.reduce((s, j) => s + j.totalHours, 0);
+      const totalQty = dayJobs.reduce((s, j) => s + j.qty, 0);
+
+      if (dayJobs.length === 0) {
+        summaryEl.innerHTML = `<span style="color:rgba(255,255,255,0.45);">この日の計画はまだありません（ボタンを押すと空の予定枠をカレンダーに作成できます）。</span>`;
+      } else {
+        summaryEl.innerHTML = `
+          <div style="color:#93c5fd; font-weight:bold;">📋 予定ジョブ数: ${dayJobs.length}件 / 合計個数: ${totalQty}個 / 造形予定時間: ${totalHours.toFixed(1)}h</div>
+          <div style="margin-top:4px; max-height:80px; overflow-y:auto; color:rgba(255,255,255,0.7);">
+            ${dayJobs.map(j => {
+              const sku = mfgSkuMapCache[j.skuId] || mfgSkuMapCache[j.productId] || { parentName: j.productId, variantName: '無印' };
+              return `・${sku.parentName} (${sku.variantName}) ×${j.qty} (${j.totalHours.toFixed(1)}h)`;
+            }).join('<br>')}
+          </div>
+        `;
+      }
+    };
+
+        window.printSalesReport = () => {
       const allEvents = window.getAllEvents(eventConfigData);
       const ev = allEvents[currentEventKey] || {};
       const eventLabel = ev.fullName || ev.label || '不明なイベント';
