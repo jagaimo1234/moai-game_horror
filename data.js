@@ -16,6 +16,12 @@
 // 全作品のマスターリスト
 const MASTER_PRODUCTS = [
   {
+    image: 'images/kurima/nitto_osuwari_moai_penstand.jpg',
+    name: 'ニットおすわりモアイペ��立て',
+    desc: 'ニット版(冬仕様）',
+  },
+
+  {
     image: 'images/kurima/macho_moai_keyholder.jpg',
     name: 'まっちょモアイキーホルダー',
     desc: '',
@@ -833,6 +839,12 @@ window.WORK_FOLDER_ASSETS = {
       "images/kurima/macho_moai_keyholder/studio/15704196-82ad-4bb5-ad26-3b43dda68172.png",
       "images/kurima/macho_moai_keyholder/studio/4d924d16-4899-44d9-857b-d36e813cef4d.png",
       "images/kurima/macho_moai_keyholder/studio/まっちょモアイキーホルダー_master.png"
+    ]
+  },
+  "nitto_osuwari_moai_penstand": {
+    "raw": [],
+    "studio": [
+      "images/kurima/nitto_osuwari_moai_penstand/studio/雪白と黒のモアイ型ペンホルダー.png"
     ]
   },
   "osuwari_moai_pen": {
