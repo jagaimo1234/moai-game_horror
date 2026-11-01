@@ -10002,6 +10002,14 @@
       return (val >= 10 && val <= 100) ? val : 70;
     };
 
+    // Global getter fallback so targetRate is always defined everywhere
+    try {
+      Object.defineProperty(window, 'targetRate', {
+        get() { return window.getTargetRate ? window.getTargetRate() : 70; },
+        configurable: true
+      });
+    } catch(e) {}
+
     window.setTargetRate = (val) => {
       const num = parseInt(val, 10);
       const clamped = Math.max(10, Math.min(100, isNaN(num) ? 70 : num));
@@ -10274,6 +10282,7 @@
     };
 
     window.renderMultiEventAggregation = async () => {
+      const targetRate = window.getTargetRate ? window.getTargetRate() : 70;
       const container = document.getElementById('multi-agg-table-container');
       const chkContainer = document.getElementById('multi-agg-event-checkboxes');
       const pillsContainer = document.getElementById('multi-agg-active-pills');
@@ -10781,8 +10790,6 @@
         return `<span class="status-pill-short">▲ 不足</span>`;
       };
 
-      const targetRate = window.getTargetRate ? window.getTargetRate() : 70;
-      
       // Sync selector value on toolbar
       const targetRateSelEl = document.getElementById('multi-agg-target-rate');
       if (targetRateSelEl && targetRateSelEl.value !== String(targetRate)) {
@@ -11033,6 +11040,7 @@
 
     // Render Right-Side Sticky Detail & Stock Adjustment Inspector Panel
     function renderMultiAggDetailPanel() {
+      const targetRate = window.getTargetRate ? window.getTargetRate() : 70;
       const panel = document.getElementById('multi-agg-detail-panel');
       if (!panel) return;
 
