@@ -2500,11 +2500,16 @@
                     💡 左の作品を選択して「＋追加」を押すか、ドラッグ＆ドロップで配置できます
                   </span>
                 </div>
-                <div style="display:flex; align-items:center; gap:8px;">
+                <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+                  <button type="button" onclick="downloadMfgIcsFile('week')"
+                          style="background:linear-gradient(135deg, #10b981, #059669); color:#fff; border:none; padding:5px 13px; border-radius:7px; font-size:11.5px; font-weight:bold; cursor:pointer; display:inline-flex; align-items:center; gap:5px; box-shadow:0 2px 8px rgba(16,185,129,0.35); transition:transform 0.1s ease;"
+                          title="ワンタップで表示中の1週間の製造計画をカレンダーファイル(.ics)として保存（二重登録防止UID対応）">
+                    <span>📅 1週間の計画をカレンダー反映 (.ics)</span>
+                  </button>
                   <button type="button" onclick="openMfgGCalModal()"
-                          style="background:linear-gradient(135deg, #1a73e8, #4285f4); color:#fff; border:none; padding:5px 12px; border-radius:7px; font-size:11.5px; font-weight:bold; cursor:pointer; display:inline-flex; align-items:center; gap:5px; box-shadow:0 2px 8px rgba(66,133,244,0.35); transition:transform 0.1s ease;"
-                          title="製造計画をGoogleカレンダーに反映・通知連携">
-                    <span>📅 Googleカレンダー連携</span>
+                          style="background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.2); color:#ddd; padding:5px 10px; border-radius:7px; font-size:11.5px; cursor:pointer; display:inline-flex; align-items:center; gap:4px;"
+                          title="日別Googleカレンダー直接追加や全期間保存">
+                    <span>詳細連携...</span>
                   </button>
                   <label style="display:inline-flex; align-items:center; gap:4px; font-size:11px; color:rgba(255,255,255,0.7); cursor:pointer;">
                     <input type="checkbox" id="mfg-show-completed-jobs" checked onchange="renderProductionPlans()" style="accent-color:#10b981; cursor:pointer;">
@@ -2599,19 +2604,23 @@
 
             <!-- Bulk Export .ics -->
             <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); border-radius:12px; padding:14px; margin-bottom:16px;">
-              <div style="font-size:12px; font-weight:bold; color:#fff;">📥 全期間の製造スケジュールを一括保存 (.ics)</div>
-              <div style="font-size:11px; color:rgba(255,255,255,0.55); margin-top:3px; line-height:1.4;">
-                全期間の製造ジョブを標準カレンダー形式（iCalendar / .ics）でダウンロードします。<br>
-                Googleカレンダーへの一括インポートや、iPhone/Mac/Windowsのカレンダーアプリに一発で取り込めます。
+              <div style="font-size:12px; font-weight:bold; color:#fff;">📥 カレンダー連携ファイル出力 (.ics - 二重登録防止UID対応)</div>
+              <div style="font-size:11px; color:#34d399; margin-top:3px; line-height:1.4;">
+                🛡️ <strong>二重登録防止機能：</strong>各予定に固有の識別子(UID)を保持しているため、同じカレンダーに何度取り込んでも予定が重複（二重登録）せず、最新の計画に自動で上書き更新されます。<br>
+                💡 件名も「<strong>マッチョなMOAIペン立てプリント</strong>」のように直感的なタイトルで登録されます。
               </div>
               <div style="display:flex; gap:8px; margin-top:10px; flex-wrap:wrap;">
-                <button type="button" onclick="downloadMfgIcsFile()"
-                        style="background:rgba(16,185,129,0.18); border:1px solid #10b981; color:#34d399; padding:8px 14px; border-radius:8px; font-size:12px; font-weight:bold; cursor:pointer; display:inline-flex; align-items:center; gap:6px;">
-                  <span>📥 .ics カレンダーファイルを保存</span>
+                <button type="button" onclick="downloadMfgIcsFile('week')"
+                        style="background:linear-gradient(135deg, #10b981, #059669); border:none; color:#fff; padding:8px 14px; border-radius:8px; font-size:12px; font-weight:bold; cursor:pointer; display:inline-flex; align-items:center; gap:6px; box-shadow:0 2px 8px rgba(16,185,129,0.35);">
+                  <span>⚡ 表示中1週間の計画を保存 (.ics)</span>
+                </button>
+                <button type="button" onclick="downloadMfgIcsFile('all')"
+                        style="background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.25); color:#fff; padding:8px 14px; border-radius:8px; font-size:12px; font-weight:bold; cursor:pointer; display:inline-flex; align-items:center; gap:6px;">
+                  <span>📥 全期間の計画を保存 (.ics)</span>
                 </button>
                 <a href="https://calendar.google.com/calendar/u/0/r/settings/export" target="_blank" rel="noopener"
-                   style="background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.18); color:#ddd; padding:8px 14px; border-radius:8px; font-size:12px; text-decoration:none; display:inline-flex; align-items:center; gap:4px;">
-                  <span>🔗 Googleカレンダーのインポート設定画面を開く ↗</span>
+                   style="background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.18); color:#ddd; padding:8px 14px; border-radius:8px; font-size:12px; text-decoration:none; display:inline-flex; align-items:center; gap:4px;">
+                  <span>🔗 Googleカレンダー設定画面を開く ↗</span>
                 </a>
               </div>
             </div>
@@ -14245,9 +14254,17 @@
     };
 
 
-    // =========================================================================
+        // =========================================================================
     // 📅 Google Calendar & iCalendar (.ics) Sync for 3D Manufacturing Plans
     // =========================================================================
+
+    // Generate clean, direct title e.g. "マッチョなMOAIペン立てプリント"
+    window.getMfgSimpleEventTitle = function(skuInfo) {
+      if (!skuInfo) return '3D作品プリント';
+      const pName = skuInfo.parentName || 'MOAI作品';
+      const vName = (skuInfo.variantName && skuInfo.variantName !== '無印') ? ` (${skuInfo.variantName})` : '';
+      return `${pName}${vName}プリント`;
+    };
 
     window.buildGoogleCalendarUrl = function({ title, startDate, endDate, allDay = true, details = '', location = '' }) {
       let datesParam = '';
@@ -14283,9 +14300,10 @@
         variantName: '無印'
       };
 
-      const title = `🖨️ [${pr.shortName || pr.name}] ${skuInfo.parentName}${skuInfo.variantName !== '無印' ? ' (' + skuInfo.variantName + ')' : ''} ×${job.qty} (${job.totalHours.toFixed(1)}h)`;
+      // Clean simple title: e.g. "マッチョなMOAIペン立てプリント"
+      const title = window.getMfgSimpleEventTitle(skuInfo);
       const details = [
-        `【MOAI 3D製造計画】`,
+        `【3D製造プリント作業】`,
         `・作品名: ${skuInfo.parentName}`,
         `・バリエーション: ${skuInfo.variantName}`,
         `・製造数量: ${job.qty}個`,
@@ -14327,7 +14345,12 @@
       const totalHours = dayJobs.reduce((sum, j) => sum + j.totalHours, 0);
       const totalQty = dayJobs.reduce((sum, j) => sum + j.qty, 0);
 
-      const title = `🖨️ 3D製造予定 [${dateLabel}] (計${totalHours.toFixed(1)}h / ${totalQty}個)`;
+      // Clean simple title
+      let title = `MOAI 3Dプリント製造 [${dateLabel}]`;
+      if (dayJobs.length === 1) {
+        const singleSku = mfgSkuMapCache[dayJobs[0].skuId] || mfgSkuMapCache[dayJobs[0].productId];
+        if (singleSku) title = window.getMfgSimpleEventTitle(singleSku);
+      }
 
       let detailsList = [];
       detailsList.push(`【${dateLabel} 3Dプリンター製造計画】`);
@@ -14367,6 +14390,7 @@
       window.open(url, '_blank');
     };
 
+    // RFC 5545 iCalendar format with strict UID deduplication
     window.generateMfgIcsContent = function(jobs, printers) {
       const prMap = {};
       printers.forEach(p => { prMap[p.id] = p.shortName || p.name; });
@@ -14398,19 +14422,35 @@
         dObj.setDate(dObj.getDate() + 1);
         const eDate = `${dObj.getFullYear()}${pad(dObj.getMonth()+1)}${pad(dObj.getDate())}`;
 
-        const summary = `🖨️ [${prName}] ${skuInfo.parentName}${skuInfo.variantName !== '無印' ? ' (' + skuInfo.variantName + ')' : ''} ×${j.qty} (${j.totalHours.toFixed(1)}h)`;
-        const description = `【3D製造計画】\\n品名: ${skuInfo.parentName} (${skuInfo.variantName})\\n数量: ${j.qty}個\\n予定時間: ${j.totalHours.toFixed(1)}時間\\nライン: ${prName}\\nステータス: ${j.status || 'planned'}\\nメモ: ${(j.memo || 'なし').replace(/\n/g, ' ')}`;
-        const uid = `moai-mfg-${j.id || idx}-${sDate}@moaistudio.local`;
+        // Clean simple title e.g. "マッチョなMOAIペン立てプリント"
+        const summary = window.getMfgSimpleEventTitle(skuInfo);
+
+        const description = [
+          `【3D製造プリント作業】`,
+          `・作品名: ${skuInfo.parentName}`,
+          `・バリエーション: ${skuInfo.variantName}`,
+          `・製造数量: ${job.qty}個`,
+          `・予定時間: ${job.totalHours.toFixed(1)}時間`,
+          `・ライン: ${prName}`,
+          `・ステータス: ${job.status === 'completed' ? '✅完了済み' : (job.status === 'printing' ? '🖨️印刷中' : '📋予定')}`,
+          job.memo ? `・メモ: ${job.memo}` : ''
+        ].filter(Boolean).join('\\n');
+
+        // Deterministic immutable UID per Job ID -> Guarantees NO duplicates on re-import
+        const uid = `moai-mfg-job-${j.id || ('job_' + idx)}@moaistudio.local`;
+        const seq = j.updatedAt ? Math.floor(j.updatedAt / 1000) : 1;
 
         ics.push('BEGIN:VEVENT');
         ics.push(`UID:${uid}`);
+        ics.push(`SEQUENCE:${seq}`);
         ics.push(`DTSTAMP:${dtStamp}`);
         ics.push(`DTSTART;VALUE=DATE:${sDate}`);
         ics.push(`DTEND;VALUE=DATE:${eDate}`);
         ics.push(`SUMMARY:${summary}`);
         ics.push(`DESCRIPTION:${description}`);
-        ics.push(`LOCATION:3Dライン: ${prName}`);
+        ics.push(`LOCATION:3D制作ライン: ${prName}`);
         ics.push('STATUS:CONFIRMED');
+        ics.push('TRANSP:OPAQUE');
         ics.push('END:VEVENT');
       });
 
@@ -14418,23 +14458,42 @@
       return ics.join('\r\n');
     };
 
-    window.downloadMfgIcsFile = function() {
+    // Download .ics for 1 week (displayed 7 days) or all jobs
+    window.downloadMfgIcsFile = function(mode = 'week') {
       const allJobs = window.getMfgScheduledJobs();
       if (!allJobs.length) {
         alert('カレンダーに出力する製造計画がありません。まずはボードに計画を配置してください。');
         return;
       }
+
+      let targetJobs = allJobs;
+      const startStr = mfgStartDateStr || getLocalYmd();
+      const endStr = addDaysYmd(startStr, 6);
+
+      if (mode === 'week') {
+        targetJobs = allJobs.filter(j => j.date >= startStr && j.date <= endStr);
+        if (!targetJobs.length) {
+          alert(`表示中の1週間 (${startStr} 〜 ${endStr}) には製造計画がありません。全期間を出力するか、計画を配置してください。`);
+          return;
+        }
+      }
+
       const printers = window.getMfgPrinters();
-      const icsText = window.generateMfgIcsContent(allJobs, printers);
+      const icsText = window.generateMfgIcsContent(targetJobs, printers);
       const blob = new Blob([icsText], { type: 'text/calendar;charset=utf-8' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `moai_3d_production_schedule_${new Date().toISOString().slice(0, 10)}.ics`;
+      const fileSuffix = mode === 'week' ? `1week_${startStr}` : `all_${getLocalYmd()}`;
+      a.download = `moai_3d_print_schedule_${fileSuffix}.ics`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
+
+      const countMsg = `${targetJobs.length}件の製造計画`;
+      const periodMsg = mode === 'week' ? `表示中の1週間 (${startStr} 〜 ${endStr})` : '全期間';
+      alert(`📅 ${periodMsg}の${countMsg}をカレンダーファイル (.ics) としてダウンロードしました！\n\n【二重登録防止について】\n各ジョブ固有のUIDが付与されているため、カレンダーに何度取り込んでも予定は重複せず最新情報に自動上書き更新されます。\n\nダウンロードしたファイルを開いてカレンダーに追加してください。`);
     };
 
     window.openMfgGCalModal = function(preferredDate) {
