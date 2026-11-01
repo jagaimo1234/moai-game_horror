@@ -657,6 +657,8 @@ window.expandProductsForCatalog = function(baseProducts, worksMasterData, hidden
 
     // works_master側の画像・説明文設定があれば反映
     if (wData.image && !p.image) p.image = wData.image;
+    p.imagePosition = wData.imagePosition || p.imagePosition || "center center";
+    p.imageFit = wData.imageFit || p.imageFit || "cover";
     if (wData.optimizedCover && !p.optimizedCover) p.optimizedCover = wData.optimizedCover;
     if (Array.isArray(wData.images) && wData.images.length > 0 && (!p.images || p.images.length <= 1)) {
       p.images = [wData.image || p.image, ...wData.images.filter(u => u && u !== (wData.image || p.image))].filter(Boolean);
@@ -720,6 +722,8 @@ window.expandProductsForCatalog = function(baseProducts, worksMasterData, hidden
           name: groupTitle,
           desc: groupDesc,
           image: varImages[0] || p.image || p.optimizedCover || null,
+          imagePosition: wData.catalogGroupImagePosition || "center center",
+          imageFit: wData.catalogGroupImageFit || "cover",
           catalogGroupImage: wData.catalogGroupImage || varImages[0] || null,
           images: varImages.length > 0 ? varImages : (p.images || []),
           catalogVariants: nonBaseVars,
