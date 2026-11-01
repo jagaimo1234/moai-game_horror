@@ -603,7 +603,7 @@
     }
     .prod-kpi-grid {
       display: grid;
-      grid-template-columns: repeat(5, minmax(170px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(175px, 1fr));
       gap: 12px;
     }
     .prod-kpi-card {
@@ -10556,6 +10556,12 @@
       let totalTargetSkus = 0;          // Count of SKUs where R_i > 0
       let completedTargetSkus = 0;      // Count of SKUs where R_i > 0 and S_i >= R_i
 
+      // Monetary (Revenue & Asset Value) Accumulators
+      let grandTotalRawStockValue = 0;       // Sum of (currentStock * price) -> 現状在庫の総想定売上
+      let grandTotalAllocatedStockValue = 0; // Sum of (min(currentStock, totalReq) * price)
+      let grandTotalRequiredValue = 0;       // Sum of (totalReq * price) -> 目標想定売上
+      let grandTotalShortageValue = 0;       // Sum of (shortage * price)
+
       const seriesOptions = [];
       const variantNameSet = new Set();
 
@@ -10600,11 +10606,16 @@
             pAllocatedStock += vAlloc;
             pShortage += vShort;
 
+            const vPrice = window.getEffectiveProductPrice(p.id, v.skuId, refInvMap);
             if (isSelectedInAnyEvent || vTotalReq > 0 || vCur > 0) {
               grandTotalRequired += vTotalReq;
               grandTotalAllocatedStock += vAlloc;
               grandTotalRawStock += vCur;
               grandTotalShortage += vShort;
+              grandTotalRawStockValue += (vCur * vPrice);
+              grandTotalAllocatedStockValue += (vAlloc * vPrice);
+              grandTotalRequiredValue += (vTotalReq * vPrice);
+              grandTotalShortageValue += (vShort * vPrice);
               if (vTotalReq > 0) {
                 totalTargetSkus++;
                 if (vShort === 0) completedTargetSkus++;
@@ -10634,7 +10645,10 @@
               shortage: vShort,
               rate: vRate,
               isReady: vTotalReq > 0 && vShort === 0,
-              masterOrder: masterIdx * 100 + vIdx
+              masterOrder: masterIdx * 100 + vIdx,
+              price: vPrice,
+              currentStockValue: vCur * vPrice,
+              totalReqValue: vTotalReq * vPrice
             };
             skuItems.push(skuRowObj);
             lastBuiltRowLookup[v.skuId] = skuRowObj;
@@ -10690,12 +10704,17 @@
           const pShort = Math.max(0, pTotalReq - pCur);
           const pRate = pTotalReq > 0 ? Math.min(100, Math.round((pAlloc / pTotalReq) * 100)) : (pCur > 0 ? 100 : 0);
 
+          const pPrice = window.getEffectiveProductPrice(p.id, p.id, refInvMap);
           if (isSelectedInAnyEvent || pTotalReq > 0 || pCur > 0) {
             seriesOptions.push({ id: p.id, name: cleanParentName });
             grandTotalRequired += pTotalReq;
             grandTotalAllocatedStock += pAlloc;
             grandTotalRawStock += pCur;
             grandTotalShortage += pShort;
+            grandTotalRawStockValue += (pCur * pPrice);
+            grandTotalAllocatedStockValue += (pAlloc * pPrice);
+            grandTotalRequiredValue += (pTotalReq * pPrice);
+            grandTotalShortageValue += (pShort * pPrice);
             if (pTotalReq > 0) {
               totalTargetSkus++;
               if (pShort === 0) completedTargetSkus++;
@@ -10724,7 +10743,10 @@
               rate: pRate,
               isReady: pTotalReq > 0 && pShort === 0,
               skuItems: [],
-              masterOrder: masterIdx * 100
+              masterOrder: masterIdx * 100,
+              price: pPrice,
+              currentStockValue: pCur * pPrice,
+              totalReqValue: pTotalReq * pPrice
             };
             parentRows.push(singleObj);
             flatSkuRows.push(singleObj);
@@ -10824,6 +10846,26 @@
               </div>
               <div style="font-size:10px; color:rgba(255,255,255,0.45); margin-top:3px;">
                 全 ${totalTargetSkus} SKU のうち (必要数設定分)
+              </div>
+            </div>
+          </div>
+
+          <!-- 6. 💰 現在庫の想定売上金額 (安心指標) -->
+          <div class="prod-kpi-card" style="border: 1px solid rgba(245, 158, 11, 0.4); background: linear-gradient(135deg, rgba(245, 158, 11, 0.12), rgba(20, 23, 34, 0.95)); box-shadow: 0 4px 16px rgba(245,158,11,0.15);" title="最悪、目標在庫が全部用意できなくても、現在手元にこれだけの販売可能金額分が確保できています。">
+            <div class="prod-kpi-icon" style="background:rgba(245,158,11,0.22); color:#fbbf24; border:1px solid rgba(245,158,11,0.45); font-size:20px;">💴</div>
+            <div style="flex:1; min-width:0;">
+              <div style="display:flex; justify-content:space-between; align-items:center;">
+                <span style="font-size:11px; color:#fde68a; font-weight:bold;">現在庫の想定売上</span>
+                <span style="font-size:9.5px; background:rgba(245,158,11,0.25); border:1px solid rgba(245,158,11,0.45); color:#fbbf24; padding:1px 6px; border-radius:10px; font-weight:bold;">安心指標 ✨</span>
+              </div>
+              <div style="font-size:24px; font-weight:bold; color:#fbbf24; line-height:1.15; margin-top:2px;">
+                ¥${grandTotalRawStockValue.toLocaleString()}
+              </div>
+              <div style="font-size:10px; color:rgba(255,255,255,0.65); margin-top:3px; display:flex; justify-content:space-between; flex-wrap:wrap; gap:4px;">
+                <span>目標: ¥${grandTotalRequiredValue.toLocaleString()}</span>
+                <span style="color:#38bdf8; font-weight:bold;">
+                  金額達成率: ${grandTotalRequiredValue > 0 ? Math.min(100, ((grandTotalAllocatedStockValue / grandTotalRequiredValue) * 100)).toFixed(1) : '100.0'}%
+                </span>
               </div>
             </div>
           </div>
@@ -11024,7 +11066,10 @@
                 </td>
                 ${evCols}
                 <td style="font-weight:bold; color:#fff; font-size:14px;">${r.totalReq}</td>
-                <td style="font-weight:bold; color:${r.totalReq > 0 && r.currentStock >= r.totalReq ? '#10b981' : '#fff'}; font-size:14px;">${r.currentStock}</td>
+                <td style="font-weight:bold; color:${r.totalReq > 0 && r.currentStock >= r.totalReq ? '#10b981' : '#fff'}; font-size:14px;">
+                  <div>${r.currentStock}</div>
+                  ${r.price > 0 && r.currentStock > 0 ? `<div style="font-size:9.5px; color:#fbbf24; font-weight:normal;" title="現在庫の想定売上">¥${(r.currentStock * r.price).toLocaleString()}</div>` : ''}
+                </td>
                 <td style="font-weight:bold; color:${r.shortage > 0 ? '#ef4444' : '#10b981'}; font-size:14px;">${r.shortage}</td>
                 <td>${buildRateCell(r)}</td>
                 <td>
@@ -11085,7 +11130,10 @@
                 </td>
                 ${evCols}
                 <td style="font-weight:bold; color:#fff; font-size:14px;">${pRow.totalReq}</td>
-                <td style="font-weight:bold; color:${pRow.totalReq > 0 && pRow.currentStock >= pRow.totalReq ? '#10b981' : '#fff'}; font-size:14px;">${pRow.currentStock}</td>
+                <td style="font-weight:bold; color:${pRow.totalReq > 0 && pRow.currentStock >= pRow.totalReq ? '#10b981' : '#fff'}; font-size:14px;">
+                  <div>${pRow.currentStock}</div>
+                  ${pRow.skuItems && pRow.skuItems.length > 0 ? `<div style="font-size:9.5px; color:#fbbf24; font-weight:normal;" title="シリーズ現在庫の想定売上">¥${pRow.skuItems.reduce((s, it) => s + (it.currentStock * (it.price || 0)), 0).toLocaleString()}</div>` : ''}
+                </td>
                 <td style="font-weight:bold; color:${pRow.shortage > 0 ? '#ef4444' : '#10b981'}; font-size:14px;">${pRow.shortage}</td>
                 <td>${buildRateCell(pRow)}</td>
                 <td>
@@ -11403,6 +11451,32 @@
                 <div style="font-size:9px; color:rgba(255,255,255,0.5);">
                   ${isComplete ? '目標数を達成しています' : (activeSkuRow.shortage > 0 ? '優先的に制作が必要です' : '下部から必要数を設定可能')}
                 </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 2.5 Monetary Asset & Revenue Box -->
+        <div style="background:linear-gradient(135deg, rgba(245,158,11,0.1), rgba(0,0,0,0.3)); border:1px solid rgba(245,158,11,0.3); border-radius:10px; padding:10px 12px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+            <span style="font-size:11px; color:#fde68a; font-weight:bold; display:flex; align-items:center; gap:4px;">
+              <span>💴</span> 想定売上・金額指標
+            </span>
+            <span style="font-size:11px; color:#fff; font-weight:bold;">
+              単価: ${activeSkuRow.price > 0 ? '¥' + activeSkuRow.price.toLocaleString() : '<span style="color:rgba(255,255,255,0.4);">未設定</span>'}
+            </span>
+          </div>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:6px; background:rgba(0,0,0,0.25); padding:8px 10px; border-radius:8px;">
+            <div>
+              <div style="font-size:10px; color:rgba(255,255,255,0.55);">現在庫の想定売上</div>
+              <div style="font-size:15px; font-weight:bold; color:#fbbf24; margin-top:2px;">
+                ¥${((activeSkuRow.currentStock || 0) * (activeSkuRow.price || 0)).toLocaleString()}
+              </div>
+            </div>
+            <div>
+              <div style="font-size:10px; color:rgba(255,255,255,0.55);">目標完納時の売上規模</div>
+              <div style="font-size:15px; font-weight:bold; color:#38bdf8; margin-top:2px;">
+                ¥${((activeSkuRow.totalReq || 0) * (activeSkuRow.price || 0)).toLocaleString()}
               </div>
             </div>
           </div>
