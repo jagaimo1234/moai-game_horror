@@ -2280,6 +2280,7 @@
                 <span style="font-size:11px; color:rgba(255,255,255,0.6);">並び替え</span>
                 <select id="multi-agg-sort" onchange="renderMultiEventAggregation()" class="form-select" style="width:auto; font-size:12px; padding:5px 10px; background:#0d0f17; border-color:rgba(255,255,255,0.15);">
                   <option value="priority_desc">🔥 重要度順 (最優先 ➔ 通常 ➔ 低優先)</option>
+                  <option value="target_gap_desc">🎯 目標未達が大きい順 (要注力)</option>
                   <option value="category_asc">🏷️ カテゴリー別 (FDM ➔ 光造形 ➔ セメント)</option>
                   <option value="shortage_desc">⚠️ 不足数順 (多い順)</option>
                   <option value="rate_asc">📉 達成率が低い順</option>
@@ -2307,6 +2308,21 @@
                   <option value="high">🔥 最優先のみ (絶対準備)</option>
                   <option value="high_normal">🔥+⭐ 最優先＋通常</option>
                   <option value="low">💤 低優先のみ (後回し可)</option>
+                </select>
+              </div>
+
+              <!-- 🎯 Target Achievement Rate Goal (最低目標達成率セレクター) -->
+              <div style="display:flex; align-items:center; gap:5px; background:rgba(245,158,11,0.08); border:1px solid rgba(245,158,11,0.3); border-radius:8px; padding:2px 8px;" title="各作品のゲージにこの目標達成率ラインの目印バーが表示されます">
+                <span style="font-size:11px; color:#fbbf24; font-weight:bold; display:flex; align-items:center; gap:3px;">
+                  <span>🎯</span> 目標ライン
+                </span>
+                <select id="multi-agg-target-rate" onchange="onTargetRateChange(this.value)" class="form-select" style="width:auto; font-size:12px; padding:3px 6px; background:#0d0f17; border-color:#fbbf24; color:#fbbf24; font-weight:bold; cursor:pointer;">
+                  <option value="50">50%</option>
+                  <option value="60">60%</option>
+                  <option value="70">70% (推奨)</option>
+                  <option value="80">80%</option>
+                  <option value="90">90%</option>
+                  <option value="100">100% (完納)</option>
                 </select>
               </div>
 
@@ -2343,6 +2359,8 @@
                   <option value="required">📦 必要数 &gt; 0 のみ</option>
                   <option value="shortage">🔥 不足 &gt; 0 のみ</option>
                   <option value="completed">✅ 準備完了のみ</option>
+                  <option value="below_target">🎯 目標ライン未達のみ</option>
+                  <option value="reached_target">✨ 目標ライン達成済のみ</option>
                   <option value="variants">🎨 バリエありのみ</option>
                 </select>
               </div>
@@ -9977,6 +9995,26 @@
     };
 
     // Cycle priority: normal -> high -> low -> normal
+    // 🎯 Target Achievement Rate Goal (最低目標達成率)
+    window.getTargetRate = () => {
+      const saved = localStorage.getItem('moai_pos_target_rate');
+      const val = parseInt(saved, 10);
+      return (val >= 10 && val <= 100) ? val : 70;
+    };
+
+    window.setTargetRate = (val) => {
+      const num = parseInt(val, 10);
+      const clamped = Math.max(10, Math.min(100, isNaN(num) ? 70 : num));
+      localStorage.setItem('moai_pos_target_rate', clamped);
+      const sel = document.getElementById('multi-agg-target-rate');
+      if (sel) sel.value = String(clamped);
+      renderMultiEventAggregation();
+    };
+
+    window.onTargetRateChange = (val) => {
+      window.setTargetRate(val);
+    };
+
     window.cycleItemPriority = async (itemId, parentId = null, e = null) => {
       if (e) e.stopPropagation();
       const current = window.getItemPriority(itemId, parentId);
@@ -10650,6 +10688,11 @@
           if (priA !== priB) return priA - priB; // 1 (high) comes first
           if (b.shortage !== a.shortage) return b.shortage - a.shortage;
           if (b.totalReq !== a.totalReq) return b.totalReq - a.totalReq;
+        } else if (sortMode === 'target_gap_desc') {
+          const gapA = a.totalReq > 0 ? (targetRate - a.rate) : -999;
+          const gapB = b.totalReq > 0 ? (targetRate - b.rate) : -999;
+          if (gapA !== gapB) return gapB - gapA;
+          if (b.shortage !== a.shortage) return b.shortage - a.shortage;
         } else if (sortMode === 'category_asc') {
           const catA = window.getCategoryMeta(a.category || window.getProductCategory(a)).order;
           const catB = window.getCategoryMeta(b.category || window.getProductCategory(b)).order;
@@ -10680,6 +10723,8 @@
         if (filterMode === 'shortage' && row.shortage <= 0) return false;
         if (filterMode === 'required' && row.totalReq <= 0) return false;
         if (filterMode === 'completed' && !(row.totalReq > 0 && row.shortage === 0)) return false;
+        if (filterMode === 'below_target' && (row.totalReq <= 0 || row.rate >= targetRate)) return false;
+        if (filterMode === 'reached_target' && (row.totalReq <= 0 || row.rate < targetRate)) return false;
         if (filterMode === 'variants' && !row.hasVars) return false;
         if (seriesFilter !== 'all' && row.parentId !== seriesFilter) return false;
 
@@ -10736,17 +10781,47 @@
         return `<span class="status-pill-short">▲ 不足</span>`;
       };
 
+      const targetRate = window.getTargetRate ? window.getTargetRate() : 70;
+      
+      // Sync selector value on toolbar
+      const targetRateSelEl = document.getElementById('multi-agg-target-rate');
+      if (targetRateSelEl && targetRateSelEl.value !== String(targetRate)) {
+        targetRateSelEl.value = String(targetRate);
+      }
+
       const buildRateCell = (r) => {
         if (r.totalReq <= 0) {
           return `<div style="display:flex; align-items:center; justify-content:flex-end; gap:8px; opacity:0.35;"><span style="font-size:11px;">-</span></div>`;
         }
         const barColor = getRateBarColor(r.rate);
+        const isReached = r.rate >= targetRate;
+        const isCompleted = r.rate >= 100;
+        const targetReqQty = Math.ceil((r.totalReq * targetRate) / 100);
+        const gapQty = Math.max(0, targetReqQty - r.currentStock);
+
         return `
-          <div style="display:flex; align-items:center; justify-content:flex-end; gap:8px; min-width:110px;">
-            <div style="width:62px; height:7px; background:rgba(255,255,255,0.08); border-radius:4px; overflow:hidden;">
-              <div style="width:${Math.min(100, r.rate)}%; height:100%; background:${barColor}; border-radius:4px;"></div>
+          <div style="display:flex; align-items:center; justify-content:flex-end; gap:8px; min-width:126px;">
+            <!-- Gauge with Visual Target Marker Line -->
+            <div style="position:relative; width:68px; height:8px; background:rgba(255,255,255,0.08); border-radius:4px; overflow:visible;"
+                 title="達成率: ${r.rate}% (最低目標: ${targetRate}% / 目標数: ${targetReqQty}個 ${gapQty > 0 ? `➔ あと${gapQty}個で達成` : '➔ 目標クリア✨'})">
+              
+              <!-- Progress fill (clipped inside border-radius) -->
+              <div style="width:100%; height:100%; border-radius:4px; overflow:hidden;">
+                <div style="width:${Math.min(100, r.rate)}%; height:100%; background:${isReached ? (isCompleted ? '#10b981' : '#38bdf8') : barColor}; border-radius:4px; transition:width 0.2s;"></div>
+              </div>
+
+              <!-- 🎯 Vertical Target Goal Line Marker (目印バー) -->
+              <div style="position:absolute; left:${targetRate}%; top:-3px; bottom:-3px; width:2px; background:#fff; box-shadow:0 0 5px #fbbf24, 0 0 2px #fff; z-index:3; border-radius:1px; pointer-events:none;">
+                <!-- Target Indicator Pin Arrow -->
+                <div style="position:absolute; top:-4px; left:50%; transform:translateX(-50%); width:0; height:0; border-left:3px solid transparent; border-right:3px solid transparent; border-top:4px solid #fbbf24;"></div>
+              </div>
             </div>
-            <span style="font-size:12px; color:rgba(255,255,255,0.85); min-width:34px; text-align:right;">${r.rate}%</span>
+
+            <!-- Numeric Rate with Reached Status Badge -->
+            <div style="display:flex; align-items:center; gap:2px; min-width:50px; justify-content:flex-end;">
+              <span style="font-size:12px; font-weight:bold; color:${isReached ? '#38bdf8' : 'rgba(255,255,255,0.85)'};">${r.rate}%</span>
+              ${isReached ? `<span style="font-size:10px;" title="最低目標(${targetRate}%)達成！">🎯</span>` : ''}
+            </div>
           </div>
         `;
       };
@@ -11086,12 +11161,32 @@
         <!-- 2. Progress Status Section -->
         <div style="background:rgba(0,0,0,0.28); border:1px solid rgba(255,255,255,0.07); border-radius:10px; padding:12px;">
           <div style="font-size:11px; color:rgba(255,255,255,0.6); margin-bottom:6px;">進捗状況 (${activeSkuRow.variantName})</div>
-          <div style="display:flex; align-items:center; gap:10px; margin-bottom:12px;">
-            <div style="flex:1; height:9px; background:rgba(255,255,255,0.08); border-radius:5px; overflow:hidden;">
-              <div style="width:${Math.min(100, activeSkuRow.rate)}%; height:100%; background:${barColor}; border-radius:5px; transition:width 0.25s;"></div>
+          <div style="display:flex; align-items:center; gap:10px; margin-bottom:6px;">
+            <div style="position:relative; flex:1; height:10px; background:rgba(255,255,255,0.08); border-radius:5px; overflow:visible;">
+              <div style="width:100%; height:100%; border-radius:5px; overflow:hidden;">
+                <div style="width:${Math.min(100, activeSkuRow.rate)}%; height:100%; background:${activeSkuRow.rate >= targetRate ? (activeSkuRow.rate >= 100 ? '#10b981' : '#38bdf8') : barColor}; border-radius:5px; transition:width 0.25s;"></div>
+              </div>
+              <!-- 🎯 Target Goal Line Marker in Detail Inspector -->
+              <div style="position:absolute; left:${targetRate}%; top:-3px; bottom:-3px; width:2px; background:#fff; box-shadow:0 0 6px #fbbf24; z-index:3; border-radius:1px;" title="最低目標: ${targetRate}%">
+                <div style="position:absolute; top:-4px; left:50%; transform:translateX(-50%); width:0; height:0; border-left:3px solid transparent; border-right:3px solid transparent; border-top:4px solid #fbbf24;"></div>
+              </div>
             </div>
-            <span style="font-size:16px; font-weight:bold; color:#fff; min-width:44px; text-align:right;">${activeSkuRow.totalReq > 0 ? activeSkuRow.rate + '%' : '-'}</span>
+            <div style="display:flex; align-items:center; gap:3px; min-width:54px; justify-content:flex-end;">
+              <span style="font-size:16px; font-weight:bold; color:${activeSkuRow.rate >= targetRate ? '#38bdf8' : '#fff'};">${activeSkuRow.totalReq > 0 ? activeSkuRow.rate + '%' : '-'}</span>
+              ${activeSkuRow.rate >= targetRate ? `<span style="font-size:12px;" title="目標達成！">🎯</span>` : ''}
+            </div>
           </div>
+          ${(() => {
+            if (activeSkuRow.totalReq <= 0) return '';
+            const targetReqQty = Math.ceil((activeSkuRow.totalReq * targetRate) / 100);
+            const gap = Math.max(0, targetReqQty - activeSkuRow.currentStock);
+            return `
+              <div style="font-size:11px; margin-bottom:12px; display:flex; justify-content:space-between; align-items:center; color:rgba(255,255,255,0.65); background:rgba(255,255,255,0.03); padding:5px 8px; border-radius:6px; border:1px solid rgba(255,255,255,0.06);">
+                <span>🎯 最低目標 (${targetRate}%): <strong style="color:#fbbf24;">${targetReqQty}個</strong></span>
+                <span>${gap > 0 ? `<strong style="color:#f87171;">あと ${gap}個</strong> で目標達成` : '<strong style="color:#34d399;">目標クリア ✨</strong>'}</span>
+              </div>
+            `;
+          })()}
 
           <div style="display:flex; align-items:center; justify-content:space-between; gap:8px;">
             <div style="display:flex; gap:18px;">
