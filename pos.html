@@ -2201,10 +2201,34 @@
               <div style="display:flex; align-items:center; gap:5px;">
                 <span style="font-size:11px; color:rgba(255,255,255,0.6);">並び替え</span>
                 <select id="multi-agg-sort" onchange="renderMultiEventAggregation()" class="form-select" style="width:auto; font-size:12px; padding:5px 10px; background:#0d0f17; border-color:rgba(255,255,255,0.15);">
-                  <option value="shortage_desc">不足数順 (多い順)</option>
-                  <option value="rate_asc">達成率が低い順</option>
-                  <option value="required_desc">必要数が多い順</option>
+                  <option value="priority_desc">🔥 重要度順 (最優先 ➔ 通常 ➔ 低優先)</option>
+                  <option value="category_asc">🏷️ カテゴリー別 (FDM ➔ 光造形 ➔ セメント)</option>
+                  <option value="shortage_desc">⚠️ 不足数順 (多い順)</option>
+                  <option value="rate_asc">📉 達成率が低い順</option>
+                  <option value="required_desc">📦 必要数が多い順</option>
                   <option value="default">標準（作品登録順）</option>
+                </select>
+              </div>
+
+              <!-- Category (Manufacturing Method) Filter -->
+              <div style="display:flex; align-items:center; gap:5px;">
+                <span style="font-size:11px; color:rgba(255,255,255,0.6);">製法・区分</span>
+                <select id="multi-agg-category-filter" onchange="renderMultiEventAggregation()" class="form-select" style="width:auto; font-size:12px; padding:5px 8px; background:#0d0f17; border-color:#38bdf8; color:#fff; font-weight:bold;">
+                  <option value="all">全カテゴリー</option>
+                  <option value="fdm">🖨️ 熱積層3Dプリント (FDM)</option>
+                  <option value="resin">💡 光造形3Dプリント (レジン)</option>
+                  <option value="cement">🏺 セメント・手作業成型</option>
+                </select>
+              </div>
+
+              <!-- Priority / Importance Filter -->
+              <div style="display:flex; align-items:center; gap:5px;">
+                <span style="font-size:11px; color:rgba(255,255,255,0.6);">重要度</span>
+                <select id="multi-agg-priority-filter" onchange="renderMultiEventAggregation()" class="form-select" style="width:auto; font-size:12px; padding:5px 8px; background:#0d0f17; border-color:#ef4444; color:#fff; font-weight:bold;">
+                  <option value="all">全重要度</option>
+                  <option value="high">🔥 最優先のみ (絶対準備)</option>
+                  <option value="high_normal">🔥+⭐ 最優先＋通常</option>
+                  <option value="low">💤 低優先のみ (後回し可)</option>
                 </select>
               </div>
 
@@ -2339,6 +2363,7 @@
               <div style="display:flex; flex-direction:column; gap:6px;">
                 <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px;">
                   <select id="mfg-left-sort" onchange="renderProductionPlans()" class="form-select" style="font-size:11px; padding:5px 6px; background:#0d0f17;">
+                    <option value="priority_desc">🔥 重要度順 (最優先 ➔ 通常)</option>
                     <option value="unplanned_desc">未計画数が多い順</option>
                     <option value="progress_asc">計画達成率が低い順</option>
                     <option value="shortage_desc">不足数が多い順</option>
@@ -9549,6 +9574,101 @@
     // =========================================================================
     // 📊 イベント制作状況ダッシュボード（単一/複数イベント集計 × 右サイド詳細操作パネル）
     // =========================================================================
+    // =========================================================================
+    // 🏷️ 作品カテゴリー（製法区分）＆ 重要度・優先度（制作プライオリティ）管理
+    // =========================================================================
+    const PRODUCT_PRIORITY_STORAGE_KEY = "moai_pos_product_priorities";
+
+    // In-memory priorities: { [itemId]: 'high' | 'normal' | 'low' }
+    let productPrioritiesData = (() => {
+      try {
+        const raw = localStorage.getItem(PRODUCT_PRIORITY_STORAGE_KEY);
+        if (raw) return JSON.parse(raw) || {};
+      } catch(e) {}
+      return {};
+    })();
+
+    window.getProductCategory = (item) => {
+      const name = (item.parentName || item.name || item.id || item.parentId || '').toLowerCase();
+      const skuId = (item.skuId || item.id || '').toLowerCase();
+      const text = `${name} ${skuId}`;
+
+      // 1. セメント・手作業成型 (内省MOAI, 黄昏MOAI, 一輪挿し, セメント, モルタル)
+      if (text.includes('一輪挿し') || text.includes('一輪差し') ||
+          text.includes('黄昏') || text.includes('内省') ||
+          text.includes('内政') || text.includes('セメント') || text.includes('モルタル')) {
+        return 'cement';
+      }
+      // 2. 光造形 3Dプリンター / SLA (考えるMOAI, レジン, robo, ロボ, エレク)
+      if (text.includes('考える') || text.includes('レジン') ||
+          text.includes('robo') || text.includes('ロボ') || text.includes('エレク')) {
+        return 'resin';
+      }
+      // 3. 熱溶解積層式 3Dプリンター / FDM (ペン立て, メガネスタンド, ロゴ, その他通常3Dプリント)
+      return 'fdm';
+    };
+
+    window.getCategoryMeta = (catId) => {
+      const map = {
+        fdm: { id: 'fdm', label: '熱積層FDM', icon: '🖨️', color: '#38bdf8', bg: 'rgba(56,189,248,0.14)', border: 'rgba(56,189,248,0.35)', order: 1 },
+        resin: { id: 'resin', label: '光造形', icon: '💡', color: '#c084fc', bg: 'rgba(192,132,252,0.14)', border: 'rgba(192,132,252,0.35)', order: 2 },
+        cement: { id: 'cement', label: 'セメント', icon: '🏺', color: '#fbbf24', bg: 'rgba(251,191,36,0.14)', border: 'rgba(251,191,36,0.35)', order: 3 },
+        other: { id: 'other', label: 'その他', icon: '📦', color: '#94a3b8', bg: 'rgba(148,163,184,0.14)', border: 'rgba(148,163,184,0.35)', order: 4 }
+      };
+      return map[catId] || map.fdm;
+    };
+
+    window.getItemPriority = (itemId, parentId = null) => {
+      if (productPrioritiesData[itemId]) return productPrioritiesData[itemId];
+      if (parentId && productPrioritiesData[parentId]) return productPrioritiesData[parentId];
+      return 'normal'; // Default is normal
+    };
+
+    window.getPriorityMeta = (priId) => {
+      const map = {
+        high: { id: 'high', label: '最優先 (絶対準備)', shortLabel: '最優先', icon: '🔥', color: '#ef4444', bg: 'rgba(239,68,68,0.18)', border: '#ef4444', order: 1 },
+        normal: { id: 'normal', label: '通常 (標準準備)', shortLabel: '通常', icon: '⭐', color: '#3b82f6', bg: 'rgba(59,130,246,0.14)', border: 'rgba(59,130,246,0.35)', order: 2 },
+        low: { id: 'low', label: '低優先 (後回し可)', shortLabel: '低優先', icon: '💤', color: '#9ca3af', bg: 'rgba(156,163,175,0.12)', border: 'rgba(156,163,175,0.3)', order: 3 }
+      };
+      return map[priId] || map.normal;
+    };
+
+    // Cycle priority: normal -> high -> low -> normal
+    window.cycleItemPriority = async (itemId, parentId = null, e = null) => {
+      if (e) e.stopPropagation();
+      const current = window.getItemPriority(itemId, parentId);
+      const cycle = { normal: 'high', high: 'low', low: 'normal' };
+      const next = cycle[current] || 'normal';
+      await window.setItemPriority(itemId, next);
+    };
+
+    window.setItemPriority = async (itemId, priority) => {
+      productPrioritiesData[itemId] = priority;
+      try {
+        localStorage.setItem(PRODUCT_PRIORITY_STORAGE_KEY, JSON.stringify(productPrioritiesData));
+      } catch(e) {}
+
+      // Save to Firestore
+      if (typeof auth !== 'undefined' && auth && auth.currentUser) {
+        try {
+          await setDoc(doc(db, "settings", "product_priorities"), {
+            priorities: productPrioritiesData,
+            updatedAt: Date.now()
+          }, { merge: true });
+        } catch(e) {
+          console.warn("Firestore set priority error:", e);
+        }
+      }
+
+      // Re-render views
+      if (window.renderMultiEventAggregation && currentSettingsSubTab === 'multi-agg') {
+        window.renderMultiEventAggregation();
+      }
+      if (window.renderProductionPlans && currentSettingsSubTab === 'production') {
+        window.renderProductionPlans();
+      }
+    };
+
     const MULTI_AGG_STORAGE_KEY_EVENTS = "moai_pos_multi_agg_events";
     const MULTI_AGG_STORAGE_KEY_STOCK_SRC = "moai_pos_multi_agg_stock_source";
 
@@ -9740,7 +9860,9 @@
     window.cycleMultiAggSort = (field) => {
       const sel = document.getElementById('multi-agg-sort');
       if (!sel) return;
-      if (field === 'shortage') sel.value = 'shortage_desc';
+      if (field === 'priority') sel.value = 'priority_desc';
+      else if (field === 'category') sel.value = 'category_asc';
+      else if (field === 'shortage') sel.value = 'shortage_desc';
       else if (field === 'rate') sel.value = 'rate_asc';
       else if (field === 'required') sel.value = 'required_desc';
       else sel.value = 'default';
@@ -9958,6 +10080,8 @@
               }
             }
 
+            const vCat = window.getProductCategory({ parentName: cleanParentName, id: p.id, skuId: v.skuId });
+            const vPri = window.getItemPriority(v.skuId, p.id);
             const skuRowObj = {
               rowId: v.skuId,
               type: 'sku',
@@ -9970,6 +10094,8 @@
               statusNote: v.statusNote,
               hasVars: true,
               varsCount: vars.length,
+              category: vCat,
+              priority: vPri,
               perEventReq: vPerEvent,
               totalReq: vTotalReq,
               currentStock: vCur,
@@ -9989,6 +10115,8 @@
           if (isSelectedInAnyEvent || pTotalReq > 0 || pCurrentStock > 0) {
             seriesOptions.push({ id: p.id, name: cleanParentName });
             const pRate = pTotalReq > 0 ? Math.min(100, Math.round((pAllocatedStock / pTotalReq) * 100)) : (pCurrentStock > 0 ? 100 : 0);
+            const pCat = window.getProductCategory({ parentName: cleanParentName, id: p.id });
+            const pPri = window.getItemPriority(p.id);
             const pObj = {
               rowId: p.id,
               type: 'parent',
@@ -9999,6 +10127,8 @@
               variantName: `${vars.length}種合計`,
               hasVars: true,
               varsCount: vars.length,
+              category: pCat,
+              priority: pPri,
               perEventReq: pPerEventReq,
               totalReq: pTotalReq,
               currentStock: pCurrentStock,
@@ -10040,6 +10170,8 @@
               if (pShort === 0) completedTargetSkus++;
             }
 
+            const sCat = window.getProductCategory({ parentName: cleanParentName, id: p.id });
+            const sPri = window.getItemPriority(p.id);
             const singleObj = {
               rowId: p.id,
               type: 'single_sku',
@@ -10051,6 +10183,8 @@
               isBase: true,
               hasVars: false,
               varsCount: 0,
+              category: sCat,
+              priority: sPri,
               perEventReq: pPerEvent,
               totalReq: pTotalReq,
               currentStock: pCur,
@@ -10167,7 +10301,18 @@
 
       // 5. Filter & Sort Rows
       const sortFn = (a, b) => {
-        if (sortMode === 'shortage_desc') {
+        if (sortMode === 'priority_desc') {
+          const priA = window.getPriorityMeta(a.priority || window.getItemPriority(a.rowId, a.parentId)).order;
+          const priB = window.getPriorityMeta(b.priority || window.getItemPriority(b.rowId, b.parentId)).order;
+          if (priA !== priB) return priA - priB; // 1 (high) comes first
+          if (b.shortage !== a.shortage) return b.shortage - a.shortage;
+          if (b.totalReq !== a.totalReq) return b.totalReq - a.totalReq;
+        } else if (sortMode === 'category_asc') {
+          const catA = window.getCategoryMeta(a.category || window.getProductCategory(a)).order;
+          const catB = window.getCategoryMeta(b.category || window.getProductCategory(b)).order;
+          if (catA !== catB) return catA - catB; // FDM -> Resin -> Cement
+          if (b.shortage !== a.shortage) return b.shortage - a.shortage;
+        } else if (sortMode === 'shortage_desc') {
           if (b.shortage !== a.shortage) return b.shortage - a.shortage;
           if (b.totalReq !== a.totalReq) return b.totalReq - a.totalReq;
         } else if (sortMode === 'rate_asc') {
@@ -10184,6 +10329,9 @@
         return a.masterOrder - b.masterOrder;
       };
 
+      const categoryFilter = document.getElementById('multi-agg-category-filter')?.value || 'all';
+      const priorityFilter = document.getElementById('multi-agg-priority-filter')?.value || 'all';
+
       const matchesCommonFilters = (row) => {
         if (unfinishedOnly && row.shortage <= 0) return false;
         if (filterMode === 'shortage' && row.shortage <= 0) return false;
@@ -10191,6 +10339,21 @@
         if (filterMode === 'completed' && !(row.totalReq > 0 && row.shortage === 0)) return false;
         if (filterMode === 'variants' && !row.hasVars) return false;
         if (seriesFilter !== 'all' && row.parentId !== seriesFilter) return false;
+
+        // Category Filter
+        if (categoryFilter !== 'all') {
+          const cat = row.category || window.getProductCategory(row);
+          if (cat !== categoryFilter) return false;
+        }
+
+        // Priority Filter
+        if (priorityFilter !== 'all') {
+          const pri = row.priority || window.getItemPriority(row.rowId, row.parentId);
+          if (priorityFilter === 'high' && pri !== 'high') return false;
+          if (priorityFilter === 'high_normal' && pri === 'low') return false;
+          if (priorityFilter === 'low' && pri !== 'low') return false;
+        }
+
         if (variantFilter !== 'all') {
           if (row.type === 'parent' && row.hasVars) {
             if (!row.skuItems.some(s => s.variantName === variantFilter)) return false;
@@ -10216,7 +10379,7 @@
         return `<th style="min-width:66px; color:rgba(255,255,255,0.75);">${label}<div style="font-size:9px; font-weight:normal; opacity:0.6;">必要数</div></th>`;
       }).join('') : '';
 
-      const totalColSpan = 7 + (renderEventColsVisible ? multiAggSelectedEvents.length : 0);
+      const totalColSpan = 8 + (renderEventColsVisible ? multiAggSelectedEvents.length : 0);
       let tbodyHtml = '';
       let displayedIds = [];
 
@@ -10258,12 +10421,21 @@
               return `<td style="color:${val > 0 ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.25)'};">${val}</td>`;
             }).join('') : '';
 
+            const catMeta = window.getCategoryMeta(r.category || window.getProductCategory(r));
+            const priKey = r.priority || window.getItemPriority(r.rowId, r.parentId);
+            const priMeta = window.getPriorityMeta(priKey);
+
             return `
               <tr class="multi-agg-parent-row multi-agg-row-item ${isSel ? 'multi-agg-row-selected' : ''}" data-item-id="${r.rowId}" onclick="selectMultiAggItem('${r.rowId}', true)">
                 <td>
-                  <div style="display:flex; align-items:center; gap:10px;">
+                  <div style="display:flex; align-items:center; gap:8px;">
                     <img src="${r.parentImage}" style="width:36px; height:36px; border-radius:6px; object-fit:cover; background:#222; flex-shrink:0;">
-                    <span style="font-weight:bold; color:#fff; font-size:13px; line-height:1.3;">${r.parentName}</span>
+                    <div style="display:flex; flex-direction:column; gap:2px; min-width:0;">
+                      <span style="font-weight:bold; color:#fff; font-size:13px; line-height:1.25;">${r.parentName}</span>
+                      <div>
+                        <span style="font-size:9.5px; padding:1px 5px; border-radius:4px; font-weight:bold; background:${catMeta.bg}; color:${catMeta.color}; border:1px solid ${catMeta.border};">${catMeta.icon} ${catMeta.label}</span>
+                      </div>
+                    </div>
                   </div>
                 </td>
                 <td>
@@ -10271,6 +10443,13 @@
                     ${r.variantName}
                   </span>
                   ${r.statusNote ? `<span style="font-size:10px; color:#f39c12; margin-left:4px;">(${r.statusNote})</span>` : ''}
+                </td>
+                <td>
+                  <button type="button" onclick="cycleItemPriority('${r.rowId}', '${r.parentId}', event)"
+                          title="クリックで重要度を切り替え (🔥最優先 ➔ ⭐通常 ➔ 💤低優先)"
+                          style="background:${priMeta.bg}; border:1px solid ${priMeta.border}; color:${priMeta.color}; font-size:11px; font-weight:bold; padding:3px 7px; border-radius:6px; cursor:pointer; display:inline-flex; align-items:center; gap:3px; white-space:nowrap; transition:all 0.15s;">
+                    <span>${priMeta.icon}</span> <span>${priMeta.shortLabel}</span>
+                  </button>
                 </td>
                 ${evCols}
                 <td style="font-weight:bold; color:#fff; font-size:14px;">${r.totalReq}</td>
@@ -10302,12 +10481,21 @@
               return `<td style="color:${val > 0 ? '#fff' : 'rgba(255,255,255,0.25)'};">${val}</td>`;
             }).join('') : '';
 
+            const pCatMeta = window.getCategoryMeta(pRow.category || window.getProductCategory(pRow));
+            const pPriKey = pRow.priority || window.getItemPriority(pRow.rowId);
+            const pPriMeta = window.getPriorityMeta(pPriKey);
+
             tbodyHtml += `
               <tr class="multi-agg-parent-row multi-agg-row-item ${isParentSel ? 'multi-agg-row-selected' : ''}" data-item-id="${pRow.rowId}" onclick="selectMultiAggItem('${pRow.rowId}', true)">
                 <td>
-                  <div style="display:flex; align-items:center; gap:10px;">
+                  <div style="display:flex; align-items:center; gap:8px;">
                     <img src="${pRow.parentImage}" style="width:36px; height:36px; border-radius:6px; object-fit:cover; background:#222; flex-shrink:0;">
-                    <span style="color:#fff; font-size:13px; font-weight:bold;">${pRow.parentName}</span>
+                    <div style="display:flex; flex-direction:column; gap:2px; min-width:0;">
+                      <span style="color:#fff; font-size:13px; font-weight:bold; line-height:1.25;">${pRow.parentName}</span>
+                      <div>
+                        <span style="font-size:9.5px; padding:1px 5px; border-radius:4px; font-weight:bold; background:${pCatMeta.bg}; color:${pCatMeta.color}; border:1px solid ${pCatMeta.border};">${pCatMeta.icon} ${pCatMeta.label}</span>
+                      </div>
+                    </div>
                   </div>
                 </td>
                 <td>
@@ -10316,6 +10504,13 @@
                       ${isExpanded ? '▼' : '▶'} ${pRow.varsCount}種内訳
                     </button>
                   ` : `<span style="font-size:12px; opacity:0.65;">無印</span>`}
+                </td>
+                <td>
+                  <button type="button" onclick="cycleItemPriority('${pRow.rowId}', null, event)"
+                          title="クリックで重要度を切り替え (🔥最優先 ➔ ⭐通常 ➔ 💤低優先)"
+                          style="background:${pPriMeta.bg}; border:1px solid ${pPriMeta.border}; color:${pPriMeta.color}; font-size:11px; font-weight:bold; padding:3px 7px; border-radius:6px; cursor:pointer; display:inline-flex; align-items:center; gap:3px;">
+                    <span>${pPriMeta.icon}</span> <span>${pPriMeta.shortLabel}</span>
+                  </button>
                 </td>
                 ${evCols}
                 <td style="font-weight:bold; color:#fff; font-size:14px;">${pRow.totalReq}</td>
@@ -10347,6 +10542,9 @@
                   return `<td style="color:${val > 0 ? '#eee' : 'rgba(255,255,255,0.25)'};">${val}</td>`;
                 }).join('') : '';
 
+                const cPriKey = sRow.priority || window.getItemPriority(sRow.rowId, sRow.parentId);
+                const cPriMeta = window.getPriorityMeta(cPriKey);
+
                 tbodyHtml += `
                   <tr class="multi-agg-sku-row multi-agg-row-item ${isSkuSel ? 'multi-agg-row-selected' : ''}" data-item-id="${sRow.rowId}" onclick="selectMultiAggItem('${sRow.rowId}', true)">
                     <td>
@@ -10355,6 +10553,13 @@
                     <td>
                       <span style="font-weight:bold; color:${sRow.isBase ? '#ddd' : 'var(--accent)'};">${sRow.isBase ? '🔹' : '🔸'} ${sRow.variantName}</span>
                       ${sRow.statusNote ? `<span style="font-size:10px; color:#f39c12; margin-left:4px;">(${sRow.statusNote})</span>` : ''}
+                    </td>
+                    <td>
+                      <button type="button" onclick="cycleItemPriority('${sRow.rowId}', '${sRow.parentId}', event)"
+                              title="クリックで重要度を切り替え"
+                              style="background:${cPriMeta.bg}; border:1px solid ${cPriMeta.border}; color:${cPriMeta.color}; font-size:10px; font-weight:bold; padding:2px 6px; border-radius:5px; cursor:pointer;">
+                        ${cPriMeta.icon} ${cPriMeta.shortLabel}
+                      </button>
                     </td>
                     ${sEvCols}
                     <td style="font-weight:bold; color:#fff;">${sRow.totalReq}</td>
@@ -10379,8 +10584,9 @@
         <table class="multi-agg-table">
           <thead>
             <tr>
-              <th style="min-width:180px; cursor:pointer;" onclick="cycleMultiAggSort('default')">作品名 ⇅</th>
-              <th style="min-width:120px;">バリエーション</th>
+              <th style="min-width:190px; cursor:pointer;" onclick="cycleMultiAggSort('default')">作品名 / 製法区分 ⇅</th>
+              <th style="min-width:110px;">バリエーション</th>
+              <th style="min-width:85px; cursor:pointer;" onclick="cycleMultiAggSort('priority')" title="クリックで重要度順にソート">重要度 ⇅</th>
               ${eventHeadersHtml}
               <th style="min-width:68px; cursor:pointer;" onclick="cycleMultiAggSort('required')">必要数 ⇅</th>
               <th style="min-width:68px;">現在庫</th>
@@ -10624,6 +10830,33 @@
           <div style="display:flex; gap:6px;">
             <button type="button" onclick="openEditModal('${parentId}', 'desc')" style="flex:1; font-size:11px; padding:6px 10px; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.12); color:#ddd; border-radius:6px; cursor:pointer;">✏️ 作品説明を編集</button>
             <button type="button" onclick="openEditModal('${parentId}', 'announce')" style="flex:1; font-size:11px; padding:6px 10px; background:rgba(59,130,246,0.15); border:1px solid rgba(59,130,246,0.35); color:#60a5fa; border-radius:6px; cursor:pointer;">📢 告知を編集</button>
+          </div>
+        </div>
+
+        <!-- Priority & Category Selector in Detail Panel -->
+        <div style="background:rgba(0,0,0,0.28); border:1px solid rgba(255,255,255,0.07); border-radius:10px; padding:12px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+            <span style="font-size:11px; color:rgba(255,255,255,0.7); font-weight:bold;">🏷️ 制作重要度（優先度設定）</span>
+            ${(() => {
+              const cm = window.getCategoryMeta(activeSkuRow.category || window.getProductCategory(activeSkuRow));
+              return `<span style="font-size:10px; padding:1px 6px; border-radius:4px; font-weight:bold; background:${cm.bg}; color:${cm.color}; border:1px solid ${cm.border};">${cm.icon} ${cm.label}</span>`;
+            })()}
+          </div>
+          <div style="display:flex; gap:6px;">
+            ${['high', 'normal', 'low'].map(pKey => {
+              const pm = window.getPriorityMeta(pKey);
+              const curPri = window.getItemPriority(targetStockId, parentId);
+              const isCur = curPri === pKey;
+              return `
+                <button type="button" onclick="setItemPriority('${targetStockId}', '${pKey}')"
+                        style="flex:1; padding:7px 4px; font-size:11px; font-weight:bold; border-radius:6px; cursor:pointer; border:1px solid ${isCur ? pm.color : 'rgba(255,255,255,0.15)'}; background:${isCur ? pm.bg : 'rgba(255,255,255,0.05)'}; color:${isCur ? pm.color : 'rgba(255,255,255,0.6)'};">
+                  ${pm.icon} ${pm.shortLabel}
+                </button>
+              `;
+            }).join('')}
+          </div>
+          <div style="font-size:9.5px; color:rgba(255,255,255,0.5); margin-top:5px;">
+            ※「最優先」に設定すると、間に合わせるべき絶対枠としてテーブル上部や製造計画に優先表示されます。
           </div>
         </div>
 
@@ -11830,7 +12063,13 @@
             return (b.finishingStock || 0) - (a.finishingStock || 0);
           }
         }
-        if (sortMode === 'unplanned_desc') {
+        if (sortMode === 'priority_desc') {
+          const priA = window.getPriorityMeta(window.getItemPriority(a.skuId, a.parentId)).order;
+          const priB = window.getPriorityMeta(window.getItemPriority(b.skuId, b.parentId)).order;
+          if (priA !== priB) return priA - priB;
+          if (b.unplannedQty !== a.unplannedQty) return b.unplannedQty - a.unplannedQty;
+          if (b.shortage !== a.shortage) return b.shortage - a.shortage;
+        } else if (sortMode === 'unplanned_desc') {
           if (b.unplannedQty !== a.unplannedQty) return b.unplannedQty - a.unplannedQty;
           if (b.shortage !== a.shortage) return b.shortage - a.shortage;
         } else if (sortMode === 'progress_asc') {
@@ -11933,8 +12172,17 @@
             <div style="flex:1; min-width:0;">
               <!-- Row 1: Product Name & Action Buttons -->
               <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:4px;">
-                <div style="font-size:12.5px; font-weight:bold; color:#fff; line-height:1.25; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="${s.parentName}">
-                  ${s.parentName}
+                <div style="display:flex; align-items:center; gap:5px; min-width:0; overflow:hidden;" title="${s.parentName}">
+                  <span style="font-size:12.5px; font-weight:bold; color:#fff; line-height:1.25; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${s.parentName}</span>
+                  ${(() => {
+                    const pri = window.getItemPriority(s.skuId, s.parentId);
+                    if (pri === 'high') {
+                      return `<span style="font-size:9px; background:rgba(239,68,68,0.22); color:#ef4444; border:1px solid #ef4444; padding:1px 4px; border-radius:4px; font-weight:bold; flex-shrink:0;">🔥最優先</span>`;
+                    } else if (pri === 'low') {
+                      return `<span style="font-size:9px; background:rgba(156,163,175,0.15); color:#9ca3af; border:1px solid rgba(156,163,175,0.3); padding:1px 4px; border-radius:4px; flex-shrink:0;">💤後回し可</span>`;
+                    }
+                    return '';
+                  })()}
                 </div>
                 <div style="display:flex; align-items:center; gap:4px; flex-shrink:0;">
                   ${finishing > 0 ? `
