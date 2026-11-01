@@ -11794,6 +11794,9 @@
     let mfgPrinterDraftList = [];
 
     function getLocalYmd(d = new Date()) {
+      return getTodayLocalYmd(d);
+    }
+    function getTodayLocalYmd(d = new Date()) {
       const y = d.getFullYear();
       const m = String(d.getMonth() + 1).padStart(2, '0');
       const day = String(d.getDate()).padStart(2, '0');
@@ -14435,7 +14438,7 @@
     };
 
     window.openMfgGCalModal = function(preferredDate) {
-      const todayStr = getTodayLocalYmd();
+      const todayStr = getLocalYmd();
       const targetDate = preferredDate || todayStr;
       const modal = document.getElementById('mfg-gcal-modal');
       if (!modal) return;
@@ -14456,7 +14459,7 @@
 
     window.renderMfgGCalModalContent = function() {
       const allJobs = window.getMfgScheduledJobs();
-      const todayStr = getTodayLocalYmd();
+      const todayStr = getLocalYmd();
       
       const tm = new Date();
       tm.setDate(tm.getDate() + 1);
