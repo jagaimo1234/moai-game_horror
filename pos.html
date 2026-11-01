@@ -2141,9 +2141,14 @@
           <div id="multi-agg-selector-drawer" style="display:none; background:#141722; border:1px solid rgba(0,210,255,0.35); border-radius:12px; padding:16px; box-shadow:0 8px 24px rgba(0,0,0,0.5);">
             <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:10px;">
               <div>
-                <h4 style="margin:0; font-size:14px; color:var(--accent); display:flex; align-items:center; gap:6px;">
-                  📊 集計対象イベントの選択 ＆ 手元現在庫の参照枠設定
-                </h4>
+                <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+                  <h4 style="margin:0; font-size:14px; color:var(--accent); display:flex; align-items:center; gap:6px;">
+                    📊 集計対象イベントの選択 ＆ 手元現在庫の参照枠設定
+                  </h4>
+                  <span id="multi-agg-saved-indicator" style="font-size:11px; color:#34d399; background:rgba(16,185,129,0.14); border:1px solid rgba(16,185,129,0.3); padding:2px 8px; border-radius:12px; font-weight:bold; transition:opacity 0.3s;">
+                    💾 複数参照は自動保存され、次回も保持されます
+                  </span>
+                </div>
                 <p style="margin:3px 0 0 0; font-size:11px; opacity:0.7;">
                   チェックを入れたイベントの採用シミュ必要数を合算し、指定した参照枠の現在庫を1回だけ差し引いて不足数・未計画数を算出します。
                 </p>
@@ -2938,8 +2943,9 @@
       if (typeof multiAggSelectedEvents !== 'undefined') {
         if (multiAggSelectedEvents.length <= 1 && (!multiAggSelectedEvents[0] || multiAggSelectedEvents[0] === prevEventKey)) {
           multiAggSelectedEvents = [key];
+          multiAggStockSourceEvent = key;
+          if (typeof window.saveMultiAggConfig === 'function') window.saveMultiAggConfig();
         }
-        multiAggStockSourceEvent = key;
       }
       cart = {}; // Clear cart when switching events
       updateCartUI();
@@ -3165,6 +3171,36 @@
           if (snap.exists()) window.productionPlansData = snap.data();
           else window.productionPlansData = {};
           if (typeof window.renderProductionPlans === 'function') window.renderProductionPlans();
+        });
+
+        // 🔄 Sync Multi-Event Aggregation Configuration (Cross-device & persistent)
+        onSnapshot(doc(db, "settings", "multi_agg_config"), (snap) => {
+          if (snap.exists()) {
+            const data = snap.data() || {};
+            let changed = false;
+            if (Array.isArray(data.selectedEvents) && data.selectedEvents.length > 0) {
+              const curStr = JSON.stringify(multiAggSelectedEvents || []);
+              const newStr = JSON.stringify(data.selectedEvents);
+              if (curStr !== newStr) {
+                multiAggSelectedEvents = [...data.selectedEvents];
+                try { localStorage.setItem("moai_pos_multi_agg_events", newStr); } catch(e) {}
+                changed = true;
+              }
+            }
+            if (data.stockSourceEvent && data.stockSourceEvent !== multiAggStockSourceEvent) {
+              multiAggStockSourceEvent = data.stockSourceEvent;
+              try { localStorage.setItem("moai_pos_multi_agg_stock_source", data.stockSourceEvent); } catch(e) {}
+              changed = true;
+            }
+            if (changed) {
+              if (window.renderMultiEventAggregation && currentSettingsSubTab === 'multi-agg') {
+                window.renderMultiEventAggregation();
+              }
+              if (window.renderProductionPlans && currentSettingsSubTab === 'production') {
+                window.renderProductionPlans();
+              }
+            }
+          }
         });
 
         // Works Master listener (ログイン認証済み時に全作品を自動一括保存)
@@ -9513,13 +9549,77 @@
     // =========================================================================
     // 📊 イベント制作状況ダッシュボード（単一/複数イベント集計 × 右サイド詳細操作パネル）
     // =========================================================================
-    let multiAggSelectedEvents = []; // Array of eventKeys
-    let multiAggStockSourceEvent = null; // Defaults to currentEventKey
+    const MULTI_AGG_STORAGE_KEY_EVENTS = "moai_pos_multi_agg_events";
+    const MULTI_AGG_STORAGE_KEY_STOCK_SRC = "moai_pos_multi_agg_stock_source";
+
+    // 💾 Restore saved multi-event selection from localStorage immediately upon reload
+    let multiAggSelectedEvents = (() => {
+      try {
+        const raw = localStorage.getItem(MULTI_AGG_STORAGE_KEY_EVENTS);
+        if (raw) {
+          const arr = JSON.parse(raw);
+          if (Array.isArray(arr) && arr.length > 0) return arr;
+        }
+      } catch(e) {}
+      return [];
+    })();
+    let multiAggStockSourceEvent = (() => {
+      try {
+        return localStorage.getItem(MULTI_AGG_STORAGE_KEY_STOCK_SRC) || null;
+      } catch(e) {}
+      return null;
+    })();
     let multiAggSimCache = {}; // { [eventKey]: simulationDocData }
     let multiAggInvCache = {}; // { [eventKey]: inventoryDocData }
     let multiAggLoading = false;
     let selectedMultiAggItemId = null; // Currently focused skuId or parentId in Right Detail Panel
     let lastBuiltRowLookup = {}; // { [id]: rowDataObj }
+
+    // 💾 Persist multi-event selection to LocalStorage & Firestore (Auto-save)
+    let isSavingMultiAggConfig = false;
+    window.saveMultiAggConfig = async () => {
+      if (isSavingMultiAggConfig) return;
+      isSavingMultiAggConfig = true;
+      try {
+        // 1. Save to LocalStorage immediately (synchronous & reliable for next reload)
+        if (Array.isArray(multiAggSelectedEvents) && multiAggSelectedEvents.length > 0) {
+          localStorage.setItem(MULTI_AGG_STORAGE_KEY_EVENTS, JSON.stringify(multiAggSelectedEvents));
+        }
+        if (multiAggStockSourceEvent) {
+          localStorage.setItem(MULTI_AGG_STORAGE_KEY_STOCK_SRC, multiAggStockSourceEvent);
+        }
+
+        // Show brief visual feedback toast on indicator
+        const saveIndicator = document.getElementById('multi-agg-saved-indicator');
+        if (saveIndicator) {
+          saveIndicator.textContent = `✔ 複数参照（${multiAggSelectedEvents.length}件）を保存しました`;
+          saveIndicator.style.color = '#10b981';
+          saveIndicator.style.background = 'rgba(16,185,129,0.22)';
+          saveIndicator.style.borderColor = '#10b981';
+          setTimeout(() => {
+            if (saveIndicator) {
+              saveIndicator.textContent = '💾 複数参照は自動保存され、次回も保持されます';
+              saveIndicator.style.color = '#34d399';
+              saveIndicator.style.background = 'rgba(16,185,129,0.14)';
+              saveIndicator.style.borderColor = 'rgba(16,185,129,0.3)';
+            }
+          }, 2500);
+        }
+
+        // 2. Persist to Firestore asynchronously for multi-device sync
+        if (typeof auth !== 'undefined' && auth && auth.currentUser) {
+          await setDoc(doc(db, "settings", "multi_agg_config"), {
+            selectedEvents: multiAggSelectedEvents,
+            stockSourceEvent: multiAggStockSourceEvent,
+            updatedAt: Date.now()
+          }, { merge: true });
+        }
+      } catch(e) {
+        console.warn("saveMultiAggConfig error:", e);
+      } finally {
+        isSavingMultiAggConfig = false;
+      }
+    };
 
     window.toggleMultiAggEventDrawer = () => {
       const drawer = document.getElementById('multi-agg-selector-drawer');
@@ -9603,6 +9703,7 @@
       } else if (preset === 'all') {
         multiAggSelectedEvents = Object.keys(allEvents).filter(k => allEvents[k].isMarche !== false);
       }
+      await window.saveMultiAggConfig();
       await window.renderMultiEventAggregation();
       if (currentSettingsSubTab === 'production' && typeof window.renderProductionPlans === 'function') {
         window.renderProductionPlans();
@@ -9619,6 +9720,7 @@
         }
         multiAggSelectedEvents.splice(idx, 1);
       }
+      await window.saveMultiAggConfig();
       await window.renderMultiEventAggregation();
       if (currentSettingsSubTab === 'production' && typeof window.renderProductionPlans === 'function') {
         window.renderProductionPlans();
@@ -9627,6 +9729,7 @@
 
     window.onChangeMultiAggStockSource = async (evKey) => {
       multiAggStockSourceEvent = evKey;
+      await window.saveMultiAggConfig();
       await ensureAllEventsSimAndInvLoaded(false);
       await window.renderMultiEventAggregation();
       if (currentSettingsSubTab === 'production' && typeof window.renderProductionPlans === 'function') {
@@ -9679,16 +9782,39 @@
       const allEvents = window.getAllEvents ? window.getAllEvents(eventConfigData) : {};
       const plans = window.exhibitionPlansData || {};
 
-      // Initialize default selected events if empty
+      // Initialize default selected events if empty, honoring restored saved state
       if (!multiAggSelectedEvents || multiAggSelectedEvents.length === 0) {
-        multiAggSelectedEvents = [currentEventKey];
-      } else {
-        multiAggSelectedEvents = multiAggSelectedEvents.filter(k => allEvents[k]);
-        if (multiAggSelectedEvents.length === 0 && currentEventKey) multiAggSelectedEvents = [currentEventKey];
+        try {
+          const raw = localStorage.getItem(MULTI_AGG_STORAGE_KEY_EVENTS);
+          if (raw) {
+            const arr = JSON.parse(raw);
+            if (Array.isArray(arr) && arr.length > 0) multiAggSelectedEvents = arr;
+          }
+        } catch(e) {}
       }
 
-      if (!multiAggStockSourceEvent || !allEvents[multiAggStockSourceEvent]) {
-        multiAggStockSourceEvent = currentEventKey;
+      if (!multiAggSelectedEvents || multiAggSelectedEvents.length === 0) {
+        multiAggSelectedEvents = [currentEventKey];
+      } else if (Object.keys(allEvents).length > 0) {
+        const valid = multiAggSelectedEvents.filter(k => allEvents[k]);
+        if (valid.length > 0) {
+          multiAggSelectedEvents = valid;
+        } else if (currentEventKey) {
+          multiAggSelectedEvents = [currentEventKey];
+        }
+      }
+
+      if (!multiAggStockSourceEvent || (Object.keys(allEvents).length > 0 && !allEvents[multiAggStockSourceEvent])) {
+        try {
+          const savedSrc = localStorage.getItem(MULTI_AGG_STORAGE_KEY_STOCK_SRC);
+          if (savedSrc && (!Object.keys(allEvents).length || allEvents[savedSrc])) {
+            multiAggStockSourceEvent = savedSrc;
+          } else {
+            multiAggStockSourceEvent = currentEventKey;
+          }
+        } catch(e) {
+          multiAggStockSourceEvent = currentEventKey;
+        }
       }
 
       await ensureAllEventsSimAndInvLoaded(false);
@@ -11266,10 +11392,28 @@
     function buildMfgSkuDemandList() {
       const allEvents = window.getAllEvents ? window.getAllEvents(eventConfigData) : {};
       if (!multiAggSelectedEvents || multiAggSelectedEvents.length === 0) {
-        multiAggSelectedEvents = [currentEventKey];
+        try {
+          const raw = localStorage.getItem("moai_pos_multi_agg_events");
+          if (raw) {
+            const arr = JSON.parse(raw);
+            if (Array.isArray(arr) && arr.length > 0) multiAggSelectedEvents = arr;
+          }
+        } catch(e) {}
+        if (!multiAggSelectedEvents || multiAggSelectedEvents.length === 0) {
+          multiAggSelectedEvents = [currentEventKey];
+        }
       }
       if (!multiAggStockSourceEvent || !allEvents[multiAggStockSourceEvent]) {
-        multiAggStockSourceEvent = currentEventKey;
+        try {
+          const savedSrc = localStorage.getItem("moai_pos_multi_agg_stock_source");
+          if (savedSrc && allEvents[savedSrc]) {
+            multiAggStockSourceEvent = savedSrc;
+          } else {
+            multiAggStockSourceEvent = currentEventKey;
+          }
+        } catch(e) {
+          multiAggStockSourceEvent = currentEventKey;
+        }
       }
 
       const refInvMap = (multiAggStockSourceEvent === currentEventKey)
