@@ -1952,6 +1952,63 @@
 
     <!-- Simulation View -->
     <section id="simulation-view" class="view-section">
+      <!-- Modal 1: 新規パターン作成モーダル（ベース取り込み選択付き） -->
+      <div id="sim-pattern-new-modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.78); z-index:9999; align-items:center; justify-content:center; padding:15px; backdrop-filter:blur(4px);">
+        <div style="background:#181b26; border:1px solid rgba(255,255,255,0.18); border-radius:14px; width:100%; max-width:480px; box-shadow:0 20px 45px rgba(0,0,0,0.7); overflow:hidden;">
+          <div style="padding:15px 20px; background:rgba(255,255,255,0.04); border-bottom:1px solid rgba(255,255,255,0.08); display:flex; justify-content:space-between; align-items:center;">
+            <div style="font-size:15px; font-weight:bold; color:#fff; display:flex; align-items:center; gap:7px;">
+              <span>✨</span> 新規パターンの追加・作成
+            </div>
+            <button type="button" onclick="closeSimPatternModal('sim-pattern-new-modal')" style="background:none; border:none; color:#888; font-size:22px; cursor:pointer; line-height:1;">&times;</button>
+          </div>
+          <div style="padding:20px; display:flex; flex-direction:column; gap:16px;">
+            <div>
+              <label style="font-size:12px; color:rgba(255,255,255,0.8); font-weight:bold; display:block; margin-bottom:6px;">① パターンの名前</label>
+              <input type="text" id="sim-new-pattern-name-input" class="form-input" placeholder="例: 強気パターン、控えめパターン、デザフェス想定 など" style="width:100%; font-size:13px; padding:9px 12px; background:#0d0f17; border-radius:7px;">
+            </div>
+            <div>
+              <label style="font-size:12px; color:rgba(255,255,255,0.8); font-weight:bold; display:block; margin-bottom:6px;">② 取り込み元（ベース）の選択</label>
+              <select id="sim-new-pattern-source-select" class="form-select" style="width:100%; font-size:12.5px; padding:9px 12px; background:#0d0f17; border-radius:7px; border:1px solid var(--border); color:#fff;"></select>
+              <p style="font-size:11px; color:rgba(255,255,255,0.5); margin:6px 0 0 2px;">
+                ※ 既存パターンを選ぶと、その目標金額・見込数・準備数が自動で引き継がれます。1から打ち直す手間が省けます。
+              </p>
+            </div>
+            <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:10px;">
+              <button type="button" class="btn" style="background:rgba(255,255,255,0.08); color:#ccc; font-size:12px; padding:8px 14px; border-radius:7px;" onclick="closeSimPatternModal('sim-pattern-new-modal')">キャンセル</button>
+              <button type="button" class="btn" style="background:linear-gradient(135deg, #3b82f6, #00d2ff); color:#fff; font-size:12px; font-weight:bold; padding:8px 18px; border-radius:7px; border:none; cursor:pointer;" onclick="executeCreateNewPattern()">作成して開く ➔</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Modal 2: 既存パターン取り込みモーダル（上書きインポート） -->
+      <div id="sim-pattern-import-modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.78); z-index:9999; align-items:center; justify-content:center; padding:15px; backdrop-filter:blur(4px);">
+        <div style="background:#181b26; border:1px solid rgba(255,255,255,0.18); border-radius:14px; width:100%; max-width:480px; box-shadow:0 20px 45px rgba(0,0,0,0.7); overflow:hidden;">
+          <div style="padding:15px 20px; background:rgba(255,255,255,0.04); border-bottom:1px solid rgba(255,255,255,0.08); display:flex; justify-content:space-between; align-items:center;">
+            <div style="font-size:15px; font-weight:bold; color:#fff; display:flex; align-items:center; gap:7px;">
+              <span>📥</span> 既存パターンから数値を取り込み
+            </div>
+            <button type="button" onclick="closeSimPatternModal('sim-pattern-import-modal')" style="background:none; border:none; color:#888; font-size:22px; cursor:pointer; line-height:1;">&times;</button>
+          </div>
+          <div style="padding:20px; display:flex; flex-direction:column; gap:16px;">
+            <div style="background:rgba(245,158,11,0.12); border:1px solid rgba(245,158,11,0.3); border-radius:8px; padding:10px 12px; font-size:12px; color:#fbbf24;">
+              取り込み対象: 現在開いているパターン ➔ <strong id="sim-import-target-pattern-name" style="color:#fff;"></strong>
+            </div>
+            <div>
+              <label style="font-size:12px; color:rgba(255,255,255,0.8); font-weight:bold; display:block; margin-bottom:6px;">取り込み元となる既存パターンを選択:</label>
+              <select id="sim-import-source-select" class="form-select" style="width:100%; font-size:12.5px; padding:9px 12px; background:#0d0f17; border-radius:7px; border:1px solid var(--border); color:#fff;"></select>
+              <p style="font-size:11px; color:rgba(255,255,255,0.5); margin:6px 0 0 2px;">
+                ※ 選択したパターンの「目標売上・販売見込数・準備数」が現在のパターンへ丸ごと上書きコピーされます。
+              </p>
+            </div>
+            <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:10px;">
+              <button type="button" class="btn" style="background:rgba(255,255,255,0.08); color:#ccc; font-size:12px; padding:8px 14px; border-radius:7px;" onclick="closeSimPatternModal('sim-pattern-import-modal')">キャンセル</button>
+              <button type="button" id="btn-execute-import-pattern" class="btn" style="background:linear-gradient(135deg, #f59e0b, #d97706); color:#fff; font-size:12px; font-weight:bold; padding:8px 18px; border-radius:7px; border:none; cursor:pointer;" onclick="executeImportPattern()">数値を上書き取り込み ➔</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div class="scroll-container" style="padding-bottom: 120px;">
         <div style="background:rgba(255,255,255,0.05); padding:10px; border-radius:8px; margin-bottom:15px; display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
           <h2 style="margin:0; font-size:16px;">🎯 売上シミュ (<span id="sim-event-name"></span>)</h2>
@@ -1959,11 +2016,32 @@
           <div style="flex:1;"></div>
           <button class="btn" style="background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.15); color:#ddd; font-size:11px; padding:5px 8px;" onclick="toggleAllVariantExpand('sim', true)">▼ 内訳全展開</button>
           <button class="btn" style="background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.15); color:#ddd; font-size:11px; padding:5px 8px;" onclick="toggleAllVariantExpand('sim', false)">▶ 全折りたたみ</button>
-          <span style="font-size:12px; opacity:0.8;">パターン:</span>
-          <select id="sim-pattern-select" style="padding:6px; border-radius:4px; background:var(--bg); color:white; border:1px solid var(--border);" onchange="switchSimulationPattern(this.value)"></select>
-          <button class="btn" style="background:rgba(255,255,255,0.1); font-size:12px; padding:6px 10px;" onclick="createNewPattern()">＋新規</button>
-          <button class="btn" style="background:var(--success); color:white; font-size:12px; padding:6px 12px; font-weight:bold;" onclick="adoptSimulationPattern()">✅ 採用する</button>
-          <button class="btn btn-primary" style="font-size:12px; padding:6px 12px;" onclick="saveSimulationData()">💾 保存</button>
+          <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
+            <span style="font-size:12px; opacity:0.8; font-weight:bold;">パターン:</span>
+            <div style="display:flex; align-items:center; gap:3px;">
+              <select id="sim-pattern-select" style="padding:6px 8px; border-radius:6px; background:var(--bg); color:white; border:1px solid var(--border); font-size:12px; font-weight:bold; cursor:pointer;" onchange="switchSimulationPattern(this.value)"></select>
+              <button type="button" class="btn" style="background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.18); color:#ddd; font-size:11px; padding:5px 7px; border-radius:5px;" onclick="renameCurrentPattern()" title="現在のパターン名を変更">✏️</button>
+              <button type="button" class="btn" style="background:rgba(239,68,68,0.15); border:1px solid rgba(239,68,68,0.3); color:#f87171; font-size:11px; padding:5px 7px; border-radius:5px;" onclick="deleteCurrentPattern()" title="現在のパターンを削除">🗑️</button>
+            </div>
+            
+            <!-- Quick Duplicate Button -->
+            <button type="button" class="btn" style="background:rgba(59,130,246,0.18); border:1px solid #3b82f6; color:#93c5fd; font-size:12px; padding:6px 11px; font-weight:bold; border-radius:6px; display:flex; align-items:center; gap:4px;" onclick="duplicateCurrentPattern()" title="現在選択中のパターンの数値（目標売上・見込数・準備数）を丸ごとコピーして新パターンを作成">
+              <span>📋</span> このパターンを複製
+            </button>
+
+            <!-- Import Existing Pattern Button -->
+            <button type="button" class="btn" style="background:rgba(245,158,11,0.18); border:1px solid #f59e0b; color:#fbbf24; font-size:12px; padding:6px 11px; font-weight:bold; border-radius:6px; display:flex; align-items:center; gap:4px;" onclick="openImportPatternModal()" title="既存の別パターンから目標・見込数・準備数を現在のパターンに取り込み（上書きコピー）">
+              <span>📥</span> 既存から取り込み
+            </button>
+
+            <!-- Create New Pattern Button -->
+            <button type="button" class="btn" style="background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.2); color:#eee; font-size:12px; padding:6px 10px; border-radius:6px;" onclick="openNewPatternModal()" title="ベースを選択して新しいパターンを作成">
+              ＋新規作成
+            </button>
+
+            <button class="btn" style="background:var(--success); color:white; font-size:12px; padding:6px 12px; font-weight:bold; border-radius:6px;" onclick="adoptSimulationPattern()">✅ 採用する</button>
+            <button class="btn btn-primary" style="font-size:12px; padding:6px 12px; border-radius:6px;" onclick="saveSimulationData()">💾 保存</button>
+          </div>
         </div>
         
         <div style="background:var(--panel-bg); padding:20px; border-radius:12px; margin-bottom:24px; border:1px solid var(--border);">
@@ -6756,29 +6834,291 @@
       currentSimulationData.patterns[currentPatternId].prepQty = {...preparationQuantities};
     };
 
-    window.createNewPattern = function() {
+    // 📋 1. 現在開いているパターンを一発複製（ワンクリック）
+    window.duplicateCurrentPattern = async function() {
       saveCurrentPatternToMemory();
-      const name = prompt("新しいパターンの名前を入力してください:");
-      if(!name) return;
+      const curPat = currentSimulationData.patterns[currentPatternId] || { name: 'パターン', target: 150000 };
+      const defaultName = `${curPat.name} のコピー`;
+      const name = prompt("複製するパターンの名前を入力してください:", defaultName);
+      if (!name || !name.trim()) return;
+
       const newId = 'pat_' + Date.now();
-      currentSimulationData.patterns[newId] = { name: name, target: 150000, simQty: {}, prepQty: {} };
+      currentSimulationData.patterns[newId] = {
+        name: name.trim(),
+        target: curPat.target || 150000,
+        simQty: JSON.parse(JSON.stringify(simulationQuantities || {})),
+        prepQty: JSON.parse(JSON.stringify(preparationQuantities || {}))
+      };
+
       loadPatternToUI(newId);
+      await window.saveSimulationData(true);
+      alert(`📋 パターン「${name.trim()}」を複製しました！\n数値はそのまま引き継がれていますので、自由に微調整してください。`);
     };
+
+    // 📥 2. 既存パターン取り込みモーダルを開く
+    window.openImportPatternModal = async function() {
+      saveCurrentPatternToMemory();
+      const curPat = currentSimulationData.patterns[currentPatternId];
+      if (!curPat) return;
+
+      const modal = document.getElementById('sim-pattern-import-modal');
+      if (!modal) return;
+
+      const targetLabel = document.getElementById('sim-import-target-pattern-name');
+      if (targetLabel) targetLabel.textContent = curPat.name;
+
+      const select = document.getElementById('sim-import-source-select');
+      select.innerHTML = '';
+
+      // A. 現在のイベント内の別パターン
+      const curEventGroup = document.createElement('optgroup');
+      curEventGroup.label = '【このイベントの既存パターン】';
+      let hasOtherInCur = false;
+      Object.keys(currentSimulationData.patterns).forEach(pKey => {
+        if (pKey === currentPatternId) return; // 自分自身は除外
+        hasOtherInCur = true;
+        const pat = currentSimulationData.patterns[pKey];
+        const simCount = Object.keys(pat.simQty || {}).length;
+        const prepCount = Object.keys(pat.prepQty || {}).length;
+        const opt = document.createElement('option');
+        opt.value = `current:${pKey}`;
+        opt.textContent = `${pat.name} (目標: ¥${(pat.target || 150000).toLocaleString()} / 入力済: 見込${simCount}種, 準備${prepCount}種)`;
+        curEventGroup.appendChild(opt);
+      });
+      if (hasOtherInCur) {
+        select.appendChild(curEventGroup);
+      }
+
+      // B. 他のイベントのシミュレーションパターン（もしあれば）
+      try {
+        const allEvents = window.getAllEvents ? window.getAllEvents(eventConfigData) : {};
+        const otherEventKeys = Object.keys(allEvents).filter(k => k !== currentEventKey);
+        if (otherEventKeys.length > 0) {
+          const otherGroup = document.createElement('optgroup');
+          otherGroup.label = '【他イベントのシミュレーションパターン】';
+          let hasOtherEv = false;
+          for (const evKey of otherEventKeys) {
+            const evLabel = allEvents[evKey]?.label || evKey;
+            let sData = window.multiAggSimCache ? window.multiAggSimCache[evKey] : null;
+            if (!sData) {
+              const snap = await getDoc(doc(db, "settings", "simulation_" + evKey));
+              if (snap.exists()) {
+                sData = snap.data();
+                if (window.multiAggSimCache) window.multiAggSimCache[evKey] = sData;
+              }
+            }
+            if (sData && sData.patterns) {
+              Object.keys(sData.patterns).forEach(pKey => {
+                hasOtherEv = true;
+                const pat = sData.patterns[pKey];
+                const opt = document.createElement('option');
+                opt.value = `event:${evKey}:${pKey}`;
+                opt.textContent = `[${evLabel}] ${pat.name} (目標: ¥${(pat.target || 150000).toLocaleString()})`;
+                otherGroup.appendChild(opt);
+              });
+            }
+          }
+          if (hasOtherEv) {
+            select.appendChild(otherGroup);
+          }
+        }
+      } catch(e) {
+        console.warn("Could not load other events simulation patterns:", e);
+      }
+
+      const execBtn = document.getElementById('btn-execute-import-pattern');
+      if (select.children.length === 0) {
+        select.innerHTML = '<option value="" disabled>取り込み可能な他の既存パターンがありません</option>';
+        if (execBtn) execBtn.disabled = true;
+      } else {
+        if (execBtn) execBtn.disabled = false;
+      }
+
+      modal.style.display = 'flex';
+    };
+
+    // 📥 3. 取り込みの実行
+    window.executeImportPattern = async function() {
+      const select = document.getElementById('sim-import-source-select');
+      const val = select ? select.value : '';
+      if (!val) return;
+
+      let sourcePat = null;
+      let sourceName = '';
+
+      if (val.startsWith('current:')) {
+        const pKey = val.replace('current:', '');
+        sourcePat = currentSimulationData.patterns[pKey];
+        sourceName = sourcePat?.name || pKey;
+      } else if (val.startsWith('event:')) {
+        const parts = val.split(':');
+        const evKey = parts[1];
+        const pKey = parts[2];
+        const sData = window.multiAggSimCache ? window.multiAggSimCache[evKey] : null;
+        if (sData && sData.patterns) {
+          sourcePat = sData.patterns[pKey];
+          sourceName = sourcePat?.name || pKey;
+        }
+      }
+
+      if (!sourcePat) return alert("取り込み元のパターンデータが見つかりませんでした。");
+
+      const curPat = currentSimulationData.patterns[currentPatternId];
+      if (!confirm(`パターン「${sourceName}」のデータ（目標金額、販売見込数、準備数）を、現在の「${curPat.name}」に取り込みます。\n\n現在の入力値は上書きされますがよろしいですか？`)) {
+        return;
+      }
+
+      // 取り込み反映
+      curPat.target = sourcePat.target || 150000;
+      curPat.simQty = JSON.parse(JSON.stringify(sourcePat.simQty || {}));
+      curPat.prepQty = JSON.parse(JSON.stringify(sourcePat.prepQty || {}));
+
+      simulationQuantities = curPat.simQty;
+      preparationQuantities = curPat.prepQty;
+
+      const targetInput = document.getElementById('sim-target-sales');
+      if (targetInput) targetInput.value = curPat.target;
+
+      closeSimPatternModal('sim-pattern-import-modal');
+      renderSimulation();
+      await window.saveSimulationData(true);
+      alert(`✅ 「${sourceName}」の数値を現在のパターンに取り込みました！`);
+    };
+
+    // ＋ 4. 新規パターン作成モーダルを開く
+    window.openNewPatternModal = async function() {
+      saveCurrentPatternToMemory();
+      const modal = document.getElementById('sim-pattern-new-modal');
+      if (!modal) return;
+
+      const nameInput = document.getElementById('sim-new-pattern-name-input');
+      if (nameInput) nameInput.value = '';
+
+      const select = document.getElementById('sim-new-pattern-source-select');
+      select.innerHTML = '';
+
+      // 選択肢1: 現在のパターンをコピー (推奨)
+      const curPat = currentSimulationData.patterns[currentPatternId];
+      if (curPat) {
+        const optCur = document.createElement('option');
+        optCur.value = `current:${currentPatternId}`;
+        optCur.textContent = `📋 現在のパターン (${curPat.name}) の数値をコピー [推奨]`;
+        select.appendChild(optCur);
+      }
+
+      // 選択肢2: 他の既存パターン
+      Object.keys(currentSimulationData.patterns).forEach(pKey => {
+        if (pKey === currentPatternId) return;
+        const pat = currentSimulationData.patterns[pKey];
+        const opt = document.createElement('option');
+        opt.value = `current:${pKey}`;
+        opt.textContent = `📋 既存: ${pat.name} の数値をコピー`;
+        select.appendChild(opt);
+      });
+
+      // 選択肢3: 空の状態で作成
+      const optBlank = document.createElement('option');
+      optBlank.value = 'blank';
+      optBlank.textContent = '⚪ 空の状態で作成 (数値すべて0から新規作成)';
+      select.appendChild(optBlank);
+
+      modal.style.display = 'flex';
+      setTimeout(() => {
+        if (nameInput) nameInput.focus();
+      }, 100);
+    };
+
+    // ＋ 5. 新規パターン作成の実行
+    window.executeCreateNewPattern = async function() {
+      const nameInput = document.getElementById('sim-new-pattern-name-input');
+      const name = nameInput ? nameInput.value.trim() : '';
+      if (!name) return alert("パターンの名前を入力してください。");
+
+      const sourceSelect = document.getElementById('sim-new-pattern-source-select');
+      const sourceVal = sourceSelect ? sourceSelect.value : 'blank';
+
+      let newTarget = 150000;
+      let newSimQty = {};
+      let newPrepQty = {};
+
+      if (sourceVal && sourceVal.startsWith('current:')) {
+        const pKey = sourceVal.replace('current:', '');
+        const src = currentSimulationData.patterns[pKey];
+        if (src) {
+          newTarget = src.target || 150000;
+          newSimQty = JSON.parse(JSON.stringify(src.simQty || {}));
+          newPrepQty = JSON.parse(JSON.stringify(src.prepQty || {}));
+        }
+      }
+
+      const newId = 'pat_' + Date.now();
+      currentSimulationData.patterns[newId] = {
+        name: name,
+        target: newTarget,
+        simQty: newSimQty,
+        prepQty: newPrepQty
+      };
+
+      closeSimPatternModal('sim-pattern-new-modal');
+      loadPatternToUI(newId);
+      await window.saveSimulationData(true);
+      alert(`✨ 新規パターン「${name}」を作成しました！`);
+    };
+
+    // ✏️ 6. パターン名変更
+    window.renameCurrentPattern = async function() {
+      const curPat = currentSimulationData.patterns[currentPatternId];
+      if (!curPat) return;
+      const newName = prompt("パターンの名前を変更:", curPat.name);
+      if (!newName || !newName.trim() || newName.trim() === curPat.name) return;
+      curPat.name = newName.trim();
+      loadPatternToUI(currentPatternId);
+      await window.saveSimulationData(true);
+    };
+
+    // 🗑️ 7. パターン削除
+    window.deleteCurrentPattern = async function() {
+      const patKeys = Object.keys(currentSimulationData.patterns);
+      if (patKeys.length <= 1) {
+        return alert("これ以上パターンを削除できません（最低1つのパターンが必要です）。");
+      }
+      if (currentSimulationData.activePatternId === currentPatternId) {
+        return alert("現在【採用中 ✅】のパターンは削除できません。\n先に別のパターンを「採用する」で選択してから削除してください。");
+      }
+      const curPat = currentSimulationData.patterns[currentPatternId];
+      if (!confirm(`パターン「${curPat.name}」を本当に削除しますか？\n（この操作は取り消せません）`)) {
+        return;
+      }
+      delete currentSimulationData.patterns[currentPatternId];
+      const nextPatId = patKeys.find(k => k !== currentPatternId) || Object.keys(currentSimulationData.patterns)[0];
+      loadPatternToUI(nextPatId);
+      await window.saveSimulationData(true);
+      alert(`🗑️ パターン「${curPat.name}」を削除しました。`);
+    };
+
+    // ✖️ 8. モーダル閉じる
+    window.closeSimPatternModal = function(id) {
+      const el = document.getElementById(id);
+      if (el) el.style.display = 'none';
+    };
+
+    // 互換性維持
+    window.createNewPattern = window.openNewPatternModal;
 
     window.adoptSimulationPattern = async function() {
       saveCurrentPatternToMemory();
       currentSimulationData.activePatternId = currentPatternId;
-      await window.saveSimulationData();
+      await window.saveSimulationData(true);
       alert("このパターンを採用しました！\n在庫設定画面に目標準備数が反映されます。");
       renderSettings();
       loadPatternToUI(currentPatternId); // update select label
     };
 
-    window.saveSimulationData = async function() {
+    window.saveSimulationData = async function(silent = false) {
       saveCurrentPatternToMemory();
       try {
         await setDoc(doc(db, "settings", "simulation_" + currentEventKey), currentSimulationData);
-        alert("シミュレーションの内容を保存しました！");
+        if (!silent) alert("シミュレーションの内容を保存しました！");
       } catch(e) {
         console.error(e);
         alert("保存に失敗しました。");
