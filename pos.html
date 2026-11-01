@@ -3030,9 +3030,12 @@
                 cleaned[k] = raw[k];
               }
             }
-            window.customProductsData = cleaned;
-            if (hasCorrupt) {
-              setDoc(doc(db, "settings", "custom_products"), cleaned).catch(e => console.warn(e));
+            const cpStr = JSON.stringify(cleaned);
+            const needsCpCleanse = cpStr.length > 250000 || cpStr.includes('"optimizedImages"') || cpStr.includes('"imageBackups"');
+            const safeCleaned = needsCpCleanse ? cleanseMasterData(cleaned) : cleaned;
+            window.customProductsData = safeCleaned;
+            if (hasCorrupt || needsCpCleanse) {
+              setDoc(doc(db, "settings", "custom_products"), safeCleaned).catch(e => console.warn(e));
             }
           }
           renderAll();
@@ -3128,10 +3131,23 @@
             }
           });
 
-          if (hasNewSeed && auth.currentUser) {
-            window.worksMasterData = mergedMaster;
+          // ドキュメント肥大化（1MB制限）検知と自動クレンジング
+          const rawDocStr = JSON.stringify(currentData);
+          const needsCleanse = rawDocStr.length > 250000 || rawDocStr.includes('"optimizedImages"') || rawDocStr.includes('"imageBackups"');
+          if (needsCleanse && auth.currentUser) {
+            console.log("works_master auto-cleanse triggered, original size: " + rawDocStr.length);
+            const cleanedWM = cleanseMasterData(currentData);
             try {
-              await setDoc(doc(db, "settings", "works_master"), mergedMaster);
+              await setDoc(doc(db, "settings", "works_master"), cleanedWM);
+              console.log("works_master auto-cleanse finished!");
+            } catch(ce) {
+              console.warn("Cleanse error:", ce);
+            }
+          }
+          if (hasNewSeed && auth.currentUser) {
+            window.worksMasterData = cleanseMasterData(mergedMaster);
+            try {
+              await setDoc(doc(db, "settings", "works_master"), window.worksMasterData);
             } catch(e) {
               console.error("Auto seed error:", e);
             }
@@ -14354,11 +14370,35 @@
     // ====================================================================
 
     // 任意の画像URL（パス/DataURL）を、画質を保ったまま軽量DataURL（最大1100px / JPEG 0.83、約100KB）に変換
-    function convertToOptimizedDataUrl(src, maxDim = 1100, quality = 0.83) {
+
+    // Firestore 1MB上限対策：巨大なBase64 DataURLキャッシュ（optimizedImages, imageBackups等）を除去して軽量化
+    function cleanseMasterData(data) {
+      if (!data || typeof data !== "object") return {};
+      const cleaned = {};
+      for (const [id, item] of Object.entries(data)) {
+        if (!item || typeof item !== "object" || id.includes(".")) continue;
+        const cItem = { ...item };
+        delete cItem.optimizedImages;
+        delete cItem.imageBackups;
+        delete cItem.optimizedCover;
+        if (Array.isArray(cItem.images)) {
+          cItem.images = cItem.images.filter(img => typeof img === "string" && (!img.startsWith("data:image/") || img.length < 50000));
+        }
+        if (Array.isArray(cItem.catalogGroupImages)) {
+          cItem.catalogGroupImages = cItem.catalogGroupImages.filter(img => typeof img === "string" && (!img.startsWith("data:image/") || img.length < 50000));
+        }
+        cleaned[id] = cItem;
+      }
+      return cleaned;
+    }
+
+    function convertToOptimizedDataUrl(src, maxDim = 750, quality = 0.75) {
       return new Promise((resolve) => {
         if (!src) return resolve(null);
+        // ファイルパス（images/〜）や通常のURLは、絶対にDataURL化せずそのままパスを返す（ドキュメント容量を節約！）
+        if (!src.startsWith('data:image/')) return resolve(src);
         // すでに小さいDataURL（30KB以下）ならそのまま再利用
-        if (src.startsWith('data:image/') && src.length < 40000) return resolve(src);
+        if (src.length < 35000) return resolve(src);
 
         const img = new Image();
         img.crossOrigin = 'anonymous';
@@ -14473,12 +14513,10 @@
         const rawGTitle = (document.getElementById('img-manager-var-group-title')?.value || '').trim().replace(/\\n/g, '\n');
         const rawGDesc = (document.getElementById('img-manager-var-group-desc')?.value || '').trim().replace(/\\n/g, '\n');
 
-        const cpData = { ...window.customProductsData };
-        Object.keys(cpData).forEach(k => { if (k.includes('.')) delete cpData[k]; });
+        const cpData = cleanseMasterData(window.customProductsData);
         if (!cpData[pId]) cpData[pId] = {};
 
-        const wmData = { ...window.worksMasterData };
-        Object.keys(wmData).forEach(k => { if (k.includes('.')) delete wmData[k]; });
+        const wmData = cleanseMasterData(window.worksMasterData);
         if (!wmData[pId]) wmData[pId] = {};
 
         wmData[pId].catalogDisplayMode = catalogDisplayMode;
@@ -14511,14 +14549,7 @@
           alert('✅ 個別バリエーション画像をお品書きに反映しました！');
         } else {
           // 通常版（本体）の画像として保存
-          let currentBackups = Array.isArray(existingWData.imageBackups) ? [...existingWData.imageBackups] : [];
-          currentBackups.push({
-            timestamp: Date.now(),
-            image: mainImg,
-            images: subImgs,
-            optimizedCover: optimizedMain
-          });
-          if (currentBackups.length > 5) currentBackups = currentBackups.slice(-5);
+          let currentBackups = [];
 
           Object.assign(cpData[pId], {
             image: mainImg,
