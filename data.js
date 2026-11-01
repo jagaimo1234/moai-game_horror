@@ -15,6 +15,12 @@
 
 // 全作品のマスターリスト
 const MASTER_PRODUCTS = [
+  {
+    image: 'images/kurima/macho_moai_keyholder.jpg',
+    name: 'まっちょモアイキーホルダー',
+    desc: '',
+  },
+
 
   {
     image: 'images/kurima/moai_dance_test.jpg',
@@ -804,6 +810,16 @@ window.WORK_FOLDER_ASSETS = {
     "studio": [
       "images/kurima/glasses_stand/studio/Moataro.jpg"
     ]
+  },
+  "macho_moai_keyholder": {
+    "raw": [
+      "images/kurima/macho_moai_keyholder/raw/macho_moai_keyholder_RAW_20261101_162055_001.jpg",
+      "images/kurima/macho_moai_keyholder/raw/macho_moai_keyholder_RAW_20261101_162102_002.jpg",
+      "images/kurima/macho_moai_keyholder/raw/macho_moai_keyholder_RAW_20261101_162130_003.jpg",
+      "images/kurima/macho_moai_keyholder/raw/macho_moai_keyholder_RAW_20261101_162146_004.jpg",
+      "images/kurima/macho_moai_keyholder/raw/macho_moai_keyholder_RAW_20261101_162151_005.jpg"
+    ],
+    "studio": []
   },
   "osuwari_moai_pen": {
     "raw": [
