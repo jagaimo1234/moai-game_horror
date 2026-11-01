@@ -17,7 +17,7 @@
 const MASTER_PRODUCTS = [
   {
     image: 'images/kurima/nitto_osuwari_moai_penstand.jpg',
-    name: 'ニットおすわりモアイペ��立て',
+    name: 'ニットおすわりモアイペン立て',
     desc: 'ニット版(冬仕様）',
   },
 
@@ -612,6 +612,8 @@ window.getFullMasterProducts = function(customProductsData) {
       
       if (masterItem) {
         masterItem.id = key;
+        if (p.name) masterItem.name = p.name;
+        if (p.desc) masterItem.desc = p.desc;
         if (p.image) masterItem.image = p.image;
         if (p.images) masterItem.images = p.images;
         if (p.optimizedCover) masterItem.optimizedCover = p.optimizedCover;
@@ -634,6 +636,17 @@ window.getFullMasterProducts = function(customProductsData) {
       }
     });
   }
+
+  // Firestoreの個別作品名マスター（product_names / works_master）で最新名を優先反映
+  const namesMap = window.productNamesData || {};
+  const wmMap = window.worksMasterData || {};
+  list.forEach(item => {
+    if (namesMap[item.id]) {
+      item.name = namesMap[item.id];
+    } else if (wmMap[item.id]?.name) {
+      item.name = wmMap[item.id].name;
+    }
+  });
 
   return list;
 };

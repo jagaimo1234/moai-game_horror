@@ -38,6 +38,7 @@ function checkAndSync() {
 
   // 2. Firestore をチェック
   https.get(FIRESTORE_URL, (res) => {
+    res.setEncoding('utf8');
     let body = '';
     res.on('data', chunk => body += chunk);
     res.on('end', () => {

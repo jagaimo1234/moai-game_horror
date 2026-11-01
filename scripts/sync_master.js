@@ -30,6 +30,7 @@ const FIRESTORE_BASE = 'https://firestore.googleapis.com/v1/projects/moai-catalo
 function fetchJson(url) {
   return new Promise((resolve) => {
     https.get(url, (res) => {
+      res.setEncoding('utf8');
       let data = '';
       res.on('data', chunk => data += chunk);
       res.on('end', () => {

@@ -3101,6 +3101,7 @@
     let descriptionsData = {};
     window.customProductsData = {};
     window.worksMasterData = {};
+    window.productNamesData = {};
     window.currentCatalogFilter = 'all';
     window.eventProductsData = {}; // { eventKey: [ids] }
     window.eventConfigData = {};   // { eventKey: { visible: bool } }
@@ -3298,6 +3299,10 @@
           }
         });
         window.customProductsData = {}; // Restore customProductsData definition
+        onSnapshot(doc(db, "settings", "product_names"), (snap) => {
+          window.productNamesData = snap.exists() ? (snap.data() || {}) : {};
+          renderAll();
+        });
         onSnapshot(doc(db, "settings", "custom_products"), (snap) => {
           if (snap.exists()) {
             const raw = snap.data() || {};
@@ -4486,6 +4491,7 @@
                 </button>
               </div>
               <div style="flex:1;"></div>
+              <button onclick="promptEditProductName('${p.id}')" style="font-size:11px; padding:6px 10px; background:#16a085; color:white; border:none; border-radius:4px; cursor:pointer;" title="作品名を変更">✏️ 名前</button>
               <button onclick="openEditModal('${p.id}', 'desc')" style="font-size:11px; padding:6px 10px; background:#34495e; color:white; border:none; border-radius:4px; cursor:pointer;">✏️ 説明</button>
               <button onclick="openEditModal('${p.id}', 'announce')" style="font-size:11px; padding:6px 10px; background:#2980b9; color:white; border:none; border-radius:4px; cursor:pointer;">📢 告知</button>
             </div>
@@ -4535,6 +4541,43 @@
         closeEditModal();
         alert("保存しました。");
       } catch(e) { console.error(e); alert("保存に失敗しました。"); }
+    };
+
+    window.promptEditProductName = async (pId) => {
+      const allMaster = window.getFullMasterProducts ? window.getFullMasterProducts(window.customProductsData) : MASTER_PRODUCTS;
+      const prod = allMaster.find(x => x.id === pId) || { id: pId, name: pId };
+      const currentName = window.productNamesData?.[pId] || window.worksMasterData?.[pId]?.name || window.customProductsData?.[pId]?.name || prod.name || "";
+      
+      const newName = prompt(`作品名を変更します（POSレジとお品書きに即時反映されます）:\n\n現在の名前: ${currentName}`, currentName);
+      if (newName === null) return;
+      const trimmed = newName.trim();
+      if (!trimmed || trimmed === currentName) return;
+
+      try {
+        // 1. settings/product_names に保存
+        window.productNamesData = { ...(window.productNamesData || {}), [pId]: trimmed };
+        await setDoc(doc(db, "settings", "product_names"), { [pId]: trimmed }, { merge: true });
+
+        // 2. settings/works_master にも反映
+        if (window.worksMasterData) {
+          const updatedWm = { ...window.worksMasterData };
+          updatedWm[pId] = { ...(updatedWm[pId] || {}), name: trimmed, updatedAt: Date.now() };
+          window.worksMasterData = updatedWm;
+          await setDoc(doc(db, "settings", "works_master"), updatedWm);
+        }
+
+        // 3. settings/custom_products にも反映
+        if (window.customProductsData && window.customProductsData[pId]) {
+          window.customProductsData[pId].name = trimmed;
+          await setDoc(doc(db, "settings", "custom_products"), { [pId]: { name: trimmed } }, { merge: true });
+        }
+
+        alert(`✅ 作品名を「${trimmed}」に変更・保存しました！`);
+        renderAll();
+      } catch (err) {
+        console.error("作品名更新エラー:", err);
+        alert("作品名の保存に失敗しました: " + err.message);
+      }
     };
 
     window.cycleRecommendStatus = async (pId) => {
@@ -4753,7 +4796,7 @@
           : '';
         
         grid.innerHTML += `
-          <div class="pos-item" style="position:relative;" onclick="handlePosItemClick('${p.id}')">
+          <div class="pos-item" style="position:relative;" onclick="handlePosItemClick('${p.id}')" oncontextmenu="event.preventDefault(); promptEditProductName('${p.id}');" title="左クリック: カート追加 / 右クリック: 作品名編集">
             ${varBadge}
             <img src="${p.image}" alt="">
             <div class="pos-item-name">${(p.name || p.id || '').replace(/\n/g, '<br>')}</div>
