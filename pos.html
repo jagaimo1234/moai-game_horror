@@ -1527,6 +1527,70 @@
             </div>
           </div>
 
+          <!-- Section 1.5: 📐 写真の位置・トリミング調整パネル -->
+          <div id="img-position-adjust-panel" style="background:#13151f; border:1px solid rgba(0,210,255,0.3); border-radius:12px; padding:12px 16px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; flex-wrap:wrap; gap:6px;">
+              <span style="font-size:13px; font-weight:bold; color:#00d2ff; display:flex; align-items:center; gap:6px;">
+                📐 お品書きでの写真の位置・トリミング調整（長方形写真対応）
+              </span>
+              <span style="font-size:11px; color:#aaa;">プレビューを見ながら長方形写真の見せたい位置を調整できます</span>
+            </div>
+
+            <div style="display:flex; gap:16px; align-items:center; flex-wrap:wrap;">
+              <!-- Live Preview Box (1:1 正方形) -->
+              <div style="flex-shrink:0; text-align:center;">
+                <div style="width:110px; height:110px; border-radius:12px; overflow:hidden; background:#000; border:2px solid var(--accent); box-shadow:0 4px 15px rgba(0,0,0,0.6); margin:0 auto; position:relative;">
+                  <img id="img-pos-preview" src="" style="width:100%; height:100%; object-fit:cover; object-position:center center;" onerror="this.src=window.NO_IMAGE_PLACEHOLDER||this.src">
+                  <div style="position:absolute; bottom:2px; right:4px; font-size:9px; background:rgba(0,0,0,0.7); color:#00d2ff; padding:1px 4px; border-radius:3px;">1:1 お品書き枠</div>
+                </div>
+              </div>
+
+              <!-- Controls -->
+              <div style="flex:1; min-width:260px; display:flex; flex-direction:column; gap:8px;">
+                <!-- Fit Toggle -->
+                <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+                  <span style="font-size:11px; font-weight:bold; color:#ddd;">表示モード:</span>
+                  <label style="display:flex; align-items:center; gap:4px; font-size:12px; cursor:pointer; color:#fff;">
+                    <input type="radio" name="img-fit-radio" value="cover" checked onchange="onChangeImageFit(this.value)" style="accent-color:var(--accent);">
+                    <span>枠いっぱいに広げる（余白なし・推奨）</span>
+                  </label>
+                  <label style="display:flex; align-items:center; gap:4px; font-size:12px; cursor:pointer; color:#fff;">
+                    <input type="radio" name="img-fit-radio" value="contain" onchange="onChangeImageFit(this.value)" style="accent-color:var(--accent);">
+                    <span>全体を収める（余白あり）</span>
+                  </label>
+                </div>
+
+                <!-- Position Presets -->
+                <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
+                  <span style="font-size:11px; font-weight:bold; color:#ddd;">位置プリセット:</span>
+                  <button type="button" onclick="setImagePositionPreset(50, 15)" style="background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.2); color:#fff; font-size:11px; padding:3px 8px; border-radius:5px; cursor:pointer;">🔝 上寄り (顔・文字)</button>
+                  <button type="button" onclick="setImagePositionPreset(50, 50)" style="background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.2); color:#fff; font-size:11px; padding:3px 8px; border-radius:5px; cursor:pointer;">⏺️ 中央</button>
+                  <button type="button" onclick="setImagePositionPreset(50, 85)" style="background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.2); color:#fff; font-size:11px; padding:3px 8px; border-radius:5px; cursor:pointer;">🔽 下寄り</button>
+                  <button type="button" onclick="setImagePositionPreset(15, 50)" style="background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.2); color:#fff; font-size:11px; padding:3px 8px; border-radius:5px; cursor:pointer;">◀️ 左寄り</button>
+                  <button type="button" onclick="setImagePositionPreset(85, 50)" style="background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.2); color:#fff; font-size:11px; padding:3px 8px; border-radius:5px; cursor:pointer;">▶️ 右寄り</button>
+                </div>
+
+                <!-- Sliders -->
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:2px;">
+                  <div>
+                    <div style="display:flex; justify-content:space-between; font-size:11px; color:#aaa; margin-bottom:2px;">
+                      <span>↕️ 上下位置</span>
+                      <span id="img-pos-y-val" style="color:var(--accent); font-weight:bold;">50%</span>
+                    </div>
+                    <input type="range" id="img-pos-y-slider" min="0" max="100" value="50" oninput="onSlideImagePosition()" style="width:100%; accent-color:var(--accent); cursor:pointer;">
+                  </div>
+                  <div>
+                    <div style="display:flex; justify-content:space-between; font-size:11px; color:#aaa; margin-bottom:2px;">
+                      <span>↔️ 左右位置</span>
+                      <span id="img-pos-x-val" style="color:var(--accent); font-weight:bold;">50%</span>
+                    </div>
+                    <input type="range" id="img-pos-x-slider" min="0" max="100" value="50" oninput="onSlideImagePosition()" style="width:100%; accent-color:var(--accent); cursor:pointer;">
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
           <!-- Section 2: 画像プール・ライブラリ -->
           <div style="background:rgba(0,0,0,0.25); border:1px solid rgba(255,255,255,0.08); border-radius:12px; padding:16px; flex:1; display:flex; flex-direction:column;">
             
@@ -13853,6 +13917,48 @@
     // 🖼️ お品書き画像管理コントローラー (2段スタジオ＆RAW統合UI)
     // =========================================================
     let currentSelectorPosId = null;
+    let currentImageFit = 'cover';
+    let currentImagePosX = 50;
+    let currentImagePosY = 50;
+
+    window.updateImagePositionUI = function() {
+      const prevImg = document.getElementById('img-pos-preview');
+      const mainSrc = currentDraftImages[0] || '';
+      if (prevImg) {
+        prevImg.src = mainSrc || window.NO_IMAGE_PLACEHOLDER;
+        prevImg.style.objectFit = currentImageFit;
+        prevImg.style.objectPosition = `${currentImagePosX}% ${currentImagePosY}%`;
+      }
+      const xSlider = document.getElementById('img-pos-x-slider');
+      const ySlider = document.getElementById('img-pos-y-slider');
+      const xVal = document.getElementById('img-pos-x-val');
+      const yVal = document.getElementById('img-pos-y-val');
+      if (xSlider) xSlider.value = currentImagePosX;
+      if (ySlider) ySlider.value = currentImagePosY;
+      if (xVal) xVal.textContent = `${currentImagePosX}%`;
+      if (yVal) yVal.textContent = `${currentImagePosY}%`;
+      const radios = document.querySelectorAll('input[name="img-fit-radio"]');
+      radios.forEach(r => { r.checked = (r.value === currentImageFit); });
+    };
+
+    window.onChangeImageFit = function(val) {
+      currentImageFit = val || 'cover';
+      window.updateImagePositionUI();
+    };
+
+    window.setImagePositionPreset = function(x, y) {
+      currentImagePosX = x;
+      currentImagePosY = y;
+      window.updateImagePositionUI();
+    };
+
+    window.onSlideImagePosition = function() {
+      const xSlider = document.getElementById('img-pos-x-slider');
+      const ySlider = document.getElementById('img-pos-y-slider');
+      if (xSlider) currentImagePosX = parseInt(xSlider.value, 10);
+      if (ySlider) currentImagePosY = parseInt(ySlider.value, 10);
+      window.updateImagePositionUI();
+    };
     let currentSelectorTargetSlot = 'base'; // 'base' | 'group' | 'sku:<skuId>'
     let currentDraftImages = []; // Array of image URLs/paths in the selected tray
     let currentPoolTab = 'studio'; // 'studio' | 'raw' | 'all'
@@ -14013,12 +14119,34 @@
 
       currentDraftImages = [...currentList];
 
+      // ロード: 既存の画像位置・フィット設定をUIに復元
+      let loadedPos = '50% 50%';
+      let loadedFit = 'cover';
+      if (currentSelectorTargetSlot === 'group') {
+        loadedPos = wData.catalogGroupImagePosition || '50% 50%';
+        loadedFit = wData.catalogGroupImageFit || 'cover';
+      } else if (currentSelectorTargetSlot.startsWith('sku:')) {
+        const skuId = currentSelectorTargetSlot.slice(4);
+        const targetVar = rawVars.find(v => v.skuId === skuId);
+        loadedPos = targetVar?.imagePosition || '50% 50%';
+        loadedFit = targetVar?.imageFit || 'cover';
+      } else {
+        loadedPos = wData.imagePosition || '50% 50%';
+        loadedFit = wData.imageFit || 'cover';
+      }
+      const posParts = loadedPos.replace(/center/g, '50%').replace(/top|left/g, '10%').replace(/bottom|right/g, '90%').split(/\s+/);
+      currentImagePosX = parseInt(posParts[0], 10) || 50;
+      currentImagePosY = parseInt(posParts[1], 10) || 50;
+      currentImageFit = loadedFit || 'cover';
+      window.updateImagePositionUI();
+
       // 2. 候補プールの分類と構築
       buildCandidatePool(pId, p, wData);
 
       // 3. レンダリング
       renderDraftTray();
       renderImagePool();
+      window.updateImagePositionUI();
       updateBackupSelectUI(pId, wData);
 
       const modalEl = document.getElementById('work-image-selector-modal');
@@ -14522,11 +14650,17 @@
         wmData[pId].catalogDisplayMode = catalogDisplayMode;
         if (rawGTitle) wmData[pId].catalogGroupTitle = rawGTitle;
         if (rawGDesc) wmData[pId].catalogGroupDesc = rawGDesc;
+        if (currentSelectorTargetSlot === 'base') {
+          wmData[pId].imagePosition = `${currentImagePosX}% ${currentImagePosY}%`;
+          wmData[pId].imageFit = currentImageFit;
+        }
 
         if (currentSelectorTargetSlot === 'group') {
           // バリエーションまとめ画像（1枚または複数枚）として保存
           wmData[pId].catalogGroupImage = optimizedMain || mainImg || null;
           wmData[pId].catalogGroupImages = [optimizedMain || mainImg, ...optimizedSubs].filter(Boolean);
+          wmData[pId].catalogGroupImagePosition = `${currentImagePosX}% ${currentImagePosY}%`;
+          wmData[pId].catalogGroupImageFit = currentImageFit;
           wmData[pId].updatedAt = Date.now();
           await setDoc(doc(targetDb, 'settings', 'works_master'), wmData);
           window.worksMasterData = wmData;
@@ -14539,7 +14673,7 @@
             : (pId === 'osuwari_moai_pen' && window.DEFAULT_OSUWARI_VARIANTS ? [...window.DEFAULT_OSUWARI_VARIANTS] : []);
           wmData[pId].variants = vars.map(v => {
             if (v.skuId === skuId) {
-              return { ...v, image: optimizedMain || mainImg || null, images: [optimizedMain || mainImg, ...optimizedSubs].filter(Boolean) };
+              return { ...v, image: optimizedMain || mainImg || null, images: [optimizedMain || mainImg, ...optimizedSubs].filter(Boolean), imagePosition: `${currentImagePosX}% ${currentImagePosY}%`, imageFit: currentImageFit };
             }
             return v;
           });

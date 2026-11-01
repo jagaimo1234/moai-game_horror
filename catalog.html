@@ -955,6 +955,13 @@
           });
         }
         setMainImg(slideIdx, targetImg, matchingThumb);
+        const mainImgEl = document.getElementById("main-img-" + slideIdx);
+        if (mainImgEl) {
+          const varPos = v.imagePosition || (v.isBase ? p.imagePosition : (p.catalogGroupImagePosition || "center center"));
+          const varFit = v.imageFit || (v.isBase ? p.imageFit : (p.catalogGroupImageFit || "cover"));
+          mainImgEl.style.objectPosition = varPos;
+          mainImgEl.style.objectFit = varFit;
+        }
       }
 
       // Refresh stock badges for selected variant
@@ -1065,7 +1072,9 @@
           const stockHtml = `<div class="badge" id="stock-${p.id}" style="display:none;"></div>`;
 
           const imgSrc = p.image || p.optimizedCover || (p.isDev ? 'images/dev_placeholder.gif' : (window.NO_IMAGE_PLACEHOLDER || 'images/dev_placeholder.gif'));
-          const imageHtml = `<img class="main-product-img" src="${imgSrc}" style="border-radius:12px 12px 0 0; ${(!p.image && !p.optimizedCover && p.isDev) ? 'border:1px dashed rgba(255,255,255,0.1);' : ''}" alt="${(p.name || p.id || '').replace(/\n/g,' ')}" onerror="this.src=window.NO_IMAGE_PLACEHOLDER||'images/dev_placeholder.gif'">`;
+          const tilePos = p.imagePosition || 'center center';
+          const tileFit = p.imageFit || 'cover';
+          const imageHtml = `<img class="main-product-img" src="${imgSrc}" style="border-radius:12px 12px 0 0; object-fit:${tileFit}; object-position:${tilePos}; ${(!p.image && !p.optimizedCover && p.isDev) ? 'border:1px dashed rgba(255,255,255,0.1);' : ''}" alt="${(p.name || p.id || '').replace(/\n/g,' ')}" onerror="this.src=window.NO_IMAGE_PLACEHOLDER||'images/dev_placeholder.gif'">`;
 
           const topLeftBadgeHtml = p.isDev
             ? `<div class="dev-badge-tile">${DEV_STATUSES[parseInt(p.status) || 0].label}</div>`
@@ -1131,7 +1140,9 @@
           const stockLargeHtml = `<div class="badge" id="stock-large-${p.id}" style="display:none;"></div>`;
 
           const largeImgSrc = p.image || p.optimizedCover || (p.isDev ? 'images/dev_placeholder.gif' : (window.NO_IMAGE_PLACEHOLDER || 'images/dev_placeholder.gif'));
-          const largeImageHtml = `<img class="main-product-img" id="main-img-${i}" src="${largeImgSrc}" style="width:100%; aspect-ratio:1; object-fit:cover; border-radius:12px; ${(!p.image && !p.optimizedCover && p.isDev) ? 'border:1px dashed rgba(255,255,255,0.1);' : ''}" alt="${(p.name || p.id || '').replace(/\n/g,' ')}" onerror="this.src=window.NO_IMAGE_PLACEHOLDER||'images/dev_placeholder.gif'">
+          const cPos = p.imagePosition || 'center center';
+          const cFit = p.imageFit || 'cover';
+          const largeImageHtml = `<img class="main-product-img" id="main-img-${i}" src="${largeImgSrc}" style="width:100%; aspect-ratio:1; object-fit:${cFit}; object-position:${cPos}; border-radius:12px; ${(!p.image && !p.optimizedCover && p.isDev) ? 'border:1px dashed rgba(255,255,255,0.1);' : ''}" alt="${(p.name || p.id || '').replace(/\n/g,' ')}" onerror="this.src=window.NO_IMAGE_PLACEHOLDER||'images/dev_placeholder.gif'">
                <video class="main-product-img" id="main-video-${i}" style="display:none; width:100%; height:auto; aspect-ratio:1/1; object-fit:cover;" loop muted playsinline controls></video>`;
 
           // バリエーション切替UI（代表枠カードまたは統合バリエーションカード用）
