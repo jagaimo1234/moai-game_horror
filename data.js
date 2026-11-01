@@ -825,7 +825,8 @@ window.WORK_FOLDER_ASSETS = {
     ],
     "studio": [
       "images/kurima/macho_moai_keyholder/studio/15704196-82ad-4bb5-ad26-3b43dda68172.png",
-      "images/kurima/macho_moai_keyholder/studio/4d924d16-4899-44d9-857b-d36e813cef4d.png"
+      "images/kurima/macho_moai_keyholder/studio/4d924d16-4899-44d9-857b-d36e813cef4d.png",
+      "images/kurima/macho_moai_keyholder/studio/まっちょモアイキーホルダー_master.png"
     ]
   },
   "osuwari_moai_pen": {
