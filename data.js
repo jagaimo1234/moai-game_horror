@@ -873,7 +873,10 @@ window.WORK_FOLDER_ASSETS = {
       "images/kurima/moai_highleg/raw/moai_highleg_RAW_20261104_220728_005.jpg",
       "images/kurima/moai_highleg/raw/moai_highleg_RAW_20261104_220738_006.jpg"
     ],
-    "studio": []
+    "studio": [
+      "images/kurima/moai_highleg/studio/ChatGPT 画像 2026年11月4日 22_17_22-1.png",
+      "images/kurima/moai_highleg/studio/ChatGPT 画像 2026年11月4日 22_17_52-2.png"
+    ]
   },
   "nitto_osuwari_moai_penstand": {
     "raw": [],
