@@ -16,6 +16,16 @@
 // 全作品のマスターリスト
 const MASTER_PRODUCTS = [
   {
+    image: 'images/kurima/moai_highleg.jpg',
+    name: 'ハイレグモアイ',
+    desc: 'もはや変態を超えた変態ハイレグモアイ
+ペン立てとかなにか物立て。
+受付とかのペン立てに使うのがいいかも
+(知らんけど)🗿
+シャチハタ立てサイズも検討している。',
+  },
+
+  {
     image: 'images/kurima/nitto_osuwari_moai_penstand.jpg',
     name: 'ニットおすわりモアイペン立て',
     desc: 'ニット版(冬仕様）',
@@ -853,6 +863,12 @@ window.WORK_FOLDER_ASSETS = {
       "images/kurima/macho_moai_keyholder/studio/4d924d16-4899-44d9-857b-d36e813cef4d.png",
       "images/kurima/macho_moai_keyholder/studio/まっちょモアイキーホルダー_master.png"
     ]
+  },
+  "moai_highleg": {
+    "raw": [
+      "images/kurima/moai_highleg/raw/moai_highleg_RAW_20261104_220608_001.jpg"
+    ],
+    "studio": []
   },
   "nitto_osuwari_moai_penstand": {
     "raw": [],
