@@ -24,13 +24,7 @@ const MASTER_PRODUCTS = [
       'images/kurima/moai_highleg/studio/ChatGPT 画像 2026年11月4日 22_17_56-3.png',
       'images/kurima/moai_highleg/studio/ChatGPT 画像 2026年11月4日 22_19_07-4.png',
       'images/kurima/moai_highleg/studio/ChatGPT 画像 2026年11月4日 22_19_12-5.png',
-      'images/kurima/moai_highleg/studio/ChatGPT 画像 2026年11月4日 22_19_16-6.png',
-      'images/kurima/moai_highleg/raw/moai_highleg_RAW_20261104_220608_001.jpg',
-      'images/kurima/moai_highleg/raw/moai_highleg_RAW_20261104_220639_002.jpg',
-      'images/kurima/moai_highleg/raw/moai_highleg_RAW_20261104_220709_003.jpg',
-      'images/kurima/moai_highleg/raw/moai_highleg_RAW_20261104_220716_004.jpg',
-      'images/kurima/moai_highleg/raw/moai_highleg_RAW_20261104_220728_005.jpg',
-      'images/kurima/moai_highleg/raw/moai_highleg_RAW_20261104_220738_006.jpg'
+      'images/kurima/moai_highleg/studio/ChatGPT 画像 2026年11月4日 22_19_16-6.png'
     ],
     name: 'ハイレグモアイ',
     desc: 'もはや変態を超えた変態ハイレグモアイ\\nペン立てとかなにか物立て。\\n受付とかのペン立てに使うのがいいかも\\n(知らんけど)🗿\\nシャチハタ立てサイズも検討している。',

@@ -205,7 +205,10 @@ async function main() {
       mainImgRel = `images/kurima/${posId}.jpg`;
     }
 
-    const subImgPaths = [...studioFiles, ...directFiles, ...rawFiles];
+    // 公開用のサブ画像リスト（スタジオ完成画像を最優先。RAW写真は未処理の元写真のためPOS商品ギャラリーには載せない）
+    const subImgPaths = studioFiles.length > 0
+      ? [...studioFiles, ...directFiles]
+      : (directFiles.length > 0 ? directFiles : rawFiles);
 
     const imagesCode = subImgPaths.length > 0
       ? `\n    images: [\n${subImgPaths.map(p => `      '${p}',`).join('\n')}\n    ],`
