@@ -2501,6 +2501,11 @@
                   </span>
                 </div>
                 <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+                  <button type="button" id="btn-sync-to-mission-system" onclick="syncMfgToMissionSystem('week')"
+                          style="background:linear-gradient(135deg, #f59e0b, #d97706); color:#fff; border:none; padding:5px 14px; border-radius:7px; font-size:11.5px; font-weight:bold; cursor:pointer; display:inline-flex; align-items:center; gap:5px; box-shadow:0 2px 8px rgba(245,158,11,0.4); transition:transform 0.1s ease;"
+                          title="クエストログ2（ミッションシステム）に表示中の1週間の製造計画を一括同期・反映します">
+                    <span>🚀 ミッションシステムに一括反映</span>
+                  </button>
                   <button type="button" onclick="exportMfgWeekToGoogleCalendar()"
                           style="background:linear-gradient(135deg, #1a73e8, #4285f4); color:#fff; border:none; padding:5px 14px; border-radius:7px; font-size:11.5px; font-weight:bold; cursor:pointer; display:inline-flex; align-items:center; gap:5px; box-shadow:0 2px 8px rgba(66,133,244,0.4); transition:transform 0.1s ease;"
                           title="ダウンロード不要！WebのGoogleカレンダーを直接開いて、今週の製造計画をポンと反映します">
@@ -3385,7 +3390,15 @@
         onSnapshot(doc(db, "settings", "production_plans"), (snap) => {
           if (snap.exists()) window.productionPlansData = snap.data();
           else window.productionPlansData = {};
-          if (typeof window.renderProductionPlans === 'function') window.renderProductionPlans();
+          if (typeof window.renderProductionPlans === "function") window.renderProductionPlans();
+
+          // 🚀 製造計画の変更（追加・移動・数量変更・削除）を検知し、自動でミッションシステムへ連動・生成
+          if (window._mfgAutoSyncTimer) clearTimeout(window._mfgAutoSyncTimer);
+          window._mfgAutoSyncTimer = setTimeout(() => {
+            if (typeof window.syncMfgToMissionSystem === "function") {
+              window.syncMfgToMissionSystem("week", null, { silent: true });
+            }
+          }, 1500);
         });
 
         // 🔄 Sync Multi-Event Aggregation Configuration (Cross-device & persistent)
@@ -10673,8 +10686,10 @@
             let vPerEvent = {};
             let vTotalReq = 0;
             multiAggSelectedEvents.forEach(evKey => {
-              const prepMap = getEventAdoptedPrepMap(evKey);
-              const q = window.getSkuSimQty(prepMap, p.id, v);
+              const selIds = window.eventProductsData?.[evKey];
+              const isSelectedInThisEv = !selIds || selIds.includes(p.id);
+              const prepMap = isSelectedInThisEv ? getEventAdoptedPrepMap(evKey) : {};
+              const q = isSelectedInThisEv ? window.getSkuSimQty(prepMap, p.id, v) : 0;
               vPerEvent[evKey] = q;
               vTotalReq += q;
               pPerEventReq[evKey] += q;
@@ -10691,7 +10706,7 @@
             pShortage += vShort;
 
             const vPrice = window.getEffectiveProductPrice(p.id, v.skuId, refInvMap);
-            if (isSelectedInAnyEvent || vTotalReq > 0 || vCur > 0) {
+            if (isSelectedInAnyEvent) {
               grandTotalRequired += vTotalReq;
               grandTotalAllocatedStock += vAlloc;
               grandTotalRawStock += vCur;
@@ -10736,12 +10751,12 @@
             };
             skuItems.push(skuRowObj);
             lastBuiltRowLookup[v.skuId] = skuRowObj;
-            if (isSelectedInAnyEvent || vTotalReq > 0 || vCur > 0) {
+            if (isSelectedInAnyEvent) {
               flatSkuRows.push(skuRowObj);
             }
           });
 
-          if (isSelectedInAnyEvent || pTotalReq > 0 || pCurrentStock > 0) {
+          if (isSelectedInAnyEvent) {
             seriesOptions.push({ id: p.id, name: cleanParentName });
             const pRate = pTotalReq > 0 ? Math.min(100, Math.round((pAllocatedStock / pTotalReq) * 100)) : (pCurrentStock > 0 ? 100 : 0);
             const pCat = window.getProductCategory({ parentName: cleanParentName, id: p.id });
@@ -10777,8 +10792,10 @@
           let pPerEvent = {};
           let pTotalReq = 0;
           multiAggSelectedEvents.forEach(evKey => {
-            const prepMap = getEventAdoptedPrepMap(evKey);
-            const q = Number(prepMap[p.id]) || 0;
+            const selIds = window.eventProductsData?.[evKey];
+            const isSelectedInThisEv = !selIds || selIds.includes(p.id);
+            const prepMap = isSelectedInThisEv ? getEventAdoptedPrepMap(evKey) : {};
+            const q = isSelectedInThisEv ? (Number(prepMap[p.id]) || 0) : 0;
             pPerEvent[evKey] = q;
             pTotalReq += q;
           });
@@ -10789,7 +10806,7 @@
           const pRate = pTotalReq > 0 ? Math.min(100, Math.round((pAlloc / pTotalReq) * 100)) : (pCur > 0 ? 100 : 0);
 
           const pPrice = window.getEffectiveProductPrice(p.id, p.id, refInvMap);
-          if (isSelectedInAnyEvent || pTotalReq > 0 || pCur > 0) {
+          if (isSelectedInAnyEvent) {
             seriesOptions.push({ id: p.id, name: cleanParentName });
             grandTotalRequired += pTotalReq;
             grandTotalAllocatedStock += pAlloc;
@@ -13432,6 +13449,7 @@
       window.productionPlansData = updated;
       await setDoc(doc(db, "settings", "production_plans"), updated);
       window.renderProductionPlans();
+      if (typeof window.syncMfgToMissionSystem === "function") { window.syncMfgToMissionSystem("week", null, { silent: true }); }
     };
 
     // Quick "+ 計画に追加" button on Left Unplanned Card: finds earliest date in view with free capacity on a compatible printer
@@ -13872,6 +13890,9 @@
       window.productionPlansData = updatedAll;
       await setDoc(doc(db, "settings", "production_plans"), updatedAll);
       window.renderProductionPlans();
+      if (typeof window.syncMfgToMissionSystem === "function") {
+        window.syncMfgToMissionSystem("week", null, { silent: true });
+      }
     };
 
     window.stepMfgJobQty = async (jobId, delta) => {
@@ -13889,6 +13910,21 @@
       window.productionPlansData = updated;
       await setDoc(doc(db, "settings", "production_plans"), updated);
       window.renderProductionPlans();
+
+      try {
+        const TURSO_URL = "https://quest-log-jagaimo1234.aws-ap-northeast-1.turso.io/v2/pipeline";
+        const TURSO_TOKEN = "eyJhbGciOiJFZERTQSIsInR5cCI6IkpXVCJ9.eyJhIjoicnciLCJpYXQiOjE3Njk4NzM3MTksImlkIjoiZmY3MGI2OWEtNTc3ZC00YTZjLTlhZDYtNjQwMjQ3NTMwZWZmIiwicmlkIjoiOWIyODk0YzEtMDk4Ni00YWUyLWFkODMtZjhlMzNiY2QwOGRkIn0.8G2TYYW-hNjPMDFrs1uY-czDAkhhIMBsrkIuaTKXdoZ3hhiORfNklIlnMW0-QThphw-b1Virb-XfZQTqQll4AQ";
+        fetch(TURSO_URL, {
+          method: "POST",
+          headers: { "Authorization": "Bearer " + TURSO_TOKEN, "Content-Type": "application/json" },
+          body: JSON.stringify({
+            requests: [
+              { type: "execute", stmt: { sql: "DELETE FROM quests WHERE projectName = ? AND note LIKE ?;", args: [{ type: "text", value: "MOAI活動3Dプリント" }, { type: "text", value: "%[mfg:" + jobId + "]%" }] } },
+              { type: "close" }
+            ]
+          })
+        }).catch(e => console.warn("Failed to delete mission quest:", e));
+      } catch(e) {}
     };
 
     // Save SKU Unit Hours to _specs
@@ -14139,6 +14175,9 @@
 
         await window.renderMultiEventAggregation();
         await window.renderProductionPlans();
+        if (typeof window.syncMfgToMissionSystem === "function") {
+          window.syncMfgToMissionSystem("week", null, { silent: true });
+        }
       } catch(e) {
         console.error(e);
         alert("完了反映中にエラーが発生しました: " + e.message);
@@ -14482,6 +14521,229 @@
       window.open(url, '_blank');
     };
 
+
+    // 🚀 双方向同期 (Bidirectional Sync): 製造計画 ⇄ クエストログ2 (Turso Cloud Database)
+    // ※ クエストログ2 の正式データ仕様（schema.ts / createQuest）に100%厳格準拠
+    let _lastMfgSyncTimestamp = 0;
+    let _isMfgSyncInProgress = false;
+
+    window.syncMfgToMissionSystem = async function(mode = "week", targetDate = null, options = {}) {
+      const { silent = false } = options;
+      if (_isMfgSyncInProgress) return;
+      _isMfgSyncInProgress = true;
+
+      const TURSO_URL = "https://quest-log-jagaimo1234.aws-ap-northeast-1.turso.io/v2/pipeline";
+      const TURSO_TOKEN = "eyJhbGciOiJFZERTQSIsInR5cCI6IkpXVCJ9.eyJhIjoicnciLCJpYXQiOjE3Njk4NzM3MTksImlkIjoiZmY3MGI2OWEtNTc3ZC00YTZjLTlhZDYtNjQwMjQ3NTMwZWZmIiwicmlkIjoiOWIyODk0YzEtMDk4Ni00YWUyLWFkODMtZjhlMzNiY2QwOGRkIn0.8G2TYYW-hNjPMDFrs1uY-czDAkhhIMBsrkIuaTKXdoZ3hhiORfNklIlnMW0-QThphw-b1Virb-XfZQTqQll4AQ";
+
+      const btn = document.getElementById("btn-sync-to-mission-system");
+      const origHtml = btn ? btn.innerHTML : "";
+      if (btn && !silent) {
+        btn.disabled = true;
+        btn.innerHTML = "<span>⏳ 双方向同期中...</span>";
+      }
+
+      try {
+        // 1. クエストログ2から該当プロジェクトの全タスクを取得
+        const resQuery = await fetch(TURSO_URL, {
+          method: "POST",
+          headers: { "Authorization": "Bearer " + TURSO_TOKEN, "Content-Type": "application/json" },
+          body: JSON.stringify({
+            requests: [
+              { type: "execute", stmt: { sql: "SELECT id, note, status, clearedAt FROM quests WHERE projectName = ?;", args: [{ type: "text", value: "MOAI活動3Dプリント" }] } },
+              { type: "close" }
+            ]
+          })
+        });
+        const queryData = await resQuery.json();
+        const existingMap = new Map(); // jobId -> { id, status, clearedAt }
+        const rows = queryData.results?.[0]?.response?.result?.rows || [];
+        for (const r of rows) {
+          const qId = parseInt(r[0].value, 10);
+          const note = r[1]?.value || "";
+          const status = r[2]?.value || "";
+          const clearedAt = r[3]?.value;
+          const m = note.match(/#mfg_([^s]+)/) || note.match(/\[JobID:([^\s\]]+)\]/) || note.match(/\[mfg:([^\s\]]+)\]/);
+          if (m) {
+            existingMap.set(m[1], { id: qId, status, clearedAt });
+          }
+        }
+
+        // 2. 【逆同期: ミッション完了 ➔ POS製造計画】
+        // ミッションシステム側で cleared (完了) になっている場合、POS側の製造計画も completed に自動連動
+        let reverseUpdated = false;
+        const currentPlans = { ...(window.productionPlansData || {}) };
+        for (const [jobId, qInfo] of existingMap.entries()) {
+          const job = currentPlans[jobId];
+          if (job) {
+            if (qInfo.status === "cleared" && job.status !== "completed") {
+              currentPlans[jobId] = {
+                ...job,
+                status: "completed",
+                completedAt: qInfo.clearedAt ? (parseInt(qInfo.clearedAt, 10) * 1000) : Date.now(),
+                updatedAt: Date.now()
+              };
+              reverseUpdated = true;
+              console.log("[AutoSync] 🔄 ミッション側の完了をPOS製造計画に自動連動:", jobId);
+            }
+          }
+        }
+
+        if (reverseUpdated) {
+          window.productionPlansData = currentPlans;
+          if (typeof db !== "undefined" && typeof setDoc !== "undefined" && typeof doc !== "undefined") {
+            await setDoc(doc(db, "settings", "production_plans"), currentPlans);
+          }
+          if (typeof window.renderProductionPlans === "function") {
+            window.renderProductionPlans();
+          }
+        }
+
+        // 3. 【順同期: POS製造計画 ➔ ミッションシステム】
+        const allJobs = window.getMfgScheduledJobs();
+        const startStr = mfgStartDateStr || getLocalYmd();
+        const endStr = addDaysYmd(startStr, 6);
+        let targetJobs = [];
+
+        if (mode === "day") {
+          const d = targetDate || startStr;
+          targetJobs = allJobs.filter(j => j.date === d);
+        } else if (mode === "week") {
+          targetJobs = allJobs.filter(j => j.date >= startStr && j.date <= endStr);
+        } else {
+          targetJobs = allJobs;
+        }
+
+        const printers = window.getMfgPrinters();
+        const prMap = {};
+        printers.forEach(p => { prMap[p.id] = p.shortName || p.name; });
+
+        const nowSec = Math.floor(Date.now() / 1000);
+        const batchRequests = [];
+        let insertCount = 0;
+        let updateCount = 0;
+
+        for (const j of targetJobs) {
+          if (!j.date || !/^\d{4}-\d{2}-\d{2}$/.test(j.date)) continue;
+          const dObj = new Date(j.date + "T00:00:00+09:00");
+          if (isNaN(dObj.getTime())) continue;
+
+          const skuInfo = mfgSkuMapCache[j.skuId] || mfgSkuMapCache[j.productId] || { parentName: j.productId, variantName: "無印" };
+          const vName = (skuInfo.variantName && skuInfo.variantName !== "無印") ? (" (" + skuInfo.variantName + ")") : "";
+          const qty = typeof j.qty === "number" && j.qty > 0 ? j.qty : 1;
+          const questName = skuInfo.parentName + vName + " ×" + qty;
+          const prName = prMap[j.printerId] || j.printerId;
+          const hours = (j.totalHours || 0).toFixed(1);
+          const memoPart = j.memo ? (" (" + j.memo + ")") : "";
+          const note = prName + " " + hours + "h" + memoPart + " [mfg:" + j.id + "]";
+          
+          const startSec = Math.floor(dObj.getTime() / 1000);
+          const deadlineSec = startSec + 86399; // 23:59:59 JST
+          const moaiType = Math.floor(Math.random() * 8) + 1; // 1-8
+
+          const isJobCompleted = (j.status === "completed");
+          const targetStatus = isJobCompleted ? "cleared" : "accepted";
+          const targetClearedAtSec = isJobCompleted 
+            ? String(Math.floor((j.completedAt || Date.now()) / 1000)) 
+            : null;
+
+          const existingEntry = existingMap.get(j.id);
+          if (existingEntry) {
+            batchRequests.push({
+              type: "execute",
+              stmt: {
+                sql: "UPDATE quests SET questName = ?, note = ?, targetCount = 1, status = ?, clearedAt = ?, startDate = ?, deadline = ?, updatedAt = ? WHERE id = ?;",
+                args: [
+                  { type: "text", value: questName },
+                  { type: "text", value: note },
+                  { type: "integer", value: "1" },
+                  { type: "text", value: targetStatus },
+                  targetClearedAtSec ? { type: "integer", value: targetClearedAtSec } : { type: "null" },
+                  { type: "integer", value: String(startSec) },
+                  { type: "integer", value: String(deadlineSec) },
+                  { type: "integer", value: String(nowSec) },
+                  { type: "integer", value: String(existingEntry.id) }
+                ]
+              }
+            });
+            updateCount++;
+          } else {
+            batchRequests.push({
+              type: "execute",
+              stmt: {
+                sql: "INSERT INTO quests (userId, questName, projectName, questType, difficulty, status, plannedTimeSlot, note, targetCount, currentCount, startDate, deadline, moaiType, templateId, displayOrder, isAdhoc, isMoai, createdAt, updatedAt, acceptedAt, clearedAt) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);",
+                args: [
+                  { type: "integer", value: "1" },
+                  { type: "text", value: questName },
+                  { type: "text", value: "MOAI活動3Dプリント" },
+                  { type: "text", value: "Daily" },
+                  { type: "text", value: "1" },
+                  { type: "text", value: targetStatus },
+                  { type: "null" },
+                  { type: "text", value: note },
+                  { type: "integer", value: "1" }, // targetCount: 1 (バッジ非表示)
+                  { type: "integer", value: isJobCompleted ? "1" : "0" },
+                  { type: "integer", value: String(startSec) },
+                  { type: "integer", value: String(deadlineSec) },
+                  { type: "integer", value: String(moaiType) },
+                  { type: "null" },
+                  { type: "integer", value: "0" },
+                  { type: "integer", value: "0" },
+                  { type: "integer", value: "1" },
+                  { type: "integer", value: String(nowSec) },
+                  { type: "integer", value: String(nowSec) },
+                  { type: "integer", value: String(nowSec) },
+                  targetClearedAtSec ? { type: "integer", value: targetClearedAtSec } : { type: "null" }
+                ]
+              }
+            });
+            insertCount++;
+          }
+        }
+
+        if (batchRequests.length > 0) {
+          batchRequests.push({ type: "close" });
+          await fetch(TURSO_URL, {
+            method: "POST",
+            headers: { "Authorization": "Bearer " + TURSO_TOKEN, "Content-Type": "application/json" },
+            body: JSON.stringify({ requests: batchRequests })
+          });
+        }
+
+        _lastMfgSyncTimestamp = Date.now();
+
+        if (silent) {
+          console.log("[AutoSync] 🚀 ミッションシステムと双方向同期完了 (POS➔ミッション:", targetJobs.length, "件, 逆同期完了反映:", reverseUpdated ? "あり" : "なし", ")");
+        } else {
+          const periodLabel = mode === "day" ? (targetDate + "の製造計画") : (mode === "week" ? ("表示中の1週間 (" + startStr + " 〜 " + endStr + ")") : "全期間の製造計画");
+          const revMsg = reverseUpdated ? "\n・ミッション側で完了したタスクをPOS製造計画へ【完了済み✅】として自動反映しました！" : "";
+          const summaryMsg = "🚀 ミッションシステム（クエストログ2）と双方向同期完了しました！\n\n・対象期間: " + periodLabel + "\n・同期件数: 計 " + targetJobs.length + " 件 (新規: " + insertCount + "件, 更新: " + updateCount + "件)" + revMsg + "\n・プロジェクト: MOAI活動3Dプリント\n・数量バッジ: 非表示 (1)\n\nクエストログ2を開いて確認しますか？";
+          if (confirm(summaryMsg)) {
+            window.open("https://quest-log-kappa.vercel.app/", "_blank");
+          }
+        }
+      } catch (err) {
+        console.error("Mission system sync error:", err);
+        if (!silent) {
+          alert("ミッションシステムへの同期中にエラーが発生しました: " + (err.message || err));
+        }
+      } finally {
+        _isMfgSyncInProgress = false;
+        if (btn && !silent) {
+          btn.disabled = false;
+          btn.innerHTML = origHtml;
+        }
+      }
+    };
+
+    // 🔄 定期的にミッションシステムの完了状態をチェック＆逆同期（60秒おき）
+    if (!window._mfgMissionSyncInterval) {
+      window._mfgMissionSyncInterval = setInterval(() => {
+        const mfgView = document.getElementById("section-mfg");
+        if (mfgView && mfgView.style.display !== "none" && typeof window.syncMfgToMissionSystem === "function") {
+          window.syncMfgToMissionSystem("week", null, { silent: true });
+        }
+      }, 60000);
+    }
 
     // One-click Google Calendar Web export for displayed 1-week schedule
     window.exportMfgWeekToGoogleCalendar = function() {
@@ -16112,7 +16374,7 @@
       if (!data || typeof data !== "object") return {};
       const cleaned = {};
       for (const [id, item] of Object.entries(data)) {
-        if (!item || typeof item !== "object" || id.includes(".")) continue;
+        if (!item || typeof item !== "object" || id.includes(".") || id === "dev_1792332209364") continue;
         const cItem = { ...item };
         delete cItem.optimizedImages;
         delete cItem.imageBackups;
