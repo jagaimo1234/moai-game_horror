@@ -866,7 +866,9 @@ window.WORK_FOLDER_ASSETS = {
   },
   "moai_highleg": {
     "raw": [
-      "images/kurima/moai_highleg/raw/moai_highleg_RAW_20261104_220608_001.jpg"
+      "images/kurima/moai_highleg/raw/moai_highleg_RAW_20261104_220608_001.jpg",
+      "images/kurima/moai_highleg/raw/moai_highleg_RAW_20261104_220639_002.jpg",
+      "images/kurima/moai_highleg/raw/moai_highleg_RAW_20261104_220709_003.jpg"
     ],
     "studio": []
   },
