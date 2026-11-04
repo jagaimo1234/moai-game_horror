@@ -211,10 +211,13 @@ async function main() {
       ? `\n    images: [\n${subImgPaths.map(p => `      '${p}',`).join('\n')}\n    ],`
       : '';
 
+    const safeName = String(name || '').replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/\r?\n/g, '\\n');
+    const safeDesc = String(desc || '').replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/\r?\n/g, '\\n');
+
     const newEntry = `  {
     image: '${mainImgRel}',${imagesCode}
-    name: '${name.replace(/'/g, "\\'")}',
-    desc: '${desc.replace(/'/g, "\\'")}',
+    name: '${safeName}',
+    desc: '${safeDesc}',
   },
 `;
     // MASTER_PRODUCTS の先頭に安全に挿入
