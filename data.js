@@ -920,7 +920,10 @@ window.WORK_FOLDER_ASSETS = {
     "studio": [
       "images/kurima/moai_loscut/studio/ChatGPT 画像 2026年11月5日 20_27_08-1.png",
       "images/kurima/moai_loscut/studio/ChatGPT 画像 2026年11月5日 20_28_08-2.png",
-      "images/kurima/moai_loscut/studio/ChatGPT 画像 2026年11月5日 20_28_21-3.png"
+      "images/kurima/moai_loscut/studio/ChatGPT 画像 2026年11月5日 20_28_21-3.png",
+      "images/kurima/moai_loscut/studio/ChatGPT 画像 2026年11月5日 20_28_26-4.png",
+      "images/kurima/moai_loscut/studio/ChatGPT 画像 2026年11月5日 20_29_02-5.png",
+      "images/kurima/moai_loscut/studio/ChatGPT 画像 2026年11月5日 20_29_06-6.png"
     ]
   },
   "moai_losscut (1)": {
