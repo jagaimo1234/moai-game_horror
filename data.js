@@ -915,6 +915,14 @@ window.WORK_FOLDER_ASSETS = {
       "images/kurima/moai_highleg/studio/ハイレグモアイ_master.png"
     ]
   },
+  "moai_loscut": {
+    "raw": [],
+    "studio": [
+      "images/kurima/moai_loscut/studio/ChatGPT 画像 2026年11月5日 20_27_08-1.png",
+      "images/kurima/moai_loscut/studio/ChatGPT 画像 2026年11月5日 20_28_08-2.png",
+      "images/kurima/moai_loscut/studio/ChatGPT 画像 2026年11月5日 20_28_21-3.png"
+    ]
+  },
   "moai_losscut (1)": {
     "raw": [
       "images/kurima/moai_losscut (1)/raw/moai_losscut_RAW_20261105_201128_001.jpg",
