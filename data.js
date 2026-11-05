@@ -923,7 +923,17 @@ window.WORK_FOLDER_ASSETS = {
       "images/kurima/moai_loscut/studio/ChatGPT 画像 2026年11月5日 20_28_21-3.png",
       "images/kurima/moai_loscut/studio/ChatGPT 画像 2026年11月5日 20_28_26-4.png",
       "images/kurima/moai_loscut/studio/ChatGPT 画像 2026年11月5日 20_29_02-5.png",
-      "images/kurima/moai_loscut/studio/ChatGPT 画像 2026年11月5日 20_29_06-6.png"
+      "images/kurima/moai_loscut/studio/ChatGPT 画像 2026年11月5日 20_29_06-6.png",
+      "images/kurima/moai_loscut/studio/ChatGPT 画像 2026年11月5日 20_34_12-1.png",
+      "images/kurima/moai_loscut/studio/ChatGPT 画像 2026年11月5日 20_34_27-2.png",
+      "images/kurima/moai_loscut/studio/ChatGPT 画像 2026年11月5日 20_34_38-3.png",
+      "images/kurima/moai_loscut/studio/ChatGPT 画像 2026年11月5日 20_34_42-4.png",
+      "images/kurima/moai_loscut/studio/ChatGPT 画像 2026年11月5日 20_34_55-5.png",
+      "images/kurima/moai_loscut/studio/ChatGPT 画像 2026年11月5日 20_35_00-6.png",
+      "images/kurima/moai_loscut/studio/ChatGPT 画像 2026年11月5日 20_35_04-7.png",
+      "images/kurima/moai_loscut/studio/ChatGPT 画像 2026年11月5日 20_35_09-8.png",
+      "images/kurima/moai_loscut/studio/ChatGPT 画像 2026年11月5日 20_35_14-9.png",
+      "images/kurima/moai_loscut/studio/ChatGPT 画像 2026年11月5日 20_35_18-10.png"
     ]
   },
   "moai_losscut (1)": {
