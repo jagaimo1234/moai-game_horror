@@ -2108,7 +2108,7 @@ function setHud() {
         <div class="hud-steps" style="display: flex; flex-direction: column; gap: 3px; margin-top: 5px;">
           <span class="hud-step ${step1Class}">① モアイ購入: ${moataroMoaiPurchased ? '完了' : '未達成'}</span>
           <span class="hud-step ${step2Class}">② ヨーグルト: ${crystals}/${required}個 (作者強奪: ${stageFourStealDone ? 'OK' : '必要'})</span>
-          <span class="hud-step ${step3Class}">③ 会場から脱出！ (🌌闇の取引所予告)</span>
+          <span class="hud-step ${step3Class}">③ 会場から脱出！ (クリア)</span>
         </div>
       `;
     } else {
@@ -3619,8 +3619,8 @@ function showDarkMarketCatalog() {
           <h4 style="margin: 0; font-size: 12.5px; color: #fff; font-weight: bold; line-height: 1.2;">${item.name}</h4>
           <p style="margin: 0; font-size: 9.5px; opacity: 0.7; line-height: 1.35; height: 38px; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; width: 100%; text-overflow: ellipsis;">${item.desc}</p>
           <div style="font-size: 15px; font-weight: 900; color: #ffbc69; margin: 2px 0;">${item.price}</div>
-          <button type="button" onclick="event.stopPropagation(); window.open('${item.link}', '_blank')" style="background: #e67e22; color: white; border: none; font-size: 10px; padding: 6px 16px; border-radius: 5px; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 3px; box-shadow: 0 2px 6px rgba(230,126,34,0.3); transition: all 0.2s;">
-            🌌 minneでカートに入れる 🔗
+          <button type="button" disabled style="background: #7f8c8d; color: #bdc3c7; border: none; font-size: 10px; padding: 6px 16px; border-radius: 5px; font-weight: bold; cursor: not-allowed; display: flex; align-items: center; gap: 3px; box-shadow: none; transition: none;">
+            🚫 取引停止中 (閉鎖)
           </button>
         </div>
       `;
@@ -3740,7 +3740,7 @@ function showDarkMarketArrivedIntro() {
   const closeBtn = document.getElementById('btn-dark-close');
 
   if (textEl) {
-    textEl.textContent = '「ククク……無事に辿り着いたな。お前の健闘を称えよう。\n実を言うと、作者の『モアたろう』に無断で、未公開の作品を盗んできたのじゃ。フフフ……見たことない作品があるじゃろう？」';
+    textEl.textContent = '「ククク……無事に辿り着いたな。しかし、作者の『モアたろう』にこの裏取引ルートがバレてしまい、取引所は完全に閉鎖されてしまったのじゃ……。もう購入することはできんぞ。」';
   }
   if (yesBtn) {
     yesBtn.style.display = 'inline-block';
@@ -3998,15 +3998,15 @@ function showDarkMarketDialog() {
   if (darkMoaiGuideState === 'idle') {
     darkMarketDialogContext = 'guide_start';
     if (textEl) {
-      textEl.textContent = '……クックック。そこを行く旅人よ。\nお前、本物の『モアイロボの信者』か？';
+      textEl.textContent = '……クックック。そこを行く旅人よ。\n残念じゃが『闇の取引所』はすでに閉鎖されてしまったぞ。\n展示だけ見たいなら、真の信者か試してやろう。クイズに答えるか？';
     }
     if (yesBtn) {
       yesBtn.style.display = 'inline-block';
-      yesBtn.textContent = 'はい、信者です';
+      yesBtn.textContent = 'はい、答えます';
     }
     if (noBtn) {
       noBtn.style.display = 'inline-block';
-      noBtn.textContent = 'いいえ、違います';
+      noBtn.textContent = 'いいえ、結構です';
     }
     if (closeBtn) closeBtn.style.display = 'none';
   } else if (darkMoaiGuideState === 'waiting') {
@@ -4115,18 +4115,18 @@ function handleDarkMarketResponse(answer) {
   } else if (darkMarketDialogContext === 'arrived_intro1') {
     darkMarketDialogContext = 'arrived_intro2';
     if (textEl) {
-      textEl.textContent = '「それだけではない、今回はワシが勝手に値引きもして、販売してやろうと思うてな……。\nさすがに作者に怒られるから【完全秘密の取引】じゃよ。フフフ、心して見るが良いぞ。」';
+      textEl.textContent = '「見るだけならタダじゃ、展示品だけでも見ていくがよい。見るかね？」';
     }
     if (yesBtn) {
       yesBtn.style.display = 'inline-block';
-      yesBtn.textContent = '🌌 秘密の取引所を開く';
+      yesBtn.textContent = '🌌 展示を見る（購入不可）';
     }
     if (noBtn) {
       noBtn.style.display = 'none';
     }
     if (closeBtn) {
       closeBtn.style.display = 'inline-block';
-      closeBtn.textContent = '内緒にする（断る）';
+      closeBtn.textContent = '見ずに去る';
     }
   } else if (darkMarketDialogContext === 'arrived_intro2') {
     if (answer === 'yes') {
@@ -4678,19 +4678,18 @@ function finishGame(won) {
     couponHtml = `
       <div style="background: linear-gradient(180deg, #2a1e38 0%, #0b151b 100%); border: 3px solid #ffd700; border-radius: 16px; padding: 20px; margin: 15px auto 25px; max-width: 460px; box-shadow: 0 16px 40px rgba(0,0,0,0.8), inset 0 0 20px rgba(255,215,0,0.1); text-align: center; box-sizing: border-box; position: relative; overflow: hidden;">
         
-        <h3 style="color: #ffd700; margin: 0 0 10px 0; font-size: 22px; font-weight: 900; letter-spacing: 2px; text-shadow: 0 2px 8px rgba(255,215,0,0.6);">🎉 脱出成功 ＆ 感謝！！！ 🎉</h3>
-        <p style="margin: 0 0 15px 0; font-size: 14px; color: #fff; font-weight: bold; line-height: 1.5; text-align: left;">
-          ヨーグルトを無事に集め、作者の追跡から脱出できたぞ！<br>
-          ハンドメイドインジャパンフェス（HMJ）をお楽しみいただき、本当にありがとうございました！！！<br><br>
-          リアルイベントは閉幕いたしましたが、このゲームを遊んでくれたお前だけのための<b>『オンライン闇の取引所（minne）』はこれからオープンするぞ！</b><br>
-          ちょっと待っててくれ。
+        <h3 style="margin: 0 0 10px 0; color: #ffd700; font-size: 22px; font-weight: 900; letter-spacing: 1px;">🎉 ゲームクリア！！！ 🎉</h3>
+        <p style="margin: 0 0 15px 0; font-size: 14px; color: #fff; font-weight: bold; line-height: 1.6; text-align: left;">
+          ヨーグルトを無事に集めきったぞ！遊んでくれてありがとう！<br>
+          次回は<b>『デザインフェスタ vol.64（東京ビッグサイト）』</b>に出店予定！<br>
+          新作モアイや限定アイテムを多数用意して待ってるぞ！
         </p>
         
         ${itemsHtml}
 
-        <div style="background: linear-gradient(90deg, #8e44ad, #3498db); color: #fff; font-size: 15px; font-weight: 900; padding: 14px; border-radius: 8px; margin-top: 18px; box-shadow: 0 4px 15px rgba(142,68,173,0.5); text-shadow: 0 1px 3px rgba(0,0,0,0.5);">
-          🌌 オンライン闇の取引所（minne） 🌌<br>
-          <span style="font-size: 12px; display: block; margin-top: 6px; font-weight: bold; opacity: 0.95;">現在、ネット上に裏取引ルートを構築中だ。<br>オープン時は公式SNSでお知らせするぞ！</span>
+        <div style="background: linear-gradient(135deg, #00d2ff, #0077b6); color: #000; font-size: 15px; font-weight: 900; padding: 14px; border-radius: 8px; margin-top: 18px; box-shadow: 0 4px 15px rgba(0,210,255,0.4); text-align: center;">
+          🎪 次回出店：デザインフェスタ64 🎪<br>
+          <span style="font-size: 12px; display: block; margin-top: 6px; font-weight: bold; opacity: 0.9;">お品書きカタログで最新作品をチェックしてくれ！</span>
         </div>
 
         <!-- SNS Links for waiting updates -->

@@ -83,11 +83,17 @@
     /* ===== CAROUSEL VIEW ===== */
     .carousel-wrapper { overflow: hidden; position: relative; }
     .carousel-track { display: flex; transition: transform 0.45s cubic-bezier(0.25, 0.46, 0.45, 0.94); }
-    .carousel-slide { min-width: 100%; padding: 10px 24px 30px; display: flex; justify-content: center; }
+    .carousel-slide { min-width: 100%; padding: 10px 20px 30px; display: flex; justify-content: center; }
     .product-card-large {
       background: linear-gradient(145deg, #141420, #1e1e2e);
       border: 1px solid rgba(255,255,255,0.08); border-radius: 24px;
-      overflow: hidden; max-width: 500px; width: 100%; box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+      overflow: hidden; max-width: 540px; width: 100%; box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+    }
+    @media (max-width: 600px) {
+      .carousel-slide { padding: 6px 8px 24px; }
+      .product-card-large { border-radius: 16px; max-width: 100%; width: 100%; }
+      .thumb-strip { padding: 8px 10px 12px; gap: 6px; }
+      .thumb-item { width: 56px; min-width: 56px; height: 56px; border-radius: 8px; }
     }
     .main-product-img { width: 100%; aspect-ratio: 1/1; object-fit: contain; background: #000; display: block; }
     .product-info-large { padding: 20px 24px 28px; }
@@ -988,6 +994,23 @@
     window.selectCatalogVariant = selectCatalogVariant;
 
     // ===== Build tile & carousel =====
+    
+    // POS作品マスター（正式紹介文 approvedDescription）を最優先で取得するヘルパー
+    function getProductDescription(p) {
+      if (!p || !p.id) return "";
+      const wm = (window.worksMasterData && window.worksMasterData[p.id]) || {};
+      if (wm.approvedDescription && wm.approvedDescription.trim()) {
+        return wm.approvedDescription.trim();
+      }
+      if (typeof descriptionsData !== "undefined" && descriptionsData && descriptionsData[p.id] !== undefined && descriptionsData[p.id].trim()) {
+        return descriptionsData[p.id].trim();
+      }
+      if (wm.features && wm.features.trim()) {
+        return wm.features.trim();
+      }
+      return p.desc || "";
+    }
+
     function buildViews() {
       const allEvents = window.getAllEvents(window.eventConfigData);
       const config = window.eventConfigData[currentEventKey];
@@ -1090,7 +1113,7 @@
           const imgSrc = p.image || p.optimizedCover || (p.isDev ? 'images/dev_placeholder.gif' : (window.NO_IMAGE_PLACEHOLDER || 'images/dev_placeholder.gif'));
           const tilePos = p.imagePosition || 'center center';
           const tileFit = p.imageFit || 'cover';
-          const imageHtml = `<img class="main-product-img" src="${imgSrc}" style="border-radius:12px 12px 0 0; object-fit:${tileFit}; object-position:${tilePos}; ${(!p.image && !p.optimizedCover && p.isDev) ? 'border:1px dashed rgba(255,255,255,0.1);' : ''}" alt="${(p.name || p.id || '').replace(/\n/g,' ')}" onerror="this.src=window.NO_IMAGE_PLACEHOLDER||'images/dev_placeholder.gif'">`;
+          const imageHtml = `<img class="main-product-img" decoding="async" src="${imgSrc}" style="border-radius:12px 12px 0 0; object-fit:${tileFit}; object-position:${tilePos}; ${(!p.image && !p.optimizedCover && p.isDev) ? 'border:1px dashed rgba(255,255,255,0.1);' : ''}" alt="${(p.name || p.id || '').replace(/\n/g,' ')}" onerror="this.src=window.NO_IMAGE_PLACEHOLDER||'images/dev_placeholder.gif'">`;
 
           const topLeftBadgeHtml = p.isDev
             ? `<div class="dev-badge-tile">${DEV_STATUSES[parseInt(p.status) || 0].label}</div>`
@@ -1146,7 +1169,7 @@
                   <div class="thumb-item ${url === p.image ? 'active' : ''}" onclick="setMainImg(${i},'${url}',this)">
                     ${isVid ? 
                       '<div style="width:100%; height:100%; display:flex; align-items:center; justify-content:center; background:#111; color:var(--accent); font-size:10px; font-weight:bold; border-radius:4px;">MOVIE</div>' :
-                      `<img src="${url}" loading="lazy" alt="">`
+                      `<img src="${url}" loading="lazy" decoding="async" loading="lazy" alt="">`
                     }
                   </div>`;
               }).join('')}
@@ -1158,7 +1181,7 @@
           const largeImgSrc = p.image || p.optimizedCover || (p.isDev ? 'images/dev_placeholder.gif' : (window.NO_IMAGE_PLACEHOLDER || 'images/dev_placeholder.gif'));
           const cPos = p.imagePosition || 'center center';
           const cFit = p.imageFit || 'cover';
-          const largeImageHtml = `<img class="main-product-img" id="main-img-${i}" src="${largeImgSrc}" style="width:100%; aspect-ratio:1; object-fit:${cFit}; object-position:${cPos}; border-radius:12px; ${(!p.image && !p.optimizedCover && p.isDev) ? 'border:1px dashed rgba(255,255,255,0.1);' : ''}" alt="${(p.name || p.id || '').replace(/\n/g,' ')}" onerror="this.src=window.NO_IMAGE_PLACEHOLDER||'images/dev_placeholder.gif'">
+          const largeImageHtml = `<img class="main-product-img" decoding="async" id="main-img-${i}" src="${largeImgSrc}" style="width:100%; aspect-ratio:1; object-fit:${cFit}; object-position:${cPos}; border-radius:12px; ${(!p.image && !p.optimizedCover && p.isDev) ? 'border:1px dashed rgba(255,255,255,0.1);' : ''}" alt="${(p.name || p.id || '').replace(/\n/g,' ')}" onerror="this.src=window.NO_IMAGE_PLACEHOLDER||'images/dev_placeholder.gif'">
                <video class="main-product-img" id="main-video-${i}" style="display:none; width:100%; height:auto; aspect-ratio:1/1; object-fit:cover;" loop muted playsinline controls></video>`;
 
           // バリエーション切替UI（代表枠カードまたは統合バリエーションカード用）
@@ -1187,7 +1210,7 @@
                       ${stockLargeHtml}
                     </div>
                   </div>
-                  <div class="product-desc" id="desc-text-${p.id}">${(p.desc || '').replace(/\n/g, '<br>')}</div>
+                  <div class="product-desc" id="desc-text-${p.id}">${getProductDescription(p).replace(/\n/g, '<br>')}</div>
                   
                   ${variantSelectorHtml}
                   ${linkedGroupJumpHtml}
@@ -1509,17 +1532,26 @@
     // ===== Thumb Strip Drag to Scroll (PC) =====
     function enableDragScroll() {
       document.querySelectorAll('.thumb-strip').forEach(strip => {
-        // Prevent touch events from bubbling up to carousel-track
         strip.addEventListener('touchstart', e => e.stopPropagation(), { passive: true });
         strip.addEventListener('touchmove', e => e.stopPropagation(), { passive: true });
         strip.addEventListener('touchend', e => e.stopPropagation());
 
+        // PCマウスホイール横スクロール (上下ホイールでスルスル横移動)
+        strip.addEventListener('wheel', (e) => {
+          if (e.deltaY !== 0) {
+            e.preventDefault();
+            strip.scrollLeft += e.deltaY * 1.2;
+          }
+        }, { passive: false });
+
         let isDown = false;
         let startX;
         let scrollLeft;
+        let hasMoved = false;
         
         strip.addEventListener('mousedown', (e) => {
           isDown = true;
+          hasMoved = false;
           strip.style.cursor = 'grabbing';
           startX = e.pageX - strip.offsetLeft;
           scrollLeft = strip.scrollLeft;
@@ -1534,11 +1566,22 @@
         });
         strip.addEventListener('mousemove', (e) => {
           if (!isDown) return;
-          e.preventDefault();
           const x = e.pageX - strip.offsetLeft;
-          const walk = (x - startX) * 2;
-          strip.scrollLeft = scrollLeft - walk;
+          const walk = (x - startX);
+          if (Math.abs(walk) > 5) {
+            hasMoved = true;
+            e.preventDefault();
+            strip.scrollLeft = scrollLeft - walk * 1.5;
+          }
         });
+
+        // ドラッグ移動した時は写真切り替えクリックをキャンセル
+        strip.addEventListener('click', (e) => {
+          if (hasMoved) {
+            e.stopPropagation();
+            e.preventDefault();
+          }
+        }, true);
       });
     }
 
@@ -1587,6 +1630,7 @@
     onSnapshot(doc(db, "settings", "works_master"), (docSnap) => {
       window.worksMasterData = docSnap.exists() ? docSnap.data() : {};
       buildViews();
+      updateAllDescriptions();
     }, (error) => {
       console.error("Firestore works_master read error:", error);
     });
@@ -1864,13 +1908,12 @@
     });
 
     function updateAllDescriptions() {
-      const rendered = window.currentRenderedProducts || window.getFullMasterProducts(window.customProductsData);
+      const rendered = window.currentRenderedProducts || (window.getFullMasterProducts ? window.getFullMasterProducts(window.customProductsData) : []);
       rendered.forEach(p => {
         if (!p.id) return;
         const el = document.getElementById(`desc-text-${p.id}`);
         if (el) {
-          const customDesc = descriptionsData[p.id];
-          el.innerHTML = (customDesc !== undefined ? customDesc : (p.desc || '')).replace(/\n/g, '<br>');
+          el.innerHTML = getProductDescription(p).replace(/\n/g, '<br>');
         }
       });
     }

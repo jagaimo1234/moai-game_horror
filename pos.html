@@ -1431,9 +1431,14 @@
           <textarea id="work-detail-approved-desc" class="form-input" rows="3" style="margin-top:4px; font-size:13px;" placeholder="例: 酒よりヨーグルト好きなモアイロボット。組み立て式フィギュア。"></textarea>
         </div>
 
-        <div style="display:flex; justify-content:flex-end; gap:10px;">
-          <button class="btn" style="background:#444; color:white;" onclick="document.getElementById('work-detail-modal').style.display='none'">キャンセル</button>
-          <button class="btn btn-primary" onclick="saveWorkDetail()" style="padding:8px 24px;">保存して登録済みにする</button>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:20px; border-top:1px solid rgba(255,255,255,0.1); padding-top:16px;">
+          <button type="button" class="btn" onclick="deleteCurrentWork()" style="background:rgba(231,76,60,0.15); border:1px solid #e74c3c; color:#ff6b6b; font-size:12px; padding:8px 16px; font-weight:bold; display:flex; align-items:center; gap:6px; cursor:pointer;" title="この作品をマスター・クラウドから完全に削除します">
+            🗑️ この作品・登録を削除
+          </button>
+          <div style="display:flex; gap:10px;">
+            <button class="btn" style="background:#444; color:white;" onclick="document.getElementById('work-detail-modal').style.display='none'">キャンセル</button>
+            <button class="btn btn-primary" onclick="saveWorkDetail()" style="padding:8px 24px;">保存して登録済みにする</button>
+          </div>
         </div>
       </div>
     </div>
@@ -1527,29 +1532,93 @@
             </div>
           </div>
 
-          <!-- Section 1.5: 📐 写真の位置・トリミング調整パネル -->
-          <div id="img-position-adjust-panel" style="background:#13151f; border:1px solid rgba(0,210,255,0.3); border-radius:12px; padding:12px 16px;">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; flex-wrap:wrap; gap:6px;">
-              <span style="font-size:13px; font-weight:bold; color:#00d2ff; display:flex; align-items:center; gap:6px;">
-                📐 お品書きでの写真の位置・トリミング調整（長方形写真対応）
+          <!-- Section 1.5: 🔍 拡大プレビュー ＆ 表示比率・トリミング調整パネル -->
+          <div id="img-position-adjust-panel" style="background:#13151f; border:1px solid rgba(0,210,255,0.35); border-radius:12px; padding:14px 18px; box-shadow:0 6px 20px rgba(0,0,0,0.5);">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; flex-wrap:wrap; gap:8px;">
+              <span style="font-size:14px; font-weight:bold; color:#00d2ff; display:flex; align-items:center; gap:6px;">
+                🔍 拡大プレビュー ＆ 表示比率・トリミング調整
               </span>
-              <span style="font-size:11px; color:#aaa;">プレビューを見ながら長方形写真の見せたい位置を調整できます</span>
+              <span style="font-size:11px; color:#aaa;">
+                下の候補写真をタップするとここに高画質拡大表示されます。比率やトリミング位置を調整できます。
+              </span>
             </div>
 
-            <div style="display:flex; gap:16px; align-items:center; flex-wrap:wrap;">
-              <!-- Live Preview Box (1:1 正方形) -->
-              <div style="flex-shrink:0; text-align:center;">
-                <div style="width:110px; height:110px; border-radius:12px; overflow:hidden; background:#000; border:2px solid var(--accent); box-shadow:0 4px 15px rgba(0,0,0,0.6); margin:0 auto; position:relative;">
-                  <img id="img-pos-preview" src="" style="width:100%; height:100%; object-fit:cover; object-position:center center;" onerror="this.src=window.NO_IMAGE_PLACEHOLDER||this.src">
-                  <div style="position:absolute; bottom:2px; right:4px; font-size:9px; background:rgba(0,0,0,0.7); color:#00d2ff; padding:1px 4px; border-radius:3px;">1:1 お品書き枠</div>
+            <!-- メイングリッド (左: 大画面プレビュー / 右: 比率・位置・アクション) -->
+            <div style="display:grid; grid-template-columns: minmax(300px, 400px) 1fr; gap:18px; align-items:start;">
+              
+              <!-- 左: 拡大プレビュー画面 -->
+              <div style="display:flex; flex-direction:column; gap:8px;">
+                <div style="width:100%; height:330px; background:radial-gradient(circle at center, #1b2030 0%, #0a0c12 100%); border:2px solid rgba(0,210,255,0.4); border-radius:12px; overflow:hidden; position:relative; display:flex; align-items:center; justify-content:center; box-shadow:0 8px 30px rgba(0,0,0,0.8);">
+                  
+                  <!-- アスペクト比プレビュー枠 (CSS aspect-ratio で可変) -->
+                  <div id="img-preview-frame" style="width:min(310px, 100%); height:min(310px, 100%); aspect-ratio:1/1; display:flex; align-items:center; justify-content:center; position:relative; overflow:hidden; border-radius:8px; border:1.5px dashed rgba(0,210,255,0.5); box-shadow:0 0 20px rgba(0,0,0,0.8); transition:all 0.25s cubic-bezier(0.4, 0, 0.2, 1); background:#000;">
+                    <img id="img-pos-preview" src="" style="width:100%; height:100%; object-fit:cover; object-position:50% 50%;" onerror="this.src=window.NO_IMAGE_PLACEHOLDER||this.src">
+                  </div>
+
+                  <!-- 状態オーバーレイバッジ (左上) -->
+                  <div id="img-preview-badge-status" style="position:absolute; top:8px; left:8px; background:rgba(0,0,0,0.8); backdrop-filter:blur(6px); color:gold; font-size:11px; font-weight:bold; padding:4px 9px; border-radius:6px; border:1px solid rgba(255,215,0,0.4); box-shadow:0 2px 8px rgba(0,0,0,0.6); pointer-events:none;">
+                    ★ 代表カバー画像
+                  </div>
+
+                  <!-- 比率バッジ (右下) -->
+                  <div id="img-preview-ratio-badge" style="position:absolute; bottom:8px; right:8px; background:rgba(0,0,0,0.85); backdrop-filter:blur(6px); color:#00d2ff; font-size:10px; font-weight:bold; padding:3px 8px; border-radius:5px; border:1px solid rgba(0,210,255,0.4); pointer-events:none;">
+                    ⏹️ 1:1 正方形
+                  </div>
+                </div>
+
+                <!-- ファイル名＆種別バー -->
+                <div style="display:flex; justify-content:space-between; align-items:center; font-size:11px; color:#aaa; padding:2px 4px; background:rgba(255,255,255,0.03); border-radius:6px; border:1px solid rgba(255,255,255,0.06);">
+                  <span id="img-preview-filename" style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:260px; font-family:monospace;" title="">画像を選択してください</span>
+                  <span id="img-preview-kind" style="color:#70d6ff; font-weight:bold; font-size:10px; background:rgba(112,214,255,0.15); padding:1px 6px; border-radius:4px;">Studio</span>
                 </div>
               </div>
 
-              <!-- Controls -->
-              <div style="flex:1; min-width:260px; display:flex; flex-direction:column; gap:8px;">
-                <!-- Fit Toggle -->
-                <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
-                  <span style="font-size:11px; font-weight:bold; color:#ddd;">表示モード:</span>
+              <!-- 右: 設定コントロール ＆ 決定アクション -->
+              <div style="display:flex; flex-direction:column; gap:12px;">
+
+                <!-- アクションバー (代表にする・お品書きに追加/除外) -->
+                <div style="background:rgba(255,255,255,0.04); border:1px solid rgba(0,210,255,0.25); border-radius:10px; padding:10px 14px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px;">
+                  <div>
+                    <div style="font-size:12px; font-weight:bold; color:#fff;">この拡大写真の採用操作</div>
+                    <div id="img-preview-subdesc" style="font-size:10px; color:#aaa;">プレビューを確認してワンクリックで決定できます</div>
+                  </div>
+                  <div style="display:flex; gap:8px;">
+                    <button type="button" id="btn-inspect-promote" onclick="promoteInspectedImage()" class="btn" style="background:rgba(255,215,0,0.15); border:1.5px solid gold; color:gold; font-size:11px; font-weight:bold; padding:6px 12px; border-radius:6px; cursor:pointer; display:flex; align-items:center; gap:4px;">
+                      <span>★</span> 代表カバーに設定
+                    </button>
+                    <button type="button" id="btn-inspect-toggle" onclick="toggleInspectedImage()" class="btn" style="background:rgba(0,210,255,0.2); border:1.5px solid var(--accent); color:#fff; font-size:11px; font-weight:bold; padding:6px 12px; border-radius:6px; cursor:pointer; display:flex; align-items:center; gap:4px;">
+                      <span>✓</span> お品書きに追加
+                    </button>
+                  </div>
+                </div>
+
+                <!-- 1. 表示比率（アスペクト比）選択ボタン群 -->
+                <div style="background:rgba(0,0,0,0.25); border:1px solid rgba(255,255,255,0.08); border-radius:10px; padding:10px 12px;">
+                  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                    <span style="font-size:12px; font-weight:bold; color:#ffd166; display:flex; align-items:center; gap:5px;">
+                      <span>📐</span> 写真の表示比率 (アスペクト比)
+                    </span>
+                    <span style="font-size:10px; color:#888;">正方形にするか写真本来の比率にするかを選択</span>
+                  </div>
+                  <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap:8px;">
+                    <button type="button" id="btn-ratio-1-1" onclick="setImageAspectRatio('1:1')" class="btn ratio-btn" style="padding:8px 8px; font-size:12px; font-weight:bold; border-radius:8px; cursor:pointer; background:rgba(0,210,255,0.22); border:1.5px solid var(--accent); color:#fff; text-align:center; transition:all 0.2s;">
+                      ⏹️ 1:1 正方形<br><span style="font-size:9px; opacity:0.75; font-weight:normal;">お品書き基本枠</span>
+                    </button>
+                    <button type="button" id="btn-ratio-original" onclick="setImageAspectRatio('original')" class="btn ratio-btn" style="padding:8px 8px; font-size:12px; font-weight:bold; border-radius:8px; cursor:pointer; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.18); color:#bbb; text-align:center; transition:all 0.2s;">
+                      🖼️ 写真そのまま<br><span style="font-size:9px; opacity:0.75; font-weight:normal;">元比率で全体表示</span>
+                    </button>
+                    <button type="button" id="btn-ratio-3-4" onclick="setImageAspectRatio('3:4')" class="btn ratio-btn" style="padding:8px 8px; font-size:12px; font-weight:bold; border-radius:8px; cursor:pointer; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.18); color:#bbb; text-align:center; transition:all 0.2s;">
+                      📱 縦長 (3:4)<br><span style="font-size:9px; opacity:0.75; font-weight:normal;">SNS・Creema向き</span>
+                    </button>
+                    <button type="button" id="btn-ratio-4-3" onclick="setImageAspectRatio('4:3')" class="btn ratio-btn" style="padding:8px 8px; font-size:12px; font-weight:bold; border-radius:8px; cursor:pointer; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.18); color:#bbb; text-align:center; transition:all 0.2s;">
+                      🖥️ 横長 (4:3)<br><span style="font-size:9px; opacity:0.75; font-weight:normal;">ワイド構図</span>
+                    </button>
+                  </div>
+                </div>
+
+                <!-- 2. 表示モード (フィット切替) -->
+                <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap; padding:4px 2px;">
+                  <span style="font-size:11px; font-weight:bold; color:#ddd;">枠内の収まり方:</span>
                   <label style="display:flex; align-items:center; gap:4px; font-size:12px; cursor:pointer; color:#fff;">
                     <input type="radio" name="img-fit-radio" value="cover" checked onchange="onChangeImageFit(this.value)" style="accent-color:var(--accent);">
                     <span>枠いっぱいに広げる（余白なし・推奨）</span>
@@ -1560,33 +1629,37 @@
                   </label>
                 </div>
 
-                <!-- Position Presets -->
-                <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
-                  <span style="font-size:11px; font-weight:bold; color:#ddd;">位置プリセット:</span>
-                  <button type="button" onclick="setImagePositionPreset(50, 15)" style="background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.2); color:#fff; font-size:11px; padding:3px 8px; border-radius:5px; cursor:pointer;">🔝 上寄り (顔・文字)</button>
-                  <button type="button" onclick="setImagePositionPreset(50, 50)" style="background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.2); color:#fff; font-size:11px; padding:3px 8px; border-radius:5px; cursor:pointer;">⏺️ 中央</button>
-                  <button type="button" onclick="setImagePositionPreset(50, 85)" style="background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.2); color:#fff; font-size:11px; padding:3px 8px; border-radius:5px; cursor:pointer;">🔽 下寄り</button>
-                  <button type="button" onclick="setImagePositionPreset(15, 50)" style="background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.2); color:#fff; font-size:11px; padding:3px 8px; border-radius:5px; cursor:pointer;">◀️ 左寄り</button>
-                  <button type="button" onclick="setImagePositionPreset(85, 50)" style="background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.2); color:#fff; font-size:11px; padding:3px 8px; border-radius:5px; cursor:pointer;">▶️ 右寄り</button>
+                <!-- 3. 位置調整 (スライダー＆プリセット) -->
+                <div id="img-position-controls-box" style="background:rgba(0,0,0,0.2); border:1px solid rgba(255,255,255,0.06); border-radius:10px; padding:10px 12px;">
+                  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; flex-wrap:wrap; gap:4px;">
+                    <span style="font-size:11px; font-weight:bold; color:#ddd;">📍 見せたい位置（トリミング調整）:</span>
+                    <div style="display:flex; gap:4px; flex-wrap:wrap;">
+                      <button type="button" onclick="setImagePositionPreset(50, 15)" style="background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.2); color:#fff; font-size:10px; padding:2px 7px; border-radius:4px; cursor:pointer;">🔝 上 (顔・文字)</button>
+                      <button type="button" onclick="setImagePositionPreset(50, 50)" style="background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.2); color:#fff; font-size:10px; padding:2px 7px; border-radius:4px; cursor:pointer;">⏺️ 中央</button>
+                      <button type="button" onclick="setImagePositionPreset(50, 85)" style="background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.2); color:#fff; font-size:10px; padding:2px 7px; border-radius:4px; cursor:pointer;">🔽 下寄り</button>
+                      <button type="button" onclick="setImagePositionPreset(15, 50)" style="background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.2); color:#fff; font-size:10px; padding:2px 7px; border-radius:4px; cursor:pointer;">◀️ 左</button>
+                      <button type="button" onclick="setImagePositionPreset(85, 50)" style="background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.2); color:#fff; font-size:10px; padding:2px 7px; border-radius:4px; cursor:pointer;">▶️ 右</button>
+                    </div>
+                  </div>
+
+                  <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+                    <div>
+                      <div style="display:flex; justify-content:space-between; font-size:11px; color:#aaa; margin-bottom:2px;">
+                        <span>↕️ 上下位置</span>
+                        <span id="img-pos-y-val" style="color:var(--accent); font-weight:bold;">50%</span>
+                      </div>
+                      <input type="range" id="img-pos-y-slider" min="0" max="100" value="50" oninput="onSlideImagePosition()" style="width:100%; accent-color:var(--accent); cursor:pointer;">
+                    </div>
+                    <div>
+                      <div style="display:flex; justify-content:space-between; font-size:11px; color:#aaa; margin-bottom:2px;">
+                        <span>↔️ 左右位置</span>
+                        <span id="img-pos-x-val" style="color:var(--accent); font-weight:bold;">50%</span>
+                      </div>
+                      <input type="range" id="img-pos-x-slider" min="0" max="100" value="50" oninput="onSlideImagePosition()" style="width:100%; accent-color:var(--accent); cursor:pointer;">
+                    </div>
+                  </div>
                 </div>
 
-                <!-- Sliders -->
-                <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:2px;">
-                  <div>
-                    <div style="display:flex; justify-content:space-between; font-size:11px; color:#aaa; margin-bottom:2px;">
-                      <span>↕️ 上下位置</span>
-                      <span id="img-pos-y-val" style="color:var(--accent); font-weight:bold;">50%</span>
-                    </div>
-                    <input type="range" id="img-pos-y-slider" min="0" max="100" value="50" oninput="onSlideImagePosition()" style="width:100%; accent-color:var(--accent); cursor:pointer;">
-                  </div>
-                  <div>
-                    <div style="display:flex; justify-content:space-between; font-size:11px; color:#aaa; margin-bottom:2px;">
-                      <span>↔️ 左右位置</span>
-                      <span id="img-pos-x-val" style="color:var(--accent); font-weight:bold;">50%</span>
-                    </div>
-                    <input type="range" id="img-pos-x-slider" min="0" max="100" value="50" oninput="onSlideImagePosition()" style="width:100%; accent-color:var(--accent); cursor:pointer;">
-                  </div>
-                </div>
               </div>
             </div>
           </div>
@@ -3316,6 +3389,8 @@
             for (const k of Object.keys(raw)) {
               if (k.includes('.')) {
                 hasCorrupt = true;
+              } else if (k === 'moai_losscut' || k === 'moai_losscut_RAW_20261105_201128_001') {
+                hasCorrupt = true;
               } else {
                 cleaned[k] = raw[k];
               }
@@ -3460,6 +3535,15 @@
           });
 
           // ドキュメント肥大化（1MB制限）検知と自動クレンジング
+          let needsRemoveDuplicate = false;
+          ['moai_losscut', 'moai_losscut_RAW_20261105_201128_001'].forEach(badKey => {
+            if (badKey in mergedMaster) {
+              delete mergedMaster[badKey];
+              needsRemoveDuplicate = true;
+            }
+          });
+          if (needsRemoveDuplicate) hasNewSeed = true;
+
           const rawDocStr = JSON.stringify(currentData);
           const needsCleanse = rawDocStr.length > 250000 || rawDocStr.includes('"optimizedImages"') || rawDocStr.includes('"imageBackups"');
           if (needsCleanse && auth.currentUser) {
@@ -4467,7 +4551,7 @@
           <div class="settings-row" style="flex-direction:column; align-items:stretch;">
             <div style="display:flex; gap:12px; align-items:center; justify-content:space-between; flex-wrap:wrap;">
               <div style="display:flex; gap:12px; align-items:center; flex:1; min-width:200px;">
-                <img src="${p.image}" alt="">
+                <img src="${p.image}" alt="" style="object-position:${(window.worksMasterData && window.worksMasterData[p.id]?.imagePosition) || '50% 50%'}; object-fit:${(window.worksMasterData && window.worksMasterData[p.id]?.imageFit) || 'cover'};">
                 <div class="settings-info">
                   <div class="settings-name" style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
                     <span>${(p.name || p.id || '').replace(/\n/g, ' ')}</span>
@@ -5521,11 +5605,11 @@
         list.style.gridTemplateColumns = 'repeat(auto-fill, minmax(150px, 1fr))';
       }
 
-      displayItems.forEach(p => {
+      displayItems.forEach((p, idx) => {
         const isChecked = selectedIds.includes(p.id);
         const imageHtml = p.isDev 
-          ? (p.image ? `<img src="${p.image}" style="width:100%; aspect-ratio:1; object-fit:cover; border-radius:8px; opacity:${isChecked ? 1 : 0.4};">` : `<img src="images/dev_placeholder.gif" style="width:100%; aspect-ratio:1; object-fit:cover; border-radius:8px; opacity:${isChecked ? 1 : 0.4}; border:1px dashed rgba(255,255,255,0.2);">`)
-          : `<img src="${p.image}" style="width:100%; aspect-ratio:1; object-fit:cover; border-radius:8px; opacity:${isChecked ? 1 : 0.4};">`;
+          ? (p.image ? `<img src="${p.image}" style="width:100%; aspect-ratio:1; object-fit:cover; border-radius:8px; opacity:${isChecked ? 1 : 0.4}; pointer-events:none;">` : `<img src="images/dev_placeholder.gif" style="width:100%; aspect-ratio:1; object-fit:cover; border-radius:8px; opacity:${isChecked ? 1 : 0.4}; border:1px dashed rgba(255,255,255,0.2); pointer-events:none;">`)
+          : `<img src="${p.image}" style="width:100%; aspect-ratio:1; object-fit:cover; border-radius:8px; opacity:${isChecked ? 1 : 0.4}; pointer-events:none;">`;
 
         const statusObj = p.isDev ? window.DEV_STATUSES[parseInt(p.status) || 0] : null;
         const statusBadge = statusObj ? `
@@ -5535,52 +5619,90 @@
         ` : '';
 
         const devControls = p.isDev ? `
-          <div style="position:absolute; bottom:8px; left:8px; display:flex; gap:5px;">
+          <div style="position:absolute; bottom:8px; left:8px; display:flex; gap:5px; z-index:3;">
             <div onclick="event.stopPropagation(); editDevProduct('${p.id}')" style="background:rgba(255,255,255,0.2); border-radius:4px; width:28px; height:28px; display:flex; align-items:center; justify-content:center; font-size:14px; cursor:pointer; color:white;" title="名前を変更">✏️</div>
             <div onclick="event.stopPropagation(); openDevProductModal('${p.id}')" style="background:var(--accent); border-radius:4px; width:28px; height:28px; display:flex; align-items:center; justify-content:center; font-size:14px; cursor:pointer; color:white; box-shadow:0 2px 4px rgba(0,0,0,0.3);" title="進捗を更新">✨</div>
             <div onclick="event.stopPropagation(); deleteDevProduct('${p.id}')" style="background:rgba(255,0,0,0.3); border-radius:4px; width:28px; height:28px; display:flex; align-items:center; justify-content:center; font-size:14px; cursor:pointer; color:white;" title="削除">🗑️</div>
           </div>
         ` : '';
 
+        // 並べ替え操作コントロール（ドラッグハンドル、先頭・末尾・順位直接入力・1つ上下）
         const sortControls = (isChecked && selectionSortMode) ? `
-          <div style="position:absolute; top:50%; left:8px; transform:translateY(-50%); display:flex; flex-direction:column; gap:8px; background:rgba(0,0,0,0.6); padding:4px; border-radius:8px; border:1px solid rgba(255,255,255,0.1);">
-            <div onclick="event.stopPropagation(); moveProduct('${p.id}', 'up')" style="background:var(--accent); border-radius:4px; width:36px; height:36px; display:flex; align-items:center; justify-content:center; font-size:18px; cursor:pointer; color:white; font-weight:bold;">▲</div>
-            <div onclick="event.stopPropagation(); moveProduct('${p.id}', 'down')" style="background:var(--accent); border-radius:4px; width:36px; height:36px; display:flex; align-items:center; justify-content:center; font-size:18px; cursor:pointer; color:white; font-weight:bold;">▼</div>
+          <div style="position:absolute; top:8px; left:8px; display:flex; flex-direction:column; gap:4px; background:rgba(0,0,0,0.85); backdrop-filter:blur(6px); padding:4px; border-radius:8px; border:1px solid rgba(0,210,255,0.5); z-index:4; box-shadow:0 4px 15px rgba(0,0,0,0.6);">
+            <!-- 先頭へ一発移動 -->
+            <button type="button" onclick="event.stopPropagation(); moveProductToEdge('${p.id}', 'top')" style="background:rgba(255,215,0,0.2); border:1px solid gold; color:gold; border-radius:4px; width:32px; height:26px; font-size:11px; font-weight:bold; cursor:pointer; display:flex; align-items:center; justify-content:center;" title="一番最初（先頭・1番目）へ移動">⬆️</button>
+            <!-- 1つ上へ -->
+            <button type="button" onclick="event.stopPropagation(); moveProduct('${p.id}', 'up')" style="background:var(--accent); border:none; border-radius:4px; width:32px; height:26px; font-size:14px; cursor:pointer; color:#000; font-weight:bold; display:flex; align-items:center; justify-content:center;" title="1つ前へ移動">▲</button>
+            <!-- 順位直接指定 -->
+            <button type="button" onclick="event.stopPropagation(); promptMoveProductIndex('${p.id}', ${idx + 1}, ${displayItems.length})" style="background:rgba(255,255,255,0.15); border:1px solid rgba(255,255,255,0.3); color:#fff; border-radius:4px; width:32px; height:24px; font-size:10px; font-weight:bold; cursor:pointer; display:flex; align-items:center; justify-content:center;" title="指定した順位番号へジャンプ移動">#${idx + 1}</button>
+            <!-- 1つ下へ -->
+            <button type="button" onclick="event.stopPropagation(); moveProduct('${p.id}', 'down')" style="background:var(--accent); border:none; border-radius:4px; width:32px; height:26px; font-size:14px; cursor:pointer; color:#000; font-weight:bold; display:flex; align-items:center; justify-content:center;" title="1つ後ろへ移動">▼</button>
+            <!-- 末尾へ一発移動 -->
+            <button type="button" onclick="event.stopPropagation(); moveProductToEdge('${p.id}', 'bottom')" style="background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.25); color:#aaa; border-radius:4px; width:32px; height:26px; font-size:11px; cursor:pointer; display:flex; align-items:center; justify-content:center;" title="一番最後（末尾）へ移動">⬇️</button>
           </div>
         ` : '';
 
-        const cardPadding = selectionSortMode ? '15px' : '10px';
-
+        const cardPadding = selectionSortMode ? '14px' : '10px';
         const isPrintSelected = printSelection.includes(p.id);
 
+        // 誤消去防止：並べ替えモード中はカード余白クリックで出品を絶対に外さない！
+        const cardClickAction = selectionSortMode ? '' : `onclick="toggleSelection('${p.id}')"`;
+
         list.innerHTML += `
-          <div style="background:var(--panel-bg); border:2px solid ${isChecked ? 'var(--accent)' : 'var(--border)'}; border-radius:12px; padding:${cardPadding}; cursor:pointer; position:relative; transition: all 0.2s;" onclick="toggleSelection('${p.id}')">
+          <div id="selection-card-${p.id}"
+               class="${selectionSortMode ? 'selection-drag-target' : ''}"
+               draggable="${selectionSortMode}"
+               ondragstart="${selectionSortMode ? `handleSelectionDragStart(event, '${p.id}')` : ''}"
+               ondragend="${selectionSortMode ? `handleSelectionDragEnd(event, '${p.id}')` : ''}"
+               ondragover="${selectionSortMode ? 'handleSelectionDragOver(event)' : ''}"
+               ondragenter="${selectionSortMode ? `handleSelectionDragEnter(event, '${p.id}')` : ''}"
+               ondragleave="${selectionSortMode ? `handleSelectionDragLeave(event, '${p.id}')` : ''}"
+               ondrop="${selectionSortMode ? `handleSelectionDrop(event, '${p.id}')` : ''}"
+               style="background:var(--panel-bg); border:2px solid ${isChecked ? 'var(--accent)' : 'var(--border)'}; border-radius:12px; padding:${cardPadding}; cursor:${selectionSortMode ? 'grab' : 'pointer'}; position:relative; transition: transform 0.15s, box-shadow 0.15s;"
+               ${cardClickAction}
+               title="${selectionSortMode ? 'ドラッグ＆ドロップで任意の位置へ並べ替えできます' : 'クリックで出品切替'}">
             <div style="position:relative;">
               ${imageHtml}
               ${statusBadge}
-              <input type="checkbox" ${isChecked ? 'checked' : ''} style="position:absolute; top:8px; right:8px; width:22px; height:22px; accent-color:var(--accent);" title="イベントに出品する">
+
+              <!-- 順位バッジ (並べ替えモード時) -->
+              ${selectionSortMode ? `
+                <div style="position:absolute; top:8px; right:38px; background:rgba(0,210,255,0.9); color:#000; font-size:11px; font-weight:bold; padding:2px 7px; border-radius:6px; box-shadow:0 2px 6px rgba(0,0,0,0.6); pointer-events:none; z-index:3;">
+                  No. ${idx + 1}
+                </div>
+              ` : ''}
+
+              <!-- 出品チェックボックス（クリックで確実に出品切替） -->
+              <input type="checkbox" ${isChecked ? 'checked' : ''} 
+                     onclick="event.stopPropagation(); toggleSelection('${p.id}')"
+                     style="position:absolute; top:8px; right:8px; width:22px; height:22px; accent-color:var(--accent); cursor:pointer; z-index:3;" 
+                     title="イベントに出品する">
               
               <!-- 印刷用選択チェックボックス -->
               <div onclick="event.stopPropagation(); togglePrintSelection('${p.id}')" 
                    style="position:absolute; bottom:8px; right:8px; background:${isPrintSelected ? '#00d2ff' : 'rgba(0,0,0,0.6)'}; 
                           border-radius:6px; padding:4px 8px; display:flex; align-items:center; gap:4px; font-size:12px; 
                           cursor:pointer; color:white; border:1px solid ${isPrintSelected ? '#00d2ff' : 'rgba(255,255,255,0.3)'}; 
-                          box-shadow: 0 2px 4px rgba(0,0,0,0.3);" 
+                          box-shadow: 0 2px 4px rgba(0,0,0,0.3); z-index:3;" 
                    title="一括印刷に含める">
                 <input type="checkbox" ${isPrintSelected ? 'checked' : ''} style="width:16px; height:16px; cursor:pointer; pointer-events:none;">
                 🖨️
               </div>
 
-              <div onclick="event.stopPropagation(); openPrintTileModal('${p.id}')" style="position:absolute; top:8px; left:8px; background:rgba(0,0,0,0.6); border-radius:4px; width:28px; height:28px; display:flex; align-items:center; justify-content:center; font-size:14px; cursor:pointer; color:white; border:1px solid rgba(255,255,255,0.2);" title="この作品を単独で印刷">🔍</div>
+              ${!selectionSortMode ? `<div onclick="event.stopPropagation(); openPrintTileModal('${p.id}')" style="position:absolute; top:8px; left:8px; background:rgba(0,0,0,0.6); border-radius:4px; width:28px; height:28px; display:flex; align-items:center; justify-content:center; font-size:14px; cursor:pointer; color:white; border:1px solid rgba(255,255,255,0.2);" title="この作品を単独で印刷">🔍</div>` : ''}
               ${devControls}
               ${sortControls}
             </div>
             <div style="font-size:${selectionSortMode ? '14px' : '12px'}; margin-top:10px; font-weight:${selectionSortMode ? 'bold' : 'normal'}; height:36px; overflow:hidden; color:${isChecked ? 'white' : 'rgba(255,255,255,0.4)'}">${p.isDev ? '❓ ' : ''}${(p.name || p.id || '').replace(/\n/g, ' ')}</div>
-            ${selectionSortMode && isChecked ? `<div style="font-size:10px; color:var(--accent); margin-top:4px;">並べ替え有効</div>` : ''}
+            ${selectionSortMode && isChecked ? `
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-top:6px; padding-top:4px; border-top:1px dashed rgba(255,255,255,0.1);">
+                <span style="font-size:11px; color:var(--accent); font-weight:bold;">✋ 掴んでドラッグ移動</span>
+                <span style="font-size:10px; opacity:0.6;">順位: ${idx + 1} / ${displayItems.length}</span>
+              </div>
+            ` : ''}
           </div>
         `;
       });
-
       // Deadline Logic
       const evConfig = allEvents[currentEventKey];
       const alertBox = document.getElementById('deadline-alert-container');
@@ -6254,7 +6376,7 @@
       const grid = document.getElementById('catalog-grid');
       if (!grid) return;
 
-      const allProducts = window.getFullMasterProducts ? window.getFullMasterProducts(window.customProductsData) : MASTER_PRODUCTS;
+      const allProducts = (window.getFullMasterProducts ? window.getFullMasterProducts(window.customProductsData) : MASTER_PRODUCTS).filter(p => p.id !== 'moai_losscut_RAW_20261105_201128_001' && p.id !== 'moai_losscut');
       const searchInput = document.getElementById('catalog-search-input');
       const searchQuery = searchInput ? searchInput.value.trim().toLowerCase() : '';
       const filter = window.currentCatalogFilter || 'all';
@@ -6338,6 +6460,7 @@
                 return `<span class="variant-badge-pill" style="background:rgba(255,255,255,0.06); border-color:rgba(255,255,255,0.2); color:#bbb;" onclick="event.stopPropagation(); openVariantManagerModal('${pId}')" title="バリエーションを追加">＋バリエ</span>`;
               })()}
               <span style="font-size:10px; opacity:0.5; font-family:monospace;">${pId}</span>
+              <button type="button" onclick="event.stopPropagation(); window.deleteWork('${pId}')" style="background:none; border:none; color:#e74c3c; font-size:12px; cursor:pointer; padding:2px 4px; border-radius:4px; opacity:0.6; transition:opacity 0.2s;" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.6" title="この作品・登録を削除">🗑️</button>
             </div>
           </div>
 
@@ -6473,6 +6596,63 @@
       }
     };
 
+    window.deleteWork = async (pId) => {
+      if (!pId) return;
+      if (!auth.currentUser) {
+        alert("作品を削除するにはログインが必要です");
+        return;
+      }
+      const wData = (window.worksMasterData && window.worksMasterData[pId]) || {};
+      const allProducts = window.getFullMasterProducts ? window.getFullMasterProducts(window.customProductsData) : (window.MASTER_PRODUCTS || []);
+      const p = allProducts.find(x => x.id === pId) || {};
+      const pName = wData.name || p.name || pId;
+
+      if (!confirm(`本当に作品【${pName}】(ID: ${pId}) を削除しますか？\n\n※ クラウド(works_master / custom_products)から完全に抹消されます。`)) {
+        return;
+      }
+
+      try {
+        // 1. works_master から完全削除
+        if (window.worksMasterData && window.worksMasterData[pId]) {
+          const updatedWM = { ...window.worksMasterData };
+          delete updatedWM[pId];
+          window.worksMasterData = updatedWM;
+          await setDoc(doc(db, "settings", "works_master"), updatedWM);
+        }
+
+        // 2. custom_products から完全削除
+        if (window.customProductsData && window.customProductsData[pId]) {
+          const updatedCP = { ...window.customProductsData };
+          delete updatedCP[pId];
+          window.customProductsData = updatedCP;
+          await setDoc(doc(db, "settings", "custom_products"), updatedCP);
+        }
+
+        // 3. MASTER_PRODUCTS からも除外
+        if (window.MASTER_PRODUCTS) {
+          window.MASTER_PRODUCTS = window.MASTER_PRODUCTS.filter(m => m.id !== pId && m.image?.split('/').pop().split('.')[0] !== pId);
+        }
+
+        // 4. モーダルを閉じる
+        const modal = document.getElementById('work-detail-modal');
+        if (modal) modal.style.display = 'none';
+
+        alert(`作品【${pName}】を完全に削除しました！`);
+
+        // 5. 再描画
+        if (window.renderCatalogView) window.renderCatalogView();
+        if (window.renderAll) window.renderAll();
+      } catch (err) {
+        console.error("削除エラー:", err);
+        alert("削除に失敗しました: " + err.message);
+      }
+    };
+
+    window.deleteCurrentWork = () => {
+      const pId = document.getElementById('work-detail-id')?.value;
+      if (pId) window.deleteWork(pId);
+    };
+
     window.saveWorkDetail = async () => {
       if (!auth.currentUser) {
         alert("ログインが必要です");
@@ -6539,6 +6719,122 @@
 
       const url = `print_tile.html?imgs=${imgUrls.join(',')}&count=${count}&name=一括出力`;
       window.open(url, '_blank');
+    };
+
+    window.moveProductToEdge = (id, edge) => {
+      let selectedIds = eventProductsData[currentEventKey];
+      if (!selectedIds) {
+        const allEvents = window.getAllEvents(eventConfigData);
+        selectedIds = (allEvents[currentEventKey]?.products || []).map(p => p.id);
+      } else {
+        selectedIds = [...selectedIds];
+      }
+      const index = selectedIds.indexOf(id);
+      if (index === -1) return;
+      selectedIds.splice(index, 1);
+      if (edge === "top") {
+        selectedIds.unshift(id);
+      } else {
+        selectedIds.push(id);
+      }
+      eventProductsData[currentEventKey] = selectedIds;
+      renderSelection();
+    };
+
+    window.promptMoveProductIndex = (id, currentRank, total) => {
+      const input = prompt("【" + id + "】を何番目に移動しますか？ (1 〜 " + total + ")", currentRank);
+      if (!input) return;
+      const targetRank = parseInt(input.trim(), 10);
+      if (isNaN(targetRank) || targetRank < 1 || targetRank > total) {
+        alert("1から" + total + "の半角数字で指定してください。");
+        return;
+      }
+      const targetIndex = targetRank - 1;
+      let selectedIds = eventProductsData[currentEventKey];
+      if (!selectedIds) {
+        const allEvents = window.getAllEvents(eventConfigData);
+        selectedIds = (allEvents[currentEventKey]?.products || []).map(p => p.id);
+      } else {
+        selectedIds = [...selectedIds];
+      }
+      const currentIndex = selectedIds.indexOf(id);
+      if (currentIndex === -1) return;
+      selectedIds.splice(currentIndex, 1);
+      selectedIds.splice(targetIndex, 0, id);
+      eventProductsData[currentEventKey] = selectedIds;
+      renderSelection();
+    };
+
+    // ドラッグ＆ドロップ並べ替え用
+    let draggedSelectionId = null;
+    window.handleSelectionDragStart = (e, id) => {
+      draggedSelectionId = id;
+      e.dataTransfer.effectAllowed = "move";
+      e.dataTransfer.setData("text/plain", id);
+      const card = document.getElementById("selection-card-" + id);
+      if (card) {
+        card.style.opacity = "0.4";
+        card.style.transform = "scale(0.96)";
+      }
+    };
+
+    window.handleSelectionDragEnd = (e, id) => {
+      const card = document.getElementById("selection-card-" + id);
+      if (card) {
+        card.style.opacity = "1";
+        card.style.transform = "none";
+      }
+      document.querySelectorAll(".selection-drag-target").forEach(el => {
+        el.style.border = "2px solid var(--accent)";
+        el.style.boxShadow = "none";
+      });
+      draggedSelectionId = null;
+    };
+
+    window.handleSelectionDragOver = (e) => {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = "move";
+    };
+
+    window.handleSelectionDragEnter = (e, targetId) => {
+      if (!draggedSelectionId || draggedSelectionId === targetId) return;
+      const targetCard = document.getElementById("selection-card-" + targetId);
+      if (targetCard) {
+        targetCard.style.border = "2px dashed #00d2ff";
+        targetCard.style.boxShadow = "0 0 16px rgba(0,210,255,0.8)";
+      }
+    };
+
+    window.handleSelectionDragLeave = (e, targetId) => {
+      const targetCard = document.getElementById("selection-card-" + targetId);
+      if (targetCard) {
+        targetCard.style.border = "2px solid var(--accent)";
+        targetCard.style.boxShadow = "none";
+      }
+    };
+
+    window.handleSelectionDrop = (e, targetId) => {
+      e.preventDefault();
+      const fromId = draggedSelectionId || e.dataTransfer.getData("text/plain");
+      if (!fromId || fromId === targetId) return;
+
+      let selectedIds = eventProductsData[currentEventKey];
+      if (!selectedIds) {
+        const allEvents = window.getAllEvents(eventConfigData);
+        selectedIds = (allEvents[currentEventKey]?.products || []).map(p => p.id);
+      } else {
+        selectedIds = [...selectedIds];
+      }
+
+      const fromIndex = selectedIds.indexOf(fromId);
+      const toIndex = selectedIds.indexOf(targetId);
+      if (fromIndex === -1 || toIndex === -1) return;
+
+      selectedIds.splice(fromIndex, 1);
+      selectedIds.splice(toIndex, 0, fromId);
+
+      eventProductsData[currentEventKey] = selectedIds;
+      renderSelection();
     };
 
     window.moveProduct = (id, direction) => {
@@ -15786,52 +16082,234 @@
     // =========================================================
     // 🖼️ お品書き画像管理コントローラー (2段スタジオ＆RAW統合UI)
     // =========================================================
-    let currentSelectorPosId = null;
-    let currentImageFit = 'cover';
+        let currentSelectorPosId = null;
+    let currentImageFit = "cover";
     let currentImagePosX = 50;
     let currentImagePosY = 50;
+    let currentImageRatio = "1:1"; // "1:1" | "original" | "3:4" | "4:3"
+    let currentInspectImage = ""; // 現在拡大プレビュー中の画像URL
 
-    window.updateImagePositionUI = function() {
-      const prevImg = document.getElementById('img-pos-preview');
-      const mainSrc = currentDraftImages[0] || '';
+    // 拡大プレビュー画面および比率・位置UIの統合更新
+    window.updateInspectImageUI = function() {
+      const prevImg = document.getElementById("img-pos-preview");
+      const frameEl = document.getElementById("img-preview-frame");
+      const displaySrc = currentInspectImage || currentDraftImages[0] || "";
+
       if (prevImg) {
-        prevImg.src = mainSrc || window.NO_IMAGE_PLACEHOLDER;
+        prevImg.src = displaySrc || window.NO_IMAGE_PLACEHOLDER;
         prevImg.style.objectFit = currentImageFit;
-        prevImg.style.objectPosition = `${currentImagePosX}% ${currentImagePosY}%`;
+        prevImg.style.objectPosition = currentImagePosX + "% " + currentImagePosY + "%";
       }
-      const xSlider = document.getElementById('img-pos-x-slider');
-      const ySlider = document.getElementById('img-pos-y-slider');
-      const xVal = document.getElementById('img-pos-x-val');
-      const yVal = document.getElementById('img-pos-y-val');
+
+      // 比率フレームのアスペクト比更新
+      if (frameEl) {
+        if (currentImageRatio === "original") {
+          frameEl.style.aspectRatio = "auto";
+          frameEl.style.width = "100%";
+          frameEl.style.height = "100%";
+          frameEl.style.maxHeight = "310px";
+          if (prevImg) prevImg.style.objectFit = currentImageFit === "cover" ? "contain" : currentImageFit;
+        } else if (currentImageRatio === "3:4") {
+          frameEl.style.aspectRatio = "3/4";
+          frameEl.style.width = "min(235px, 100%)";
+          frameEl.style.height = "310px";
+          frameEl.style.maxHeight = "310px";
+          if (prevImg) prevImg.style.objectFit = currentImageFit;
+        } else if (currentImageRatio === "4:3") {
+          frameEl.style.aspectRatio = "4/3";
+          frameEl.style.width = "min(380px, 100%)";
+          frameEl.style.height = "min(285px, 100%)";
+          frameEl.style.maxHeight = "310px";
+          if (prevImg) prevImg.style.objectFit = currentImageFit;
+        } else {
+          // 1:1 正方形 (デフォルト)
+          frameEl.style.aspectRatio = "1/1";
+          frameEl.style.width = "min(310px, 100%)";
+          frameEl.style.height = "min(310px, 100%)";
+          frameEl.style.maxHeight = "310px";
+          if (prevImg) prevImg.style.objectFit = currentImageFit;
+        }
+      }
+
+      // ファイル名・種別の更新
+      const fnEl = document.getElementById("img-preview-filename");
+      const kindEl = document.getElementById("img-preview-kind");
+      if (fnEl) {
+        const fname = displaySrc ? (displaySrc.startsWith("data:") ? "新規アップロード画像 (DataURL)" : displaySrc.split("/").pop()) : "画像が未選択です";
+        fnEl.textContent = fname;
+        fnEl.title = fname;
+      }
+      if (kindEl) {
+        const isRaw = displaySrc && (displaySrc.toLowerCase().includes("/raw/") || displaySrc.toLowerCase().includes("_raw"));
+        kindEl.textContent = isRaw ? "📸 RAW元画像" : (displaySrc.startsWith("data:") ? "✨ 新規追加" : "🎨 Studio背景済");
+        kindEl.style.color = isRaw ? "#ff9f1c" : (displaySrc.startsWith("data:") ? "#2ecc71" : "#70d6ff");
+        kindEl.style.background = isRaw ? "rgba(255,159,28,0.15)" : (displaySrc.startsWith("data:") ? "rgba(46,204,113,0.15)" : "rgba(112,214,255,0.15)");
+      }
+
+      // 比率バッジテキスト
+      const ratioBadgeEl = document.getElementById("img-preview-ratio-badge");
+      if (ratioBadgeEl) {
+        const labels = {
+          "1:1": "⏹️ 1:1 正方形",
+          "original": "🖼️ 写真そのまま (元比率)",
+          "3:4": "📱 縦長 (3:4)",
+          "4:3": "🖥️ 横長 (4:3)"
+        };
+        ratioBadgeEl.textContent = labels[currentImageRatio] || "1:1";
+      }
+
+      // 比率ボタンのアクティブスタイル更新
+      ["1-1", "original", "3-4", "4-3"].forEach(rKey => {
+        const btn = document.getElementById("btn-ratio-" + rKey);
+        if (btn) {
+          const match = (rKey === "1-1" && currentImageRatio === "1:1") || (rKey === currentImageRatio);
+          if (match) {
+            btn.style.background = "rgba(0,210,255,0.25)";
+            btn.style.borderColor = "var(--accent)";
+            btn.style.color = "#fff";
+            btn.style.boxShadow = "0 0 12px rgba(0,210,255,0.4)";
+          } else {
+            btn.style.background = "rgba(255,255,255,0.05)";
+            btn.style.borderColor = "rgba(255,255,255,0.18)";
+            btn.style.color = "#bbb";
+            btn.style.boxShadow = "none";
+          }
+        }
+      });
+
+      // 状態バッジ＆アクションボタンの更新
+      const statusBadge = document.getElementById("img-preview-badge-status");
+      const btnPromote = document.getElementById("btn-inspect-promote");
+      const btnToggle = document.getElementById("btn-inspect-toggle");
+      const draftIdx = currentDraftImages.indexOf(displaySrc);
+
+      if (statusBadge) {
+        if (!displaySrc) {
+          statusBadge.style.display = "none";
+        } else if (draftIdx === 0) {
+          statusBadge.style.display = "block";
+          statusBadge.innerHTML = "★ 代表カバー画像";
+          statusBadge.style.color = "gold";
+          statusBadge.style.borderColor = "rgba(255,215,0,0.5)";
+          statusBadge.style.background = "rgba(0,0,0,0.85)";
+        } else if (draftIdx > 0) {
+          statusBadge.style.display = "block";
+          statusBadge.innerHTML = "✓ お品書き掲載中 (サブ " + draftIdx + ")";
+          statusBadge.style.color = "#2ecc71";
+          statusBadge.style.borderColor = "rgba(46,204,113,0.5)";
+          statusBadge.style.background = "rgba(0,0,0,0.85)";
+        } else {
+          statusBadge.style.display = "block";
+          statusBadge.innerHTML = "📁 候補ライブラリ (未採用)";
+          statusBadge.style.color = "#aaa";
+          statusBadge.style.borderColor = "rgba(255,255,255,0.2)";
+          statusBadge.style.background = "rgba(0,0,0,0.75)";
+        }
+      }
+
+      if (btnPromote) {
+        if (!displaySrc || draftIdx === 0) {
+          btnPromote.style.display = "none";
+        } else {
+          btnPromote.style.display = "flex";
+        }
+      }
+
+      if (btnToggle) {
+        if (!displaySrc) {
+          btnToggle.style.display = "none";
+        } else {
+          btnToggle.style.display = "flex";
+          if (draftIdx !== -1) {
+            btnToggle.innerHTML = "<span>✕</span> お品書きから外す";
+            btnToggle.style.background = "rgba(231,76,60,0.2)";
+            btnToggle.style.borderColor = "#e74c3c";
+            btnToggle.style.color = "#ff6b6b";
+          } else {
+            btnToggle.innerHTML = "<span>✓</span> お品書きに追加";
+            btnToggle.style.background = "rgba(0,210,255,0.2)";
+            btnToggle.style.borderColor = "var(--accent)";
+            btnToggle.style.color = "#fff";
+          }
+        }
+      }
+
+      // スライダー＆ラジオボタン
+      const xSlider = document.getElementById("img-pos-x-slider");
+      const ySlider = document.getElementById("img-pos-y-slider");
+      const xVal = document.getElementById("img-pos-x-val");
+      const yVal = document.getElementById("img-pos-y-val");
       if (xSlider) xSlider.value = currentImagePosX;
       if (ySlider) ySlider.value = currentImagePosY;
-      if (xVal) xVal.textContent = `${currentImagePosX}%`;
-      if (yVal) yVal.textContent = `${currentImagePosY}%`;
+      if (xVal) xVal.textContent = currentImagePosX + "%";
+      if (yVal) yVal.textContent = currentImagePosY + "%";
       const radios = document.querySelectorAll('input[name="img-fit-radio"]');
       radios.forEach(r => { r.checked = (r.value === currentImageFit); });
     };
 
+    window.updateImagePositionUI = function() {
+      window.updateInspectImageUI();
+    };
+
+    // 画像をクリックした時の拡大プレビュー表示（インスペクト）
+    window.inspectImage = function(src) {
+      if (!src) return;
+      currentInspectImage = src;
+      window.updateInspectImageUI();
+      renderDraftTray();
+      renderImagePool();
+    };
+
+    // 比率（アスペクト比）の切り替え
+    window.setImageAspectRatio = function(ratio) {
+      currentImageRatio = ratio || "1:1";
+      window.updateInspectImageUI();
+    };
+
+    // 拡大表示中の画像を代表カバー（一番左）に設定
+    window.promoteInspectedImage = function() {
+      const src = currentInspectImage;
+      if (!src) return;
+      const idx = currentDraftImages.indexOf(src);
+      if (idx !== -1) {
+        currentDraftImages.splice(idx, 1);
+      }
+      currentDraftImages.unshift(src);
+      renderDraftTray();
+      renderImagePool();
+      window.updateInspectImageUI();
+    };
+
+    // 拡大表示中の画像をお品書きに追加 / 除外
+    window.toggleInspectedImage = function() {
+      const src = currentInspectImage;
+      if (!src) return;
+      window.togglePoolImage(src);
+      window.updateInspectImageUI();
+    };
+
     window.onChangeImageFit = function(val) {
-      currentImageFit = val || 'cover';
-      window.updateImagePositionUI();
+      currentImageFit = val || "cover";
+      window.updateInspectImageUI();
     };
 
     window.setImagePositionPreset = function(x, y) {
       currentImagePosX = x;
       currentImagePosY = y;
-      window.updateImagePositionUI();
+      window.updateInspectImageUI();
     };
 
     window.onSlideImagePosition = function() {
-      const xSlider = document.getElementById('img-pos-x-slider');
-      const ySlider = document.getElementById('img-pos-y-slider');
+      const xSlider = document.getElementById("img-pos-x-slider");
+      const ySlider = document.getElementById("img-pos-y-slider");
       if (xSlider) currentImagePosX = parseInt(xSlider.value, 10);
       if (ySlider) currentImagePosY = parseInt(ySlider.value, 10);
-      window.updateImagePositionUI();
+      window.updateInspectImageUI();
     };
-    let currentSelectorTargetSlot = 'base'; // 'base' | 'group' | 'sku:<skuId>'
+
+    let currentSelectorTargetSlot = "base"; // "base" | "group" | "sku:<skuId>"
     let currentDraftImages = []; // Array of image URLs/paths in the selected tray
-    let currentPoolTab = 'studio'; // 'studio' | 'raw' | 'all'
+    let currentPoolTab = "studio"; // "studio" | "raw" | "all"
     let currentCandidateImages = { studio: [], raw: [], all: [] };
 
     window.onChangeImgManagerVarMode = function(mode) {
@@ -15989,34 +16467,41 @@
 
       currentDraftImages = [...currentList];
 
-      // ロード: 既存の画像位置・フィット設定をUIに復元
+      // ロード: 既存の画像位置・フィット・比率設定をUIに復元
       let loadedPos = '50% 50%';
       let loadedFit = 'cover';
+      let loadedRatio = '1:1';
       if (currentSelectorTargetSlot === 'group') {
         loadedPos = wData.catalogGroupImagePosition || '50% 50%';
         loadedFit = wData.catalogGroupImageFit || 'cover';
+        loadedRatio = wData.catalogGroupImageAspectRatio || '1:1';
       } else if (currentSelectorTargetSlot.startsWith('sku:')) {
         const skuId = currentSelectorTargetSlot.slice(4);
         const targetVar = rawVars.find(v => v.skuId === skuId);
         loadedPos = targetVar?.imagePosition || '50% 50%';
         loadedFit = targetVar?.imageFit || 'cover';
+        loadedRatio = targetVar?.imageAspectRatio || '1:1';
       } else {
         loadedPos = wData.imagePosition || '50% 50%';
         loadedFit = wData.imageFit || 'cover';
+        loadedRatio = wData.imageAspectRatio || '1:1';
       }
       const posParts = loadedPos.replace(/center/g, '50%').replace(/top|left/g, '10%').replace(/bottom|right/g, '90%').split(/\s+/);
       currentImagePosX = parseInt(posParts[0], 10) || 50;
       currentImagePosY = parseInt(posParts[1], 10) || 50;
       currentImageFit = loadedFit || 'cover';
-      window.updateImagePositionUI();
+      currentImageRatio = loadedRatio || '1:1';
 
       // 2. 候補プールの分類と構築
       buildCandidatePool(pId, p, wData);
 
+      // 初期拡大インスペクト対象を設定（代表画像があれば代表、なければ候補プールの先頭）
+      currentInspectImage = currentDraftImages[0] || (currentCandidateImages.studio[0] || currentCandidateImages.all[0] || '');
+
       // 3. レンダリング
       renderDraftTray();
       renderImagePool();
-      window.updateImagePositionUI();
+      window.updateInspectImageUI();
       updateBackupSelectUI(pId, wData);
 
       const modalEl = document.getElementById('work-image-selector-modal');
@@ -16232,9 +16717,10 @@
 
       tray.innerHTML = currentDraftImages.map((src, idx) => {
         const isMain = idx === 0;
+        const isInspected = currentInspectImage === src;
         const filename = src.split('/').pop();
         return `
-          <div style="flex-shrink:0; width:110px; background:rgba(0,0,0,0.5); border-radius:10px; border:1.5px solid ${isMain ? 'gold' : 'rgba(255,255,255,0.18)'}; padding:6px; display:flex; flex-direction:column; gap:4px; box-shadow:0 4px 12px rgba(0,0,0,0.4); position:relative;">
+          <div onclick="inspectImage('${src}')" style="cursor:pointer; flex-shrink:0; width:114px; background:rgba(0,0,0,0.5); border-radius:10px; border:1.5px solid ${isMain ? 'gold' : 'rgba(255,255,255,0.18)'}; outline:${isInspected ? '2.5px solid var(--accent)' : 'none'}; box-shadow:${isInspected ? '0 0 16px rgba(0,210,255,0.7)' : '0 4px 12px rgba(0,0,0,0.4)'}; padding:6px; display:flex; flex-direction:column; gap:4px; position:relative; transition:all 0.2s;">
             <!-- Badge -->
             <div style="font-size:10px; font-weight:bold; color:${isMain ? 'gold' : '#ccc'}; text-align:center; background:${isMain ? 'rgba(255,215,0,0.15)' : 'rgba(255,255,255,0.08)'}; padding:2px 4px; border-radius:4px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
               ${isMain ? '★ 代表カバー' : `サブ ${idx}`}
@@ -16244,26 +16730,27 @@
             <div style="width:100%; aspect-ratio:1; border-radius:6px; overflow:hidden; background:#000; position:relative;">
               <img src="${src}" style="width:100%; height:100%; object-fit:cover;" onerror="this.src=window.NO_IMAGE_PLACEHOLDER||this.src">
               <!-- Promote to Main Button -->
-              ${!isMain ? `<button type="button" onclick="promoteToMainImage(${idx})" title="代表画像にする" style="position:absolute; bottom:2px; left:2px; background:rgba(0,0,0,0.85); border:1px solid gold; color:gold; font-size:9px; padding:2px 5px; border-radius:3px; cursor:pointer; font-weight:bold;">★代表へ</button>` : ''}
+              ${!isMain ? `<button type="button" onclick="event.stopPropagation(); promoteToMainImage(${idx})" title="代表画像にする" style="position:absolute; bottom:2px; left:2px; background:rgba(0,0,0,0.85); border:1px solid gold; color:gold; font-size:9px; padding:2px 5px; border-radius:3px; cursor:pointer; font-weight:bold;">★代表へ</button>` : ''}
+              ${isInspected ? `<div style="position:absolute; top:2px; right:2px; background:var(--accent); color:#000; font-size:8px; font-weight:bold; padding:1px 4px; border-radius:3px;">🔍 拡大中</div>` : ''}
             </div>
 
             <!-- Filename -->
-            <div style="font-size:9px; color:#888; text-align:center; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="${filename}">
+            <div style="font-size:9px; color:${isInspected ? 'var(--accent)' : '#888'}; text-align:center; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-weight:${isInspected ? 'bold' : 'normal'};" title="${filename}">
               ${filename}
             </div>
 
             <!-- Action Controls (Left / Right / Delete) -->
             <div style="display:flex; justify-content:space-between; align-items:center; gap:2px; margin-top:2px;">
-              <button type="button" onclick="moveDraftImage(${idx}, -1)" ${idx === 0 ? 'disabled style="opacity:0.2; cursor:default;"' : ''} style="background:rgba(255,255,255,0.1); border:none; color:#fff; border-radius:3px; font-size:10px; flex:1; height:22px; cursor:pointer;">◀</button>
-              <button type="button" onclick="moveDraftImage(${idx}, 1)" ${idx === currentDraftImages.length - 1 ? 'disabled style="opacity:0.2; cursor:default;"' : ''} style="background:rgba(255,255,255,0.1); border:none; color:#fff; border-radius:3px; font-size:10px; flex:1; height:22px; cursor:pointer;">▶</button>
-              <button type="button" onclick="removeDraftImage(${idx})" title="お品書きから除外" style="background:rgba(231,76,60,0.25); border:1px solid #e74c3c; color:#ff6b6b; border-radius:3px; width:22px; height:22px; font-size:10px; cursor:pointer; display:flex; align-items:center; justify-content:center;">✕</button>
+              <button type="button" onclick="event.stopPropagation(); moveDraftImage(${idx}, -1)" ${idx === 0 ? 'disabled style="opacity:0.2; cursor:default;"' : ''} style="background:rgba(255,255,255,0.1); border:none; color:#fff; border-radius:3px; font-size:10px; flex:1; height:22px; cursor:pointer;">◀</button>
+              <button type="button" onclick="event.stopPropagation(); moveDraftImage(${idx}, 1)" ${idx === currentDraftImages.length - 1 ? 'disabled style="opacity:0.2; cursor:default;"' : ''} style="background:rgba(255,255,255,0.1); border:none; color:#fff; border-radius:3px; font-size:10px; flex:1; height:22px; cursor:pointer;">▶</button>
+              <button type="button" onclick="event.stopPropagation(); removeDraftImage(${idx})" title="お品書きから除外" style="background:rgba(231,76,60,0.25); border:1px solid #e74c3c; color:#ff6b6b; border-radius:3px; width:22px; height:22px; font-size:10px; cursor:pointer; display:flex; align-items:center; justify-content:center;">✕</button>
             </div>
           </div>
         `;
       }).join('');
     }
 
-    // 下段ライブラリのレンダリング
+    // 下段ライブラリのレンダリング (タップで拡大プレビュー、バッジやダブルクリックで追加/除外)
     function renderImagePool() {
       const grid = document.getElementById('image-pool-grid');
       if (!grid) return;
@@ -16281,27 +16768,41 @@
 
       grid.innerHTML = list.map(src => {
         const isSelected = currentDraftImages.includes(src);
+        const isInspected = currentInspectImage === src;
         const filename = src.split('/').pop();
         const isRaw = src.toLowerCase().includes('/raw/') || src.toLowerCase().includes('_raw');
 
         return `
-          <div onclick="togglePoolImage('${src}')" style="cursor:pointer; position:relative; aspect-ratio:1; border-radius:10px; overflow:hidden; border:2px solid ${isSelected ? 'var(--accent)' : 'rgba(255,255,255,0.12)'}; background:#0a0c10; box-shadow:${isSelected ? '0 0 12px rgba(0,210,255,0.4)' : 'none'}; transition:all 0.2s;" title="${isSelected ? 'タップしてお品書きから除外' : 'タップしてお品書きに追加'}">
+          <div onclick="inspectImage('${src}')" ondblclick="togglePoolImage('${src}')" style="cursor:pointer; position:relative; aspect-ratio:1; border-radius:10px; overflow:hidden; border:2px solid ${isInspected ? '#00d2ff' : (isSelected ? 'rgba(0,210,255,0.6)' : 'rgba(255,255,255,0.12)')}; outline:${isInspected ? '3px solid #00d2ff' : 'none'}; outline-offset:1px; background:#0a0c10; box-shadow:${isInspected ? '0 0 18px rgba(0,210,255,0.85)' : (isSelected ? '0 0 10px rgba(0,210,255,0.3)' : 'none')}; transform:${isInspected ? 'scale(1.02)' : 'scale(1)'}; transition:all 0.2s;" title="クリックで拡大プレビュー、ダブルクリックで追加/除外">
             <img src="${src}" style="width:100%; height:100%; object-fit:cover;" onerror="this.src=window.NO_IMAGE_PLACEHOLDER||this.src">
             
-            <!-- Selected Check Badge -->
-            ${isSelected ? `
-              <div style="position:absolute; top:6px; right:6px; background:var(--accent); color:#000; font-size:10px; font-weight:bold; border-radius:12px; padding:2px 7px; box-shadow:0 2px 6px rgba(0,0,0,0.6); display:flex; align-items:center; gap:2px;">
-                ✓ 選択中
+            <!-- Inspected Badge -->
+            ${isInspected ? `
+              <div style="position:absolute; top:6px; left:6px; background:#00d2ff; color:#000; font-size:9px; font-weight:bold; border-radius:4px; padding:2px 6px; box-shadow:0 2px 6px rgba(0,0,0,0.7); z-index:2;">
+                🔍 拡大表示中
               </div>
-            ` : ''}
+            ` : `
+              <!-- Type Tag -->
+              <div style="position:absolute; top:6px; left:6px; background:rgba(0,0,0,0.7); color:${isRaw ? '#ff9f1c' : '#70d6ff'}; font-size:9px; padding:2px 5px; border-radius:4px; font-weight:bold;">
+                ${isRaw ? 'RAW' : 'Studio'}
+              </div>
+            `}
 
-            <!-- Type Tag -->
-            <div style="position:absolute; top:6px; left:6px; background:rgba(0,0,0,0.65); color:${isRaw ? '#ff9f1c' : '#70d6ff'}; font-size:9px; padding:2px 5px; border-radius:4px; font-weight:bold;">
-              ${isRaw ? 'RAW' : 'Studio'}
+            <!-- Right Top Add/Remove Badge -->
+            <div onclick="event.stopPropagation(); togglePoolImage('${src}')" style="position:absolute; top:6px; right:6px; z-index:2; cursor:pointer;" title="${isSelected ? 'お品書きから除外' : 'お品書きに追加'}">
+              ${isSelected ? `
+                <div style="background:var(--accent); color:#000; font-size:10px; font-weight:bold; border-radius:12px; padding:2px 7px; box-shadow:0 2px 6px rgba(0,0,0,0.6); display:flex; align-items:center; gap:2px;">
+                  ✓ 選択中
+                </div>
+              ` : `
+                <div style="background:rgba(0,0,0,0.75); border:1px solid rgba(255,255,255,0.4); color:#fff; font-size:10px; font-weight:bold; border-radius:12px; padding:2px 7px; box-shadow:0 2px 6px rgba(0,0,0,0.6); display:flex; align-items:center; gap:2px;">
+                  ＋ 追加
+                </div>
+              `}
             </div>
 
             <!-- Filename Bar -->
-            <div style="position:absolute; bottom:0; inset-x:0; background:linear-gradient(transparent, rgba(0,0,0,0.85)); font-size:9px; color:#ddd; padding:8px 6px 4px 6px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; text-align:center;">
+            <div style="position:absolute; bottom:0; inset-x:0; background:linear-gradient(transparent, rgba(0,0,0,0.85)); font-size:9px; color:${isInspected ? '#00d2ff' : '#ddd'}; font-weight:${isInspected ? 'bold' : 'normal'}; padding:8px 6px 4px 6px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; text-align:center;">
               ${filename}
             </div>
           </div>
@@ -16328,8 +16829,10 @@
       renderImagePool();
     };
 
-    window.togglePoolImage = function(src) {
+    window.togglePoolImage = function(src, e) {
+      if (e) e.stopPropagation();
       if (!src) return;
+      currentInspectImage = src;
       const idx = currentDraftImages.indexOf(src);
       if (idx !== -1) {
         currentDraftImages.splice(idx, 1);
@@ -16338,12 +16841,17 @@
       }
       renderDraftTray();
       renderImagePool();
+      window.updateInspectImageUI();
     };
 
     window.removeDraftImage = function(idx) {
       currentDraftImages.splice(idx, 1);
+      if (currentDraftImages.length > 0 && !currentDraftImages.includes(currentInspectImage)) {
+        currentInspectImage = currentDraftImages[0];
+      }
       renderDraftTray();
       renderImagePool();
+      window.updateInspectImageUI();
     };
 
     window.moveDraftImage = function(idx, direction) {
@@ -16353,14 +16861,17 @@
       currentDraftImages.splice(targetIdx, 0, item);
       renderDraftTray();
       renderImagePool();
+      window.updateInspectImageUI();
     };
 
     window.promoteToMainImage = function(idx) {
       if (idx <= 0 || idx >= currentDraftImages.length) return;
       const item = currentDraftImages.splice(idx, 1)[0];
       currentDraftImages.unshift(item);
+      currentInspectImage = item;
       renderDraftTray();
       renderImagePool();
+      window.updateInspectImageUI();
     };
 
     // ====================================================================
@@ -16523,6 +17034,7 @@
         if (currentSelectorTargetSlot === 'base') {
           wmData[pId].imagePosition = `${currentImagePosX}% ${currentImagePosY}%`;
           wmData[pId].imageFit = currentImageFit;
+          wmData[pId].imageAspectRatio = currentImageRatio;
         }
 
         if (currentSelectorTargetSlot === 'group') {

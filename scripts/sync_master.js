@@ -114,10 +114,11 @@ async function main() {
   const worksMaster = decodeFirestoreDoc(wmDoc);
 
   // 2. OMOAIで仮登録された作品IDの受け皿フォルダを作成
+  const BLACKLIST_KEYS = ['moai_losscut', 'moai_losscut_RAW_20261105_201128_001'];
   const remoteProductKeys = Array.from(new Set([
     ...Object.keys(customProducts),
     ...Object.keys(worksMaster)
-  ])).filter(k => k && !k.startsWith('dev_') && !k.startsWith('temp_') && !k.includes('.') && !/^\d+$/.test(k));
+  ])).filter(k => k && !k.startsWith('dev_') && !k.startsWith('temp_') && !k.includes('.') && !/^\d+$/.test(k) && !BLACKLIST_KEYS.includes(k));
 
   for (const posId of remoteProductKeys) {
     const itemFolder = path.join(KURIMA_DIR, posId);
