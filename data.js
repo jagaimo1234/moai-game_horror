@@ -16,12 +16,6 @@
 // 全作品のマスターリスト
 const MASTER_PRODUCTS = [
   {
-    image: 'images/kurima/moai_losscut_RAW_20261105_201128_001.jpg',
-    name: 'moai losscut (1)',
-    desc: '',
-  },
-
-  {
     image: 'images/kurima/moai_loscut/studio/ChatGPT 画像 2026年11月5日 20_27_08-1.png',
     images: [
       'images/kurima/moai_loscut/studio/ChatGPT 画像 2026年11月5日 20_27_08-1.png',
@@ -645,7 +639,7 @@ window.getFullMasterProducts = function(customProductsData) {
   if (customProductsData) {
     Object.keys(customProductsData).forEach(key => {
       // 不正なメタデータキー（ドット付きなど）やオブジェクトでないものは除外
-      if (key.includes('.') || !customProductsData[key] || typeof customProductsData[key] !== 'object') return;
+      if (key.includes('.') || key === 'moai_losscut' || key === 'moai_losscut_RAW_20261105_201128_001' || !customProductsData[key] || typeof customProductsData[key] !== 'object') return;
       const p = customProductsData[key];
       const normalize = (s) => s ? s.replace(/\s+/g, '').replace(/\n/g, '') : '';
       const masterItem = list.find(m => {
