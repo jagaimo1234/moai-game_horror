@@ -16,6 +16,33 @@
 // 全作品のマスターリスト
 const MASTER_PRODUCTS = [
   {
+    image: 'images/kurima/moai_losscut (1)/raw/moai_losscut_RAW_20261105_201128_001.jpg',
+    images: [
+      'images/kurima/moai_losscut (1)/raw/moai_losscut_RAW_20261105_201128_001.jpg',
+      'images/kurima/moai_losscut (1)/raw/moai_losscut_RAW_20261105_201205_002.jpg',
+      'images/kurima/moai_losscut (1)/raw/moai_losscut_RAW_20261105_201208_003.jpg',
+      'images/kurima/moai_losscut (1)/raw/moai_losscut_RAW_20261105_201228_004.jpg',
+      'images/kurima/moai_losscut (1)/raw/moai_losscut_RAW_20261105_201236_005.jpg',
+      'images/kurima/moai_losscut (1)/raw/moai_losscut_RAW_20261105_201311_006.jpg',
+      'images/kurima/moai_losscut (1)/raw/moai_losscut_RAW_20261105_201313_007.jpg',
+      'images/kurima/moai_losscut (1)/raw/moai_losscut_RAW_20261105_201319_008.jpg',
+      'images/kurima/moai_losscut (1)/raw/moai_losscut_RAW_20261105_201326_009.jpg',
+      'images/kurima/moai_losscut (1)/raw/moai_losscut_RAW_20261105_201350_010.jpg',
+      'images/kurima/moai_losscut (1)/raw/moai_losscut_RAW_20261105_201433_011.jpg',
+      'images/kurima/moai_losscut (1)/raw/moai_losscut_RAW_20261105_201438_012.jpg',
+      'images/kurima/moai_losscut (1)/raw/moai_losscut_RAW_20261105_201447_013.jpg',
+    ],
+    name: 'moai losscut (1)',
+    desc: '',
+  },
+
+  {
+    image: 'images/kurima/moai_loscut.jpg',
+    name: 'うなだれているモアイ',
+    desc: 'うなだれてるモアイ\nそれはまるで相場で大負けしたような様子。\nロスカットモアイ🗿',
+  },
+
+  {
     image: 'images/kurima/moai_highleg/studio/ハイレグモアイ_master.png',
     images: [
       'images/kurima/moai_highleg/studio/ハイレグモアイ_master.png',
@@ -887,6 +914,24 @@ window.WORK_FOLDER_ASSETS = {
       "images/kurima/moai_highleg/studio/ChatGPT 画像 2026年11月4日 22_19_16-6.png",
       "images/kurima/moai_highleg/studio/ハイレグモアイ_master.png"
     ]
+  },
+  "moai_losscut (1)": {
+    "raw": [
+      "images/kurima/moai_losscut (1)/raw/moai_losscut_RAW_20261105_201128_001.jpg",
+      "images/kurima/moai_losscut (1)/raw/moai_losscut_RAW_20261105_201205_002.jpg",
+      "images/kurima/moai_losscut (1)/raw/moai_losscut_RAW_20261105_201208_003.jpg",
+      "images/kurima/moai_losscut (1)/raw/moai_losscut_RAW_20261105_201228_004.jpg",
+      "images/kurima/moai_losscut (1)/raw/moai_losscut_RAW_20261105_201236_005.jpg",
+      "images/kurima/moai_losscut (1)/raw/moai_losscut_RAW_20261105_201311_006.jpg",
+      "images/kurima/moai_losscut (1)/raw/moai_losscut_RAW_20261105_201313_007.jpg",
+      "images/kurima/moai_losscut (1)/raw/moai_losscut_RAW_20261105_201319_008.jpg",
+      "images/kurima/moai_losscut (1)/raw/moai_losscut_RAW_20261105_201326_009.jpg",
+      "images/kurima/moai_losscut (1)/raw/moai_losscut_RAW_20261105_201350_010.jpg",
+      "images/kurima/moai_losscut (1)/raw/moai_losscut_RAW_20261105_201433_011.jpg",
+      "images/kurima/moai_losscut (1)/raw/moai_losscut_RAW_20261105_201438_012.jpg",
+      "images/kurima/moai_losscut (1)/raw/moai_losscut_RAW_20261105_201447_013.jpg"
+    ],
+    "studio": []
   },
   "nitto_osuwari_moai_penstand": {
     "raw": [],
