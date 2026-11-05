@@ -602,6 +602,206 @@
     .btn-topic-detail:hover {
       background: rgba(0, 210, 255, 0.3); transform: scale(1.05); box-shadow: 0 4px 15px rgba(0, 210, 255, 0.3);
     }
+  
+    /* ===== PRODUCT SHARE CONTAINER ===== */
+    .product-share-container {
+      margin-top: 16px;
+      padding: 12px 14px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 14px;
+    }
+    .share-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+      flex-wrap: wrap;
+      gap: 4px;
+    }
+    .share-title {
+      font-size: 12px;
+      font-weight: 700;
+      color: #00d2ff;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      letter-spacing: 0.5px;
+    }
+    .share-subtitle {
+      font-size: 11px;
+      color: rgba(255, 255, 255, 0.5);
+    }
+    .share-btn-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 6px;
+    }
+    @media (max-width: 480px) {
+      .share-btn-row {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+    .btn-share-action {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+      padding: 8px 6px;
+      border-radius: 10px;
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: all 0.2s;
+      text-decoration: none;
+      white-space: nowrap;
+      user-select: none;
+    }
+    .btn-share-action:active {
+      transform: scale(0.97);
+    }
+    .btn-share-native {
+      background: linear-gradient(135deg, #00d2ff, #0077ff);
+      color: #fff;
+      box-shadow: 0 2px 8px rgba(0, 210, 255, 0.3);
+    }
+    .btn-share-x {
+      background: #000;
+      color: #fff;
+      border-color: rgba(255, 255, 255, 0.25);
+    }
+    .btn-share-insta {
+      background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);
+      color: #fff;
+      box-shadow: 0 2px 8px rgba(220, 39, 67, 0.3);
+    }
+    .btn-share-link {
+      background: rgba(255, 255, 255, 0.08);
+      color: rgba(255, 255, 255, 0.9);
+      border-color: rgba(255, 255, 255, 0.15);
+    }
+    .btn-tile-share {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      background: rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(4px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 50%;
+      width: 28px;
+      height: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: #fff;
+      font-size: 13px;
+      transition: all 0.2s;
+      z-index: 5;
+    }
+    .btn-tile-share:hover, .btn-tile-share:active {
+      background: rgba(0, 210, 255, 0.8);
+      transform: scale(1.1);
+    }
+
+    /* Toast Notification */
+    #toast-msg {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      background: rgba(15, 23, 42, 0.95);
+      color: #00d2ff;
+      border: 1px solid rgba(0, 210, 255, 0.5);
+      padding: 10px 20px;
+      border-radius: 30px;
+      font-size: 13px;
+      font-weight: bold;
+      z-index: 100000;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.6);
+      backdrop-filter: blur(8px);
+      transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s;
+      opacity: 0;
+      pointer-events: none;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    #toast-msg.show {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
+
+    /* Instagram Stories Modal */
+    .insta-modal-overlay {
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.85);
+      backdrop-filter: blur(10px);
+      z-index: 99999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      box-sizing: border-box;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s;
+    }
+    .insta-modal-overlay.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    .insta-modal-content {
+      background: #141420;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 20px;
+      max-width: 420px;
+      width: 100%;
+      max-height: 90vh;
+      overflow-y: auto;
+      padding: 22px 18px;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.8);
+      position: relative;
+    }
+    .insta-modal-close {
+      position: absolute;
+      top: 14px;
+      right: 14px;
+      background: rgba(255,255,255,0.1);
+      border: none;
+      color: #fff;
+      font-size: 20px;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .btn-insta-step {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 10px 14px;
+      border-radius: 12px;
+      font-weight: bold;
+      font-size: 13px;
+      cursor: pointer;
+      border: 1px solid rgba(255,255,255,0.2);
+      background: rgba(255,255,255,0.06);
+      color: #fff;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+    .btn-insta-step:active {
+      transform: scale(0.98);
+    }
+
   </style>
 </head>
 <body>
@@ -1125,6 +1325,7 @@
 
           tileGrid.innerHTML += `
             <div class="product-card-tile" onclick="openDetail(${i})">
+                <button type="button" class="btn-tile-share" onclick="event.stopPropagation(); window.shareProductNative('${p.id}')" title="この作品をシェア">📤</button>
               <div style="position:relative;">
                 ${imageHtml}
                 ${topLeftBadgeHtml}
@@ -1295,6 +1496,30 @@
                     </div>
                     <div class="announce-text" id="announce-text-${p.id}"></div>
                   </div>
+
+                  <!-- SNS共有バー -->
+                  <div class="product-share-container">
+                    <div class="share-header">
+                      <span class="share-title">📢 この作品をシェアする</span>
+                      <span class="share-subtitle">ストーリーやポスト大歓迎！</span>
+                    </div>
+                    <div class="share-btn-row">
+                      <button type="button" class="btn-share-action btn-share-native" onclick="window.shareProductNative('${p.id}')">
+                        <span>📲</span><span>共有</span>
+                      </button>
+                      <button type="button" class="btn-share-action btn-share-x" onclick="window.shareProductX('${p.id}')">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+                        <span>ポスト</span>
+                      </button>
+                      <button type="button" class="btn-share-action btn-share-insta" onclick="window.openInstaStoriesModal('${p.id}')">
+                        <span>📸</span><span>インスタ</span>
+                      </button>
+                      <button type="button" class="btn-share-action btn-share-link" onclick="window.copyProductLink('${p.id}')">
+                        <span>🔗</span><span>URLコピー</span>
+                      </button>
+                    </div>
+                  </div>
+
 
 
                 </div>
@@ -2260,6 +2485,275 @@
       requestAnimationFrame(animateFollower);
     }
     animateFollower();
+  
+    // ===== SNS Share & Deep Link System =====
+    let currentModalProduct = null;
+    let toastTimer = null;
+
+    function showToast(text, icon = '✨') {
+      const toast = document.getElementById('toast-msg');
+      const toastText = document.getElementById('toast-text');
+      const toastIcon = document.getElementById('toast-icon');
+      if (!toast) return;
+      if (toastText) toastText.textContent = text;
+      if (toastIcon) toastIcon.textContent = icon;
+      toast.classList.add('show');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => {
+        toast.classList.remove('show');
+      }, 2500);
+    }
+    window.showToast = showToast;
+
+    function findProductById(productId) {
+      if (!productId) return null;
+      if (window.currentRenderedProducts && window.currentRenderedProducts.length > 0) {
+        const found = window.currentRenderedProducts.find(p => p.id === productId);
+        if (found) return found;
+      }
+      if (window.catalogProducts) {
+        const found = window.catalogProducts.find(p => p.id === productId);
+        if (found) return found;
+      }
+      return null;
+    }
+
+    function getProductShareUrl(productId) {
+      const url = new URL(window.location.href);
+      url.searchParams.set('work', productId);
+      if (currentEventKey) {
+        url.searchParams.set('event', currentEventKey);
+      }
+      return url.toString();
+    }
+    window.getProductShareUrl = getProductShareUrl;
+
+    window.shareProductNative = async function(productId) {
+      const p = findProductById(productId);
+      if (!p) return;
+      const desc = getProductDescription(p);
+      const shareUrl = getProductShareUrl(productId);
+      const cleanDesc = desc.replace(/<[^>]+>/g, '').trim();
+      const shareText = `金沢モア太郎【${p.name || ''}】🗿✨\n${cleanDesc.slice(0, 60)}...\n\n#金沢モア太郎 #モアイ #デザフェス64`;
+
+      if (navigator.share) {
+        try {
+          const shareData = {
+            title: `金沢モア太郎作品: ${p.name || ''}`,
+            text: shareText,
+            url: shareUrl
+          };
+
+          // Try attaching image file if possible
+          const imgSrc = p.image || p.optimizedCover;
+          if (imgSrc && navigator.canShare) {
+            try {
+              const resp = await fetch(imgSrc);
+              const blob = await resp.blob();
+              const file = new File([blob], `${p.id || 'moai'}.jpg`, { type: blob.type || 'image/jpeg' });
+              if (navigator.canShare({ files: [file] })) {
+                shareData.files = [file];
+              }
+            } catch (imgErr) {
+              console.warn('Image blob fetch skipped:', imgErr);
+            }
+          }
+
+          await navigator.share(shareData);
+          showToast('シェアありがとうございます！🎉', '🙌');
+          return;
+        } catch (err) {
+          if (err.name === 'AbortError') return; // User cancelled
+          console.warn('navigator.share failed, fallback to modal:', err);
+        }
+      }
+
+      // Fallback
+      window.openInstaStoriesModal(productId);
+    };
+
+    window.shareProductX = function(productId) {
+      const p = findProductById(productId);
+      if (!p) return;
+      const desc = getProductDescription(p);
+      const shareUrl = getProductShareUrl(productId);
+      const cleanDesc = desc.replace(/<[^>]+>/g, '').trim();
+      const tweetText = `金沢モア太郎【${p.name || ''}】🗿✨\n${cleanDesc.slice(0, 70)}...\n`;
+      const hashtags = '金沢モア太郎,モアイ,デザフェス64';
+      const xUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(tweetText)}&url=${encodeURIComponent(shareUrl)}&hashtags=${encodeURIComponent(hashtags)}`;
+      window.open(xUrl, '_blank', 'noopener,noreferrer');
+    };
+
+    window.copyProductLink = function(productId) {
+      const shareUrl = getProductShareUrl(productId);
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(shareUrl).then(() => {
+          showToast('作品URLをコピーしました！🔗', '📋');
+        }).catch(() => {
+          prompt('作品URLをコピーしてください:', shareUrl);
+        });
+      } else {
+        prompt('作品URLをコピーしてください:', shareUrl);
+      }
+    };
+
+    window.openInstaStoriesModal = function(productId) {
+      const p = findProductById(productId);
+      if (!p) return;
+      currentModalProduct = p;
+
+      const modal = document.getElementById('insta-modal');
+      const img = document.getElementById('insta-preview-img');
+      const linkInput = document.getElementById('insta-link-input');
+      const imgSrc = p.image || p.optimizedCover || (window.NO_IMAGE_PLACEHOLDER || 'images/dev_placeholder.gif');
+      const shareUrl = getProductShareUrl(productId);
+
+      if (img) img.src = imgSrc;
+      if (linkInput) linkInput.value = shareUrl;
+
+      modal.classList.add('active');
+    };
+
+    window.closeInstaStoriesModal = function(e) {
+      if (e && e.target && e.target !== e.currentTarget) return;
+      const modal = document.getElementById('insta-modal');
+      if (modal) modal.classList.remove('active');
+    };
+
+    window.downloadPreviewImage = async function() {
+      if (!currentModalProduct) return;
+      const imgSrc = currentModalProduct.image || currentModalProduct.optimizedCover;
+      if (!imgSrc) {
+        showToast('画像が見つかりません', '⚠️');
+        return;
+      }
+
+      try {
+        const resp = await fetch(imgSrc);
+        const blob = await resp.blob();
+        const blobUrl = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = blobUrl;
+        a.download = `${currentModalProduct.id || 'moai'}.jpg`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(blobUrl);
+        showToast('写真を保存しました！📥', '✨');
+      } catch (err) {
+        // Fallback open image in new tab
+        window.open(imgSrc, '_blank');
+        showToast('画像を長押しして保存してください', '👆');
+      }
+    };
+
+    window.copyCurrentInstaLink = function() {
+      if (!currentModalProduct) return;
+      const shareUrl = getProductShareUrl(currentModalProduct.id);
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(shareUrl).then(() => {
+          showToast('URLをコピーしました！🔗', '📋');
+        });
+      } else {
+        prompt('URLをコピー:', shareUrl);
+      }
+    };
+
+    window.copyCurrentInstaText = function() {
+      if (!currentModalProduct) return;
+      const desc = getProductDescription(currentModalProduct);
+      const cleanDesc = desc.replace(/<[^>]+>/g, '').trim();
+      const text = `金沢モア太郎【${currentModalProduct.name || ''}】🗿✨\n${cleanDesc}\n\n#金沢モア太郎 #モアイ #デザフェス64`;
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(() => {
+          showToast('紹介テキストをコピーしました！📝', '✨');
+        });
+      } else {
+        prompt('紹介テキストをコピー:', text);
+      }
+    };
+
+    // Deep link auto opener
+    let hasHandledDeepLink = false;
+    window.addEventListener('viewsBuilt', () => {
+      if (!hasHandledDeepLink) {
+        const params = new URLSearchParams(window.location.search);
+        const targetWork = params.get('work') || params.get('id');
+        if (targetWork) {
+          hasHandledDeepLink = true;
+          setTimeout(() => {
+            if (typeof openProductById === 'function') {
+              openProductById(targetWork);
+            }
+          }, 150);
+        }
+      }
+    });
+
   </script>
+
+  <!-- Toast Message -->
+  <div id="toast-msg">
+    <span id="toast-icon">✨</span>
+    <span id="toast-text">メッセージ</span>
+  </div>
+
+  <!-- Instagram Stories Modal -->
+  <div id="insta-modal" class="insta-modal-overlay" onclick="window.closeInstaStoriesModal(event)">
+    <div class="insta-modal-content" onclick="event.stopPropagation()">
+      <button class="insta-modal-close" onclick="window.closeInstaStoriesModal()">&times;</button>
+      
+      <div style="text-align: center; margin-bottom: 12px;">
+        <div style="font-size: 24px; margin-bottom: 2px;">📸✨</div>
+        <div style="font-size: 16px; font-weight: bold; color: #fff;">Instagram ストーリーズ共有</div>
+        <div style="font-size: 11px; color: rgba(255,255,255,0.6); margin-top: 2px;">
+          3ステップでかんたんにストーリーに載せられます！
+        </div>
+      </div>
+
+      <!-- 作品画像プレビュー & 保存 -->
+      <div style="text-align: center; margin-bottom: 14px;">
+        <img id="insta-preview-img" src="" alt="作品プレビュー" style="width: 170px; height: 170px; object-fit: cover; border-radius: 12px; border: 2px solid rgba(255,255,255,0.15); box-shadow: 0 4px 16px rgba(0,0,0,0.5); background: #000;">
+        <div style="margin-top: 8px;">
+          <button id="btn-save-insta-img" type="button" class="btn-insta-step" style="background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.3);" onclick="window.downloadPreviewImage()">
+            📥 ① 写真を端末に保存する
+          </button>
+        </div>
+        <div style="font-size: 10px; color: rgba(255,255,255,0.4); margin-top: 3px;">（スマホは画像を長押しでも保存できます）</div>
+      </div>
+
+      <!-- URLコピー -->
+      <div style="margin-bottom: 12px;">
+        <button type="button" class="btn-insta-step" style="background: rgba(0,210,255,0.15); border-color: rgba(0,210,255,0.5); color: #00d2ff;" onclick="window.copyCurrentInstaLink()">
+          🔗 ② 作品リンクをコピーする
+        </button>
+        <input type="text" id="insta-link-input" readonly style="width: 100%; box-sizing: border-box; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: rgba(255,255,255,0.7); font-size: 11px; padding: 6px 10px; margin-top: 5px; outline: none;">
+      </div>
+
+      <!-- 紹介テキスト＆ハッシュタグコピー -->
+      <div style="margin-bottom: 14px;">
+        <button type="button" class="btn-insta-step" style="background: rgba(255,255,255,0.06); border-color: rgba(255,255,255,0.2); color: #ddd;" onclick="window.copyCurrentInstaText()">
+          📝 ③ 作品紹介文＆タグをコピー
+        </button>
+      </div>
+
+      <!-- Instagram アプリ起動 -->
+      <div style="text-align: center; border-top: 1px dashed rgba(255,255,255,0.1); padding-top: 12px;">
+        <a id="btn-launch-insta" href="https://www.instagram.com" target="_blank" rel="noopener noreferrer" style="
+          display: inline-flex; align-items: center; justify-content: center; gap: 8px; width: 100%; box-sizing: border-box;
+          padding: 11px 16px; border-radius: 12px; font-weight: bold; font-size: 14px; text-decoration: none;
+          background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888); color: #fff;
+          box-shadow: 0 4px 15px rgba(220, 39, 67, 0.4);
+        ">
+          <span>📸 ④ Instagram を開く</span>
+          <span>→</span>
+        </a>
+        <div style="font-size: 10px; color: rgba(255,255,255,0.5); margin-top: 7px; line-height: 1.4;">
+          ストーリーズで保存した写真を選び、スタンプ「🔗 リンク」にURLを貼るだけ！
+        </div>
+      </div>
+    </div>
+  </div>
+
 </body>
 </html>
