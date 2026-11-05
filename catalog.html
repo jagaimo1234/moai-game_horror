@@ -802,6 +802,214 @@
       transform: scale(0.98);
     }
 
+  
+    /* ===== SNS REEL (RECORDING) MODE ===== */
+    .self-mode-only {
+      display: none !important;
+    }
+    body.admin-mode .self-mode-only,
+    body.preview-mode .self-mode-only,
+    body.sns-creator-mode .self-mode-only {
+      display: inline-flex !important;
+    }
+
+    .btn-sns-reel-trigger {
+      background: linear-gradient(135deg, #ff007f, #7928ca);
+      color: #fff;
+      font-weight: bold;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      border-radius: 10px;
+      padding: 8px 12px;
+      font-size: 11px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      box-shadow: 0 4px 15px rgba(255, 0, 127, 0.4);
+      transition: all 0.2s;
+    }
+    .btn-sns-reel-trigger:hover, .btn-sns-reel-trigger:active {
+      transform: scale(1.03);
+      box-shadow: 0 6px 20px rgba(255, 0, 127, 0.6);
+    }
+
+    #sns-reel-modal {
+      position: fixed;
+      top: 0; left: 0; width: 100vw; height: 100vh;
+      background: #000;
+      z-index: 999999;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      overflow: hidden;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+    #sns-reel-modal.active {
+      display: flex;
+    }
+
+    /* Stories style progress bars */
+    .reel-progress-container {
+      position: absolute;
+      top: env(safe-area-inset-top, 12px);
+      left: 12px;
+      right: 12px;
+      display: flex;
+      gap: 4px;
+      z-index: 100;
+      transition: opacity 0.3s;
+    }
+    .reel-progress-bar {
+      flex: 1;
+      height: 3px;
+      background: rgba(255, 255, 255, 0.25);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+    .reel-progress-fill {
+      width: 0%;
+      height: 100%;
+      background: #fff;
+      transition: width linear;
+    }
+
+    /* Main visual stage */
+    .reel-stage {
+      position: relative;
+      width: 100%;
+      height: 60vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: calc(env(safe-area-inset-top, 16px) + 20px);
+    }
+    .reel-img {
+      width: 90vw;
+      max-width: 420px;
+      height: 90vw;
+      max-height: 420px;
+      object-fit: cover;
+      border-radius: 20px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8), 0 0 30px rgba(255, 0, 127, 0.2);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      transition: transform 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.2s ease;
+      background: #0d0d12;
+    }
+    .reel-img.pulse {
+      transform: scale(1.04);
+    }
+
+    /* Bottom typography & info */
+    .reel-info-container {
+      width: 100%;
+      max-width: 440px;
+      padding: 0 24px calc(env(safe-area-inset-bottom, 20px) + 30px);
+      box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      z-index: 10;
+    }
+    .reel-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(255, 215, 0, 0.15);
+      border: 1px solid rgba(255, 215, 0, 0.4);
+      color: #ffd700;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 3px 10px;
+      border-radius: 20px;
+      align-self: flex-start;
+      letter-spacing: 0.5px;
+    }
+    .reel-title {
+      font-size: clamp(22px, 6.5vw, 28px);
+      font-weight: 900;
+      color: #fff;
+      line-height: 1.25;
+      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.8);
+      letter-spacing: 0.5px;
+    }
+    .reel-desc {
+      font-size: clamp(12px, 3.6vw, 14px);
+      color: rgba(255, 255, 255, 0.85);
+      line-height: 1.5;
+      text-shadow: 0 2px 8px rgba(0, 0, 0, 0.9);
+      max-height: 4.5em;
+      overflow: hidden;
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+    }
+    .reel-brand {
+      font-size: 11px;
+      font-weight: 700;
+      color: rgba(255, 255, 255, 0.4);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-top: 4px;
+    }
+
+    /* Floating recorder controls (fade out during screen recording) */
+    .reel-controls {
+      position: absolute;
+      top: calc(env(safe-area-inset-top, 14px) + 12px);
+      left: 14px;
+      right: 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 120;
+      transition: opacity 0.3s ease;
+    }
+    .reel-controls.hidden-for-record {
+      opacity: 0;
+      pointer-events: none;
+    }
+    .reel-ctrl-btn {
+      background: rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: #fff;
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: bold;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .reel-record-guide {
+      position: absolute;
+      bottom: calc(env(safe-area-inset-bottom, 20px) + 6px);
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(255, 0, 127, 0.85);
+      color: #fff;
+      font-size: 11px;
+      font-weight: bold;
+      padding: 5px 14px;
+      border-radius: 20px;
+      box-shadow: 0 4px 15px rgba(255, 0, 127, 0.5);
+      z-index: 110;
+      pointer-events: none;
+      white-space: nowrap;
+      animation: pulseRecord 2s infinite;
+      transition: opacity 0.3s ease;
+    }
+    .reel-record-guide.hidden-for-record {
+      opacity: 0;
+    }
+    @keyframes pulseRecord {
+      0%, 100% { opacity: 0.9; transform: translateX(-50%) scale(1); }
+      50% { opacity: 1; transform: translateX(-50%) scale(1.04); }
+    }
+
   </style>
 </head>
 <body>
@@ -823,8 +1031,11 @@
   </div>
 
   <!-- Preview Mode Banner (shown only in ?preview mode) -->
-  <div id="preview-banner" style="display:none; background:linear-gradient(90deg,rgba(241,196,15,0.15),rgba(230,126,34,0.15)); border:1px solid rgba(241,196,15,0.4); border-radius:10px; margin:0 16px 10px; padding:10px 16px; font-size:13px; color:#f1c40f; font-weight:bold; display:none; align-items:center; gap:8px;">
-    🔒 管理者プレビューモード — 非公開作品を含めてすべて表示中
+  <div id="preview-banner" style="display:none; background:linear-gradient(90deg,rgba(241,196,15,0.15),rgba(230,126,34,0.15)); border:1px solid rgba(241,196,15,0.4); border-radius:10px; margin:0 16px 10px; padding:10px 16px; font-size:13px; color:#f1c40f; font-weight:bold; display:none; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+    <div>🔒 管理者プレビューモード — 非公開作品を含めて全表示中</div>
+    <div style="font-size:11px; background:rgba(255,0,127,0.2); border:1px solid rgba(255,0,127,0.5); color:#ff66cc; padding:4px 10px; border-radius:20px;">
+      🎬 作品詳細の「動画録画」でインスタ用ポンポン動画が作れます
+    </div>
   </div>
 
   <!-- Admin Modal (Less Conspicuous) -->
@@ -1516,6 +1727,9 @@
                       </button>
                       <button type="button" class="btn-share-action btn-share-link" onclick="window.copyProductLink('${p.id}')">
                         <span>🔗</span><span>URLコピー</span>
+                      </button>
+                      <button type="button" class="btn-share-action btn-sns-reel-trigger self-mode-only" onclick="event.stopPropagation(); window.startSnsReelMode('${p.id}')" title="画面録画用：ポンポン画像が切り替わるショート動画モード">
+                        <span>🎬</span><span>動画録画</span>
                       </button>
                     </div>
                   </div>
@@ -2673,6 +2887,185 @@
       }
     };
 
+    
+    // ===== SNS Reel Recording Controller =====
+    let reelImages = [];
+    let reelImageIndex = 0;
+    let reelTimer = null;
+    let reelIntervalMs = 1300; // Default 1.3s
+    let isReelPlaying = false;
+    let isControlsHidden = false;
+
+    // Check if self mode / preview mode / admin mode
+    function checkSelfMode() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const isPreview = urlParams.get('preview') === 'moai2024';
+      const isModeSns = urlParams.get('mode') === 'sns';
+      const isAdminParam = urlParams.get('admin') === 'true';
+
+      if (isPreview || isModeSns || isAdminParam) {
+        document.body.classList.add('preview-mode');
+        document.body.classList.add('sns-creator-mode');
+      }
+    }
+    checkSelfMode();
+
+    window.startSnsReelMode = function(productId) {
+      const p = findProductById(productId);
+      if (!p) return;
+
+      // Collect all available images for this product
+      reelImages = [];
+      if (p.image) reelImages.push(p.image);
+      if (p.optimizedCover && !reelImages.includes(p.optimizedCover)) reelImages.push(p.optimizedCover);
+      if (Array.isArray(p.images)) {
+        p.images.forEach(img => {
+          if (img && !reelImages.includes(img) && !img.toLowerCase().endsWith('.mp4')) {
+            reelImages.push(img);
+          }
+        });
+      }
+
+      // Check worksMasterData for extra studio/raw photos
+      if (window.worksMasterData && window.worksMasterData[p.id]) {
+        const m = window.worksMasterData[p.id];
+        if (Array.isArray(m.images)) {
+          m.images.forEach(img => {
+            if (img && !reelImages.includes(img) && !img.toLowerCase().endsWith('.mp4')) {
+              reelImages.push(img);
+            }
+          });
+        }
+      }
+
+      if (reelImages.length === 0) {
+        reelImages.push(window.NO_IMAGE_PLACEHOLDER || 'images/dev_placeholder.gif');
+      }
+
+      // Populate text
+      const desc = getProductDescription(p);
+      const cleanDesc = desc.replace(/<[^>]+>/g, '').trim();
+      document.getElementById('reel-title').textContent = (p.name || '').replace(/\n/g, ' ');
+      document.getElementById('reel-desc').textContent = cleanDesc;
+
+      // Build progress bars
+      const progressContainer = document.getElementById('reel-progress-bars');
+      progressContainer.innerHTML = '';
+      reelImages.forEach((_, idx) => {
+        const bar = document.createElement('div');
+        bar.className = 'reel-progress-bar';
+        const fill = document.createElement('div');
+        fill.className = 'reel-progress-fill';
+        fill.id = `reel-fill-${idx}`;
+        bar.appendChild(fill);
+        progressContainer.appendChild(bar);
+      });
+
+      // Show Modal
+      const modal = document.getElementById('sns-reel-modal');
+      modal.classList.add('active');
+      isControlsHidden = false;
+      document.getElementById('reel-controls').classList.remove('hidden-for-record');
+      document.getElementById('reel-record-guide').classList.remove('hidden-for-record');
+
+      // Start Playback
+      reelImageIndex = 0;
+      isReelPlaying = true;
+      renderCurrentReelFrame();
+      scheduleNextReelFrame();
+    };
+
+    function renderCurrentReelFrame() {
+      if (reelImages.length === 0) return;
+      const imgEl = document.getElementById('reel-current-img');
+      const src = reelImages[reelImageIndex];
+
+      // Reset animation pulse
+      imgEl.classList.remove('pulse');
+      void imgEl.offsetWidth; // trigger reflow
+      imgEl.src = src;
+      imgEl.classList.add('pulse');
+
+      // Update progress fills
+      reelImages.forEach((_, idx) => {
+        const fill = document.getElementById(`reel-fill-${idx}`);
+        if (!fill) return;
+        if (idx < reelImageIndex) {
+          fill.style.transition = 'none';
+          fill.style.width = '100%';
+        } else if (idx === reelImageIndex) {
+          fill.style.transition = 'none';
+          fill.style.width = '0%';
+          setTimeout(() => {
+            fill.style.transition = `width ${reelIntervalMs}ms linear`;
+            fill.style.width = '100%';
+          }, 30);
+        } else {
+          fill.style.transition = 'none';
+          fill.style.width = '0%';
+        }
+      });
+    }
+
+    function scheduleNextReelFrame() {
+      clearTimeout(reelTimer);
+      if (!isReelPlaying) return;
+
+      reelTimer = setTimeout(() => {
+        reelImageIndex = (reelImageIndex + 1) % reelImages.length;
+        renderCurrentReelFrame();
+        scheduleNextReelFrame();
+      }, reelIntervalMs);
+    }
+
+    window.toggleReelPlay = function() {
+      isReelPlaying = !isReelPlaying;
+      document.getElementById('btn-reel-pause').textContent = isReelPlaying ? '⏸' : '▶️';
+      if (isReelPlaying) {
+        scheduleNextReelFrame();
+      } else {
+        clearTimeout(reelTimer);
+      }
+    };
+
+    window.cycleReelSpeed = function() {
+      if (reelIntervalMs === 1300) {
+        reelIntervalMs = 900;
+        document.getElementById('reel-speed-label').textContent = '0.9s';
+      } else if (reelIntervalMs === 900) {
+        reelIntervalMs = 2000;
+        document.getElementById('reel-speed-label').textContent = '2.0s';
+      } else {
+        reelIntervalMs = 1300;
+        document.getElementById('reel-speed-label').textContent = '1.3s';
+      }
+      if (isReelPlaying) {
+        scheduleNextReelFrame();
+      }
+    };
+
+    window.toggleReelControlsVisibility = function() {
+      isControlsHidden = !isControlsHidden;
+      const ctrl = document.getElementById('reel-controls');
+      const guide = document.getElementById('reel-record-guide');
+      const progress = document.getElementById('reel-progress-bars');
+
+      if (isControlsHidden) {
+        ctrl.classList.add('hidden-for-record');
+        guide.classList.add('hidden-for-record');
+      } else {
+        ctrl.classList.remove('hidden-for-record');
+        guide.classList.remove('hidden-for-record');
+      }
+    };
+
+    window.closeSnsReelMode = function() {
+      clearTimeout(reelTimer);
+      isReelPlaying = false;
+      const modal = document.getElementById('sns-reel-modal');
+      modal.classList.remove('active');
+    };
+
     // Deep link auto opener
     let hasHandledDeepLink = false;
     window.addEventListener('viewsBuilt', () => {
@@ -2752,6 +3145,46 @@
           ストーリーズで保存した写真を選び、スタンプ「🔗 リンク」にURLを貼るだけ！
         </div>
       </div>
+    </div>
+  </div>
+
+
+  <!-- SNS Reel (Screen Recording) Fullscreen Modal -->
+  <div id="sns-reel-modal" onclick="window.toggleReelControlsVisibility()">
+    <!-- Progress Bars -->
+    <div class="reel-progress-container" id="reel-progress-bars"></div>
+
+    <!-- Top Controls (Fade out on tap/recording) -->
+    <div class="reel-controls" id="reel-controls">
+      <button type="button" class="reel-ctrl-btn" onclick="event.stopPropagation(); window.closeSnsReelMode()">
+        ✕ 終了
+      </button>
+      <div style="display:flex; gap:6px;">
+        <button type="button" class="reel-ctrl-btn" id="btn-reel-speed" onclick="event.stopPropagation(); window.cycleReelSpeed()">
+          ⚡ テンポ: <span id="reel-speed-label">1.3s</span>
+        </button>
+        <button type="button" class="reel-ctrl-btn" id="btn-reel-pause" onclick="event.stopPropagation(); window.toggleReelPlay()">
+          ⏸
+        </button>
+      </div>
+    </div>
+
+    <!-- Center Stage -->
+    <div class="reel-stage">
+      <img id="reel-current-img" class="reel-img" src="" alt="MOAI REEL">
+    </div>
+
+    <!-- Bottom Typography -->
+    <div class="reel-info-container">
+      <div class="reel-badge" id="reel-badge">🎨 デザフェス64 出展作品</div>
+      <div class="reel-title" id="reel-title">作品名</div>
+      <div class="reel-desc" id="reel-desc">紹介文...</div>
+      <div class="reel-brand">KANAZAWA MOATARO | MOAI ART</div>
+    </div>
+
+    <!-- Tap Guide Pill -->
+    <div class="reel-record-guide" id="reel-record-guide">
+      🔴 画面録画開始後、ここをタップして全UI非表示
     </div>
   </div>
 
