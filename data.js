@@ -945,7 +945,8 @@ window.WORK_FOLDER_ASSETS = {
       "images/kurima/moai_loscut/studio/ChatGPT 画像 2026年11月5日 20_35_04-7.png",
       "images/kurima/moai_loscut/studio/ChatGPT 画像 2026年11月5日 20_35_09-8.png",
       "images/kurima/moai_loscut/studio/ChatGPT 画像 2026年11月5日 20_35_14-9.png",
-      "images/kurima/moai_loscut/studio/ChatGPT 画像 2026年11月5日 20_35_18-10.png"
+      "images/kurima/moai_loscut/studio/ChatGPT 画像 2026年11月5日 20_35_18-10.png",
+      "images/kurima/moai_loscut/studio/含み損モアイ_master.png"
     ]
   },
   "nitto_osuwari_moai_penstand": {
