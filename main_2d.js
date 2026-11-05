@@ -463,20 +463,19 @@ function animate() {
           <button class="retro-btn btn-insta" onclick="window.open('https://www.instagram.com/moataro_k/', '_blank')" aria-label="Instagram"></button>
         </div>
 
-        <!-- ▼▼▼ イベント情報終了メッセージ ▼▼▼ -->
+        <!-- ▼▼▼ デザフェス案内 & お品書き導線 ▼▼▼ -->
         <div style="width: 100%; max-width: 550px; display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 20px 0; background: #000; z-index: 101;">
             <div style="text-align: center; color: #fff; font-family: 'Outfit', sans-serif; font-weight: bold; text-shadow: 0px 2px 5px rgba(0,0,0,1);">
-                <div style="font-size: clamp(16px, 4.5vw, 22px); margin-bottom: 4px; color: #ffd700;">HMJ（ハンドメイドインジャパン）</div>
-                <div style="font-size: clamp(14px, 4vw, 18px); margin-bottom: 8px; color: #fff;">ご来場・ご交信ありがとうございました！</div>
+                <div style="font-size: clamp(16px, 4.5vw, 22px); margin-bottom: 4px; color: #ffd700;">デザインフェスタ64 出展決定！</div>
                 <div style="font-size: clamp(12px, 3.5vw, 14px); color: rgba(255,255,255,0.7); line-height: 1.5; padding: 0 10px;">
-                    無事にイベントが終了いたしました。<br>
-                    たくさんのご来場、誠にありがとうございました！
+                    新作モアイ作品を多数出品予定！<br>
+                    最新のお品書きをチェック！
                 </div>
             </div>
             <div style="display: flex; gap: 10px; flex-wrap: wrap; justify-content: center;">
-                <button onclick="event.stopPropagation(); location.href='catalog.html?v=20260526_1'" style="
+                <button onclick="event.stopPropagation(); location.href='catalog.html'" style="
                     background: linear-gradient(135deg, #00d2ff, #0088cc); border: none; color: #000;
-                    padding: clamp(6px, 1.5vw, 8px) clamp(12px, 3vw, 18px); border-radius: 20px;
+                    padding: clamp(6px, 1.5vw, 8px) clamp(16px, 3vw, 22px); border-radius: 20px;
                     font-size: clamp(12px, 3.5vw, 16px); font-weight: bold; cursor: pointer;
                     box-shadow: 0 4px 6px rgba(0,210,255,0.3);
                 ">お品書きを見る 📚</button>
