@@ -3,6 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
   <title>お品書き | Kanazawa Moataro</title>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700;900&family=DotGothic16&display=swap" rel="stylesheet">
   <style>
@@ -2663,6 +2666,8 @@
       });
 
       sortedKeys.forEach(key => {
+        // 終了したHMJ、クリマは絶対にタブ描画しない
+        if (key === 'hmj' || key === 'kurima' || key.toLowerCase().includes('hmj')) return;
         const ev = allEvents[key];
         if (!ev) return;
         // Handle visibility status
@@ -3084,6 +3089,7 @@
             </button>
           ` : '';
 
+          const isLiked = (typeof window.isMoaiLiked === 'function') ? window.isMoaiLiked(p.id) : false;
           track.innerHTML += `
             <div class="carousel-slide">
               <div class="product-card-large">
@@ -3101,7 +3107,7 @@
                   </div>
                   <div class="product-desc" id="desc-text-${p.id}">${getProductDescription(p).replace(/\n/g, '<br>')}</div>
                   
-                  ${variantSelectorHtml}
+${variantSelectorHtml}
                   ${linkedGroupJumpHtml}
 
                   <!-- マッチングボタン -->
@@ -3707,7 +3713,7 @@
         else if (config.visible === false) status = 'hidden';
       }
       
-      if ((status === 'hidden' || !allEvents[currentEventKey]) && !IS_PREVIEW_MODE) {
+      if ((status === 'hidden' || !allEvents[currentEventKey] || currentEventKey === 'hmj' || currentEventKey.includes('hmj')) && !IS_PREVIEW_MODE) {
         const targetDf = (allEvents['designfesta64'] && window.eventConfigData['designfesta64']?.status !== 'hidden')
           ? 'designfesta64'
           : ((allEvents['designfesta'] && window.eventConfigData['designfesta']?.status !== 'hidden') ? 'designfesta' : DEFAULT_EVENT);
@@ -4281,7 +4287,7 @@
     }
     window.showToast = showToast;
 
-    window.getAllAvailableProducts() = function() {
+    window.getAllAvailableProducts = function() {
       if (window.currentRenderedProducts && window.currentRenderedProducts.length > 0) {
         return window.currentRenderedProducts;
       }
@@ -5123,11 +5129,11 @@
     <div class="moai-chat-body" id="chatroom-messages"></div>
 
     <div class="moai-chat-quick-replies">
-      <button class="moai-quick-btn" onclick="sendQuickReply('デザフェス当日会いに行くよ！')">🏃 当日会いに行くよ！</button>
-      <button class="moai-quick-btn" onclick="sendQuickReply('暗闇でどんな風に光るの？')">💡 暗闇で光る？</button>
-      <button class="moai-quick-btn" onclick="sendQuickReply('いくらで連れて帰れる？')">💰 いくら？</button>
-      <button class="moai-quick-btn" onclick="sendQuickReply('写真撮ってもいい？')">📸 写真撮っていい？</button>
-      <button class="moai-quick-btn" onclick="sendQuickReply('めっちゃかわいい！')">❤️ かわいい！</button>
+      <button class="moai-quick-btn" onclick="sendQuickReply('当日会いに行くよ！')">🏃 当日会いに行くよ！</button>
+      <button class="moai-quick-btn" onclick="sendQuickReply('暗いブースってどんなとこ？')">👀 暗いブースってどんなとこ？</button>
+      <button class="moai-quick-btn" onclick="sendQuickReply('普段はどんな性格なの？')">✨ どんな性格なの？</button>
+      <button class="moai-quick-btn" onclick="sendQuickReply('会場で写真撮ってもいい？')">📸 写真撮っていい？</button>
+      <button class="moai-quick-btn" onclick="sendQuickReply('一目惚れしちゃった…！')">💖 一目惚れしちゃった！</button>
     </div>
 
     <div class="moai-chat-input-bar">
@@ -5539,12 +5545,21 @@
     // Render "Chat Matches" list
     // Plus Button triggers Photo Roulette Gacha
     window.triggerRouletteFromPlus = function() {
-      if (typeof window.spinPhotoRoulette === 'function') {
+      if (typeof window.openCatalogGachaModal === 'function') {
+        window.openCatalogGachaModal();
+        setTimeout(() => {
+          if (typeof window.spinMoaiRoulette === 'function') {
+            window.spinMoaiRoulette();
+          }
+        }, 150);
+      } else if (typeof window.spinPhotoRoulette === 'function') {
         window.spinPhotoRoulette();
       } else if (typeof openGachaModal === 'function') {
         openGachaModal();
       }
     };
+    window.spinPhotoRoulette = window.openCatalogGachaModal;
+    window.openGachaModal = window.openCatalogGachaModal;
 
     function renderChatMatchesView() {
       const listEl = document.getElementById('chat-matches-list');
@@ -5622,6 +5637,16 @@
 
       if (avatar) avatar.src = p.image || p.optimizedCover || 'images/dev_placeholder.gif';
       if (name) name.textContent = p.name ? p.name.replace(/\n/g, ' ') : 'モアイ';
+
+      // 初回チャット時、モアイ側からキャラクター個性全開のお誘いメッセージを1通自動送信
+      if (!chats[activeChatMoaiId] || chats[activeChatMoaiId].length === 0) {
+        chats[activeChatMoaiId] = [{
+          sender: 'moai',
+          text: getMoaiFirstGreeting(p),
+          time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+        }];
+        saveState();
+      }
 
       renderChatMessages();
 
@@ -5791,6 +5816,144 @@
       return null;
     }
 
+    
+    // ===== キャラクター別 性格判定ヘルパー =====
+    function getMoaiPersonalityType(p) {
+      if (!p) return 'default';
+      const id = (p.id || '').toLowerCase();
+      const name = (p.name || '').toLowerCase();
+
+      if (id.includes('loscut') || name.includes('うなだれ') || name.includes('ロスカット') || name.includes('含み損')) return 'loscut';
+      if (id.includes('highleg') || name.includes('ハイレグ')) return 'highleg';
+      if (id.includes('macho') || name.includes('マッチョ') || name.includes('まっちょ')) return 'macho';
+      if (id.includes('robo') || name.includes('ロボ') || name.includes('ヨーグルト')) return 'robo';
+      if (id.includes('tasogare') || name.includes('黄昏')) return 'tasogare';
+      if (id.includes('headphone') || name.includes('ヘッドホン')) return 'headphone';
+      if (id.includes('kangaeru') || name.includes('考え')) return 'kangaeru';
+      if (id.includes('dot') || id.includes('mini') || name.includes('ドット') || name.includes('ミニおすわり')) return 'cute';
+      if (id.includes('lure') || name.includes('ルアー') || name.includes('釣り')) return 'lure';
+      if (id.includes('glasses') || name.includes('メガネ')) return 'glasses';
+      if (id.includes('nomidakure') || name.includes('飲み')) return 'nomidakure';
+      if (id.includes('nukayorokobi') || name.includes('ぬか喜び')) return 'nukayorokobi';
+      if (id.includes('positive') || name.includes('ポジティブ')) return 'positive';
+      return 'default';
+    }
+
+    // 各モアイの初回アプローチメッセージ（はじめまして＆やけに誘ってくる！）
+    function getMoaiFirstGreeting(p) {
+      const type = getMoaiPersonalityType(p);
+      const cleanName = (p.name || 'モアイ').replace(/\n/g, ' ');
+
+      switch (type) {
+        case 'loscut':
+          return '…あ、はじめまして…。どうせ僕なんかに誰も会いたくないよね…？ でも…もし気が向いたら、デザフェス西4Fの【暗いブース K-271】に来てくれませんか…？ 暗がりなら僕の落ち込み顔も目立たないと思うので…待ってます…📉🗿';
+        case 'highleg':
+          return 'あら、はじめまして♡ 私の美脚に見惚れちゃった？フフッ、デザフェス西4F【暗いブース K-271】で脚組んで待ってるから、絶対会いにいらっしゃいよね！待ってるんだから🩱✨';
+        case 'macho':
+          return 'フンッッ！！（大胸筋ピクピク）はじめまして！君のペンを挟むために筋トレしてきたぜ！デザフェス西4F【暗いブース K-271】でパンプアップしながら待ってるマッチョ！絶対会いに来てくれよなパワーッ！💪💥';
+        case 'robo':
+          return 'ピピピッ！通信接続！はじめましてだな相棒！オレはヨーグルトで稼働するモアイロボ！デザフェス西4F【暗いブース K-271】で待機中だ！暗闇ブースで一緒に乾杯しようぜ！🤖🥛';
+        case 'tasogare':
+          return '…あ、やっほ。はじめまして。今ちょっと黄昏てたところ…。君もたまには息抜きしたいでしょ？ デザフェス西4F【暗いブース K-271】の暗がりってすごく落ち着くんだ。ふらっと寄ってくれたら嬉しいな…一緒に黄昏れよ？🗿🌇';
+        case 'headphone':
+          return 'Hey、はじめまして🎧 今ちょうどいい曲聴いてチルってたところさ。西4Fの【暗いブース K-271】で待ってるよ。暗闇とお気に入りの花…最高のチル空間作っておくから、音に身を任せて遊びに来てよ🗿🌿';
+        case 'kangaeru':
+          return 'ふむ…君か、はじめまして。私は今、宇宙の真理と今日の夕飯について熟考していたのだ。西4F【暗いブース K-271】で腕を組んで待機しているぞ。議論の続きをしに来ないかね？🤔🗿';
+        case 'cute':
+          return 'わーい！はじめまして！メッセージすっごく嬉しいな〜！✨ 僕ね、デザフェス西4Fの【暗いブース K-271】でちょこんとお座りして待ってるんだよ！会いに来てくれたら全力で喜んじゃう！待ってるね！🗿🎒💕';
+        case 'lure':
+          return 'フッ…引っかかったな。はじめまして。オレという大物ルアーに食いついてくるとは、君もなかなかの釣り師とお見受けするぜ🎣 西4F【暗いブース K-271】の水域で待ってる。オレを釣り上げに来てくれよな…！🐟🗿';
+        case 'glasses':
+          return 'おや、はじめまして。視界は良好でしょうか？ 私はデザフェス西4F【暗いブース K-271】にて、あなたの愛用メガネをお預かりする準備を整えております。ぜひ会場でフィッティングさせてくださいね👓🗿✨';
+        case 'nomidakure':
+          return 'うぃ〜〜…はじめましてぇ〜🍶 今夜も飲むヨーグルトでいい気分だぜ…！デザフェス西4F【暗いブース K-271】でくだ巻いてるからさ、愚痴聞きに来てくれよな〜待ってるぜ🗿🍺';
+        case 'nukayorokobi':
+          return 'はじめまして…！えっ、メッセージくれたの！？やったーー！！…あ、いや、またぬか喜びかも…。お願い、裏切らないで…デザフェス西4F【暗いブース K-271】で待ってるからね…？🎄🗿';
+        case 'positive':
+          return 'おっす！はじめましてッッ！君に会えて最高にテンション上がってきたぞ！デザフェス西4F【暗いブース K-271】で魂込めて待ってる！君の元気を全力応援するから絶対来てくれよなッ！🔥🗿';
+        default:
+          const defaults = [
+            `はじめまして🗿✨ メッセージありがとう！実は今デザフェスの準備でソワソワしててさ…西4Fの【暗いブース K-271】で待ってるから、絶対顔見せてね！約束だよ？`,
+            `ふーん、君から話しかけてくるなんていい度胸じゃない🗿…でも本当はすごく嬉しいんだ。西4Fの【暗いブース K-271】にいるから、見つけたら声かけてよね。待っててあげるからさ！`,
+            `はじめまして〜🗿🍵 メッセージ届いてホッコリしたよ。金沢から東京ビッグサイト（西4F 暗いブース K-271）へ遠征するから、ブースに遊びに来てくれたら嬉しいな〜待ってるね！`
+          ];
+          return defaults[Math.floor(Math.random() * defaults.length)];
+      }
+    }
+
+    // ユーザーの発言に対するモアイキャラクター別の柔軟な返答
+    function getMoaiCharacterReply(p, userText) {
+      const type = getMoaiPersonalityType(p);
+      const text = userText.toLowerCase();
+
+      // 1. 会いに行く・行く
+      if (text.includes('会いに行く') || text.includes('行く') || text.includes('いくよ')) {
+        switch (type) {
+          case 'loscut': return '…ホ、ホントに…！？嘘じゃないよね…？嬉しすぎて含み損のこと忘れちゃいそうだよ…！西4F K-271で泣きながら待ってるね…！📉😭';
+          case 'highleg': return 'あら、即答じゃない！素直でよろしい♡ 暗いブース K-271で一番セクシーなポーズで待ってるから、絶対見失わないでよね🩱✨';
+          case 'macho': return 'おおおおッッ！熱い魂を感じたぜ相棒ッ！オレの大胸筋も歓喜のスクワット中だ！西4F K-271で全力でペン挟んで待ってるぜパワーッッ！！💪🔥';
+          case 'robo': return '了解だ相棒！会場でのランデブーをスケジュールに登録したぞ！西4F 暗いブース K-271で飲むヨーグルト用意して待機する！🤖🥛';
+          case 'tasogare': return 'ありがとう…すごく嬉しいな。当日は人混みで疲れちゃうかもしれないから、西4F K-271の暗がりで一緒にのんびり休もうね🗿☕';
+          case 'headphone': return '最高のレスポンスじゃん🎧 西4F K-271で極上のBGMとお花セットして待ってる。気軽に遊びにおいでよ🗿✨';
+          case 'cute': return 'わーーーい！！やったやった！飛び跳ねちゃうくらい嬉しいな！西4F K-271で待ってるから、見つけたらすぐ声かけてね！🎒💖';
+          default: return '本当に行くって言ってくれてすごく嬉しい🗿❤️ 西4F 暗いブース K-271 で首を長〜くして待ってるよ！気をつけて来てね！';
+        }
+      }
+
+      // 2. 暗いブースってどんなとこ？
+      if (text.includes('暗い') || text.includes('どんなとこ') || text.includes('場所') || text.includes('ブース')) {
+        switch (type) {
+          case 'loscut': return '東京ビッグサイト西4Fの照明が落とされた特別なエリアだよ…。薄暗くて静かで、僕みたいな傷心モアイには居心地最高なんだ…。K-271を探してね🗿🕯️';
+          case 'highleg': return '西ホールの4階にある、照明が控えめなムーディーなエリアよ♡ 暗がりの中でスポットライトを浴びる私の美脚、拝みに来なさい？K-271番よ🩱✨';
+          case 'macho': return '西4Fの照明が落ちたストイックな筋トレ部屋…じゃなくて暗闇エリアだ！薄暗い中で光るオレの筋肉美を目印にK-271へ突撃してくれッ！💪🔥';
+          case 'robo': return '西4Fの照明制限エリアだ！暗闇の中でメカモアイたちが妖しくスタンバイしている秘密基地のようなブースだぞ！目印はブース番号K-271！🤖🛸';
+          default: return 'デザフェス西4Fにある、照明をぐっと落とした特別な暗闇エリアなんだ💡 落ち着いた雰囲気でモアイたちをじっくり眺められるよ！角ブースのK-271で待ってるね🗿✨';
+        }
+      }
+
+      // 3. どんな性格？
+      if (text.includes('性格') || text.includes('どんな人') || text.includes('どんなモアイ') || text.includes('誰')) {
+        const hitokoto = window.getMoaiHitokoto ? window.getMoaiHitokoto(p) : '';
+        switch (type) {
+          case 'loscut': return `僕の性格？…だいたい「${hitokoto}」って感じだよ…。ネガティブだけど、心を開いた人には一途なんだ…。見捨てないでね📉🗿`;
+          case 'highleg': return `私の性格？「${hitokoto}」よ♡ 自信家に見えて、実はお手入れ大変なんだから。撫でてくれたら特別に懐いてあげるわ🩱✨`;
+          case 'macho': return `オレのモットーは「${hitokoto}」だッッ！熱血、義理堅い、そしてパンプアップ！君のペンを一生離さないぜパワーッ！💪🔥`;
+          case 'robo': return `オレの基本スペックは「${hitokoto}」だ！ヨーグルトを愛し、相棒との絆を重んじる近未来メカだぞ！よろしくな！🤖🥛`;
+          default: return hitokoto ? `一言で言うと「${hitokoto}」な性格だよ🗿✨ 会場で直接お話ししたら、もっと仲良くなれると思うな！` : '石川県金沢生まれの素直でちょっとシュールなモアイだよ🗿 会場でお話ししよう！';
+        }
+      }
+
+      // 4. 写真撮っていい？
+      if (text.includes('写真') || text.includes('撮') || text.includes('カメラ')) {
+        switch (type) {
+          case 'highleg': return 'もちろんよ！最高に美脚が映えるアングルからバシバシ撮って、SNSで自慢してちょうだい♡ ポーズ決めちゃうわよ🩱📸';
+          case 'macho': return '大歓迎だァッ！一番カットが出てる角度から筋肉モアイを激写してくれッ！拡散してくれたら雄叫びあげるぜパワーッ！💪📸';
+          case 'loscut': return 'えっ、僕なんか撮って面白いの…？でも…遺影みたいにならないように、優しく撮ってくれたら嬉しいな…📉📸';
+          default: return '撮影大大大歓迎！！かっこいい角度やシュールなアングルからバシバシ撮って、X（Twitter）やインスタに載せてくれたら歓喜の咆哮をあげます🗿📸✨';
+        }
+      }
+
+      // 5. かわいい・一目惚れ・好き
+      if (text.includes('かわいい') || text.includes('好き') || text.includes('惚れ') || text.includes('愛')) {
+        switch (type) {
+          case 'loscut': return 'え…！？僕に一目惚れ…！？嘘…人生で初めて言われた…！心拍数ストップ高になっちゃうよ…大切にしてね…📉❤️';
+          case 'highleg': return 'フフッ、素直でかわいいじゃない♡ 私もあなたの熱い視線、最初から気づいてたわよ？会場で独占させてあげるわ🩱💋';
+          case 'macho': return 'ガハハッ！惚れ惚れするだろこの肉体美！君の愛を胸筋でガッチリ受け止めたぜ！西4F K-271で待ってるぜ相棒ッ！💪❤️';
+          default: return '照れちゃうな…🗿/// ありがとう！実物は写真以上に愛嬌と重厚感があるから、ぜひ会場で直接撫でてあげてね！西4F K-271で待ってるよ✨';
+        }
+      }
+
+      // 6. その他の自由入力
+      switch (type) {
+        case 'loscut': return 'メッセージ読んでちょっと元気出たよ…ありがとう…。暗いブース K-271 で君に会えるのを心の支えにして生きていくね…📉🗿';
+        case 'highleg': return 'フフッ、君とお話しするの結構楽しいじゃない♡ デザフェス当日は他の子に目移りしちゃダメよ？K-271で待ってるわ🩱✨';
+        case 'macho': return '君の熱いバイブス、ビンビン伝わってきたぜッ！当日までにもっとパンプアップしてK-271で待ってるぜパワーッッ！💪🔥';
+        case 'robo': return 'メッセージ受信完了！エネルギー充填率120%だ！会場で君と会えるのを楽しみにしてるぞ相棒！🤖🥛';
+        case 'tasogare': return 'メッセージありがとう。なんだかホッとするね…。デザフェス当日は、西4F K-271でまったり語り合おうね🗿☕';
+        default: return 'メッセージありがとう🗿❤️ 君とデザフェス西4F 暗いブース K-271 で直接会えるのが本当に楽しみだな！ブースで待ってるね✨';
+      }
+    }
+
     async function sendUserMessage(text) {
       if (!activeChatMoaiId) return;
       const cleanText = text.slice(0, 40);
@@ -5809,21 +5972,9 @@
       // Try Gemini AI first (with 1 day 5 requests limit)
       let reply = await fetchGeminiMoaiReply(p, cleanText);
 
-      // Fallback to high quality scripted response if no AI response
+      // Fallback to rich character-specific persona response
       if (!reply) {
-        if (cleanText.includes('会いに行く') || cleanText.includes('行く')) {
-          reply = 'やったー！！西4F 暗いブース K-271で首を長くして待ってるね🗿✨ 迷ったら下の「会場MAP」を見てね！';
-        } else if (cleanText.includes('光る') || cleanText.includes('暗闇')) {
-          reply = 'そうなんです！特殊な蓄光素材で、暗いブースで妖しく光るギミックがあります💡 暗いエリアで本領発揮するよ🗿✨';
-        } else if (cleanText.includes('いくら') || cleanText.includes('価格') || cleanText.includes('値段')) {
-          reply = 'デザフェス特別価格で連れて帰れるよ！詳しい金額は作品詳細をチェックしてみてね🗿💰';
-        } else if (cleanText.includes('写真') || cleanText.includes('撮')) {
-          reply = '撮影大大大歓迎！！かっこいい角度やシュールなアングルからバシバシ撮って、X（Twitter）に載せてくれたら歓喜の咆哮をあげます🗿📸';
-        } else if (cleanText.includes('かわいい') || cleanText.includes('好き')) {
-          reply = '照れちゃうな…🗿/// ありがとう！実物は写真以上に愛嬌と重厚感があるから、ぜひ会場で撫でてあげてね！';
-        } else {
-          reply = 'メッセージありがとう🗿❤️ あなたとデザフェスで直接会えるのが本当に楽しみだな！ブースK-271で待ってるね✨';
-        }
+        reply = getMoaiCharacterReply(p, cleanText);
       }
 
       chats[activeChatMoaiId].push({
