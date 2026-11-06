@@ -469,23 +469,36 @@ const MASTER_PRODUCTS = [
 ];
 
 const EVENTS = {
-  kurima: {
-    label: '名古屋クリマ',
+  designfesta64: {
+    label: 'デザフェス64',
+    fullName: 'デザインフェスタvol.64',
     isMarche: true,
-    defaultStatus: 'hidden',
-    products: []
+    defaultStatus: 'public',
+    date: '2026-11-14',
+    location: '東京ビッグサイト 西4F 暗いブース K-271',
+    products: [
+      ...MASTER_PRODUCTS
+    ]
   },
   designfesta: {
     label: 'デザインフェスタ',
+    fullName: 'デザインフェスタvol.63',
     isMarche: true,
     defaultStatus: 'hidden',
     products: [
       ...MASTER_PRODUCTS
     ]
   },
+  kurima: {
+    label: '名古屋クリマ',
+    isMarche: true,
+    defaultStatus: 'hidden',
+    products: []
+  },
   hmj: {
     label: 'HMJ 7/11,12',
     isMarche: true,
+    defaultStatus: 'hidden',
     heroHtml: `
       <div class="topics-container">
         <div class="topics-header">
@@ -610,6 +623,8 @@ window.getAllEvents = function(configData) {
   if (configData) {
     Object.entries(configData).forEach(([key, config]) => {
       if (config.label) {
+        const existingProducts = merged[key]?.products;
+        const fallbackProducts = (merged[key]?.isMarche !== false && config.isMarche !== false) ? [...MASTER_PRODUCTS] : [];
         merged[key] = {
           ...merged[key],
           label: config.label,
@@ -617,7 +632,7 @@ window.getAllEvents = function(configData) {
           isMarche: config.isMarche !== undefined ? config.isMarche : (merged[key]?.isMarche !== undefined ? merged[key].isMarche : true),
           date: config.date || null,
           location: config.location || null,
-          products: merged[key]?.products || []
+          products: (existingProducts && existingProducts.length > 0) ? existingProducts : fallbackProducts
         };
       }
     });
