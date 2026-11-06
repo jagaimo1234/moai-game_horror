@@ -2629,6 +2629,10 @@
     // URLパラメータでイベント指定があれば取得 (?event=...)。無ければデザフェスをデフォルトにする
     const urlEventParam = new URLSearchParams(window.location.search).get('event');
     let currentEventKey = urlEventParam || DEFAULT_EVENT;
+    // 終了したHMJが指定されていても、一般モードなら強制的にデザフェス64に切り替え
+    if ((currentEventKey === 'hmj' || currentEventKey === 'kurima') && !window.location.search.includes('preview=moai2024')) {
+      currentEventKey = 'designfesta64';
+    }
     let currentSlide = 0;
     window.eventProductsData = {};
     window.eventConfigData = {};
@@ -2649,17 +2653,14 @@
       const allEvents = window.getAllEvents(window.eventConfigData);
       
       let sortedKeys = Object.keys(allEvents);
-      if (window.eventConfigData && window.eventConfigData._order) {
-        const order = window.eventConfigData._order;
-        sortedKeys.sort((a, b) => {
-          const idxA = order.indexOf(a);
-          const idxB = order.indexOf(b);
-          if (idxA === -1 && idxB === -1) return 0;
-          if (idxA === -1) return 1;
-          if (idxB === -1) return -1;
-          return idxA - idxB;
-        });
-      }
+      // デザフェス64を常に最優先（先頭）、歴代図鑑を末尾に配置
+      sortedKeys.sort((a, b) => {
+        if (a === 'designfesta64' || a === 'designfesta') return -1;
+        if (b === 'designfesta64' || b === 'designfesta') return 1;
+        if (a === 'history') return 1;
+        if (b === 'history') return -1;
+        return 0;
+      });
 
       sortedKeys.forEach(key => {
         const ev = allEvents[key];
