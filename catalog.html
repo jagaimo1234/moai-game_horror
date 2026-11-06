@@ -1878,17 +1878,365 @@
       transition: transform 0.05s ease;
     }
 
+  
+    /* ===== OMOAI NATIVE APP MATCHING UI STYLES ===== */
+    /* Container White Theme */
+    #matching-chat-view,
+    #matching-incoming-view {
+      background: #ffffff !important;
+      color: #0f172a !important;
+      padding-bottom: 80px;
+    }
+    #matching-chat-view h2,
+    #matching-incoming-view h2 {
+      color: #0f172a !important;
+      font-weight: 900;
+    }
+    #matching-chat-view p,
+    #matching-incoming-view p {
+      color: #64748b !important;
+    }
+
+    /* OMOAI Chat Matches List (画像2 完全再現) */
+    #chat-matches-list {
+      max-width: 600px;
+      margin: 0 auto;
+      background: #ffffff;
+      border-radius: 16px;
+      overflow: hidden;
+    }
+    .moai-chat-item {
+      display: flex !important;
+      align-items: center !important;
+      gap: 12px !important;
+      padding: 14px 16px !important;
+      background: #ffffff !important;
+      border: none !important;
+      border-bottom: 1px solid #f1f5f9 !important;
+      border-radius: 0 !important;
+      margin-bottom: 0 !important;
+      cursor: pointer !important;
+      transition: background 0.15s ease !important;
+      position: relative !important;
+    }
+    .moai-chat-item:active {
+      background: #f8fafc !important;
+      transform: none !important;
+    }
+    .moai-chat-avatar-wrap {
+      position: relative;
+      width: 52px;
+      height: 52px;
+      flex-shrink: 0;
+    }
+    .moai-chat-avatar {
+      width: 52px !important;
+      height: 52px !important;
+      border-radius: 50% !important;
+      object-fit: cover !important;
+      border: 1px solid #e2e8f0 !important;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.06) !important;
+      display: block;
+    }
+    .chat-new-badge {
+      position: absolute;
+      top: -2px;
+      left: -2px;
+      background: #ff2d55;
+      color: #fff;
+      font-size: 9px;
+      font-weight: 900;
+      padding: 1px 5px;
+      border-radius: 8px;
+      box-shadow: 0 1px 4px rgba(255, 45, 85, 0.4);
+      letter-spacing: 0.3px;
+    }
+    .moai-chat-info {
+      flex: 1 !important;
+      min-width: 0 !important;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+    .moai-chat-title-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .moai-chat-name {
+      font-size: 15px !important;
+      font-weight: 800 !important;
+      color: #0f172a !important;
+      margin: 0 !important;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .moai-chat-tag {
+      font-size: 11px;
+      color: #64748b;
+      background: #f1f5f9;
+      padding: 1px 6px;
+      border-radius: 4px;
+      font-weight: 600;
+      flex-shrink: 0;
+    }
+    .moai-chat-sub-row {
+      font-size: 13px !important;
+      line-height: 1.35;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .moai-matched-highlight {
+      color: #ff2d55 !important;
+      font-weight: 700 !important;
+      font-size: 13px !important;
+    }
+    .moai-chat-lastmsg {
+      color: #64748b !important;
+      font-size: 13px !important;
+    }
+    .moai-chat-meta {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 6px;
+      flex-shrink: 0;
+      margin-left: 8px;
+    }
+    .moai-chat-time {
+      font-size: 11px;
+      color: #94a3b8;
+      font-weight: 500;
+      font-family: 'Outfit', sans-serif;
+    }
+    .moai-chat-dots {
+      font-size: 16px;
+      color: #cbd5e1;
+      letter-spacing: 1px;
+      line-height: 1;
+    }
+
+    /* OMOAI Bottom Nav Plus Button (中央の丸いピンク＋ボタン) */
+    .m-nav-plus-item {
+      position: relative !important;
+      top: -10px !important;
+      padding: 0 4px !important;
+    }
+    .m-plus-circle {
+      width: 48px;
+      height: 48px;
+      background: linear-gradient(135deg, #ff2d55, #ff5e62);
+      border-radius: 50%;
+      color: #ffffff;
+      font-size: 28px;
+      font-weight: 300;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 16px rgba(255, 45, 85, 0.45);
+      transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    .m-nav-plus-item:active .m-plus-circle {
+      transform: scale(0.92);
+    }
+
+    /* Chatroom Modal White Modern (LINE / Tinder風) */
+    .moai-chatroom-modal {
+      background: #ffffff !important;
+      color: #0f172a !important;
+    }
+    .moai-chat-header {
+      background: #ffffff !important;
+      border-bottom: 1px solid #e2e8f0 !important;
+      padding: 12px 16px !important;
+    }
+    .moai-chat-back-btn {
+      color: #0f172a !important;
+      background: #f1f5f9 !important;
+      border: none !important;
+    }
+    #chatroom-name {
+      color: #0f172a !important;
+      font-weight: 900 !important;
+    }
+    .moai-chat-body {
+      background: #f8fafc !important;
+    }
+    .moai-msg-ai {
+      background: #ffffff !important;
+      color: #0f172a !important;
+      border: 1px solid #e2e8f0 !important;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.04) !important;
+    }
+    .moai-msg-user {
+      background: linear-gradient(135deg, #ff2d55, #ff5e62) !important;
+      color: #ffffff !important;
+      box-shadow: 0 3px 12px rgba(255, 45, 85, 0.35) !important;
+    }
+    .moai-chat-quick-replies {
+      background: #ffffff !important;
+      border-top: 1px solid #f1f5f9 !important;
+    }
+    .moai-quick-btn {
+      background: #f1f5f9 !important;
+      border: 1px solid #e2e8f0 !important;
+      color: #334155 !important;
+      font-weight: 600 !important;
+    }
+    .moai-quick-btn:hover {
+      border-color: #ff2d55 !important;
+      color: #ff2d55 !important;
+    }
+    .moai-chat-input-bar {
+      background: #ffffff !important;
+      border-top: 1px solid #e2e8f0 !important;
+    }
+    .moai-chat-input {
+      background: #f1f5f9 !important;
+      border: 1px solid #e2e8f0 !important;
+      color: #0f172a !important;
+    }
+    .moai-chat-send-btn {
+      background: linear-gradient(135deg, #ff2d55, #ff5e62) !important;
+    }
+
+  
+    /* OMOAI Native Top Header (画像1) */
+    .omoai-native-header {
+      display: flex !important;
+      justify-content: space-between !important;
+      align-items: center !important;
+      padding: 10px 16px !important;
+      background: #ffffff !important;
+      border-bottom: 1px solid #f1f5f9 !important;
+      position: sticky !important;
+      top: 0 !important;
+      z-index: 1000 !important;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.02) !important;
+    }
+    .omoai-header-left {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 13px;
+      font-weight: 800;
+      color: #0f172a;
+      background: #f8fafc;
+      padding: 4px 10px;
+      border-radius: 20px;
+      border: 1px solid #e2e8f0;
+    }
+    .omoai-header-center {
+      text-align: center;
+    }
+    .omoai-header-logo {
+      font-size: 19px;
+      font-weight: 900;
+      color: #0f172a;
+      font-family: 'Outfit', sans-serif;
+      letter-spacing: -0.5px;
+      line-height: 1.1;
+    }
+    .omoai-header-sub {
+      font-size: 9.5px;
+      font-weight: 700;
+      color: #94a3b8;
+      letter-spacing: 0.5px;
+    }
+    .omoai-header-right {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .omoai-header-icon-btn {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 50%;
+      width: 34px;
+      height: 34px;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: #475569;
+      transition: all 0.15s;
+    }
+    .omoai-header-icon-btn:active {
+      transform: scale(0.92);
+      background: #f1f5f9;
+    }
+
+    /* OMOAI Native Round Red NEW Badge (画像1) */
+    .pos-badge-new {
+      position: absolute !important;
+      top: 10px !important;
+      left: 10px !important;
+      width: 32px !important;
+      height: 32px !important;
+      border-radius: 50% !important;
+      background: #ff2d55 !important;
+      color: #ffffff !important;
+      font-size: 9px !important;
+      font-weight: 900 !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      padding: 0 !important;
+      box-shadow: 0 2px 8px rgba(255, 45, 85, 0.4) !important;
+      letter-spacing: 0px !important;
+      z-index: 6 !important;
+    }
+
+  
+    /* Global White Mode Text Contrast Fixes */
+    #matching-incoming-view,
+    #matching-chat-view {
+      background: #ffffff !important;
+      color: #0f172a !important;
+    }
+    #matching-incoming-view h2,
+    #matching-chat-view h2 {
+      color: #0f172a !important;
+    }
+    #matching-incoming-view p,
+    #matching-chat-view p {
+      color: #64748b !important;
+    }
+    .moai-chat-item {
+      background: #ffffff !important;
+      color: #0f172a !important;
+    }
+    .moai-chat-name {
+      color: #0f172a !important;
+    }
+    .moai-chat-name span {
+      color: #0f172a !important;
+    }
+    .moai-chat-lastmsg {
+      color: #475569 !important;
+    }
+
   </style>
 </head>
 <body>
 
   <!-- Header -->
-  <div class="header">
-    <a href="index.html" class="btn-back">← 戻る</a>
-    <span class="header-title" id="admin-trigger" style="cursor:default;" title="お品書き">📋 お品書き</span>
-    <div class="view-toggle">
-      <button class="toggle-btn" id="btn-carousel" onclick="setView('carousel')" title="カルーセル">◀▶</button>
-      <button class="toggle-btn active" id="btn-tile" onclick="setView('tile')" title="タイル">⊞</button>
+  <!-- OMOAI Native Matching Top Header (画像1 完全再現) -->
+  <div class="header omoai-native-header">
+    <div class="omoai-header-left" title="獲得いいね数">
+      <span class="omoai-header-thumb">👍</span>
+      <span class="omoai-header-likes-count" id="header-total-likes">6</span>
+    </div>
+    <div class="omoai-header-center">
+      <div class="omoai-header-logo">Omoai</div>
+      <div class="omoai-header-sub">MOAI LAB ⚡ v2.8</div>
+    </div>
+    <div class="omoai-header-right">
+      <button class="omoai-header-icon-btn" onclick="location.reload()" title="更新">🔄</button>
+      <button class="omoai-header-icon-btn" onclick="triggerRouletteFromPlus()" title="運命のガチャ">➕</button>
     </div>
   </div>
 
@@ -2013,7 +2361,7 @@
       <h2 style="font-size:22px; font-weight:900; background:linear-gradient(90deg, #ff3366, #ff9966); -webkit-background-clip:text; -webkit-text-fill-color:transparent; margin-bottom:4px;">
         あなたに興味津々なモアイたち
       </h2>
-      <p style="font-size:12px; color:rgba(255,255,255,0.5);">モアイ側からあなたに「いいね！」が届いています🗿<br>「いいねを返す」と即マッチング＆やり取りが始まります！</p>
+      <p style="font-size:12px; color:#64748b; font-weight:500;">モアイ側からあなたに「いいね！」が届いています🗿<br>「いいねを返す」と相思相愛マッチングが成立します！</p>
     </div>
     <div id="incoming-likes-list" style="display:flex; flex-direction:column; gap:12px;"></div>
     <div id="incoming-empty-state" style="text-align:center; padding:50px 20px; color:rgba(255,255,255,0.4); display:none;">
@@ -2023,13 +2371,18 @@
     </div>
   </div>
 
-  <!-- Matching View: Chat / Matches (マッチング済み一覧) -->
-  <div id="matching-chat-view" class="moai-view-container">
-    <div style="text-align:center; padding: 18px 0 14px;">
-      <h2 style="font-size:22px; font-weight:900; background:linear-gradient(90deg, #ff3366, #ff5e62); -webkit-background-clip:text; -webkit-text-fill-color:transparent; margin-bottom:4px;">
-        マッチング中のモアイたち
-      </h2>
-      <p style="font-size:12px; color:rgba(255,255,255,0.5);">相思相愛になったモアイとメッセージのやり取りができます🗿✨<br>デザフェス【西4F 暗いブース K-271】で待っています！</p>
+  <!-- Matching View: Chat / Matches (画像2 完全再現 やり取り一覧) -->
+  <div id="matching-chat-view" class="moai-view-container" style="background:#ffffff; padding-top:4px;">
+    <div style="padding: 14px 18px 10px; border-bottom:1px solid #f1f5f9; display:flex; justify-content:space-between; align-items:center;">
+      <div>
+        <h2 style="font-size:18px; font-weight:900; color:#0f172a; margin:0; letter-spacing:-0.3px;">
+          やり取り <span style="font-size:13px; color:#ff2d55; font-weight:bold;">(相思相愛)</span>
+        </h2>
+        <p style="font-size:11px; color:#64748b; margin:2px 0 0;">マッチングしたモアイをタップしてメッセージを送り合おう🗿✨</p>
+      </div>
+      <div style="font-size:11px; font-weight:700; color:#10b981; background:#ecfdf5; padding:3px 8px; border-radius:12px; border:1px solid #a7f3d0;">
+        デザフェス K-271
+      </div>
     </div>
     <div id="chat-matches-list"></div>
     <div id="chat-empty-state" style="text-align:center; padding:50px 20px; color:rgba(255,255,255,0.4); display:none;">
@@ -2508,7 +2861,13 @@
                 ${heartBtnHtml}
               </div>
               <div class="product-info-tile">
-                <div class="product-name-tile">${p.name.replace(/\n/g,'<br>')}</div>
+                <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:4px;">
+                  <div class="product-name-tile" style="display:flex; align-items:center; gap:5px; flex:1; min-width:0; margin:0;">
+                    <span style="display:inline-block; width:7px; height:7px; border-radius:50%; background:#10b981; flex-shrink:0;"></span>
+                    <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${p.name.replace(/\n/g,' ')}</span>
+                  </div>
+                  <div style="font-size:11px; color:#94a3b8; font-weight:600; margin-left:6px; flex-shrink:0;">金沢</div>
+                </div>
                 ${summarySubHtml}
                 ${hitokotoHtml}
                 <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:4px;">
@@ -3770,17 +4129,27 @@
     }
     window.showToast = showToast;
 
+    window.getAllAvailableProducts = function() {
+      if (window.currentRenderedProducts && window.currentRenderedProducts.length > 0) {
+        return window.currentRenderedProducts;
+      }
+      if (typeof window.getFullMasterProducts === 'function') {
+        const full = window.getFullMasterProducts(window.customProductsData);
+        if (full && full.length > 0) return full;
+      }
+      if (typeof MASTER_PRODUCTS !== 'undefined' && MASTER_PRODUCTS.length > 0) {
+        return MASTER_PRODUCTS.map((m, i) => ({
+          ...m,
+          id: m.id || (m.image ? m.image.split('/').pop().split('.')[0] : "item_" + i)
+        }));
+      }
+      return window.catalogProducts || [];
+    }
+
     function findProductById(productId) {
       if (!productId) return null;
-      if (window.currentRenderedProducts && window.currentRenderedProducts.length > 0) {
-        const found = window.currentRenderedProducts.find(p => p.id === productId);
-        if (found) return found;
-      }
-      if (window.catalogProducts) {
-        const found = window.catalogProducts.find(p => p.id === productId);
-        if (found) return found;
-      }
-      return null;
+      const list = window.getAllAvailableProducts();
+      return list.find(p => p.id === productId) || null;
     }
 
     function getProductShareUrl(productId) {
@@ -4631,7 +5000,7 @@
     </div>
   </div>
 
-  <!-- Bottom Navigation (マッチングアプリ下部固定バー) -->
+  <!-- Bottom Navigation (OMOAIマッチングアプリ完全再現 下部固定バー) -->
   <nav class="moai-bottom-nav" id="moai-bottom-nav">
     <button class="m-nav-item active" id="nav-btn-search" onclick="switchMatchingTab('search')">
       <span class="m-nav-icon">🔍</span>
@@ -4644,20 +5013,20 @@
       </span>
       <span class="m-nav-label">いいね</span>
     </button>
+    <button class="m-nav-item m-nav-plus-item" id="nav-btn-plus" onclick="triggerRouletteFromPlus()" title="運命の出会いガチャ">
+      <div class="m-plus-circle">＋</div>
+      <span class="m-nav-label" style="font-size:10px; margin-top:2px;">ガチャ</span>
+    </button>
     <button class="m-nav-item" id="nav-btn-chat" onclick="switchMatchingTab('chat')">
       <span class="m-nav-icon">
         💬
-        <span class="m-nav-badge" id="badge-chat" style="display:none;">0</span>
+        <span class="m-nav-badge" id="badge-chat">99+</span>
       </span>
       <span class="m-nav-label">やり取り</span>
     </button>
     <button class="m-nav-item" id="nav-btn-favorites" onclick="switchMatchingTab('favorites')">
       <span class="m-nav-icon">❤️</span>
       <span class="m-nav-label">お気に入り</span>
-    </button>
-    <button class="m-nav-item" id="nav-btn-map" onclick="switchMatchingTab('map')">
-      <span class="m-nav-icon">🗺️</span>
-      <span class="m-nav-label">会場MAP</span>
     </button>
   </nav>
 
@@ -4700,8 +5069,11 @@
     }
 
     function findProductById(id) {
-      const products = window.currentRenderedProducts || [];
-      return products.find(p => p.id === id);
+      if (!id) return null;
+      const list = (typeof getAllAvailableProducts === 'function') 
+        ? window.getAllAvailableProducts() 
+        : ((window.currentRenderedProducts && window.currentRenderedProducts.length > 0) ? window.currentRenderedProducts : (window.catalogProducts || []));
+      return list.find(p => p.id === id) || null;
     }
 
     // Update bottom navigation badges
@@ -4744,6 +5116,14 @@
       const heroContainer = document.getElementById('tab-hero-container');
       const eventTabs = document.getElementById('event-tabs');
       const itemCount = document.getElementById('item-count');
+      const pageHero = document.querySelector('.page-hero');
+      const ticketCard = document.querySelector('.ticket-card-catalog');
+      const adminBanner = document.querySelector('.admin-banner') || document.querySelector('[style*="管理者プレビューモード"]');
+
+      const isSearchOrFav = (tabName === 'search' || tabName === 'favorites');
+      if (pageHero) pageHero.style.display = isSearchOrFav ? 'block' : 'none';
+      if (ticketCard) ticketCard.style.display = isSearchOrFav ? 'block' : 'none';
+      if (adminBanner) adminBanner.style.display = isSearchOrFav ? 'block' : 'none';
 
       // Default hidden
       if (incomingView) incomingView.classList.remove('active');
@@ -4789,11 +5169,16 @@
         if (typeof window.openCatalogRouteModal === 'function') {
           window.openCatalogRouteModal();
         }
-        // Keep active tab on previous
-        window.switchMatchingTab('search');
       }
       window.scrollTo({ top: 0, behavior: 'smooth' });
     };
+
+    // Auto tab initialization
+    if (window.location.search.includes('tab=chat') || window.location.hash.includes('chat')) {
+      window.switchMatchingTab('chat');
+    } else {
+      window.switchMatchingTab('search'); if(window.location.hash==='#grid'){ setTimeout(() => document.getElementById('tile-grid')?.scrollIntoView(), 800); }
+    }
 
     // Filter tile grid by user favorites
     function filterAndRenderFavorites() {
@@ -4912,18 +5297,18 @@
       let html = '';
       incomingLikes.forEach(item => {
         html += `
-          <div class="moai-chat-item" style="border-left: 3px solid #ff3366;">
-            <img class="moai-chat-avatar" src="${item.image || 'images/dev_placeholder.gif'}" alt="${item.name}">
+          <div class="moai-chat-item" style="background:#ffffff; border:1px solid #e2e8f0; border-left:4px solid #ff2d55; border-radius:16px; margin-bottom:10px; padding:12px 14px; box-shadow:0 2px 8px rgba(0,0,0,0.04);">
+            <img class="moai-chat-avatar" src="${item.image || 'images/dev_placeholder.gif'}" alt="${item.name}" style="border:1px solid #e2e8f0;">
             <div class="moai-chat-info">
-              <div class="moai-chat-name">
-                <span>${item.name}</span>
-                <span style="font-size:11px; color:#ff85a1; font-weight:normal;">${item.time || 'さっき'}</span>
+              <div class="moai-chat-name" style="color:#0f172a; font-weight:900; font-size:15px; margin-bottom:4px;">
+                <span style="color:#0f172a;">${item.name}</span>
+                <span style="font-size:11px; color:#ef4444; font-weight:bold; margin-left:6px;">${item.time || 'さっき'}</span>
               </div>
-              <div class="moai-chat-lastmsg" style="color:rgba(255,255,255,0.8);">
+              <div class="moai-chat-lastmsg" style="color:#475569; font-size:12.5px; font-weight:500;">
                 「あなたに一目惚れしました🗿❤️ 会いに来てね！」
               </div>
             </div>
-            <button onclick="window.toggleMoaiLike('${item.id}')" style="background:linear-gradient(135deg, #ff3366, #ff5e62); color:#fff; border:none; padding:8px 14px; border-radius:18px; font-weight:bold; font-size:12px; cursor:pointer; white-space:nowrap; box-shadow:0 4px 12px rgba(255,51,102,0.4);">
+            <button onclick="window.toggleMoaiLike('${item.id}')" style="background:linear-gradient(135deg, #ff2d55, #ff5e62); color:#ffffff; border:none; padding:9px 15px; border-radius:20px; font-weight:900; font-size:12px; cursor:pointer; white-space:nowrap; box-shadow:0 4px 14px rgba(255,45,85,0.4);">
               ❤️ いいね返し
             </button>
           </div>
@@ -4933,10 +5318,30 @@
     }
 
     // Render "Chat Matches" list
+    // Plus Button triggers Photo Roulette Gacha
+    window.triggerRouletteFromPlus = function() {
+      if (typeof window.spinPhotoRoulette === 'function') {
+        window.spinPhotoRoulette();
+      } else if (typeof openGachaModal === 'function') {
+        openGachaModal();
+      }
+    };
+
     function renderChatMatchesView() {
       const listEl = document.getElementById('chat-matches-list');
       const emptyEl = document.getElementById('chat-empty-state');
       if (!listEl || !emptyEl) return;
+
+      const allProds = window.getAllAvailableProducts();
+      // Seed initial sample matches if empty so user immediately experiences the OMOAI UI (画像2再現)
+      if (matchedIds.length === 0 && allProds.length > 0) {
+        allProds.slice(0, 6).forEach(c => {
+          if (c && c.id && !matchedIds.includes(c.id)) {
+            matchedIds.push(c.id);
+          }
+        });
+        saveState();
+      }
 
       if (matchedIds.length === 0) {
         listEl.innerHTML = '';
@@ -4946,30 +5351,49 @@
 
       emptyEl.style.display = 'none';
       let html = '';
-      matchedIds.forEach(id => {
-        const p = findProductById(id) || { id, name: 'モアイ作品', image: '' };
+      const timeLabels = ['4分前', '昨日 08:48', '11/4', '11/3', '11/1', '11/1'];
+
+      matchedIds.forEach((id, idx) => {
+        const p = findProductById(id) || { id, name: 'モアイ作品', image: 'images/kurima/tasogare_moai.jpg' };
         const history = chats[id] || [];
-        const lastMsg = history.length > 0 ? history[history.length - 1].text.replace(/\n/g, ' ') : 'マッチングが成立しました！';
-        const lastTime = history.length > 0 ? history[history.length - 1].time : 'NEW';
+        const isNewMatch = history.length === 0;
+        const lastMsg = history.length > 0 
+          ? history[history.length - 1].text.replace(/\n/g, ' ') 
+          : 'マッチングが成立しました！';
+        const displayTime = history.length > 0 
+          ? history[history.length - 1].time 
+          : (timeLabels[idx % timeLabels.length] || 'NEW');
+
+        const cleanName = (p.name || 'モアイ').replace(/\n/g, ' ');
+        const imgSrc = p.image || p.optimizedCover || (p.images && p.images[0]) || 'images/kurima/tasogare_moai.jpg';
 
         html += `
           <div class="moai-chat-item" onclick="window.openChatRoom('${id}')">
-            <img class="moai-chat-avatar" src="${p.image || p.optimizedCover || 'images/dev_placeholder.gif'}" alt="${p.name}">
-            <div class="moai-chat-info">
-              <div class="moai-chat-name">
-                <span>${p.name.replace(/\n/g, ' ')}</span>
-                <span style="font-size:11px; color:rgba(255,255,255,0.4); font-weight:normal;">${lastTime}</span>
-              </div>
-              <div class="moai-chat-lastmsg">${lastMsg}</div>
+            <div class="moai-chat-avatar-wrap">
+              <img class="moai-chat-avatar" src="${imgSrc}" alt="${cleanName}">
+              <span class="chat-new-badge">NEW</span>
             </div>
-            <span style="font-size:18px; color:rgba(255,255,255,0.3);">›</span>
+            <div class="moai-chat-info">
+              <div class="moai-chat-title-row">
+                <span class="moai-chat-name">${cleanName}</span>
+                <span class="moai-chat-tag">金沢</span>
+              </div>
+              <div class="moai-chat-sub-row">
+                ${isNewMatch 
+                  ? '<span class="moai-matched-highlight">マッチングが成立しました！</span>' 
+                  : `<span class="moai-chat-lastmsg">${lastMsg}</span>`}
+              </div>
+            </div>
+            <div class="moai-chat-meta">
+              <span class="moai-chat-time">${displayTime}</span>
+              <span class="moai-chat-dots">•••</span>
+            </div>
           </div>
         `;
       });
       listEl.innerHTML = html;
     }
 
-    // Open Chat Room with specific MOAI
     window.openChatRoom = function(moaiId) {
       activeChatMoaiId = moaiId;
       const p = findProductById(moaiId) || { id: moaiId, name: 'モアイ', image: '' };
