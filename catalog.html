@@ -2219,6 +2219,45 @@
       color: #475569 !important;
     }
 
+  
+    /* ===== WHITE THEME ABSOLUTE TEXT CONTRAST GUARDS ===== */
+    #matching-incoming-view,
+    #matching-chat-view,
+    #matching-favorites-view {
+      background: #ffffff !important;
+      color: #0f172a !important;
+    }
+    #matching-incoming-view p,
+    #matching-incoming-view span,
+    #matching-incoming-view div:not([class*="badge"]):not(button) {
+      color: #334155;
+    }
+    #matching-incoming-view .moai-chat-name,
+    #matching-incoming-view .moai-chat-name span {
+      color: #0f172a !important;
+      font-weight: 900 !important;
+    }
+    #matching-incoming-view .moai-chat-lastmsg {
+      color: #334155 !important;
+    }
+    #matching-chat-view .moai-chat-name,
+    #matching-chat-view .moai-chat-name span {
+      color: #0f172a !important;
+      font-weight: 900 !important;
+    }
+    #matching-chat-view .moai-chat-lastmsg {
+      color: #475569 !important;
+    }
+    #matching-favorites-view .product-name-tile span {
+      color: #0f172a !important;
+      font-weight: 800 !important;
+    }
+    #matching-favorites-view .hitokoto-bubble {
+      background: #f8fafc !important;
+      color: #334155 !important;
+      border: 1px solid #e2e8f0 !important;
+    }
+
   </style>
 </head>
 <body>
@@ -2361,7 +2400,10 @@
       <h2 style="font-size:22px; font-weight:900; background:linear-gradient(90deg, #ff3366, #ff9966); -webkit-background-clip:text; -webkit-text-fill-color:transparent; margin-bottom:4px;">
         あなたに興味津々なモアイたち
       </h2>
-      <p style="font-size:12px; color:#64748b; font-weight:500;">モアイ側からあなたに「いいね！」が届いています🗿<br>「いいねを返す」と相思相愛マッチングが成立します！</p>
+      <p style="font-size:12.5px; color:#475569 !important; font-weight:600; line-height:1.5; margin:0;">
+        モアイ側からあなたに「いいね！」が届いています🗿<br>
+        「いいねを返す」と即マッチング＆やり取りが始まります！
+      </p>
     </div>
     <div id="incoming-likes-list" style="display:flex; flex-direction:column; gap:12px;"></div>
     <div id="incoming-empty-state" style="text-align:center; padding:50px 20px; color:rgba(255,255,255,0.4); display:none;">
@@ -2393,6 +2435,29 @@
     </div>
   </div>
 
+
+  
+  <!-- Matching View: Favorites (お気に入り作品一覧) -->
+  <div id="matching-favorites-view" class="moai-view-container" style="background:#ffffff; padding-top:4px;">
+    <div style="padding: 14px 18px 10px; border-bottom:1px solid #f1f5f9; display:flex; justify-content:space-between; align-items:center;">
+      <div>
+        <h2 style="font-size:18px; font-weight:900; color:#0f172a; margin:0; letter-spacing:-0.3px;">
+          お気に入り <span style="font-size:13px; color:#ff2d55; font-weight:bold;" id="fav-count-badge">(0)</span>
+        </h2>
+        <p style="font-size:11px; color:#64748b; margin:2px 0 0;">あなたがハート（いいね）を付けたモアイ作品一覧です❤️</p>
+      </div>
+      <div style="font-size:11px; font-weight:700; color:#10b981; background:#ecfdf5; padding:3px 8px; border-radius:12px; border:1px solid #a7f3d0;">
+        デザフェス K-271
+      </div>
+    </div>
+    <div id="fav-cards-grid" class="tile-grid" style="padding:14px 16px 80px;"></div>
+    <div id="fav-empty-state" style="text-align:center; padding:60px 20px; color:#64748b; display:none;">
+      <div style="font-size:48px; margin-bottom:12px;">🤍</div>
+      <div style="font-size:16px; font-weight:900; color:#0f172a; margin-bottom:6px;">お気に入りの作品はまだいません</div>
+      <div style="font-size:12px; color:#64748b; margin-bottom:18px;">気になる作品のハートボタン（いいね）を押すと、ここに並びます！</div>
+      <button onclick="switchMatchingTab('search')" style="background:linear-gradient(135deg, #ff2d55, #ff5e62); color:#fff; border:none; padding:10px 24px; border-radius:20px; font-weight:bold; font-size:13px; cursor:pointer; box-shadow:0 4px 15px rgba(255,45,85,0.4);">運命のモアイを探す 🔍</button>
+    </div>
+  </div>
 
   <!-- Carousel View -->
   <div id="carousel-view">
@@ -2487,12 +2552,68 @@
       0%,100% { transform: translateY(0); }
       50% { transform: translateY(-10px); }
     }
+  
+    /* ===== WHITE THEME ABSOLUTE TEXT CONTRAST GUARDS ===== */
+    #matching-incoming-view,
+    #matching-chat-view,
+    #matching-favorites-view {
+      background: #ffffff !important;
+      color: #0f172a !important;
+    }
+    #matching-incoming-view p,
+    #matching-incoming-view span,
+    #matching-incoming-view div:not([class*="badge"]):not(button) {
+      color: #334155;
+    }
+    #matching-incoming-view .moai-chat-name,
+    #matching-incoming-view .moai-chat-name span {
+      color: #0f172a !important;
+      font-weight: 900 !important;
+    }
+    #matching-incoming-view .moai-chat-lastmsg {
+      color: #334155 !important;
+    }
+    #matching-chat-view .moai-chat-name,
+    #matching-chat-view .moai-chat-name span {
+      color: #0f172a !important;
+      font-weight: 900 !important;
+    }
+    #matching-chat-view .moai-chat-lastmsg {
+      color: #475569 !important;
+    }
+    #matching-favorites-view .product-name-tile span {
+      color: #0f172a !important;
+      font-weight: 800 !important;
+    }
+    #matching-favorites-view .hitokoto-bubble {
+      background: #f8fafc !important;
+      color: #334155 !important;
+      border: 1px solid #e2e8f0 !important;
+    }
+
   </style>
 
   <script>
     document.write('<script src="data.js?v=' + Date.now() + '"><\/script>');
   </script>
   <script>
+    window.getAllAvailableProducts = function() {
+      if (window.currentRenderedProducts && window.currentRenderedProducts.length > 0) {
+        return window.currentRenderedProducts;
+      }
+      if (typeof window.getFullMasterProducts === 'function') {
+        const full = window.getFullMasterProducts(window.customProductsData);
+        if (full && full.length > 0) return full;
+      }
+      if (typeof MASTER_PRODUCTS !== 'undefined' && MASTER_PRODUCTS.length > 0) {
+        return MASTER_PRODUCTS.map((m, i) => ({
+          ...m,
+          id: m.id || (m.image ? m.image.split('/').pop().split('.')[0] : "item_" + i)
+        }));
+      }
+      return window.catalogProducts || [];
+    };
+
     const DEV_STATUSES = [
       { label: "💭 発掘中", desc: "アイデア・構想段階" },
       { label: "🛠 開発中", desc: "モデリング・試作段階" },
@@ -2791,33 +2912,63 @@
       window.selectedVariantIndexMap = {};
 
       // Item count & Tab description
-      const eventData = allEvents[currentEventKey];
-      if (!eventData) return;
+      const eventData = allEvents[currentEventKey] || {};
       
       let countHtml = products.length > 0 ? `${products.length}点` : '';
-      if (eventData.tabDesc) {
+      if (window.renderTileViewOnlyFavorites) {
+        countHtml = '<span style="font-weight:900; color:#0f172a; font-size:16px;">❤️ あなたのお気に入り作品</span>';
+      } else if (eventData.tabDesc) {
         countHtml += `<div style="margin-top:10px; color:rgba(255,215,0,0.8); font-size:13px; line-height:1.5; font-weight:bold;">${eventData.tabDesc.replace(/\n/g,'<br>')}</div>`;
       }
-      document.getElementById('item-count').innerHTML = countHtml;
+      const countEl = document.getElementById('item-count');
+      if (countEl) countEl.innerHTML = countHtml;
 
       // Hero Container
-      if (window.renderHero) {
-        window.renderHero();
-      } else {
-        document.getElementById('tab-hero-container').innerHTML = eventData.heroHtml || '';
+      const heroContainerEl = document.getElementById('tab-hero-container');
+      if (heroContainerEl) {
+        if (window.renderTileViewOnlyFavorites) {
+          heroContainerEl.innerHTML = '';
+        } else if (window.renderHero) {
+          window.renderHero();
+        } else {
+          heroContainerEl.innerHTML = eventData.heroHtml || '';
+        }
       }
 
       // --- Tile ---
       const tileGrid = document.getElementById('tile-grid');
       tileGrid.innerHTML = '';
-      if (products.length === 0) {
-        tileGrid.innerHTML = `
-          <div class="empty-state">
-            <span class="emoji">🚧</span>
-            作品を準備中です<br>お楽しみに！
-          </div>`;
+
+      // Favorite filter: only products the user liked
+      let displayProducts = products;
+      if (window.renderTileViewOnlyFavorites) {
+        let userLikes = [];
+        try {
+          userLikes = JSON.parse(localStorage.getItem('moai_dating_likes') || '[]');
+        } catch(e) { userLikes = []; }
+        const allProds = ((typeof window.getFullMasterProducts === 'function') ? window.getFullMasterProducts() : (window.currentRenderedProducts || []));
+        displayProducts = allProds.filter(p => userLikes.includes(p.id));
+      }
+
+      if (displayProducts.length === 0) {
+        if (window.renderTileViewOnlyFavorites) {
+          tileGrid.innerHTML = `
+            <div style="grid-column: 1 / -1; text-align:center; padding:60px 20px; color:#64748b; background:#ffffff; border-radius:20px; border:1px solid #e2e8f0; margin:10px 0;">
+              <div style="font-size:48px; margin-bottom:12px;">🤍</div>
+              <div style="font-size:18px; font-weight:900; color:#0f172a; margin-bottom:6px;">お気に入りの作品はまだいません</div>
+              <div style="font-size:12px; color:#64748b; margin-bottom:18px;">気になる作品のハートボタン（いいね）を押すと、ここに並びます！</div>
+              <button onclick="switchMatchingTab('search')" style="background:linear-gradient(135deg, #ff2d55, #ff5e62); color:#fff; border:none; padding:10px 24px; border-radius:20px; font-weight:bold; font-size:13px; cursor:pointer; box-shadow:0 4px 15px rgba(255,45,85,0.4);">運命のモアイを探す 🔍</button>
+            </div>
+          `;
+        } else {
+          tileGrid.innerHTML = `
+            <div class="empty-state">
+              <span class="emoji">🚧</span>
+              作品を準備中です<br>お楽しみに！
+            </div>`;
+        }
       } else {
-        products.forEach((p, i) => {
+        displayProducts.forEach((p, i) => {
           const badgeHtml = `<div class="badge" id="badge-${p.id}" style="display:none;margin-right:4px;"></div>`;
           const stockHtml = `<div class="badge" id="stock-${p.id}" style="display:none;"></div>`;
 
@@ -4129,7 +4280,7 @@
     }
     window.showToast = showToast;
 
-    window.getAllAvailableProducts = function() {
+    window.getAllAvailableProducts() = function() {
       if (window.currentRenderedProducts && window.currentRenderedProducts.length > 0) {
         return window.currentRenderedProducts;
       }
@@ -4148,8 +4299,8 @@
 
     function findProductById(productId) {
       if (!productId) return null;
-      const list = window.getAllAvailableProducts();
-      return list.find(p => p.id === productId) || null;
+      const list = (typeof window.getAllAvailableProducts === 'function') ? window.getAllAvailableProducts() : (window.currentRenderedProducts || []);
+      return list.find(p => p.id === productId || p.name === productId || (p.image && p.image.includes(productId))) || null;
     }
 
     function getProductShareUrl(productId) {
@@ -4956,13 +5107,16 @@
     <div class="moai-chat-header">
       <button class="moai-chat-back-btn" onclick="closeChatRoom()">‹</button>
       <img id="chatroom-avatar" src="" style="width:38px; height:38px; border-radius:50%; object-fit:cover; border:2px solid #ff3366;" alt="">
-      <div>
-        <div id="chatroom-name" style="font-size:15px; font-weight:900; color:#fff;">モアイ名</div>
+      <div style="flex:1; min-width:0;">
+        <div id="chatroom-name" style="font-size:15px; font-weight:900; color:#0f172a;">モアイ名</div>
         <div style="font-size:11px; color:#10b981; display:flex; align-items:center; gap:4px;">
           <span style="width:6px; height:6px; border-radius:50%; background:#10b981; display:inline-block;"></span>
           オンライン（西4F K-271 で待機中）
         </div>
       </div>
+      <button onclick="openGeminiConfigModal()" style="background:#f1f5f9; border:1px solid #e2e8f0; border-radius:14px; padding:5px 10px; font-size:11px; font-weight:700; color:#475569; cursor:pointer; display:flex; align-items:center; gap:4px; flex-shrink:0;">
+        🤖 <span id="gemini-usage-badge">AI設定 (1日5回無料)</span>
+      </button>
     </div>
 
     <div class="moai-chat-body" id="chatroom-messages"></div>
@@ -4976,7 +5130,7 @@
     </div>
 
     <div class="moai-chat-input-bar">
-      <input type="text" id="chatroom-input" class="moai-chat-input" placeholder="メッセージを入力... (Enterで送信)" onkeydown="if(event.key==='Enter') sendMessageFromInput()">
+      <input type="text" id="chatroom-input" class="moai-chat-input" placeholder="メッセージを入力... (最大40文字)" maxlength="40" onkeydown="if(event.key==='Enter') sendMessageFromInput()">
       <button class="moai-chat-send-btn" onclick="sendMessageFromInput()">➤</button>
     </div>
   </div>
@@ -5070,10 +5224,8 @@
 
     function findProductById(id) {
       if (!id) return null;
-      const list = (typeof getAllAvailableProducts === 'function') 
-        ? window.getAllAvailableProducts() 
-        : ((window.currentRenderedProducts && window.currentRenderedProducts.length > 0) ? window.currentRenderedProducts : (window.catalogProducts || []));
-      return list.find(p => p.id === id) || null;
+      const list = (typeof window.getAllAvailableProducts === 'function') ? window.getAllAvailableProducts() : (window.currentRenderedProducts || []);
+      return list.find(p => p.id === id || p.name === id || (p.image && p.image.includes(id))) || null;
     }
 
     // Update bottom navigation badges
@@ -5120,14 +5272,16 @@
       const ticketCard = document.querySelector('.ticket-card-catalog');
       const adminBanner = document.querySelector('.admin-banner') || document.querySelector('[style*="管理者プレビューモード"]');
 
-      const isSearchOrFav = (tabName === 'search' || tabName === 'favorites');
-      if (pageHero) pageHero.style.display = isSearchOrFav ? 'block' : 'none';
-      if (ticketCard) ticketCard.style.display = isSearchOrFav ? 'block' : 'none';
-      if (adminBanner) adminBanner.style.display = isSearchOrFav ? 'block' : 'none';
+      const isSearch = (tabName === 'search');
+      if (pageHero) pageHero.style.display = isSearch ? 'block' : 'none';
+      if (ticketCard) ticketCard.style.display = isSearch ? 'block' : 'none';
+      if (adminBanner) adminBanner.style.display = isSearch ? 'block' : 'none';
 
       // Default hidden
       if (incomingView) incomingView.classList.remove('active');
       if (chatView) chatView.classList.remove('active');
+      const favViewEl = document.getElementById('matching-favorites-view');
+      if (favViewEl) favViewEl.classList.remove('active');
 
       if (tabName === 'search') {
         if (tileView) tileView.style.display = 'block';
@@ -5158,13 +5312,16 @@
           renderChatMatchesView();
         }
       } else if (tabName === 'favorites') {
-        if (tileView) tileView.style.display = 'block';
+        if (tileView) tileView.style.display = 'none';
         if (carouselView) carouselView.style.display = 'none';
-        if (heroContainer) heroContainer.style.display = 'block';
-        if (eventTabs) eventTabs.style.display = 'flex';
-        if (itemCount) itemCount.style.display = 'block';
-        window.renderTileViewOnlyFavorites = true;
-        filterAndRenderFavorites();
+        if (heroContainer) heroContainer.style.display = 'none';
+        if (eventTabs) eventTabs.style.display = 'none';
+        if (itemCount) itemCount.style.display = 'none';
+        const favView = document.getElementById('matching-favorites-view');
+        if (favView) {
+          favView.classList.add('active');
+          renderFavoritesView();
+        }
       } else if (tabName === 'map') {
         if (typeof window.openCatalogRouteModal === 'function') {
           window.openCatalogRouteModal();
@@ -5182,21 +5339,8 @@
 
     // Filter tile grid by user favorites
     function filterAndRenderFavorites() {
-      const tileGrid = document.getElementById('tile-grid');
-      if (!tileGrid) return;
-      const products = window.currentRenderedProducts || [];
-      const favProducts = products.filter(p => likedIds.includes(p.id) || matchedIds.includes(p.id));
-
-      if (favProducts.length === 0) {
-        tileGrid.innerHTML = `
-          <div style="grid-column: 1 / -1; text-align:center; padding:50px 20px; color:rgba(255,255,255,0.4);">
-            <div style="font-size:48px; margin-bottom:12px;">🤍</div>
-            <div style="font-size:16px; font-weight:bold; margin-bottom:6px;">お気に入りのモアイはまだいません</div>
-            <div style="font-size:12px; margin-bottom:18px;">気になる作品のハートボタンを押して集めよう！</div>
-            <button onclick="switchMatchingTab('search')" style="background:#ff3366; color:#fff; border:none; padding:10px 22px; border-radius:20px; font-weight:bold; cursor:pointer;">作品を探す 🔍</button>
-          </div>
-        `;
-      }
+      window.renderTileViewOnlyFavorites = true;
+      if (typeof buildViews === 'function') buildViews();
     }
 
     // Toggle user like (Customer likes a MOAI)
@@ -5282,10 +5426,83 @@
     };
 
     // Render "Incoming Likes" list
+    
+    function renderFavoritesView() {
+      const gridEl = document.getElementById('fav-cards-grid');
+      const emptyEl = document.getElementById('fav-empty-state');
+      const countBadge = document.getElementById('fav-count-badge');
+      if (!gridEl || !emptyEl) return;
+
+      const allProds = (typeof window.getAllAvailableProducts === 'function') ? window.getAllAvailableProducts() : [];
+      const userLikes = JSON.parse(localStorage.getItem('moai_dating_likes') || '[]');
+      const favProducts = allProds.filter(p => userLikes.includes(p.id) || userLikes.includes(p.name) || (p.image && userLikes.some(u => p.image.includes(u))));
+
+      if (countBadge) countBadge.textContent = `(${favProducts.length}点)`;
+
+      if (favProducts.length === 0) {
+        gridEl.innerHTML = '';
+        emptyEl.style.display = 'block';
+        return;
+      }
+
+      emptyEl.style.display = 'none';
+      let html = '';
+      favProducts.forEach(p => {
+        const imgSrc = p.image || p.optimizedCover || (p.images && p.images[0]) || 'images/kurima/tasogare_moai.jpg';
+        const cleanName = (p.name || 'モアイ').replace(/\n/g, ' ');
+        const hitokoto = window.getMoaiHitokoto ? window.getMoaiHitokoto(p) : ((window.MOAI_HITOKOTO_DICT && window.MOAI_HITOKOTO_DICT[p.id]) || '');
+        
+        html += `
+          <div class="product-card-tile" onclick="window.openProductById('${p.id}')">
+            <div style="position:relative;">
+              <img class="main-product-img" src="${imgSrc}" alt="${cleanName}" style="border-radius:16px 16px 0 0; width:100%; height:170px; object-fit:cover;">
+              <div class="pos-badge-new">NEW</div>
+              <button class="btn-tile-heart liked" onclick="event.stopPropagation(); window.toggleMoaiLike('${p.id}')" title="お気に入り解除">
+                ❤️
+              </button>
+            </div>
+            <div class="product-info-tile">
+              <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:4px;">
+                <div class="product-name-tile" style="display:flex; align-items:center; gap:5px; flex:1; min-width:0; margin:0;">
+                  <span style="display:inline-block; width:7px; height:7px; border-radius:50%; background:#10b981; flex-shrink:0;"></span>
+                  <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${cleanName}</span>
+                </div>
+                <div style="font-size:11px; color:#94a3b8; font-weight:600; margin-left:6px; flex-shrink:0;">金沢</div>
+              </div>
+              ${hitokoto ? `<div class="hitokoto-bubble"><span class="hitokoto-icon">💬</span>「${hitokoto}」</div>` : ''}
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-top:6px;">
+                <div class="tile-hint">詳細を見る →</div>
+                <button onclick="event.stopPropagation(); window.openChatRoom('${p.id}')" style="background:#f1f5f9; border:1px solid #e2e8f0; color:#ff2d55; font-size:11px; font-weight:bold; padding:4px 10px; border-radius:12px; cursor:pointer;">
+                  💬 トーク
+                </button>
+              </div>
+            </div>
+          </div>
+        `;
+      });
+      gridEl.innerHTML = html;
+    }
+
     function renderIncomingLikesView() {
       const listEl = document.getElementById('incoming-likes-list');
       const emptyEl = document.getElementById('incoming-empty-state');
       if (!listEl || !emptyEl) return;
+
+      // 初回でも楽しい体験ができるよう、未アプローチなら初期モアイたちからアプローチをシード
+      if (incomingLikes.length === 0) {
+        const allProds = (typeof window.getAllAvailableProducts === 'function') ? window.getAllAvailableProducts() : [];
+        if (allProds.length > 0) {
+          allProds.slice(0, 4).forEach((m, idx) => {
+            incomingLikes.push({
+              id: m.id,
+              name: (m.name || 'モアイ').replace(/\n/g, ' '),
+              image: m.image || m.optimizedCover || (m.images && m.images[0]) || 'images/kurima/tasogare_moai.jpg',
+              time: idx === 0 ? 'たった今' : (idx * 2 + '分前')
+            });
+          });
+          saveState();
+        }
+      }
 
       if (incomingLikes.length === 0) {
         listEl.innerHTML = '';
@@ -5296,19 +5513,20 @@
       emptyEl.style.display = 'none';
       let html = '';
       incomingLikes.forEach(item => {
+        const itemHitokoto = window.getMoaiHitokoto ? window.getMoaiHitokoto(item) : 'あなたに一目惚れしました🗿❤️ 会いに来てね！';
         html += `
-          <div class="moai-chat-item" style="background:#ffffff; border:1px solid #e2e8f0; border-left:4px solid #ff2d55; border-radius:16px; margin-bottom:10px; padding:12px 14px; box-shadow:0 2px 8px rgba(0,0,0,0.04);">
-            <img class="moai-chat-avatar" src="${item.image || 'images/dev_placeholder.gif'}" alt="${item.name}" style="border:1px solid #e2e8f0;">
-            <div class="moai-chat-info">
-              <div class="moai-chat-name" style="color:#0f172a; font-weight:900; font-size:15px; margin-bottom:4px;">
-                <span style="color:#0f172a;">${item.name}</span>
-                <span style="font-size:11px; color:#ef4444; font-weight:bold; margin-left:6px;">${item.time || 'さっき'}</span>
+          <div class="moai-chat-item" style="background:#ffffff !important; border:1px solid #e2e8f0 !important; border-left:5px solid #ff2d55 !important; border-radius:16px; margin-bottom:12px; padding:12px 14px; box-shadow:0 3px 10px rgba(0,0,0,0.04); display:flex; align-items:center; gap:12px;">
+            <img class="moai-chat-avatar" src="${item.image || 'images/dev_placeholder.gif'}" alt="${item.name}" style="border:1px solid #e2e8f0; width:52px; height:52px; border-radius:50%; object-fit:cover; flex-shrink:0;">
+            <div class="moai-chat-info" style="flex:1; min-width:0;">
+              <div class="moai-chat-name" style="color:#0f172a !important; font-weight:900; font-size:14px; margin-bottom:3px; display:flex; align-items:center; justify-content:space-between;">
+                <span style="color:#0f172a !important; font-weight:900; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${item.name}</span>
+                <span style="font-size:11px; color:#ef4444 !important; font-weight:bold; flex-shrink:0; margin-left:6px;">${item.time || 'たった今'}</span>
               </div>
-              <div class="moai-chat-lastmsg" style="color:#475569; font-size:12.5px; font-weight:500;">
-                「あなたに一目惚れしました🗿❤️ 会いに来てね！」
+              <div class="moai-chat-lastmsg" style="color:#334155 !important; font-size:12px; font-weight:500; line-height:1.4; word-break:break-word;">
+                「${itemHitokoto}」
               </div>
             </div>
-            <button onclick="window.toggleMoaiLike('${item.id}')" style="background:linear-gradient(135deg, #ff2d55, #ff5e62); color:#ffffff; border:none; padding:9px 15px; border-radius:20px; font-weight:900; font-size:12px; cursor:pointer; white-space:nowrap; box-shadow:0 4px 14px rgba(255,45,85,0.4);">
+            <button onclick="window.toggleMoaiLike('${item.id}')" style="background:linear-gradient(135deg, #ff2d55, #ff5e62) !important; color:#ffffff !important; border:none; padding:9px 14px; border-radius:20px; font-weight:900; font-size:12px; cursor:pointer; white-space:nowrap; box-shadow:0 4px 14px rgba(255,45,85,0.4); flex-shrink:0;">
               ❤️ いいね返し
             </button>
           </div>
@@ -5332,7 +5550,7 @@
       const emptyEl = document.getElementById('chat-empty-state');
       if (!listEl || !emptyEl) return;
 
-      const allProds = window.getAllAvailableProducts();
+      const allProds = (typeof window.getAllAvailableProducts === 'function') ? window.getAllAvailableProducts() : [];
       // Seed initial sample matches if empty so user immediately experiences the OMOAI UI (画像2再現)
       if (matchedIds.length === 0 && allProds.length > 0) {
         allProds.slice(0, 6).forEach(c => {
@@ -5450,43 +5668,170 @@
       sendUserMessage(val);
     };
 
-    function sendUserMessage(text) {
+
+    // ===== GEMINI AI MOAI CHAT ENGINE (無料枠安全ガード付き) =====
+    const GEMINI_MAX_DAILY = 5;
+
+    function getDailyGeminiUsage() {
+      const today = new Date().toISOString().slice(0, 10);
+      let usage = {};
+      try {
+        usage = JSON.parse(localStorage.getItem('moai_gemini_daily_usage') || '{}');
+      } catch (e) { usage = {}; }
+      if (usage.date !== today) {
+        usage = { date: today, count: 0 };
+        localStorage.setItem('moai_gemini_daily_usage', JSON.stringify(usage));
+      }
+      return usage;
+    }
+
+    function incrementDailyGeminiUsage() {
+      const usage = getDailyGeminiUsage();
+      usage.count = (usage.count || 0) + 1;
+      localStorage.setItem('moai_gemini_daily_usage', JSON.stringify(usage));
+      updateGeminiUsageBadge();
+      return usage.count;
+    }
+
+    function updateGeminiUsageBadge() {
+      const usage = getDailyGeminiUsage();
+      const badge = document.getElementById('gemini-usage-badge');
+      const countEl = document.getElementById('modal-daily-count');
+      const remaining = GEMINI_MAX_DAILY - (usage.count || 0);
+      if (badge) badge.textContent = `AI残り${Math.max(0, remaining)}回`;
+      if (countEl) countEl.textContent = `${usage.count || 0} / ${GEMINI_MAX_DAILY}回`;
+    }
+
+    window.openGeminiConfigModal = function() {
+      const modal = document.getElementById('gemini-config-modal');
+      const input = document.getElementById('gemini-key-input');
+      if (input) input.value = localStorage.getItem('gemini_api_key') || '';
+      updateGeminiUsageBadge();
+      if (modal) modal.style.display = 'flex';
+    };
+
+    window.closeGeminiConfigModal = function() {
+      const modal = document.getElementById('gemini-config-modal');
+      if (modal) modal.style.display = 'none';
+    };
+
+    window.saveGeminiConfig = function() {
+      const input = document.getElementById('gemini-key-input');
+      const val = input ? input.value.trim() : '';
+      if (val) {
+        localStorage.setItem('gemini_api_key', val);
+        alert('Gemini APIキーを安全に保存しました！モアイとのAI会話が有効です🗿✨');
+      } else {
+        localStorage.removeItem('gemini_api_key');
+        alert('APIキーを解除しました。安心の自動返信モードで動作します。');
+      }
+      closeGeminiConfigModal();
+      updateGeminiUsageBadge();
+    };
+
+    window.clearGeminiConfig = function() {
+      localStorage.removeItem('gemini_api_key');
+      const input = document.getElementById('gemini-key-input');
+      if (input) input.value = '';
+      alert('APIキーを解除しました。');
+      closeGeminiConfigModal();
+      updateGeminiUsageBadge();
+    };
+
+    // Call Gemini 1.5 Flash API with strict safety bounds
+    async function fetchGeminiMoaiReply(product, userText) {
+      const apiKey = localStorage.getItem('gemini_api_key');
+      if (!apiKey) return null; // No key: fallback to scripted response
+
+      const usage = getDailyGeminiUsage();
+      if (usage.count >= GEMINI_MAX_DAILY) {
+        return '本日のAIモアイとおしゃべりできる回数（5/5回）に達しました🗿 明日また話しかけてね！デザフェス会場（西4F K-271）で待ってるよ✨';
+      }
+
+      const hitokoto = (window.MOAI_HITOKOTO_DICT && window.MOAI_HITOKOTO_DICT[product.id]) || '';
+      const prompt = `あなたはハンドメイド作家「モア太郎」が制作した石川県金沢生まれのモアイ作品「${(product.name || 'モアイ').replace(/\n/g, ' ')}」です。
+一言設定: 「${hitokoto}」
+説明: 「${(product.desc || '').slice(0, 80)}」
+出展場所: デザインフェスタ vol.64（西4F 暗いブース K-271）
+ユーザーはあなたに興味を持って話しかけてきたお客さんです。
+【厳格な返答ルール】
+・必ず文末や文中にモアイ絵文字「🗿」をつけてください。
+・愛嬌があり、少しシュールでフレンドリーな口調（金沢の情緒あるニュアンス歓迎）で返信してください。
+・2〜3行（最大70文字以内）で簡潔に返答してください。
+・デザフェス当日に西4F 暗いブース K-271で会えるのを楽しみにしていることを伝えてください。
+
+お客さん: 「${userText.slice(0, 40)}」
+モアイの返答:`;
+
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+
+      try {
+        const resp = await fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: [{ role: 'user', parts: [{ text: prompt }] }],
+            generationConfig: {
+              maxOutputTokens: 90,
+              temperature: 0.85
+            }
+          })
+        });
+        if (!resp.ok) throw new Error('API ' + resp.status);
+        const data = await resp.json();
+        const replyText = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+        if (replyText) {
+          incrementDailyGeminiUsage();
+          return replyText.trim();
+        }
+      } catch (err) {
+        console.warn('Gemini call failed, falling back to script:', err);
+      }
+      return null;
+    }
+
+    async function sendUserMessage(text) {
       if (!activeChatMoaiId) return;
+      const cleanText = text.slice(0, 40);
       if (!chats[activeChatMoaiId]) chats[activeChatMoaiId] = [];
 
       chats[activeChatMoaiId].push({
         sender: 'user',
-        text: text,
+        text: cleanText,
         time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
       });
       saveState();
       renderChatMessages();
 
-      // Trigger instant MOAI humorous scripted response (0 cost, highly entertaining)
-      setTimeout(() => {
-        let reply = '';
-        if (text.includes('会いに行く') || text.includes('行く')) {
+      const p = findProductById(activeChatMoaiId) || { id: activeChatMoaiId, name: 'モアイ' };
+
+      // Try Gemini AI first (with 1 day 5 requests limit)
+      let reply = await fetchGeminiMoaiReply(p, cleanText);
+
+      // Fallback to high quality scripted response if no AI response
+      if (!reply) {
+        if (cleanText.includes('会いに行く') || cleanText.includes('行く')) {
           reply = 'やったー！！西4F 暗いブース K-271で首を長くして待ってるね🗿✨ 迷ったら下の「会場MAP」を見てね！';
-        } else if (text.includes('光る') || text.includes('暗闇')) {
+        } else if (cleanText.includes('光る') || cleanText.includes('暗闇')) {
           reply = 'そうなんです！特殊な蓄光素材で、暗いブースで妖しく光るギミックがあります💡 暗いエリアで本領発揮するよ🗿✨';
-        } else if (text.includes('いくら') || text.includes('価格') || text.includes('値段')) {
+        } else if (cleanText.includes('いくら') || cleanText.includes('価格') || cleanText.includes('値段')) {
           reply = 'デザフェス特別価格で連れて帰れるよ！詳しい金額は作品詳細をチェックしてみてね🗿💰';
-        } else if (text.includes('写真') || text.includes('撮')) {
+        } else if (cleanText.includes('写真') || cleanText.includes('撮')) {
           reply = '撮影大大大歓迎！！かっこいい角度やシュールなアングルからバシバシ撮って、X（Twitter）に載せてくれたら歓喜の咆哮をあげます🗿📸';
-        } else if (text.includes('かわいい') || text.includes('好き')) {
+        } else if (cleanText.includes('かわいい') || cleanText.includes('好き')) {
           reply = '照れちゃうな…🗿/// ありがとう！実物は写真以上に愛嬌と重厚感があるから、ぜひ会場で撫でてあげてね！';
         } else {
           reply = 'メッセージありがとう🗿❤️ あなたとデザフェスで直接会えるのが本当に楽しみだな！ブースK-271で待ってるね✨';
         }
+      }
 
-        chats[activeChatMoaiId].push({
-          sender: 'moai',
-          text: reply,
-          time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-        });
-        saveState();
-        renderChatMessages();
-      }, 700);
+      chats[activeChatMoaiId].push({
+        sender: 'moai',
+        text: reply,
+        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      });
+      saveState();
+      renderChatMessages();
     }
 
     // Hybrid Incoming Likes Dispatcher
@@ -5782,6 +6127,39 @@
     window.toggleMoaiLike(wonMoai.id);
   };
   </script>
+
+
+  <!-- Gemini API Config Modal (無料枠安心ガード設定) -->
+  <div id="gemini-config-modal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.6); backdrop-filter:blur(8px); z-index:100005; justify-content:center; align-items:center; padding:20px; box-sizing:border-box;">
+    <div style="background:#ffffff; border-radius:24px; max-width:400px; width:100%; padding:24px; box-shadow:0 20px 60px rgba(0,0,0,0.2); border:1px solid #e2e8f0;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+        <h3 style="margin:0; font-size:17px; font-weight:900; color:#0f172a; display:flex; align-items:center; gap:6px;">
+          🤖 Gemini AI会話設定
+        </h3>
+        <button onclick="closeGeminiConfigModal()" style="background:none; border:none; font-size:22px; color:#94a3b8; cursor:pointer;">×</button>
+      </div>
+      <p style="font-size:12px; color:#64748b; line-height:1.5; margin:0 0 14px;">
+        Google AI Studioで無料発行できるGemini APIキーを設定すると、モアイがAIで自然におしゃべり返答します🗿✨<br>
+        <span style="color:#ff2d55; font-weight:bold;">※ 1端末あたり1日5回までの厳格な上限ガード</span>を設定しているため、無料枠を絶対に超えません。
+      </p>
+      <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:12px; padding:10px 14px; font-size:12px; color:#334155; margin-bottom:14px;">
+        <div>📊 本日のAI会話利用状況: <strong id="modal-daily-count" style="color:#ff2d55;">0 / 5回</strong></div>
+        <div style="font-size:11px; color:#94a3b8; margin-top:2px;">※ 日付が変わると自動でリセットされます</div>
+      </div>
+      <div style="margin-bottom:14px;">
+        <label style="display:block; font-size:11px; font-weight:bold; color:#475569; margin-bottom:4px;">Gemini API Key</label>
+        <input type="password" id="gemini-key-input" placeholder="AIzaSy..." style="width:100%; box-sizing:border-box; padding:10px 14px; border:1px solid #cbd5e1; border-radius:10px; font-size:13px; font-family:monospace;">
+      </div>
+      <div style="display:flex; gap:8px;">
+        <button onclick="saveGeminiConfig()" style="flex:1; background:linear-gradient(135deg, #ff2d55, #ff5e62); color:#fff; border:none; padding:12px; border-radius:12px; font-weight:900; font-size:13px; cursor:pointer; box-shadow:0 4px 14px rgba(255,45,85,0.35);">
+          設定を保存する
+        </button>
+        <button onclick="clearGeminiConfig()" style="background:#f1f5f9; color:#64748b; border:1px solid #e2e8f0; padding:12px 14px; border-radius:12px; font-weight:bold; font-size:12px; cursor:pointer;">
+          解除
+        </button>
+      </div>
+    </div>
+  </div>
 
 </body>
 </html>
