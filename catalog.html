@@ -3009,7 +3009,7 @@
           const hitokotoHtml = hitokoto ? `<div class="hitokoto-bubble"><span class="hitokoto-icon">💬</span>「${hitokoto}」</div>` : '';
 
           tileGrid.innerHTML += `
-            <div class="product-card-tile" onclick="openDetail(${i})">
+            <div class="product-card-tile" onclick="window.openDetail(${i})">
                 <button type="button" class="btn-tile-share" onclick="event.stopPropagation(); window.shareProductNative('${p.id}')" title="この作品をシェア">📤</button>
               <div style="position:relative;">
                 ${imageHtml}
@@ -3286,8 +3286,14 @@ ${variantSelectorHtml}
       currentSlide = index;
       setView('carousel');
       updateCarousel();
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      const carouselEl = document.getElementById('carousel-view');
+      if (carouselEl) {
+        carouselEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      } else {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
     }
+    window.openDetail = openDetail;
 
     // ===== Switch main image in detail =====
     function setMainImg(slideIndex, url, thumbEl) {
@@ -3336,6 +3342,9 @@ ${variantSelectorHtml}
       }
 
       if (idx !== -1) {
+        if (typeof window.switchMatchingTab === 'function') {
+          window.switchMatchingTab('search');
+        }
         openDetail(idx);
       } else {
         alert("現在選択中のイベント一覧に該当する作品が含まれていないか、非公開になっています。");
@@ -3345,12 +3354,18 @@ ${variantSelectorHtml}
 
     // ===== View toggle =====
     function setView(mode) {
-      document.getElementById('moairoom-view').style.display = 'none';
-      document.getElementById('tile-view').style.display     = mode === 'tile'     ? 'block' : 'none';
-      document.getElementById('carousel-view').style.display = mode === 'carousel' ? 'block' : 'none';
-      document.getElementById('btn-tile').classList.toggle('active',     mode === 'tile');
-      document.getElementById('btn-carousel').classList.toggle('active', mode === 'carousel');
+      const moairoomView = document.getElementById('moairoom-view');
+      if (moairoomView) moairoomView.style.display = 'none';
+      const tileView = document.getElementById('tile-view');
+      if (tileView) tileView.style.display = mode === 'tile' ? 'block' : 'none';
+      const carouselView = document.getElementById('carousel-view');
+      if (carouselView) carouselView.style.display = mode === 'carousel' ? 'block' : 'none';
+      const btnTile = document.getElementById('btn-tile');
+      if (btnTile) btnTile.classList.toggle('active', mode === 'tile');
+      const btnCarousel = document.getElementById('btn-carousel');
+      if (btnCarousel) btnCarousel.classList.toggle('active', mode === 'carousel');
     }
+    window.setView = setView;
 
     // ===== Moai Room key check =====
     function checkMoaiRoomKey() {
