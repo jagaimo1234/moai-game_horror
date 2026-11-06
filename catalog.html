@@ -1010,6 +1010,168 @@
       50% { opacity: 1; transform: translateX(-50%) scale(1.04); }
     }
 
+  
+    /* ===== VIP TICKET & ROUTE THEATER STYLES (CATALOG) ===== */
+    .ticket-card-catalog {
+      position: relative;
+      background: linear-gradient(135deg, #131524 0%, #1c1d32 50%, #0e101c 100%);
+      border: 1.5px solid rgba(255, 215, 0, 0.4);
+      box-shadow: 0 12px 30px rgba(0,0,0,0.7), 0 0 25px rgba(255, 215, 0, 0.15);
+      border-radius: 14px;
+      overflow: hidden;
+      margin: 0 16px 14px;
+      text-align: left;
+      padding: 14px 16px;
+    }
+    .ticket-card-catalog::before {
+      content: '';
+      position: absolute;
+      top: -50%; left: -50%; width: 200%; height: 200%;
+      background: linear-gradient(45deg, transparent 30%, rgba(255, 215, 0, 0.12) 45%, rgba(0, 210, 255, 0.15) 50%, rgba(255, 0, 127, 0.12) 55%, transparent 70%);
+      transform: rotate(-25deg);
+      animation: holoShineCat 6s infinite ease-in-out;
+      pointer-events: none;
+    }
+    @keyframes holoShineCat {
+      0% { transform: translateY(-100%) rotate(-25deg); }
+      50% { transform: translateY(100%) rotate(-25deg); }
+      100% { transform: translateY(100%) rotate(-25deg); }
+    }
+    .ticket-notch-cl, .ticket-notch-cr {
+      position: absolute;
+      width: 16px; height: 16px;
+      background: #0a0a12;
+      border-radius: 50%;
+      top: 50%; transform: translateY(-50%);
+      z-index: 10;
+    }
+    .ticket-notch-cl { left: -8px; border-right: 1.5px solid rgba(255, 215, 0, 0.4); }
+    .ticket-notch-cr { right: -8px; border-left: 1.5px solid rgba(255, 215, 0, 0.4); }
+
+    .route-modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; width: 100vw; height: 100vh;
+      background: rgba(0,0,0,0.88);
+      backdrop-filter: blur(12px);
+      z-index: 99999;
+      align-items: center;
+      justify-content: center;
+      padding: 12px;
+      box-sizing: border-box;
+    }
+    .route-modal-overlay.active {
+      display: flex;
+    }
+    .route-modal-box {
+      background: #090a10;
+      border: 2px solid rgba(255, 30, 80, 0.6);
+      border-radius: 20px;
+      max-width: 540px;
+      width: 100%;
+      overflow: hidden;
+      box-shadow: 0 25px 60px rgba(0,0,0,0.9), 0 0 40px rgba(255, 30, 80, 0.3);
+      position: relative;
+    }
+    .map-theater-container {
+      position: relative;
+      width: 100%;
+      height: 380px;
+      background: #020305;
+      overflow: hidden;
+    }
+    .map-stage-layer {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.8s ease-in-out;
+    }
+    .map-stage-layer.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    .map-img-fit {
+      width: 100%; height: 100%;
+      object-fit: contain; object-position: center;
+      display: block;
+    }
+    .red-line-svg {
+      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+      pointer-events: none; z-index: 20;
+    }
+    .red-laser-path {
+      stroke: #ff1e56; stroke-width: 6; stroke-linecap: round; stroke-linejoin: round;
+      filter: drop-shadow(0 0 8px #ff1e56) drop-shadow(0 0 16px #ff0055);
+      transition: stroke-dashoffset 1.4s ease-out;
+    }
+    .scan-ring {
+      position: absolute;
+      width: 50px; height: 50px;
+      border: 2px solid #ff1e56; border-radius: 50%;
+      transform: translate(-50%, -50%) scale(0);
+      box-shadow: 0 0 20px #ff1e56, inset 0 0 10px #ff1e56;
+      pointer-events: none; z-index: 30; opacity: 0; transition: all 0.4s ease-out;
+    }
+    .scan-ring.active {
+      opacity: 1; transform: translate(-50%, -50%) scale(1);
+      animation: ringPulseCat 1.2s infinite ease-out;
+    }
+    @keyframes ringPulseCat {
+      0% { transform: translate(-50%, -50%) scale(0.9); opacity: 1; }
+      100% { transform: translate(-50%, -50%) scale(1.4); opacity: 0; }
+    }
+    .goal-badge-popup {
+      position: absolute; top: 50%; left: 50%;
+      transform: translate(-50%, -50%) scale(0);
+      background: rgba(10, 12, 22, 0.96);
+      border: 2px solid #ff1e56; border-radius: 18px;
+      padding: 16px 22px; text-align: center; z-index: 60;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.95), 0 0 40px rgba(255, 30, 86, 0.6);
+      transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    .goal-badge-popup.show {
+      transform: translate(-50%, -50%) scale(1);
+    }
+
+    .gacha-modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; width: 100vw; height: 100vh;
+      background: rgba(0,0,0,0.88);
+      backdrop-filter: blur(12px);
+      z-index: 99999;
+      align-items: center;
+      justify-content: center;
+      padding: 12px;
+      box-sizing: border-box;
+    }
+    .gacha-modal-overlay.active {
+      display: flex;
+    }
+    .gacha-modal-box {
+      background: radial-gradient(circle at 50% 30%, #1e2238 0%, #0d0e1a 100%);
+      border: 2px solid rgba(0, 210, 255, 0.5);
+      border-radius: 20px;
+      max-width: 440px;
+      width: 100%;
+      padding: 22px 18px;
+      box-shadow: 0 25px 60px rgba(0,0,0,0.9), 0 0 35px rgba(0, 210, 255, 0.2);
+      position: relative;
+      text-align: center;
+    }
+    .shake-gacha {
+      animation: gachaShakeCat 0.5s ease-in-out infinite;
+    }
+    @keyframes gachaShakeCat {
+      0%, 100% { transform: translate(0, 0) rotate(0deg); }
+      20% { transform: translate(-3px, 2px) rotate(-1deg); }
+      40% { transform: translate(3px, -2px) rotate(1deg); }
+      60% { transform: translate(-2px, -1px) rotate(-0.5deg); }
+      80% { transform: translate(2px, 1px) rotate(0.5deg); }
+    }
+
   </style>
 </head>
 <body>
@@ -1028,6 +1190,52 @@
   <div class="page-hero">
     <h1>お品書き</h1>
     <p>Kanazawa Moataro</p>
+  </div>
+
+  <!-- デザフェス出店告知 VIPチケット看板 -->
+  <div class="ticket-card-catalog">
+    <div class="ticket-notch-cl"></div>
+    <div class="ticket-notch-cr"></div>
+
+    <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:8px;">
+      <div>
+        <span style="font-size:10px; font-weight:bold; color:#ffbc69; letter-spacing:2px; text-transform:uppercase;">OFFICIAL EXHIBITION PASS</span>
+        <div style="font-size:clamp(17px, 5vw, 21px); font-weight:900; color:#ffd700; text-shadow:0 0 10px rgba(255,215,0,0.4); margin-top:2px;">
+          DESIGN FESTA vol.64
+        </div>
+      </div>
+      <div style="background:rgba(0,255,170,0.15); border:1px solid #00ffaa; color:#00ffaa; font-size:11px; font-weight:bold; padding:2px 8px; border-radius:20px; white-space:nowrap;">
+        両日出展
+      </div>
+    </div>
+
+    <!-- 3カラム情報 -->
+    <div style="display:grid; grid-template-columns:1fr 1fr 1.2fr; gap:6px; background:rgba(0,0,0,0.45); border:1px solid rgba(255,255,255,0.1); border-radius:10px; padding:8px 10px; margin-bottom:10px;">
+      <div style="border-right:1px solid rgba(255,255,255,0.1); padding-right:4px;">
+        <div style="font-size:9px; color:#aaa; font-weight:bold;">DATE</div>
+        <div style="font-size:11px; font-weight:bold; color:#fff; margin-top:2px;">11/14(土)-15(日)</div>
+      </div>
+      <div style="border-right:1px solid rgba(255,255,255,0.1); padding-right:4px; text-align:center;">
+        <div style="font-size:9px; color:#aaa; font-weight:bold;">AREA</div>
+        <div style="font-size:11px; font-weight:bold; color:#00d2ff; margin-top:2px;">西4F 暗いブース</div>
+      </div>
+      <div style="text-align:right;">
+        <div style="font-size:9px; color:#ffd700; font-weight:bold;">BOOTH NO.</div>
+        <div style="font-size:14px; font-weight:900; color:#ffd700; margin-top:1px;">K-271 <span style="font-size:9px; font-weight:normal; opacity:0.8;">(角)</span></div>
+      </div>
+    </div>
+
+    <!-- 爽快ルート案内ボタン ＆ ガチャ起動ボタン -->
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+      <button type="button" onclick="event.stopPropagation(); window.openCatalogRouteModal()" style="background:linear-gradient(135deg, #ff1e56, #d80044); color:#fff; font-size:12px; font-weight:bold; padding:8px 10px; border-radius:8px; border:none; cursor:pointer; box-shadow:0 3px 10px rgba(255,30,86,0.4); display:flex; align-items:center; justify-content:center; gap:5px;">
+        <span>🗺️</span> K-271への行き方
+      </button>
+      <button type="button" onclick="event.stopPropagation(); window.openCatalogGachaModal()" style="background:linear-gradient(135deg, #ffd700, #ff8c00); color:#000; font-size:12px; font-weight:bold; padding:8px 10px; border-radius:8px; border:none; cursor:pointer; box-shadow:0 3px 10px rgba(255,140,0,0.4); display:flex; align-items:center; justify-content:center; gap:5px;">
+        <span>🎰</span> 運命のモアイガチャ
+      </button>
+    </div>
+  </div>
+
   </div>
 
   <!-- Preview Mode Banner (shown only in ?preview mode) -->
@@ -3083,7 +3291,198 @@
       }
     });
 
-  </script>
+  
+    // ===== Catalog Route Nav & Gacha Controllers =====
+    let catAudioCtx = null;
+    function playCatLaserSound() {
+      try {
+        if (!catAudioCtx) catAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = catAudioCtx.createOscillator();
+        const gain = catAudioCtx.createGain();
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(250, catAudioCtx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(1200, catAudioCtx.currentTime + 0.8);
+        gain.gain.setValueAtTime(0.12, catAudioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, catAudioCtx.currentTime + 0.8);
+        osc.connect(gain);
+        gain.connect(catAudioCtx.destination);
+        osc.start();
+        osc.stop(catAudioCtx.currentTime + 0.8);
+      } catch(e) {}
+    }
+    function playCatFanfareSound() {
+      try {
+        if (!catAudioCtx) catAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        [523.25, 659.25, 783.99, 1046.50].forEach((freq, idx) => {
+          setTimeout(() => {
+            const osc = catAudioCtx.createOscillator();
+            const gain = catAudioCtx.createGain();
+            osc.type = 'triangle';
+            osc.frequency.value = freq;
+            gain.gain.setValueAtTime(0.15, catAudioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, catAudioCtx.currentTime + 0.5);
+            osc.connect(gain);
+            gain.connect(catAudioCtx.destination);
+            osc.start();
+            osc.stop(catAudioCtx.currentTime + 0.5);
+          }, idx * 100);
+        });
+      } catch(e) {}
+    }
+
+    const CAT_CAPTIONS = {
+      1: "📍 ステージ 1: 会場全体マップ (入場口から西3ホールへ)",
+      2: "📍 ステージ 2: 西4階フロア (エスカレーターから暗いエリア入口へ)",
+      3: "📍 ステージ 3: 暗いエリア詳細 (最奥の角ブース K-271 へ到着！)"
+    };
+
+    window.openCatalogRouteModal = function() {
+      const modal = document.getElementById('catalog-route-modal');
+      if (modal) {
+        modal.classList.add('active');
+        window.switchCatNavStage(1);
+      }
+    };
+
+    window.closeCatalogRouteModal = function(e) {
+      if (e && e.target && e.target !== e.currentTarget) return;
+      const modal = document.getElementById('catalog-route-modal');
+      if (modal) modal.classList.remove('active');
+    };
+
+    window.switchCatNavStage = function(stageNum) {
+      for (let i = 1; i <= 3; i++) {
+        const tab = document.getElementById('cat-tab-stage-' + i);
+        const layer = document.getElementById('cat-layer-stage-' + i);
+        if (tab) {
+          tab.style.background = i === stageNum ? '#ff1e56' : 'rgba(255,255,255,0.08)';
+          tab.style.color = i === stageNum ? '#fff' : '#aaa';
+        }
+        if (layer) layer.classList.toggle('active', i === stageNum);
+      }
+
+      const cap = document.getElementById('cat-nav-caption');
+      if (cap) cap.textContent = CAT_CAPTIONS[stageNum];
+
+      document.getElementById('cat-path-stage-1').style.strokeDashoffset = '400';
+      document.getElementById('cat-path-stage-2').style.strokeDashoffset = '600';
+      document.getElementById('cat-path-stage-3').style.strokeDashoffset = '900';
+      document.getElementById('cat-ring-stage-1').classList.remove('active');
+      document.getElementById('cat-ring-stage-2').classList.remove('active');
+      document.getElementById('cat-ring-stage-3').classList.remove('active');
+      document.getElementById('cat-stage3-goal').classList.remove('show');
+
+      playCatLaserSound();
+
+      setTimeout(() => {
+        if (stageNum === 1) {
+          document.getElementById('cat-path-stage-1').style.strokeDashoffset = '0';
+          setTimeout(() => document.getElementById('cat-ring-stage-1').classList.add('active'), 800);
+        } else if (stageNum === 2) {
+          document.getElementById('cat-path-stage-2').style.strokeDashoffset = '0';
+          setTimeout(() => document.getElementById('cat-ring-stage-2').classList.add('active'), 900);
+        } else if (stageNum === 3) {
+          document.getElementById('cat-path-stage-3').style.strokeDashoffset = '0';
+          setTimeout(() => {
+            document.getElementById('cat-ring-stage-3').classList.add('active');
+            playCatFanfareSound();
+            setTimeout(() => document.getElementById('cat-stage3-goal').classList.add('show'), 300);
+          }, 1100);
+        }
+      }, 50);
+    };
+
+    let catTourTimer = null;
+    window.startCatTour = function() {
+      clearTimeout(catTourTimer);
+      window.switchCatNavStage(1);
+      catTourTimer = setTimeout(() => {
+        window.switchCatNavStage(2);
+        catTourTimer = setTimeout(() => {
+          window.switchCatNavStage(3);
+        }, 1800);
+      }, 1500);
+    };
+
+    // ===== Catalog Gacha Controller =====
+    const CAT_MOAI_LIST = [
+      { id: "moai_loscut", name: "含み損モアイ", icon: "📉", badge: "話題作", desc: "「相場の急変についていけず、気づけば膨らむ含み損…今夜は一緒に放心しましょう。」" },
+      { id: "moai_highleg", name: "ハイレグモアイ", icon: "👙", badge: "セクシー", desc: "「ハイレグ水着にリュックを背負った謎のセクシーさ。見るだけで元気が出ます。」" },
+      { id: "macho_moai_keyholder", name: "マッチョモアイ", icon: "💪", badge: "気合", desc: "「圧倒的な筋肉でデスクもあなたのモチベーションも力強く支え上げます！」" },
+      { id: "moai_robo_mk2_gray", name: "モアイロボ MARK 2", icon: "🤖", badge: "男のロマン", desc: "「よりヨーグルトを愛し、よりスタイリッシュに進化した近未来メカモアイ！」" },
+      { id: "nitto_osuwari_moai_penstand", name: "肌着おすわりペン立て", icon: "👕", badge: "実用性◎", desc: "「U首、V首、袖付き…なぜ肌着を着ているのかは作者にも分からないが妙に愛おしい。」" }
+    ];
+
+    let currentCatGachaMoai = null;
+    let isCatSpinning = false;
+
+    window.openCatalogGachaModal = function() {
+      const modal = document.getElementById('catalog-gacha-modal');
+      if (modal) modal.classList.add('active');
+    };
+
+    window.closeCatalogGachaModal = function(e) {
+      if (e && e.target && e.target !== e.currentTarget) return;
+      const modal = document.getElementById('catalog-gacha-modal');
+      if (modal) modal.classList.remove('active');
+    };
+
+    window.spinCatGacha = function() {
+      if (isCatSpinning) return;
+      isCatSpinning = true;
+
+      const idle = document.getElementById('cat-gacha-idle');
+      const spinning = document.getElementById('cat-gacha-spinning');
+      const result = document.getElementById('cat-gacha-result');
+      const actions = document.getElementById('cat-gacha-actions');
+      const box = document.getElementById('cat-gacha-box');
+      const btn = document.getElementById('btn-cat-spin');
+
+      idle.style.display = 'none';
+      result.style.display = 'none';
+      actions.style.display = 'none';
+      spinning.style.display = 'block';
+      box.classList.add('shake-gacha');
+      btn.textContent = "召喚中...";
+
+      let c = 0;
+      const iconEl = document.getElementById('cat-spinner-icon');
+      const nameEl = document.getElementById('cat-spinner-name');
+
+      const shuffle = setInterval(() => {
+        const m = CAT_MOAI_LIST[c % CAT_MOAI_LIST.length];
+        iconEl.textContent = m.icon;
+        nameEl.textContent = m.name;
+        c++;
+      }, 70);
+
+      setTimeout(() => {
+        clearInterval(shuffle);
+        box.classList.remove('shake-gacha');
+        spinning.style.display = 'none';
+
+        currentCatGachaMoai = CAT_MOAI_LIST[Math.floor(Math.random() * CAT_MOAI_LIST.length)];
+        document.getElementById('cat-result-icon').textContent = currentCatGachaMoai.icon;
+        document.getElementById('cat-result-badge').textContent = currentCatGachaMoai.badge;
+        document.getElementById('cat-result-title').textContent = currentCatGachaMoai.name;
+        document.getElementById('cat-result-desc').textContent = currentCatGachaMoai.desc;
+
+        result.style.display = 'block';
+        actions.style.display = 'flex';
+        btn.textContent = "もう一回召喚する！";
+        isCatSpinning = false;
+      }, 1400);
+    };
+
+    window.jumpToCatResultProduct = function() {
+      if (!currentCatGachaMoai) return;
+      window.closeCatalogGachaModal();
+      if (typeof openProductById === 'function') {
+        openProductById(currentCatGachaMoai.id);
+      }
+    };
+
+</script>
 
   <!-- Toast Message -->
   <div id="toast-msg">
@@ -3185,6 +3584,114 @@
     <!-- Tap Guide Pill -->
     <div class="reel-record-guide" id="reel-record-guide">
       🔴 画面録画開始後、ここをタップして全UI非表示
+    </div>
+  </div>
+
+
+  <!-- ===== ROUTE NAV MODAL (CATALOG) ===== -->
+  <div id="catalog-route-modal" class="route-modal-overlay" onclick="window.closeCatalogRouteModal(event)">
+    <div class="route-modal-box" onclick="event.stopPropagation()">
+      <div style="padding:12px 16px; background:#121422; border-bottom:1px solid rgba(255,255,255,0.1); display:flex; justify-content:space-between; align-items:center;">
+        <div style="font-size:13px; font-weight:bold; color:#ff1e56; display:flex; align-items:center; gap:6px;">
+          <span>🗺️</span> 会場全体からブースK-271への3段階ズーム案内
+        </div>
+        <button onclick="window.closeCatalogRouteModal()" style="background:rgba(255,255,255,0.1); border:none; color:#fff; font-size:18px; width:28px; height:28px; border-radius:50%; cursor:pointer;">&times;</button>
+      </div>
+
+      <div style="display:flex; gap:4px; padding:8px 12px; background:#080910; border-bottom:1px solid rgba(255,255,255,0.06);">
+        <button onclick="window.switchCatNavStage(1)" id="cat-tab-stage-1" style="flex:1; padding:6px; border-radius:6px; font-size:11px; font-weight:bold; background:#ff1e56; color:#fff; border:none; cursor:pointer;">① 全体マップ</button>
+        <button onclick="window.switchCatNavStage(2)" id="cat-tab-stage-2" style="flex:1; padding:6px; border-radius:6px; font-size:11px; font-weight:bold; background:rgba(255,255,255,0.08); color:#aaa; border:none; cursor:pointer;">② 西4Fエリア</button>
+        <button onclick="window.switchCatNavStage(3)" id="cat-tab-stage-3" style="flex:1; padding:6px; border-radius:6px; font-size:11px; font-weight:bold; background:rgba(255,255,255,0.08); color:#aaa; border:none; cursor:pointer;">③ 暗いブース K-271</button>
+      </div>
+
+      <div class="map-theater-container">
+        <div class="map-stage-layer active" id="cat-layer-stage-1">
+          <img src="images/map_stage1_overall.png" class="map-img-fit" alt="全体マップ">
+          <svg class="red-line-svg" viewBox="0 0 657 1024" preserveAspectRatio="xMidYMid meet">
+            <path id="cat-path-stage-1" class="red-laser-path" d="M 330,940 Q 250,930 240,860 L 220,830" fill="none" stroke-dasharray="400" stroke-dashoffset="400"/>
+          </svg>
+          <div id="cat-ring-stage-1" class="scan-ring" style="left: 33.5%; top: 81%;"></div>
+        </div>
+
+        <div class="map-stage-layer" id="cat-layer-stage-2">
+          <img src="images/map_stage2_west4f.png" class="map-img-fit" alt="西4Fフロア図">
+          <svg class="red-line-svg" viewBox="0 0 1024 719" preserveAspectRatio="xMidYMid meet">
+            <path id="cat-path-stage-2" class="red-laser-path" d="M 680,630 L 530,600 L 400,600 L 300,670" fill="none" stroke-dasharray="600" stroke-dashoffset="600"/>
+          </svg>
+          <div id="cat-ring-stage-2" class="scan-ring" style="left: 29.3%; top: 93%;"></div>
+        </div>
+
+        <div class="map-stage-layer" id="cat-layer-stage-3">
+          <img src="images/map_stage3_k271.png" class="map-img-fit" alt="暗いエリア詳細マップ">
+          <svg class="red-line-svg" viewBox="0 0 1024 533" preserveAspectRatio="xMidYMid meet">
+            <path id="cat-path-stage-3" class="red-laser-path" d="M 740,430 L 650,335 L 580,245 L 430,245 L 340,195 L 327,105 L 322,50" fill="none" stroke-dasharray="900" stroke-dashoffset="900"/>
+          </svg>
+          <div id="cat-ring-stage-3" class="scan-ring" style="left: 31.5%; top: 9.4%;"></div>
+        </div>
+
+        <div id="cat-stage3-goal" class="goal-badge-popup">
+          <div style="font-size:32px; margin-bottom:4px;">🗿✨</div>
+          <div style="font-size:11px; font-weight:bold; color:#ff1e56; letter-spacing:1px;">ARRIVED AT BOOTH!</div>
+          <div style="font-size:20px; font-weight:900; color:#ffd700; margin-top:2px;">西4F 暗いブース K-271</div>
+          <div style="font-size:11px; color:#ccc; margin-top:4px;">角ブースでお待ちしています！</div>
+        </div>
+
+        <div id="cat-nav-caption" style="position:absolute; top:8px; left:8px; background:rgba(0,0,0,0.75); border:1px solid rgba(255,255,255,0.15); border-radius:6px; padding:4px 8px; font-size:10px; font-weight:bold; color:#ff7799; pointer-events:none;">
+          📍 ステージ 1: 会場全体マップ (入場口から西3ホールへ)
+        </div>
+      </div>
+
+      <div style="padding:10px 14px; background:#121422; border-top:1px solid rgba(255,255,255,0.1); display:flex; justify-content:space-between; align-items:center;">
+        <button type="button" onclick="window.startCatTour()" style="background:linear-gradient(135deg, #ff1e56, #d80044); color:#fff; font-size:12px; font-weight:bold; padding:8px 16px; border-radius:8px; border:none; cursor:pointer; box-shadow:0 3px 10px rgba(255,30,86,0.4);">
+          ▶️ 一連のズーム案内を開始！
+        </button>
+        <button type="button" onclick="window.closeCatalogRouteModal()" style="background:rgba(255,255,255,0.08); color:#ccc; font-size:12px; padding:8px 14px; border-radius:8px; border:1px solid rgba(255,255,255,0.15); cursor:pointer;">
+          閉じる
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== GACHA MODAL (CATALOG) ===== -->
+  <div id="catalog-gacha-modal" class="gacha-modal-overlay" onclick="window.closeCatalogGachaModal(event)">
+    <div class="gacha-modal-box" id="cat-gacha-box" onclick="event.stopPropagation()">
+      <button onclick="window.closeCatalogGachaModal()" style="position:absolute; top:12px; right:12px; background:rgba(255,255,255,0.1); border:none; color:#fff; font-size:18px; width:28px; height:28px; border-radius:50%; cursor:pointer;">&times;</button>
+      
+      <div style="font-size:10px; color:#00d2ff; font-weight:bold; letter-spacing:2px; background:rgba(0,210,255,0.15); border:1px solid rgba(0,210,255,0.3); padding:2px 8px; border-radius:4px; display:inline-block; margin-bottom:6px;">MOAI FORTUNE DISPENSER</div>
+      <div style="font-size:18px; font-weight:900; color:#fff; margin-bottom:4px;">今のあなたに必要なモアイを召喚</div>
+      <div style="font-size:11px; color:#aaa; margin-bottom:14px;">今日の気分や運命に刺さるモアイが飛び出します！</div>
+
+      <div style="background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.15); border-radius:14px; padding:18px 12px; min-height:140px; display:flex; flex-direction:column; align-items:center; justify-content:center; margin-bottom:14px;">
+        <div id="cat-gacha-idle">
+          <div style="font-size:42px; margin-bottom:6px;">🗿✨</div>
+          <div style="font-size:13px; font-weight:bold; color:#00d2ff;">ボタンを押してモアイを召喚せよ！</div>
+        </div>
+
+        <div id="cat-gacha-spinning" style="display:none;">
+          <div id="cat-spinner-icon" style="font-size:44px; margin-bottom:6px;">🗿</div>
+          <div id="cat-spinner-name" style="font-size:14px; font-weight:bold; color:#fff;">シャッフル中...</div>
+        </div>
+
+        <div id="cat-gacha-result" style="display:none;">
+          <div id="cat-result-icon" style="font-size:44px; margin-bottom:2px;">📉</div>
+          <div id="cat-result-badge" style="font-size:9px; background:#ffd700; color:#000; font-weight:900; padding:1px 6px; border-radius:10px; display:inline-block; margin-bottom:4px;">話題作</div>
+          <div id="cat-result-title" style="font-size:18px; font-weight:900; color:#ffd700;">含み損モアイ</div>
+          <div id="cat-result-desc" style="font-size:11px; color:#ddd; margin-top:6px; background:rgba(255,255,255,0.06); padding:6px 10px; border-radius:8px; line-height:1.4;">「相場の急変についていけず、気づけば膨らむ含み損…今夜は一緒に放心しましょう。」</div>
+        </div>
+      </div>
+
+      <button id="btn-cat-spin" type="button" onclick="window.spinCatGacha()" style="width:100%; background:linear-gradient(135deg, #ffd700, #ff8c00); color:#000; font-size:15px; font-weight:900; padding:12px; border-radius:10px; border:none; cursor:pointer; box-shadow:0 4px 15px rgba(255,140,0,0.5); letter-spacing:1px; margin-bottom:8px;">
+        ⚡ モアイを召喚する！ ⚡
+      </button>
+
+      <div id="cat-gacha-actions" style="display:none; gap:8px;">
+        <button type="button" onclick="window.jumpToCatResultProduct()" style="flex:1; background:#00d2ff; color:#000; font-size:12px; font-weight:bold; padding:8px; border-radius:8px; border:none; cursor:pointer;">
+          🔍 この作品を見る
+        </button>
+        <button type="button" onclick="window.spinCatGacha()" style="flex:1; background:rgba(255,255,255,0.1); color:#fff; font-size:12px; font-weight:bold; padding:8px; border-radius:8px; border:1px solid rgba(255,255,255,0.2); cursor:pointer;">
+          🔄 もう一度引く
+        </button>
+      </div>
     </div>
   </div>
 
