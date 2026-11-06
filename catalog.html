@@ -1650,6 +1650,234 @@
       align-items: center;
       justify-content: center;
     }
+
+    /* ===== WHITE MODERN DATING APP THEME ===== */
+    body {
+      background: #f8fafc !important;
+      color: #1e293b !important;
+    }
+
+    .header {
+      background: rgba(255, 255, 255, 0.95) !important;
+      border-bottom: 1px solid #e2e8f0 !important;
+    }
+    .header-title {
+      color: #0f172a !important;
+    }
+    .btn-back {
+      background: #f1f5f9 !important;
+      border: 1px solid #e2e8f0 !important;
+      color: #334155 !important;
+      padding: 9px 18px !important;
+      font-size: 14px !important;
+      font-weight: 700 !important;
+    }
+    .toggle-btn {
+      background: #f1f5f9 !important;
+      border: 1px solid #e2e8f0 !important;
+      color: #64748b !important;
+      width: 38px !important;
+      height: 38px !important;
+    }
+    .toggle-btn.active {
+      background: #ffe4e6 !important;
+      border-color: #ff3366 !important;
+      color: #ff3366 !important;
+    }
+    .page-hero h1 {
+      background: linear-gradient(90deg, #0f172a 0%, #ff3366 100%) !important;
+      -webkit-background-clip: text !important;
+      background-clip: text !important;
+      -webkit-text-fill-color: transparent !important;
+    }
+    .page-hero p {
+      color: #64748b !important;
+    }
+    .item-count {
+      color: #94a3b8 !important;
+    }
+
+    /* Event Tabs */
+    .event-tab {
+      background: #ffffff !important;
+      border: 1.5px solid #e2e8f0 !important;
+      color: #64748b !important;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.03) !important;
+      padding: 10px 22px !important;
+    }
+    .event-tab.active {
+      background: #ffe4e6 !important;
+      border-color: #ff3366 !important;
+      color: #e11d48 !important;
+      box-shadow: 0 4px 15px rgba(225, 29, 72, 0.15) !important;
+    }
+
+    /* Product Cards in White */
+    .product-card-tile {
+      background: #ffffff !important;
+      border: 1px solid #f1f5f9 !important;
+      border-radius: 20px !important;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05), 0 1px 3px rgba(0,0,0,0.03) !important;
+      transition: transform 0.2s, box-shadow 0.2s !important;
+    }
+    .product-card-tile:active {
+      transform: scale(0.97) !important;
+    }
+    .product-name-tile {
+      color: #0f172a !important;
+      font-size: clamp(13px, 3.8vw, 15.5px) !important;
+      font-weight: 900 !important;
+    }
+    .tile-hint {
+      color: #ff3366 !important;
+      font-weight: 700 !important;
+    }
+
+    /* Hide Prices */
+    .product-price-tile,
+    .product-price-large,
+    [class*="price"] {
+      display: none !important;
+    }
+
+    /* Bigger & Easier to tap Heart Button with Live Likes Count */
+    .btn-tile-heart {
+      position: absolute !important;
+      bottom: 10px !important; right: 10px !important;
+      background: rgba(255, 255, 255, 0.95) !important;
+      border: 1.5px solid #e2e8f0 !important;
+      min-width: 44px !important;
+      height: 44px !important;
+      padding: 0 8px !important;
+      border-radius: 22px !important;
+      font-size: 18px !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      gap: 4px !important;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12) !important;
+      color: #334155 !important;
+      z-index: 10 !important;
+    }
+    .btn-tile-heart .heart-count {
+      font-size: 12px;
+      font-weight: 900;
+      color: #64748b;
+      font-family: 'Outfit', sans-serif;
+    }
+    .btn-tile-heart.liked {
+      background: linear-gradient(135deg, #ff3366, #ff5e62) !important;
+      border-color: #ff3366 !important;
+      color: #fff !important;
+      box-shadow: 0 4px 18px rgba(255, 51, 102, 0.45) !important;
+    }
+    .btn-tile-heart.liked .heart-count {
+      color: #fff !important;
+    }
+
+    /* Hitokoto Profile Bubble */
+    .hitokoto-bubble {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 7px 10px;
+      font-size: 11px;
+      color: #475569;
+      line-height: 1.4;
+      margin-top: 6px;
+      margin-bottom: 8px;
+      position: relative;
+    }
+    .hitokoto-bubble::before {
+      content: '';
+      position: absolute;
+      top: -5px; left: 16px;
+      width: 8px; height: 8px;
+      background: #f8fafc;
+      border-left: 1px solid #e2e8f0;
+      border-top: 1px solid #e2e8f0;
+      transform: rotate(45deg);
+    }
+    .hitokoto-icon {
+      margin-right: 3px;
+    }
+
+    /* POS Badge */
+    .pos-badge-new {
+      position: absolute;
+      top: 10px; left: 10px;
+      background: #ff3366;
+      color: #fff;
+      font-size: 10px;
+      font-weight: 900;
+      padding: 3px 8px;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(255, 51, 102, 0.4);
+      letter-spacing: 0.5px;
+      z-index: 6;
+    }
+    .pos-badge-recommend {
+      position: absolute;
+      top: 10px; left: 10px;
+      background: linear-gradient(135deg, #f59e0b, #d97706);
+      color: #fff;
+      font-size: 10px;
+      font-weight: 900;
+      padding: 3px 8px;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(245, 158, 11, 0.4);
+      letter-spacing: 0.5px;
+      z-index: 6;
+    }
+
+    /* White Bottom Nav */
+    .moai-bottom-nav {
+      background: rgba(255, 255, 255, 0.98) !important;
+      border-top: 1px solid #e2e8f0 !important;
+      box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.06) !important;
+    }
+    .m-nav-item {
+      color: #94a3b8 !important;
+    }
+    .m-nav-item.active {
+      color: #ff3366 !important;
+    }
+
+    /* Large Carousel Slide in White */
+    .product-card-large {
+      background: #ffffff !important;
+      border: 1px solid #e2e8f0 !important;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.08) !important;
+    }
+    .product-name-large {
+      color: #0f172a !important;
+    }
+    .product-desc {
+      color: #475569 !important;
+    }
+    .thumb-strip {
+      background: #f8fafc !important;
+      border-bottom: 1px solid #e2e8f0 !important;
+    }
+
+    /* Roulette Gacha Reel Styles */
+    .roulette-reel-box {
+      width: 140px; height: 140px;
+      border-radius: 20px;
+      border: 4px solid #ff3366;
+      box-shadow: 0 0 30px rgba(255, 51, 102, 0.5);
+      margin: 0 auto 16px;
+      overflow: hidden;
+      background: #000;
+      position: relative;
+    }
+    .roulette-reel-img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      display: block;
+      transition: transform 0.05s ease;
+    }
+
   </style>
 </head>
 <body>
@@ -2254,20 +2482,35 @@
             : '';
 
           const isLiked = window.isMoaiLiked ? window.isMoaiLiked(p.id) : false;
-          const heartBtnHtml = `<button type="button" class="btn-tile-heart ${isLiked ? 'liked' : ''}" id="tile-heart-${p.id}" onclick="event.stopPropagation(); window.toggleMoaiLike('${p.id}')" title="${isLiked ? 'マッチング中❤️' : 'このモアイ好きかも'}">${isLiked ? '❤️' : '🤍'}</button>`;
+          const liveCount = (window.cachedLiveLikes && window.cachedLiveLikes[p.id]) || 0;
+          const heartCountText = liveCount > 0 ? liveCount : '';
+          const heartBtnHtml = `<button type="button" class="btn-tile-heart ${isLiked ? 'liked' : ''}" id="tile-heart-${p.id}" onclick="event.stopPropagation(); window.toggleMoaiLike('${p.id}')" title="${isLiked ? 'マッチング中❤️' : 'このモアイ好きかも'}"><span class="heart-icon">${isLiked ? '❤️' : '🤍'}</span><span class="heart-count" id="heart-count-${p.id}">${heartCountText}</span></button>`;
+
+          // POS連動バッジ (NEW / 超おすすめ / おすすめ)
+          let customPosBadge = '';
+          if (p.isDev || p.isNew) {
+            customPosBadge = `<div class="pos-badge-new">NEW</div>`;
+          } else if (p.isRecommended || p.id === 'moai_loscut' || p.id.includes('highleg') || p.id === 'tasogare_moai') {
+            customPosBadge = `<div class="pos-badge-recommend">超おすすめ</div>`;
+          }
+
+          // 一言プロフィール (吹き出し)
+          const hitokoto = window.getMoaiHitokoto ? window.getMoaiHitokoto(p) : '';
+          const hitokotoHtml = hitokoto ? `<div class="hitokoto-bubble"><span class="hitokoto-icon">💬</span>「${hitokoto}」</div>` : '';
 
           tileGrid.innerHTML += `
             <div class="product-card-tile" onclick="openDetail(${i})">
                 <button type="button" class="btn-tile-share" onclick="event.stopPropagation(); window.shareProductNative('${p.id}')" title="この作品をシェア">📤</button>
               <div style="position:relative;">
                 ${imageHtml}
-                ${topLeftBadgeHtml}
+                ${customPosBadge || topLeftBadgeHtml}
                 ${p.demoUrl ? `<div class="demo-badge-tile">🎮 体験版あり</div>` : ''}
                 ${heartBtnHtml}
               </div>
               <div class="product-info-tile">
-                <div class="product-name-tile">${p.isDev ? '❓ [新作] ' : ''}${p.name.replace(/\n/g,'<br>')}</div>
+                <div class="product-name-tile">${p.name.replace(/\n/g,'<br>')}</div>
                 ${summarySubHtml}
+                ${hitokotoHtml}
                 <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:4px;">
                   <div class="tile-hint">${p.catalogVariants ? 'バリエーションを見る →' : '詳細を見る →'}</div>
                   <div style="display:flex; gap:4px;">
@@ -2870,6 +3113,19 @@
     });
 
     // Listen to current event's inventory for SKU-level stock status
+    
+    // Listen to real-time likes for public catalog live numbers
+    onSnapshot(doc(db, "public_analytics", "df64_likes"), (docSnap) => {
+      if (docSnap.exists()) {
+        const data = docSnap.data();
+        if (typeof window.updateAllLiveLikesCount === 'function') {
+          window.updateAllLiveLikesCount(data.likes || {});
+        }
+      }
+    }, (err) => {
+      console.warn("Live likes listener:", err);
+    });
+
     window.subscribeEventInventory = function(evKey) {
       if (unsubscribeEventInventory) {
         unsubscribeEventInventory();
@@ -4241,42 +4497,27 @@
 
   <!-- ===== GACHA MODAL (CATALOG) ===== -->
   <div id="catalog-gacha-modal" class="gacha-modal-overlay" onclick="window.closeCatalogGachaModal(event)">
-    <div class="gacha-modal-box" id="cat-gacha-box" onclick="event.stopPropagation()">
-      <button onclick="window.closeCatalogGachaModal()" style="position:absolute; top:12px; right:12px; background:rgba(255,255,255,0.1); border:none; color:#fff; font-size:18px; width:28px; height:28px; border-radius:50%; cursor:pointer;">&times;</button>
+    <div class="gacha-modal-box" id="cat-gacha-box" onclick="event.stopPropagation()" style="background:#ffffff; border:2px solid #ff3366; border-radius:24px; box-shadow:0 25px 60px rgba(0,0,0,0.25), 0 0 30px rgba(255,51,102,0.2); padding:24px 20px; color:#1e293b;">
+      <button onclick="window.closeCatalogGachaModal()" style="position:absolute; top:12px; right:12px; background:#f1f5f9; border:none; color:#64748b; font-size:20px; width:32px; height:32px; border-radius:50%; cursor:pointer;">&times;</button>
       
-      <div style="font-size:10px; color:#00d2ff; font-weight:bold; letter-spacing:2px; background:rgba(0,210,255,0.15); border:1px solid rgba(0,210,255,0.3); padding:2px 8px; border-radius:4px; display:inline-block; margin-bottom:6px;">MOAI FORTUNE DISPENSER</div>
-      <div style="font-size:18px; font-weight:900; color:#fff; margin-bottom:4px;">今のあなたに必要なモアイを召喚</div>
-      <div style="font-size:11px; color:#aaa; margin-bottom:14px;">今日の気分や運命に刺さるモアイが飛び出します！</div>
-
-      <div style="background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.15); border-radius:14px; padding:18px 12px; min-height:140px; display:flex; flex-direction:column; align-items:center; justify-content:center; margin-bottom:14px;">
-        <div id="cat-gacha-idle">
-          <div style="font-size:42px; margin-bottom:6px;">🗿✨</div>
-          <div style="font-size:13px; font-weight:bold; color:#00d2ff;">ボタンを押してモアイを召喚せよ！</div>
-        </div>
-
-        <div id="cat-gacha-spinning" style="display:none;">
-          <div id="cat-spinner-icon" style="font-size:44px; margin-bottom:6px;">🗿</div>
-          <div id="cat-spinner-name" style="font-size:14px; font-weight:bold; color:#fff;">シャッフル中...</div>
-        </div>
-
-        <div id="cat-gacha-result" style="display:none;">
-          <div id="cat-result-icon" style="font-size:44px; margin-bottom:2px;">📉</div>
-          <div id="cat-result-badge" style="font-size:9px; background:#ffd700; color:#000; font-weight:900; padding:1px 6px; border-radius:10px; display:inline-block; margin-bottom:4px;">話題作</div>
-          <div id="cat-result-title" style="font-size:18px; font-weight:900; color:#ffd700;">含み損モアイ</div>
-          <div id="cat-result-desc" style="font-size:11px; color:#ddd; margin-top:6px; background:rgba(255,255,255,0.06); padding:6px 10px; border-radius:8px; line-height:1.4;">「相場の急変についていけず、気づけば膨らむ含み損…今夜は一緒に放心しましょう。」</div>
-        </div>
+      <div style="font-size:11px; font-weight:900; color:#ff3366; letter-spacing:2px; margin-bottom:4px;">DESTINY MATCH ROULETTE</div>
+      <h3 style="font-size:22px; font-weight:900; color:#0f172a; margin-bottom:14px;">運命のモアイガチャ 🎰</h3>
+      
+      <div class="roulette-reel-box" id="roulette-box" style="width:150px; height:150px; border-radius:20px; border:3px solid #ff3366; box-shadow:0 8px 25px rgba(255,51,102,0.35); margin:0 auto 14px; overflow:hidden; background:#f8fafc; position:relative;">
+        <img id="roulette-img" src="images/kurima/tasogare_moai.jpg" style="width:100%; height:100%; object-fit:cover; display:block;" alt="モアイ">
       </div>
 
-      <button id="btn-cat-spin" type="button" onclick="window.spinCatGacha()" style="width:100%; background:linear-gradient(135deg, #ffd700, #ff8c00); color:#000; font-size:15px; font-weight:900; padding:12px; border-radius:10px; border:none; cursor:pointer; box-shadow:0 4px 15px rgba(255,140,0,0.5); letter-spacing:1px; margin-bottom:8px;">
-        ⚡ モアイを召喚する！ ⚡
-      </button>
+      <div id="roulette-name" style="font-size:18px; font-weight:900; color:#0f172a; min-height:26px; margin-bottom:4px;">黄昏れモアイ</div>
+      <div id="roulette-hitokoto" style="font-size:12.5px; color:#64748b; min-height:42px; padding:0 8px; margin-bottom:18px; line-height:1.4;">
+        ルーレットを回して、運命のモアイとマッチングしよう！
+      </div>
 
-      <div id="cat-gacha-actions" style="display:none; gap:8px;">
-        <button type="button" onclick="window.jumpToCatResultProduct()" style="flex:1; background:#00d2ff; color:#000; font-size:12px; font-weight:bold; padding:8px; border-radius:8px; border:none; cursor:pointer;">
-          🔍 この作品を見る
+      <div id="roulette-actions" style="display:flex; flex-direction:column; gap:10px;">
+        <button id="btn-spin-roulette" onclick="window.spinMoaiRoulette()" style="background:linear-gradient(135deg, #ff3366, #ff5e62); color:#fff; border:none; padding:13px 24px; border-radius:25px; font-size:16px; font-weight:900; cursor:pointer; box-shadow:0 6px 20px rgba(255,51,102,0.4);">
+          🎰 運命のモアイを召喚する！
         </button>
-        <button type="button" onclick="window.spinCatGacha()" style="flex:1; background:rgba(255,255,255,0.1); color:#fff; font-size:12px; font-weight:bold; padding:8px; border-radius:8px; border:1px solid rgba(255,255,255,0.2); cursor:pointer;">
-          🔄 もう一度引く
+        <button id="btn-match-roulette" onclick="window.acceptRouletteMatch()" style="display:none; background:linear-gradient(135deg, #10b981, #059669); color:#fff; border:none; padding:13px 24px; border-radius:25px; font-size:16px; font-weight:900; cursor:pointer; box-shadow:0 6px 20px rgba(16,185,129,0.4);">
+          ❤️ このモアイとマッチングする！（トークへ）
         </button>
       </div>
     </div>
@@ -4951,6 +5192,171 @@
     });
 
   })();
+  </script>
+
+
+  <!-- ===== MOAI HITOKOTO DICT & ROULETTE GACHA & LIVE LIKES ===== -->
+  <script>
+  window.cachedLiveLikes = {};
+
+  // 全作品 一言プロフィール辞書
+  window.MOAI_HITOKOTO_DICT = {
+    "moai_loscut": "落ち込むのが好きです📉 含み損は心の栄養。慰めてくれる人募集。",
+    "moai_highleg": "美脚を褒められると伸びます🩱 恥じらいは置いてきました。",
+    "nitto_osuwari": "寒がりなのでセーター着てます🧶 冷えたペンを温めたいな。",
+    "macho_moai_keyholder": "筋トレとプロテインが生きがい💪 あなたの鍵をスクワットで守ります！",
+    "dot_osuwari": "カクカクした世界から来ました👾 ドット絵だけど愛はなめらかです。",
+    "moai_robo_mk2": "酒よりヨーグルトが大好物です🥛 一緒に朝活で乾杯しませんか？",
+    "moai_robo_blue": "クールに見えて中身は乳酸菌派🧊 青空の下でピクニックしたい系ロボ。",
+    "moai_robo_pink": "ピンクは正義🌸 かわいい見た目ですが関節の可動域には自信あります！",
+    "moai_robo_trio": "3人揃えば無敵です🤖🤖🤖 ドライブのBGM係はお任せください。",
+    "gold": "黄金の輝きは伊達じゃない✨ 飲むヨーグルトのプレミアム味しか勝たん。",
+    "nomidakure": "今夜もヨーグルトで泥酔中🍶 朝まで愚痴を聞いてくれる相棒募集中。",
+    "cartridge": "ひたすら走るのが趣味です🏃‍♂️ スマホをかざして僕とゲームデートしよ？",
+    "glasses_stand": "メガネをがっしり支えるのが天職👓 視力の悪いあなたを支えたい。",
+    "macho_moai_pen": "パワーッッッ！！！💪 あなたのペンを大胸筋で挟み込みます！",
+    "nukayorokobi": "クリスマスに期待して裏切られた過去あり🎄 もう二度とぬか喜びしたくない…。",
+    "positive": "ガンバレ！！！🔥 見てるだけで元気が湧き出る熱血コーチタイプです！",
+    "tegotae": "何かを掴みました✊ …何を掴んだのかは自分でも分かってません。",
+    "osuwari_moai_pen": "お隣、失礼しますね🪑 デスクワークを静かに見守るのが日課です。",
+    "headphone": "爆音で音楽を聴くのが好きです🎧 一輪の花とチルな時間を過ごしたい派。",
+    "incense": "世の不条理にグレてます🚬 お香の煙のようにフッと消えそうな恋、しようぜ。",
+    "kangaeru": "考え込むのが好きです🤔 だいたい夕飯の献立か宇宙の真理について考えてます。",
+    "naisho": "昨日の言動を一人反省会中🪞 真面目すぎてたまに病むけど見捨てないで。",
+    "tasogare": "黄昏るのが好きです🗿 明日仕事行きたくないな…って時にそばにいてほしい。",
+    "mob": "量産型ですが、あなたにとっては唯一の存在になりたいな🤖",
+    "mini_osuwari": "ポケットに入れてどこへでも連れて行ってください🎒 お出かけ大好き！",
+    "lure": "釣りが好きです🎣 あなたという大物を釣り上げに来ました。",
+    "yatta": "表情筋は動かないけど、心の中では全身で大喜びしてます🙌 やったー！",
+    "doyagao": "腕組みドヤ顔が決まり手😏 デスクで誰よりも自信満々に佇みます。",
+    "ryo": "初めて世に出た長男です🗿 初恋の味を思い出す落ち着いた香りをどうぞ。"
+  };
+
+  window.getMoaiHitokoto = function(p) {
+    if (!p) return '';
+    const id = (p.id || '').toLowerCase();
+    const name = (p.name || '').toLowerCase();
+
+    for (const [key, text] of Object.entries(window.MOAI_HITOKOTO_DICT)) {
+      if (id.includes(key) || name.includes(key)) {
+        return text;
+      }
+    }
+    if (name.includes('ハイレグ')) return window.MOAI_HITOKOTO_DICT['moai_highleg'];
+    if (name.includes('うなだれ') || name.includes('ロスカット')) return window.MOAI_HITOKOTO_DICT['moai_loscut'];
+    if (name.includes('ヨーグルト')) return window.MOAI_HITOKOTO_DICT['moai_robo_mk2'];
+    if (name.includes('マッチョ')) return window.MOAI_HITOKOTO_DICT['macho_moai_pen'];
+    if (name.includes('黄昏')) return window.MOAI_HITOKOTO_DICT['tasogare'];
+    if (name.includes('考え')) return window.MOAI_HITOKOTO_DICT['kangaeru'];
+    if (name.includes('ヘッドホン')) return window.MOAI_HITOKOTO_DICT['headphone'];
+    if (name.includes('釣り') || name.includes('ルアー')) return window.MOAI_HITOKOTO_DICT['lure'];
+
+    return 'デザフェス西4F 暗いブース K-271 で待ってるよ🗿✨';
+  };
+
+  // リアルタイムいいね数の同期反映
+  window.updateAllLiveLikesCount = function(likesData) {
+    window.cachedLiveLikes = likesData || {};
+    Object.entries(window.cachedLiveLikes).forEach(([id, count]) => {
+      const el = document.getElementById('heart-count-' + id);
+      if (el) {
+        el.textContent = count > 0 ? count : '';
+      }
+    });
+  };
+
+  // 🎰 運命のモアイガチャ：本物の作品画像ルーレット連動
+  let rouletteInterval = null;
+  let isRouletteRunning = false;
+  let wonMoai = null;
+
+  window.openCatalogGachaModal = function() {
+    const modal = document.getElementById('catalog-gacha-modal');
+    if (!modal) return;
+
+    // Reset to Roulette UI
+    const box = document.getElementById('cat-gacha-box');
+    if (box) {
+      box.innerHTML = `
+        <button onclick="window.closeCatalogGachaModal()" style="position:absolute; top:12px; right:12px; background:rgba(0,0,0,0.1); border:none; color:#333; font-size:20px; width:32px; height:32px; border-radius:50%; cursor:pointer;">&times;</button>
+        
+        <div style="font-size:12px; font-weight:900; color:#ff3366; letter-spacing:2px; margin-bottom:4px;">DESTINY MATCH ROULETTE</div>
+        <h3 style="font-size:22px; font-weight:900; color:#0f172a; margin-bottom:14px;">運命のモアイガチャ 🎰</h3>
+        
+        <div class="roulette-reel-box" id="roulette-box">
+          <img id="roulette-img" class="roulette-reel-img" src="images/kurima/tasogare_moai.jpg" alt="モアイ">
+        </div>
+
+        <div id="roulette-name" style="font-size:18px; font-weight:900; color:#0f172a; min-height:26px; margin-bottom:4px;">???</div>
+        <div id="roulette-hitokoto" style="font-size:12px; color:#64748b; min-height:36px; padding:0 10px; margin-bottom:18px;">ルーレットを回して、運命のモアイとマッチングしよう！</div>
+
+        <div id="roulette-actions" style="display:flex; flex-direction:column; gap:10px;">
+          <button id="btn-spin-roulette" onclick="window.spinMoaiRoulette()" style="background:linear-gradient(135deg, #ff3366, #ff5e62); color:#fff; border:none; padding:13px 24px; border-radius:25px; font-size:16px; font-weight:900; cursor:pointer; box-shadow:0 6px 20px rgba(255,51,102,0.4);">
+            🎰 運命のモアイを召喚する！
+          </button>
+          <button id="btn-match-roulette" onclick="window.acceptRouletteMatch()" style="display:none; background:linear-gradient(135deg, #10b981, #059669); color:#fff; border:none; padding:13px 24px; border-radius:25px; font-size:16px; font-weight:900; cursor:pointer; box-shadow:0 6px 20px rgba(16,185,129,0.4);">
+            ❤️ このモアイとマッチングする！（トークへ）
+          </button>
+        </div>
+      `;
+    }
+
+    modal.classList.add('active');
+  };
+
+  window.spinMoaiRoulette = function() {
+    if (isRouletteRunning) return;
+    isRouletteRunning = true;
+
+    const imgEl = document.getElementById('roulette-img');
+    const nameEl = document.getElementById('roulette-name');
+    const hitokotoEl = document.getElementById('roulette-hitokoto');
+    const spinBtn = document.getElementById('btn-spin-roulette');
+    const matchBtn = document.getElementById('btn-match-roulette');
+
+    if (matchBtn) matchBtn.style.display = 'none';
+    if (spinBtn) {
+      spinBtn.style.display = 'block';
+      spinBtn.textContent = 'ルーレット回転中... 🌀';
+      spinBtn.style.opacity = '0.7';
+    }
+
+    // Get master completed products
+    const products = (typeof window.getFullMasterProducts === 'function' ? window.getFullMasterProducts(window.customProductsData) : (window.currentRenderedProducts || [])).filter(p => !p.isDev && p.name && (p.image || p.optimizedCover));
+    if (products.length === 0) return;
+
+    let count = 0;
+    const speed = 60; // ms
+
+    rouletteInterval = setInterval(() => {
+      const p = products[count % products.length];
+      if (imgEl) imgEl.src = p.image || p.optimizedCover;
+      if (nameEl) nameEl.textContent = p.name.replace(/\n/g, ' ');
+      count++;
+    }, speed);
+
+    // Stop after 2.2 seconds
+    setTimeout(() => {
+      clearInterval(rouletteInterval);
+      isRouletteRunning = false;
+
+      // Select winning MOAI
+      wonMoai = products[Math.floor(Math.random() * products.length)];
+      if (imgEl) imgEl.src = wonMoai.image || wonMoai.optimizedCover;
+      if (nameEl) nameEl.textContent = wonMoai.name.replace(/\n/g, ' ');
+      const h = window.getMoaiHitokoto(wonMoai);
+      if (hitokotoEl) hitokotoEl.innerHTML = `<span style="color:#ff3366; font-weight:bold;">💘 運命のマッチング候補！！</span><br>「${h}」`;
+
+      if (spinBtn) spinBtn.style.display = 'none';
+      if (matchBtn) matchBtn.style.display = 'block';
+    }, 2200);
+  };
+
+  window.acceptRouletteMatch = function() {
+    if (!wonMoai) return;
+    window.closeCatalogGachaModal();
+    window.toggleMoaiLike(wonMoai.id);
+  };
   </script>
 
 </body>
