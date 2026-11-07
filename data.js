@@ -27,7 +27,6 @@ const MASTER_PRODUCTS = [
     image: 'images/kurima/moai_giveup.jpg',
     images: [
       'images/kurima/moai_giveup.jpg',
-      'images/kurima/moai_giveup/studio/moai_giveup_02.jpg',
     ],
     name: 'あきらめたモアイ',
     desc: 'この世の摂理を受けいれた。\n足掻いても無駄。あきらめた。',
@@ -35,8 +34,9 @@ const MASTER_PRODUCTS = [
 
   {
     id: 'moai_loscut',
-    image: 'images/kurima/moai_loscut/studio/ChatGPT 画像 2026年11月5日 20_27_08-1.png',
+    image: 'images/kurima/moai_loscut/studio/含み損モアイ_master.png',
     images: [
+      'images/kurima/moai_loscut/studio/含み損モアイ_master.png',
       'images/kurima/moai_loscut/studio/ChatGPT 画像 2026年11月5日 20_27_08-1.png',
       'images/kurima/moai_loscut/studio/ChatGPT 画像 2026年11月5日 20_28_08-2.png',
       'images/kurima/moai_loscut/studio/ChatGPT 画像 2026年11月5日 20_28_21-3.png',
@@ -620,11 +620,12 @@ window.getFullMasterProducts = function(customProductsData) {
     return item;
   });
   
-  if (customProductsData) {
-    Object.keys(customProductsData).forEach(key => {
+  const cpMap = customProductsData || (typeof window !== 'undefined' ? window.customProductsData : null);
+  if (cpMap) {
+    Object.keys(cpMap).forEach(key => {
       // 不正なメタデータキー（ドット付きなど）やオブジェクトでないものは除外
-      if (key.includes('.') || key === 'moai_losscut' || key === 'moai_losscut_RAW_20261105_201128_001' || !customProductsData[key] || typeof customProductsData[key] !== 'object') return;
-      const p = customProductsData[key];
+      if (key.includes('.') || key === 'moai_losscut' || key === 'moai_losscut_RAW_20261105_201128_001' || !cpMap[key] || typeof cpMap[key] !== 'object') return;
+      const p = cpMap[key];
       const normalize = (s) => s ? s.replace(/\s+/g, '').replace(/\n/g, '') : '';
       const masterItem = list.find(m => {
         const idMatches = (p.productId && m.id === p.productId) || (m.id === key);
@@ -637,15 +638,16 @@ window.getFullMasterProducts = function(customProductsData) {
         masterItem.id = key;
         if (p.name) masterItem.name = p.name;
         if (p.desc) masterItem.desc = p.desc;
-        // 既にローカル画像パス(images/...)がある場合は、Firestoreの巨大Base64(data:image/...)で上書きしない
-        const hasLocalMainImg = masterItem.image && !masterItem.image.startsWith('data:');
-        if (p.image && (!hasLocalMainImg || !p.image.startsWith('data:'))) {
+        // POSやOMOAIで手動設定・差し替えられた画像があれば最優先で反映
+        if (p.image) {
           masterItem.image = p.image;
         }
-        if (p.images && (!Array.isArray(masterItem.images) || masterItem.images.length === 0)) {
-          masterItem.images = p.images;
+        if (Array.isArray(p.images) && p.images.length > 0) {
+          masterItem.images = [masterItem.image, ...p.images.filter(u => u && u !== masterItem.image)].filter(Boolean);
+        } else if (p.image && Array.isArray(masterItem.images)) {
+          masterItem.images = [p.image, ...masterItem.images.filter(u => u && u !== p.image)].filter(Boolean);
         }
-        if (p.optimizedCover && !hasLocalMainImg) masterItem.optimizedCover = p.optimizedCover;
+        if (p.optimizedCover) masterItem.optimizedCover = p.optimizedCover;
         if (p.optimizedImages) masterItem.optimizedImages = p.optimizedImages;
         if (p.isDev !== undefined) masterItem.isDev = p.isDev;
         if (p.isTempImage !== undefined) masterItem.isTempImage = p.isTempImage;
@@ -666,14 +668,26 @@ window.getFullMasterProducts = function(customProductsData) {
     });
   }
 
-  // Firestoreの個別作品名マスター（product_names / works_master）で最新名を優先反映
-  const namesMap = window.productNamesData || {};
-  const wmMap = window.worksMasterData || {};
+  // Firestoreの個別作品名マスター・works_masterで最新名＆手動設定画像を優先反映
+  const namesMap = (typeof window !== 'undefined' && window.productNamesData) || {};
+  const wmMap = (typeof window !== 'undefined' && window.worksMasterData) || {};
   list.forEach(item => {
+    const wData = wmMap[item.id];
     if (namesMap[item.id]) {
       item.name = namesMap[item.id];
-    } else if (wmMap[item.id]?.name) {
-      item.name = wmMap[item.id].name;
+    } else if (wData?.name) {
+      item.name = wData.name;
+    }
+    if (wData?.image) {
+      item.image = wData.image;
+    }
+    if (wData?.optimizedCover) {
+      item.optimizedCover = wData.optimizedCover;
+    }
+    if (Array.isArray(wData?.images) && wData.images.length > 0) {
+      item.images = [item.image, ...wData.images.filter(u => u && u !== item.image)].filter(Boolean);
+    } else if (wData?.image && Array.isArray(item.images)) {
+      item.images = [wData.image, ...item.images.filter(u => u && u !== wData.image)].filter(Boolean);
     }
   });
 
@@ -703,13 +717,15 @@ window.expandProductsForCatalog = function(baseProducts, worksMasterData, hidden
     const p = { ...orig };
     const wData = wmMap[p.id] || {};
 
-    // works_master側の画像・説明文設定があれば反映
-    if (wData.image && !p.image) p.image = wData.image;
+    // works_master側の画像・説明文設定があれば最優先で反映（POSで手動差し替えされた画像を即座にお品書きに反映）
+    if (wData.image) p.image = wData.image;
     p.imagePosition = wData.imagePosition || p.imagePosition || "center center";
     p.imageFit = wData.imageFit || p.imageFit || "cover";
-    if (wData.optimizedCover && !p.optimizedCover) p.optimizedCover = wData.optimizedCover;
-    if (Array.isArray(wData.images) && wData.images.length > 0 && (!p.images || p.images.length <= 1)) {
-      p.images = [wData.image || p.image, ...wData.images.filter(u => u && u !== (wData.image || p.image))].filter(Boolean);
+    if (wData.optimizedCover) p.optimizedCover = wData.optimizedCover;
+    if (Array.isArray(wData.images) && wData.images.length > 0) {
+      p.images = [p.image, ...wData.images.filter(u => u && u !== p.image)].filter(Boolean);
+    } else if (wData.image && Array.isArray(p.images)) {
+      p.images = [wData.image, ...p.images.filter(u => u && u !== wData.image)].filter(Boolean);
     }
 
     const rawVars = (Array.isArray(wData.variants) && wData.variants.length > 0)
@@ -890,12 +906,6 @@ window.WORK_FOLDER_ASSETS = {
       "images/kurima/macho_moai_keyholder/studio/15704196-82ad-4bb5-ad26-3b43dda68172.png",
       "images/kurima/macho_moai_keyholder/studio/4d924d16-4899-44d9-857b-d36e813cef4d.png",
       "images/kurima/macho_moai_keyholder/studio/まっちょモアイキーホルダー_master.png"
-    ]
-  },
-  "moai_giveup": {
-    "raw": [],
-    "studio": [
-      "images/kurima/moai_giveup/studio/moai_giveup_02.jpg"
     ]
   },
   "moai_highleg": {

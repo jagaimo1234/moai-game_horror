@@ -132,15 +132,18 @@ async function main() {
     if (!fs.existsSync(rawFolder)) fs.mkdirSync(rawFolder, { recursive: true });
     if (!fs.existsSync(studioFolder)) fs.mkdirSync(studioFolder, { recursive: true });
 
-    // 手動アップロードされたDataURL画像がFirestoreにあり、ローカルカバー画像が未作成なら自動復元保存
-    const dataUrl = customProducts[posId]?.image || worksMaster[posId]?.image || '';
+    // 手動アップロード・差し替えされたDataURL画像がFirestoreにあればローカルカバー画像として保存・更新
+    const dataUrl = worksMaster[posId]?.image || customProducts[posId]?.image || '';
     const directJpg = path.join(KURIMA_DIR, `${posId}.jpg`);
-    const directPng = path.join(KURIMA_DIR, `${posId}.png`);
-    if (typeof dataUrl === 'string' && dataUrl.startsWith('data:image/') && !fs.existsSync(directJpg) && !fs.existsSync(directPng)) {
+    if (typeof dataUrl === 'string' && dataUrl.startsWith('data:image/')) {
       const match = dataUrl.match(/^data:image\/([a-zA-Z0-9+]+);base64,(.+)$/);
       if (match) {
-        fs.writeFileSync(directJpg, Buffer.from(match[2], 'base64'));
-        console.log(`   🖼️ 手動追加のカバー画像をローカル保存: images/kurima/${posId}.jpg`);
+        const buf = Buffer.from(match[2], 'base64');
+        const existingSize = fs.existsSync(directJpg) ? fs.statSync(directJpg).size : -1;
+        if (existingSize !== buf.length) {
+          fs.writeFileSync(directJpg, buf);
+          console.log(`   🖼️ 手動追加・差し替えのカバー画像をローカル同期: images/kurima/${posId}.jpg`);
+        }
       }
     }
 
