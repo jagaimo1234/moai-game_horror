@@ -16,12 +16,25 @@
 // 全作品のマスターリスト
 const MASTER_PRODUCTS = [
   {
+    id: 'mark2_blight',
+    image: 'images/kurima/mark2_blight.jpg',
+    name: 'モアイロボmark2_怪しく光るver.',
+    desc: 'パッケージデザインのモアイロボカラーリングを再現！！やってみたかった！！\nさらに暗闇でじわぁっと光ります！！\nデザフェスの暗いブースにもってこいでしょ！！\n激アツな仕上がりとなりました。\n\n細かなカラーリング違いを用意してます。作者の気分です！',
+  },
+
+  {
+    id: 'moai_giveup',
     image: 'images/kurima/moai_giveup.jpg',
+    images: [
+      'images/kurima/moai_giveup.jpg',
+      'images/kurima/moai_giveup/studio/moai_giveup_02.jpg',
+    ],
     name: 'あきらめたモアイ',
     desc: 'この世の摂理を受けいれた。\n足掻いても無駄。あきらめた。',
   },
 
   {
+    id: 'moai_loscut',
     image: 'images/kurima/moai_loscut/studio/ChatGPT 画像 2026年11月5日 20_27_08-1.png',
     images: [
       'images/kurima/moai_loscut/studio/ChatGPT 画像 2026年11月5日 20_27_08-1.png',
@@ -46,6 +59,7 @@ const MASTER_PRODUCTS = [
   },
 
   {
+    id: 'moai_highleg',
     image: 'images/kurima/moai_highleg/studio/ハイレグモアイ_master.png',
     images: [
       'images/kurima/moai_highleg/studio/ハイレグモアイ_master.png',
@@ -61,25 +75,42 @@ const MASTER_PRODUCTS = [
   },
 
   {
+    id: 'nitto_osuwari_moai_penstand',
     image: 'images/kurima/nitto_osuwari_moai_penstand.jpg',
+    images: [
+      'images/kurima/nitto_osuwari_moai_penstand.jpg',
+      'images/kurima/nitto_osuwari_moai_penstand/studio/雪白と黒のモアイ型ペンホルダー.png',
+      'images/kurima/nitto_osuwari_moai_penstand/studio/20261101.png',
+    ],
     name: 'ニットおすわりモアイペン立て',
     desc: 'ニット版(冬仕様）',
   },
 
   {
+    id: 'macho_moai_keyholder',
     image: 'images/kurima/macho_moai_keyholder.jpg',
+    images: [
+      'images/kurima/macho_moai_keyholder.jpg',
+      'images/kurima/macho_moai_keyholder/studio/まっちょモアイキーホルダー_master.png',
+      'images/kurima/macho_moai_keyholder/studio/15704196-82ad-4bb5-ad26-3b43dda68172.png',
+      'images/kurima/macho_moai_keyholder/studio/4d924d16-4899-44d9-857b-d36e813cef4d.png',
+    ],
     name: 'まっちょモアイキーホルダー',
     desc: '',
   },
 
-
   {
+    id: 'moai_dance_test',
     image: 'images/kurima/moai_dance_test.jpg',
+    images: [
+      'images/kurima/moai_dance_test.jpg',
+    ],
     name: 'ダンシングモアイ_テスト',
     desc: '',
   },
 
   {
+    id: 'dot_osuwari_keyholder',
     image: 'images/kurima/dot_osuwari_keyholder/cover.jpg',
     images: [
       'images/kurima/dot_osuwari_keyholder/cover.jpg',
@@ -859,6 +890,12 @@ window.WORK_FOLDER_ASSETS = {
       "images/kurima/macho_moai_keyholder/studio/15704196-82ad-4bb5-ad26-3b43dda68172.png",
       "images/kurima/macho_moai_keyholder/studio/4d924d16-4899-44d9-857b-d36e813cef4d.png",
       "images/kurima/macho_moai_keyholder/studio/まっちょモアイキーホルダー_master.png"
+    ]
+  },
+  "moai_giveup": {
+    "raw": [],
+    "studio": [
+      "images/kurima/moai_giveup/studio/moai_giveup_02.jpg"
     ]
   },
   "moai_highleg": {

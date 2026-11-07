@@ -114,7 +114,7 @@ async function main() {
   const worksMaster = decodeFirestoreDoc(wmDoc);
 
   // 2. OMOAIで仮登録された作品IDの受け皿フォルダを作成
-  const BLACKLIST_KEYS = ['moai_losscut', 'moai_losscut_RAW_20261105_201128_001'];
+  const BLACKLIST_KEYS = ['moai_losscut', 'moai_losscut_RAW_20261105_201128_001', 'cover', 'ハイレグモアイ_master', 'ChatGPT 画像 2026年11月5日 20_27_08-1'];
   const remoteProductKeys = Array.from(new Set([
     ...Object.keys(customProducts),
     ...Object.keys(worksMaster)
@@ -131,6 +131,18 @@ async function main() {
     const studioFolder = path.join(itemFolder, 'studio');
     if (!fs.existsSync(rawFolder)) fs.mkdirSync(rawFolder, { recursive: true });
     if (!fs.existsSync(studioFolder)) fs.mkdirSync(studioFolder, { recursive: true });
+
+    // 手動アップロードされたDataURL画像がFirestoreにあり、ローカルカバー画像が未作成なら自動復元保存
+    const dataUrl = customProducts[posId]?.image || worksMaster[posId]?.image || '';
+    const directJpg = path.join(KURIMA_DIR, `${posId}.jpg`);
+    const directPng = path.join(KURIMA_DIR, `${posId}.png`);
+    if (typeof dataUrl === 'string' && dataUrl.startsWith('data:image/') && !fs.existsSync(directJpg) && !fs.existsSync(directPng)) {
+      const match = dataUrl.match(/^data:image\/([a-zA-Z0-9+]+);base64,(.+)$/);
+      if (match) {
+        fs.writeFileSync(directJpg, Buffer.from(match[2], 'base64'));
+        console.log(`   🖼️ 手動追加のカバー画像をローカル保存: images/kurima/${posId}.jpg`);
+      }
+    }
 
     if (created) {
       const name = worksMaster[posId]?.name || customProducts[posId]?.name || posId;
