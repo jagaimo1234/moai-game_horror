@@ -6491,36 +6491,33 @@ ${variantSelectorHtml}
     /* 疑似スワイプ＆疑似タップ指カーソル */
     #ad-touch-cursor {
       position: absolute;
-      width: 50px;
-      height: 50px;
+      width: 48px;
+      height: 48px;
       border-radius: 50%;
-      background: radial-gradient(circle, rgba(255, 45, 85, 0.55) 0%, rgba(255, 45, 85, 0.2) 65%, transparent 100%);
+      background: radial-gradient(circle, rgba(255, 45, 85, 0.45) 0%, rgba(255, 45, 85, 0.15) 65%, transparent 100%);
       border: 2.5px solid rgba(255, 255, 255, 0.95);
-      box-shadow: 0 6px 22px rgba(255, 45, 85, 0.5);
-      z-index: 400;
+      box-shadow: 0 6px 20px rgba(255, 45, 85, 0.45);
+      z-index: 250;
       pointer-events: none;
       opacity: 0;
       transform: translate(-50%, -50%) scale(1);
-      transition: left 0.45s cubic-bezier(0.22, 1, 0.36, 1),
-                  top 0.45s cubic-bezier(0.22, 1, 0.36, 1),
-                  opacity 0.2s ease,
-                  transform 0.16s ease;
-    }
-    #ad-touch-cursor.active {
-      opacity: 1 !important;
+      transition: left 0.52s cubic-bezier(0.22, 1, 0.36, 1),
+                  top 0.52s cubic-bezier(0.22, 1, 0.36, 1),
+                  opacity 0.22s ease,
+                  transform 0.18s ease;
     }
     #ad-touch-cursor::after {
       content: '👆';
       position: absolute;
-      font-size: 28px;
+      font-size: 24px;
       left: 50%;
-      top: 54%;
+      top: 56%;
       transform: translate(-50%, -30%);
-      filter: drop-shadow(0 4px 8px rgba(0,0,0,0.45));
+      filter: drop-shadow(0 3px 6px rgba(0,0,0,0.35));
     }
     #ad-touch-cursor.tapping {
       transform: translate(-50%, -50%) scale(0.75);
-      background: radial-gradient(circle, rgba(255, 45, 85, 0.9) 0%, rgba(255, 45, 85, 0.45) 70%, transparent 100%);
+      background: radial-gradient(circle, rgba(255, 45, 85, 0.85) 0%, rgba(255, 45, 85, 0.35) 70%, transparent 100%);
     }
     .ad-tap-ripple-ring {
       position: absolute;
@@ -7367,7 +7364,6 @@ ${variantSelectorHtml}
     };
 
     window.switchAdScenario = function(key) {
-      ensureAudioContext();
       if (!AD_SCENARIOS[key]) return;
       currentScenarioKey = key;
       const select = document.getElementById('ad-scenario-select');
@@ -7379,104 +7375,80 @@ ${variantSelectorHtml}
       return AD_SCENARIOS[currentScenarioKey] || AD_SCENARIOS.hadagi_osuwari;
     }
 
-    function ensureAudioContext() {
+    function playAdSound(type) {
       try {
         if (!audioCtx) {
           const Ctx = window.AudioContext || window.webkitAudioContext;
-          if (Ctx) audioCtx = new Ctx();
+          if (!Ctx) return;
+          audioCtx = new Ctx();
         }
-        if (audioCtx && audioCtx.state === 'suspended') {
-          audioCtx.resume();
-        }
-      } catch (e) {
-        console.warn('AudioContext init/resume failed:', e);
-      }
-    }
-
-    // ブラウザの自動再生ポリシー解除のため、ユーザー操作時に即時アンロック
-    if (typeof window !== 'undefined') {
-      ['click', 'touchstart', 'pointerdown'].forEach(evt => {
-        window.addEventListener(evt, () => ensureAudioContext(), { passive: true });
-      });
-    }
-
-    function playAdSound(type) {
-      try {
-        ensureAudioContext();
-        if (!audioCtx) return;
-        if (audioCtx.state === 'suspended') {
-          audioCtx.resume().then(() => {
-            if (audioCtx && audioCtx.state === 'running') playAdSound(type);
-          });
-          return;
-        }
+        if (audioCtx.state === 'suspended') audioCtx.resume();
         const now = audioCtx.currentTime;
 
         if (type === 'swipe') {
           const osc = audioCtx.createOscillator();
           const gain = audioCtx.createGain();
           osc.type = 'sine';
-          osc.frequency.setValueAtTime(360, now);
-          osc.frequency.exponentialRampToValueAtTime(160, now + 0.12);
-          gain.gain.setValueAtTime(0.25, now);
-          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
+          osc.frequency.setValueAtTime(220, now);
+          osc.frequency.exponentialRampToValueAtTime(420, now + 0.14);
+          gain.gain.setValueAtTime(0.04, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
           osc.connect(gain);
           gain.connect(audioCtx.destination);
           osc.start(now);
-          osc.stop(now + 0.12);
+          osc.stop(now + 0.15);
         } else if (type === 'notif') {
           const osc = audioCtx.createOscillator();
           const gain = audioCtx.createGain();
           osc.type = 'triangle';
-          osc.frequency.setValueAtTime(587.33, now); // D5
-          osc.frequency.setValueAtTime(880, now + 0.08); // A5
-          gain.gain.setValueAtTime(0.32, now);
-          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.28);
+          osc.frequency.setValueAtTime(587.33, now);
+          osc.frequency.setValueAtTime(880, now + 0.06);
+          gain.gain.setValueAtTime(0.11, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.22);
           osc.connect(gain);
           gain.connect(audioCtx.destination);
           osc.start(now);
-          osc.stop(now + 0.28);
+          osc.stop(now + 0.22);
         } else if (type === 'tap') {
           const osc = audioCtx.createOscillator();
           const gain = audioCtx.createGain();
           osc.type = 'sine';
-          osc.frequency.setValueAtTime(950, now);
-          gain.gain.setValueAtTime(0.28, now);
-          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.06);
+          osc.frequency.setValueAtTime(800, now);
+          osc.frequency.exponentialRampToValueAtTime(300, now + 0.07);
+          gain.gain.setValueAtTime(0.12, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
           osc.connect(gain);
           gain.connect(audioCtx.destination);
           osc.start(now);
-          osc.stop(now + 0.06);
+          osc.stop(now + 0.08);
         } else if (type === 'match') {
-          const freqs = [523.25, 659.25, 783.99, 1046.50]; // C5, E5, G5, C6
-          freqs.forEach((f, i) => {
+          [523.25, 659.25, 783.99, 1046.5].forEach((freq, idx) => {
             const osc = audioCtx.createOscillator();
             const gain = audioCtx.createGain();
             osc.type = 'triangle';
-            osc.frequency.setValueAtTime(f, now + i * 0.07);
-            gain.gain.setValueAtTime(0.3, now + i * 0.07);
-            gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.07 + 0.35);
+            const t = now + idx * 0.07;
+            osc.frequency.setValueAtTime(freq, t);
+            gain.gain.setValueAtTime(0.12, t);
+            gain.gain.exponentialRampToValueAtTime(0.001, t + 0.45);
             osc.connect(gain);
             gain.connect(audioCtx.destination);
-            osc.start(now + i * 0.07);
-            osc.stop(now + i * 0.07 + 0.35);
+            osc.start(t);
+            osc.stop(t + 0.46);
           });
         } else if (type === 'chat') {
           const osc = audioCtx.createOscillator();
           const gain = audioCtx.createGain();
           osc.type = 'sine';
-          osc.frequency.setValueAtTime(440, now);
-          osc.frequency.exponentialRampToValueAtTime(700, now + 0.08);
-          gain.gain.setValueAtTime(0.25, now);
-          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
+          osc.frequency.setValueAtTime(660, now);
+          osc.frequency.exponentialRampToValueAtTime(990, now + 0.08);
+          gain.gain.setValueAtTime(0.09, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.14);
           osc.connect(gain);
           gain.connect(audioCtx.destination);
           osc.start(now);
-          osc.stop(now + 0.12);
+          osc.stop(now + 0.15);
         }
-      } catch (err) {
-        console.warn('playAdSound error:', err);
-      }
+      } catch (e) {}
     }
 
     function clearAdScheduledTimers() {
@@ -7509,18 +7481,13 @@ ${variantSelectorHtml}
       return { x: Math.max(4, Math.min(96, xPct)), y: Math.max(4, Math.min(96, yPct)) };
     }
 
-    function moveCursorTo(xPct, yPct, show = true) {
+    function moveCursorTo(xPct, yPct, visible) {
       const cursor = document.getElementById('ad-touch-cursor');
       if (!cursor) return;
-      cursor.style.left = `${xPct}%`;
-      cursor.style.top = `${yPct}%`;
-      if (show) {
-        cursor.style.opacity = '1';
-        cursor.classList.add('active');
-      } else {
-        cursor.style.opacity = '0';
-        cursor.classList.remove('active');
-      }
+      cursor.style.left = xPct + '%';
+      cursor.style.top = yPct + '%';
+      cursor.style.opacity = visible ? '1' : '0';
+      cursor.classList.remove('tapping');
     }
 
     function moveCursorToElement(elementId, fallbackXPct, fallbackYPct, show = true) {
@@ -8066,7 +8033,6 @@ ${variantSelectorHtml}
     }
 
     function startScenarioFromOffset(offsetMs) {
-      ensureAudioContext();
       clearAdScheduledTimers();
       prepareStageData();
 
@@ -8118,7 +8084,6 @@ ${variantSelectorHtml}
     }
 
     window.toggleMoaiAdPlayPause = function() {
-      ensureAudioContext();
       if (adIsPlaying) {
         adElapsedBeforePauseMs += (performance.now() - adStartTimeMs);
         clearAdScheduledTimers();
@@ -8133,12 +8098,10 @@ ${variantSelectorHtml}
     };
 
     window.restartMoaiAdScenario = function() {
-      ensureAudioContext();
       startScenarioFromOffset(0);
     };
 
     window.openMoaiAdStudio = function() {
-      ensureAudioContext();
       if (!window.isMoaiAdminAuthenticated || !document.body.classList.contains('admin-mode')) return;
       const modal = document.getElementById('moai-ad-studio-modal');
       if (!modal) return;
@@ -8162,7 +8125,6 @@ ${variantSelectorHtml}
     };
 
     window.handleAdStageBackgroundClick = function(e) {
-      ensureAudioContext();
       if (document.body.classList.contains('ad-recording-clean')) {
         document.body.classList.remove('ad-recording-clean');
         const overlay = document.getElementById('ad-countdown-overlay');
@@ -8171,7 +8133,6 @@ ${variantSelectorHtml}
     };
 
     window.startCleanRecordingMode = function(withCountdown) {
-      ensureAudioContext();
       clearAdScheduledTimers();
       adIsPlaying = false;
       document.body.classList.add('ad-recording-clean');
