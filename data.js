@@ -695,17 +695,56 @@ window.getFullMasterProducts = function(customProductsData) {
   return list;
 };
 
-// おすわりモアイペン立てのデフォルトバリエーション定義（Firestore読込前のフォールバック用）
-const DEFAULT_OSUWARI_VARIANTS = [
-  { skuId: 'osuwari_moai_pen__base', name: '無印（通常版）', isBase: true, active: true, sortOrder: 0 },
-  { skuId: 'osuwari_moai_pen__var_mvmdzljg_a4s0', name: 'U字タンクトップ・白', isBase: false, active: true, priceOverride: 2000, sortOrder: 1 },
-  { skuId: 'osuwari_moai_pen__var_mvmdzljg_n2m1', name: 'U字タンクトップ・黒', isBase: false, active: true, priceOverride: 2000, sortOrder: 2 },
-  { skuId: 'osuwari_moai_pen__var_mvmdzqrl_4zv0', name: 'V字タンクトップ・白', isBase: false, active: true, priceOverride: 2000, sortOrder: 3 },
-  { skuId: 'osuwari_moai_pen__var_mvmdzqrl_ela1', name: 'V字タンクトップ・黒', isBase: false, active: true, priceOverride: 2000, sortOrder: 4 },
-  { skuId: 'osuwari_moai_pen__var_mvmdzvn0_ke00', name: 'V字袖付き・白', isBase: false, active: true, priceOverride: 2000, sortOrder: 5 },
-  { skuId: 'osuwari_moai_pen__var_mvmdzvn0_o881', name: 'V字袖付き・黒', isBase: false, active: true, priceOverride: 2000, sortOrder: 6 },
-  { skuId: 'osuwari_moai_pen__var_mvmdzxjm_tby0', name: '長袖ヒートテック風', isBase: false, active: true, priceOverride: 2000, statusNote: '検討中', sortOrder: 7 }
-];
+// デフォルトバリエーション設定マップ（Firestore読込前・破損時の自動復元フォールバック用）
+window.DEFAULT_PRODUCT_VARIANTS_MAP = {
+  osuwari_moai_pen: {
+    variants: [
+      { skuId: 'osuwari_moai_pen__base', name: '無印（通常版）', isBase: true, active: true, sortOrder: 0 },
+      { skuId: 'osuwari_moai_pen__var_mvmdzljg_a4s0', name: 'U字タンクトップ・白', isBase: false, active: true, priceOverride: 2000, sortOrder: 1 },
+      { skuId: 'osuwari_moai_pen__var_mvmdzljg_n2m1', name: 'U字タンクトップ・黒', isBase: false, active: true, priceOverride: 2000, sortOrder: 2 },
+      { skuId: 'osuwari_moai_pen__var_mvmdzqrl_4zv0', name: 'V字タンクトップ・白', isBase: false, active: true, priceOverride: 2000, sortOrder: 3 },
+      { skuId: 'osuwari_moai_pen__var_mvmdzqrl_ela1', name: 'V字タンクトップ・黒', isBase: false, active: true, priceOverride: 2000, sortOrder: 4 },
+      { skuId: 'osuwari_moai_pen__var_mvmdzvn0_ke00', name: 'V字袖付き・白', isBase: false, active: true, priceOverride: 2000, sortOrder: 5 },
+      { skuId: 'osuwari_moai_pen__var_mvmdzvn0_o881', name: 'V字袖付き・黒', isBase: false, active: true, priceOverride: 2000, sortOrder: 6 },
+      { skuId: 'osuwari_moai_pen__var_mvmdzxjm_tby0', name: '長袖ヒートテック風', isBase: false, active: true, priceOverride: 2000, statusNote: '検討中', sortOrder: 7 }
+    ],
+    catalogDisplayMode: 'split_group',
+    catalogGroupTitle: '肌着おすわり\nモアイペン立て',
+    catalogGroupDesc: 'タンクトップやVネック・袖付きなど、いろんな肌着を着こなすおすわりモアイペン立てシリーズ。\n詳細画面で各肌着バリエーションの写真や在庫状況をご確認いただけます。',
+    catalogGroupImage: 'images/kurima/hadagi_osuwari_moai_pen/studio/tanktop_pair_pen.jpg',
+    catalogGroupImages: [
+      'images/kurima/hadagi_osuwari_moai_pen/studio/tanktop_pair_pen.jpg',
+      'images/kurima/hadagi_osuwari_moai_pen/studio/tanktop_cover.jpg'
+    ],
+    badgeLabel: '👕 肌着'
+  },
+  glasses_stand: {
+    variants: [
+      { skuId: 'glasses_stand__base', name: '無印（通常版）', isBase: true, active: true, sortOrder: 0 },
+      { skuId: 'glasses_stand__var_mvme1mf0_oay0', name: 'U字タンクトップ・白', isBase: false, active: true, priceOverride: 2700, image: 'images/kurima/glasses_stand/studio/Moataro.jpg', sortOrder: 1 },
+      { skuId: 'glasses_stand__var_mvme1mf0_gck1', name: 'U字タンクトップ・黒', isBase: false, active: true, priceOverride: 2700, image: 'images/kurima/glasses_stand/studio/Moataro.jpg', sortOrder: 2 }
+    ],
+    catalogDisplayMode: 'split_group',
+    catalogGroupTitle: 'タンクトップ まちょい\nモアイメガネスタンド',
+    catalogGroupDesc: 'ジムによくいる屈強なマッチョたち。君のメガネを24時間ガッチリ支えます。',
+    catalogGroupImage: 'images/kurima/glasses_stand/studio/Moataro.jpg',
+    catalogGroupImages: ['images/kurima/glasses_stand/studio/Moataro.jpg'],
+    badgeLabel: '💪 タンクトップ'
+  },
+  doyagao_moai: {
+    variants: [
+      { skuId: 'doyagao_moai__base', name: '無印（通常版）', isBase: true, active: true, sortOrder: 0 },
+      { skuId: 'doyagao_moai__var_mvmh3leo_8x80', name: 'どや顔ももひき', isBase: false, active: true, priceOverride: 2000, image: 'images/kurima/doyagao_moai/studio/momohiki_doyagao.jpg', sortOrder: 1 }
+    ],
+    catalogDisplayMode: 'split_group',
+    catalogGroupTitle: 'ももひき どやがお\nモアイペン立て',
+    catalogGroupDesc: '自信満々のどや顔でペンを支えるモアイペン立て。ももひきを履いた特別バージョンです。',
+    catalogGroupImage: 'images/kurima/doyagao_moai/studio/momohiki_doyagao.jpg',
+    catalogGroupImages: ['images/kurima/doyagao_moai/studio/momohiki_doyagao.jpg'],
+    badgeLabel: '🩲 ももひき'
+  }
+};
+const DEFAULT_OSUWARI_VARIANTS = window.DEFAULT_PRODUCT_VARIANTS_MAP.osuwari_moai_pen.variants;
 
 // お品書き（catalog.html）向けに、POSのworks_masterバリエーション設定を展開して表示用リストを返すヘルパー
 window.expandProductsForCatalog = function(baseProducts, worksMasterData, hiddenProductsData, isPreviewMode) {
@@ -728,9 +767,10 @@ window.expandProductsForCatalog = function(baseProducts, worksMasterData, hidden
     p.imageFit = wData.imageFit || p.imageFit || "cover";
     if (wData.optimizedCover) p.optimizedCover = wData.optimizedCover;
 
+    const defCfg = (typeof window !== 'undefined' && window.DEFAULT_PRODUCT_VARIANTS_MAP) ? window.DEFAULT_PRODUCT_VARIANTS_MAP[p.id] : null;
     const rawVars = (Array.isArray(wData.variants) && wData.variants.length > 0)
       ? wData.variants
-      : (p.id === 'osuwari_moai_pen' ? DEFAULT_OSUWARI_VARIANTS : []);
+      : (defCfg ? defCfg.variants : (p.id === 'osuwari_moai_pen' ? DEFAULT_OSUWARI_VARIANTS : []));
 
     const activeVars = [...rawVars]
       .filter(v => v && v.active !== false)
@@ -738,14 +778,14 @@ window.expandProductsForCatalog = function(baseProducts, worksMasterData, hidden
 
     const baseVar = activeVars.find(v => v.isBase) || null;
     const nonBaseVars = activeVars.filter(v => !v.isBase);
-    const displayMode = wData.catalogDisplayMode || (p.id === 'osuwari_moai_pen' ? 'split_group' : 'integrated');
+    const displayMode = wData.catalogDisplayMode || (defCfg ? defCfg.catalogDisplayMode : (p.id === 'osuwari_moai_pen' ? 'split_group' : 'integrated'));
 
     if (displayMode === 'split_group' && nonBaseVars.length > 0) {
       const groupId = `${p.id}__variant_group`;
-      const groupTitle = wData.catalogGroupTitle || (p.id === 'osuwari_moai_pen' ? '肌着おすわり\nモアイペン立て' : `${p.name}\nバリエーション`);
-      const groupDesc = wData.catalogGroupDesc || (p.id === 'osuwari_moai_pen'
+      const groupTitle = wData.catalogGroupTitle || (defCfg ? defCfg.catalogGroupTitle : (p.id === 'osuwari_moai_pen' ? '肌着おすわり\nモアイペン立て' : `${p.name}\nバリエーション`));
+      const groupDesc = wData.catalogGroupDesc || (defCfg ? defCfg.catalogGroupDesc : (p.id === 'osuwari_moai_pen'
         ? 'タンクトップやVネック・袖付きなど、いろんな肌着を着こなすおすわりモアイペン立てシリーズ。\n詳細画面で各肌着バリエーションの写真や在庫状況をご確認いただけます。'
-        : (p.desc || ''));
+        : (p.desc || '')));
 
       // 1. 通常版（無印）カード
       p.baseSkuId = baseVar ? baseVar.skuId : `${p.id}__base`;
@@ -762,6 +802,9 @@ window.expandProductsForCatalog = function(baseProducts, worksMasterData, hidden
         if (hasExplicitGroupImgs) {
           if (wData.catalogGroupImage) addImg(wData.catalogGroupImage);
           if (Array.isArray(wData.catalogGroupImages)) wData.catalogGroupImages.forEach(addImg);
+        } else if (defCfg && (defCfg.catalogGroupImage || Array.isArray(defCfg.catalogGroupImages))) {
+          if (defCfg.catalogGroupImage) addImg(defCfg.catalogGroupImage);
+          if (Array.isArray(defCfg.catalogGroupImages)) defCfg.catalogGroupImages.forEach(addImg);
         } else {
           if (typeof window !== 'undefined' && window.WORK_FOLDER_ASSETS) {
             const folderKey = p.id === 'osuwari_moai_pen' ? 'hadagi_osuwari_moai_pen' : `${p.id}_variants`;
@@ -788,13 +831,13 @@ window.expandProductsForCatalog = function(baseProducts, worksMasterData, hidden
           linkedBaseProductTitle: (p.name || '').replace(/\n/g, ' '),
           name: groupTitle,
           desc: groupDesc,
-          image: varImages[0] || p.image || p.optimizedCover || null,
+          image: varImages[0] || (defCfg && defCfg.catalogGroupImage) || p.image || p.optimizedCover || null,
           imagePosition: wData.catalogGroupImagePosition || "center center",
           imageFit: wData.catalogGroupImageFit || "cover",
-          catalogGroupImage: varImages[0] || wData.catalogGroupImage || null,
+          catalogGroupImage: varImages[0] || (defCfg && defCfg.catalogGroupImage) || wData.catalogGroupImage || null,
           images: varImages.length > 0 ? varImages : (p.images || []),
           catalogVariants: nonBaseVars,
-          variantBadgeLabel: p.id === 'osuwari_moai_pen' ? `👕 肌着 全${nonBaseVars.length}種` : `🎨 全${nonBaseVars.length}種`,
+          variantBadgeLabel: defCfg ? `${defCfg.badgeLabel} 全${nonBaseVars.length}種` : (p.id === 'osuwari_moai_pen' ? `👕 肌着 全${nonBaseVars.length}種` : `🎨 全${nonBaseVars.length}種`),
           variantSummaryText: nonBaseVars.slice(0, 3).map(v => v.name).join(' / ') + (nonBaseVars.length > 3 ? ' 他' : '')
         });
       }
@@ -876,6 +919,12 @@ window.WORK_FOLDER_ASSETS = {
       "images/kurima/dot_osuwari_keyholder/studio/日常に寄り添うモアイチャーム1.png"
     ]
   },
+  "doyagao_moai": {
+    "raw": [],
+    "studio": [
+      "images/kurima/doyagao_moai/studio/momohiki_doyagao.jpg"
+    ]
+  },
   "glasses_stand": {
     "raw": [],
     "studio": [
@@ -885,6 +934,7 @@ window.WORK_FOLDER_ASSETS = {
   "hadagi_osuwari_moai_pen": {
     "raw": [],
     "studio": [
+      "images/kurima/hadagi_osuwari_moai_pen/studio/tanktop_pair_pen.jpg",
       "images/kurima/hadagi_osuwari_moai_pen/studio/tanktop_cover.jpg"
     ]
   },

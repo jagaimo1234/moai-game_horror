@@ -3516,6 +3516,7 @@
           const mergedMaster = { ...currentData };
 
           allProducts.forEach(p => {
+            const defDef = (typeof window.DEFAULT_PRODUCT_VARIANTS_MAP !== 'undefined' && window.DEFAULT_PRODUCT_VARIANTS_MAP[p.id]);
             if (!mergedMaster[p.id]) {
               hasNewSeed = true;
               mergedMaster[p.id] = {
@@ -3531,6 +3532,15 @@
                 profileStatus: 'unregistered',
                 updatedAt: Date.now()
               };
+            }
+            if (defDef && (!Array.isArray(mergedMaster[p.id].variants) || mergedMaster[p.id].variants.length === 0)) {
+              hasNewSeed = true;
+              mergedMaster[p.id].variants = JSON.parse(JSON.stringify(defDef.variants));
+              if (!mergedMaster[p.id].catalogDisplayMode) mergedMaster[p.id].catalogDisplayMode = defDef.catalogDisplayMode;
+              if (!mergedMaster[p.id].catalogGroupTitle) mergedMaster[p.id].catalogGroupTitle = defDef.catalogGroupTitle;
+              if (!mergedMaster[p.id].catalogGroupDesc) mergedMaster[p.id].catalogGroupDesc = defDef.catalogGroupDesc;
+              if (!mergedMaster[p.id].catalogGroupImage) mergedMaster[p.id].catalogGroupImage = defDef.catalogGroupImage;
+              if (!mergedMaster[p.id].catalogGroupImages) mergedMaster[p.id].catalogGroupImages = defDef.catalogGroupImages;
             }
           });
 
@@ -9611,7 +9621,10 @@
     // Get variants list for a parent product from worksMasterData
     window.getProductVariants = (parentId, includeInactive = false) => {
       const wData = (window.worksMasterData && window.worksMasterData[parentId]) || {};
-      const rawVars = Array.isArray(wData.variants) ? wData.variants : [];
+      const defCfg = (typeof window.DEFAULT_PRODUCT_VARIANTS_MAP !== 'undefined' && window.DEFAULT_PRODUCT_VARIANTS_MAP[parentId]) ? window.DEFAULT_PRODUCT_VARIANTS_MAP[parentId].variants : null;
+      const rawVars = (Array.isArray(wData.variants) && wData.variants.length > 0)
+        ? wData.variants
+        : (defCfg || (parentId === 'osuwari_moai_pen' && window.DEFAULT_OSUWARI_VARIANTS ? window.DEFAULT_OSUWARI_VARIANTS : []));
       if (rawVars.length === 0) return [];
       const sorted = [...rawVars].sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0));
       return includeInactive ? sorted : sorted.filter(v => v.active !== false);
@@ -16373,9 +16386,10 @@
 
       // バリエーション設定パネルの更新
       const varPanel = document.getElementById('img-manager-variant-panel');
+      const defCfg = (typeof window.DEFAULT_PRODUCT_VARIANTS_MAP !== 'undefined' && window.DEFAULT_PRODUCT_VARIANTS_MAP[pId]) ? window.DEFAULT_PRODUCT_VARIANTS_MAP[pId].variants : null;
       const rawVars = (Array.isArray(wData.variants) && wData.variants.length > 0)
         ? wData.variants
-        : (pId === 'osuwari_moai_pen' && window.DEFAULT_OSUWARI_VARIANTS ? window.DEFAULT_OSUWARI_VARIANTS : []);
+        : (defCfg || (pId === 'osuwari_moai_pen' && window.DEFAULT_OSUWARI_VARIANTS ? window.DEFAULT_OSUWARI_VARIANTS : []));
       const nonBaseVars = rawVars.filter(v => v && !v.isBase && v.active !== false);
       if (varPanel) {
         varPanel.style.display = 'block';
