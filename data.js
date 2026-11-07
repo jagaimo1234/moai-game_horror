@@ -638,11 +638,15 @@ window.getFullMasterProducts = function(customProductsData) {
         masterItem.id = key;
         if (p.name) masterItem.name = p.name;
         if (p.desc) masterItem.desc = p.desc;
-        // POSやOMOAIで手動設定・差し替えられた画像があれば最優先で反映
-        if (p.image) {
-          masterItem.image = p.image;
+        // POSやOMOAIで手動設定・差し替え・削除された画像構成をそのまま反映
+        if (p.imageConfigured || typeof p.image === 'string') {
+          if (p.image || p.imageConfigured) {
+            masterItem.image = p.image || null;
+          }
         }
-        if (Array.isArray(p.images) && p.images.length > 0) {
+        if (p.imageConfigured && Array.isArray(p.images)) {
+          masterItem.images = [masterItem.image, ...p.images.filter(u => u && u !== masterItem.image)].filter(Boolean);
+        } else if (Array.isArray(p.images) && p.images.length > 0) {
           masterItem.images = [masterItem.image, ...p.images.filter(u => u && u !== masterItem.image)].filter(Boolean);
         } else if (p.image && Array.isArray(masterItem.images)) {
           masterItem.images = [p.image, ...masterItem.images.filter(u => u && u !== p.image)].filter(Boolean);
@@ -668,7 +672,7 @@ window.getFullMasterProducts = function(customProductsData) {
     });
   }
 
-  // Firestoreの個別作品名マスター・works_masterで最新名＆手動設定画像を優先反映
+  // Firestoreの個別作品名マスター・works_masterで最新名＆手動設定画像を優先反映（削除された画像が復活しないよう厳密反映）
   const namesMap = (typeof window !== 'undefined' && window.productNamesData) || {};
   const wmMap = (typeof window !== 'undefined' && window.worksMasterData) || {};
   list.forEach(item => {
@@ -678,16 +682,13 @@ window.getFullMasterProducts = function(customProductsData) {
     } else if (wData?.name) {
       item.name = wData.name;
     }
-    if (wData?.image) {
-      item.image = wData.image;
+    if (wData && (wData.imageConfigured || 'image' in wData || Array.isArray(wData.images))) {
+      item.image = wData.image || null;
+      const wSubs = Array.isArray(wData.images) ? wData.images : [];
+      item.images = [item.image, ...wSubs.filter(u => u && u !== item.image)].filter(Boolean);
     }
     if (wData?.optimizedCover) {
       item.optimizedCover = wData.optimizedCover;
-    }
-    if (Array.isArray(wData?.images) && wData.images.length > 0) {
-      item.images = [item.image, ...wData.images.filter(u => u && u !== item.image)].filter(Boolean);
-    } else if (wData?.image && Array.isArray(item.images)) {
-      item.images = [wData.image, ...item.images.filter(u => u && u !== wData.image)].filter(Boolean);
     }
   });
 
@@ -717,16 +718,15 @@ window.expandProductsForCatalog = function(baseProducts, worksMasterData, hidden
     const p = { ...orig };
     const wData = wmMap[p.id] || {};
 
-    // works_master側の画像・説明文設定があれば最優先で反映（POSで手動差し替えされた画像を即座にお品書きに反映）
-    if (wData.image) p.image = wData.image;
+    // works_master側の画像・説明文設定があれば最優先で反映（POSで手動差し替え・削除された構成をそのまま反映し、削除した画像を復活させない）
+    if (wData.imageConfigured || 'image' in wData || Array.isArray(wData.images)) {
+      p.image = wData.image || null;
+      const wSubs = Array.isArray(wData.images) ? wData.images : [];
+      p.images = [p.image, ...wSubs.filter(u => u && u !== p.image)].filter(Boolean);
+    }
     p.imagePosition = wData.imagePosition || p.imagePosition || "center center";
     p.imageFit = wData.imageFit || p.imageFit || "cover";
     if (wData.optimizedCover) p.optimizedCover = wData.optimizedCover;
-    if (Array.isArray(wData.images) && wData.images.length > 0) {
-      p.images = [p.image, ...wData.images.filter(u => u && u !== p.image)].filter(Boolean);
-    } else if (wData.image && Array.isArray(p.images)) {
-      p.images = [wData.image, ...p.images.filter(u => u && u !== wData.image)].filter(Boolean);
-    }
 
     const rawVars = (Array.isArray(wData.variants) && wData.variants.length > 0)
       ? wData.variants
@@ -758,26 +758,26 @@ window.expandProductsForCatalog = function(baseProducts, worksMasterData, hidden
       if (isPreviewMode || !hiddenMap[groupId]) {
         const varImages = [];
         const addImg = (u) => { if (u && typeof u === 'string' && !varImages.includes(u)) varImages.push(u); };
-        if (typeof window !== 'undefined' && window.WORK_FOLDER_ASSETS) {
-          const folderKey = p.id === 'osuwari_moai_pen' ? 'hadagi_osuwari_moai_pen' : `${p.id}_variants`;
-          const fAssets = window.WORK_FOLDER_ASSETS[folderKey];
-          if (fAssets) {
-            if (Array.isArray(fAssets.studio)) fAssets.studio.forEach(addImg);
-            if (Array.isArray(fAssets.raw)) fAssets.raw.forEach(addImg);
+        const hasExplicitGroupImgs = 'catalogGroupImage' in wData || Array.isArray(wData.catalogGroupImages);
+        if (hasExplicitGroupImgs) {
+          if (wData.catalogGroupImage) addImg(wData.catalogGroupImage);
+          if (Array.isArray(wData.catalogGroupImages)) wData.catalogGroupImages.forEach(addImg);
+        } else {
+          if (typeof window !== 'undefined' && window.WORK_FOLDER_ASSETS) {
+            const folderKey = p.id === 'osuwari_moai_pen' ? 'hadagi_osuwari_moai_pen' : `${p.id}_variants`;
+            const fAssets = window.WORK_FOLDER_ASSETS[folderKey];
+            if (fAssets && Array.isArray(fAssets.studio)) {
+              fAssets.studio.forEach(addImg);
+            }
           }
-        }
-        // ローカルスタジオ画像が存在しない場合のみ、FirestoreのcatalogGroupImageを追加（巨大Base64の重複読込を防止）
-        if (wData.catalogGroupImage && (!wData.catalogGroupImage.startsWith('data:') || varImages.length === 0)) {
-          addImg(wData.catalogGroupImage);
-        }
-        nonBaseVars.forEach(v => {
-          if (v.image) addImg(v.image);
-          if (Array.isArray(v.images)) v.images.forEach(addImg);
-        });
-        if (Array.isArray(wData.catalogGroupImages)) wData.catalogGroupImages.forEach(addImg);
-        if (varImages.length === 0) {
-          if (p.image) addImg(p.image);
-          if (Array.isArray(p.images)) p.images.forEach(addImg);
+          nonBaseVars.forEach(v => {
+            if (v.image) addImg(v.image);
+            if (Array.isArray(v.images)) v.images.forEach(addImg);
+          });
+          if (varImages.length === 0) {
+            if (p.image) addImg(p.image);
+            if (Array.isArray(p.images)) p.images.forEach(addImg);
+          }
         }
 
         expanded.push({

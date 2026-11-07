@@ -203,7 +203,7 @@ async function main() {
     const rawDir = path.join(itemFolder, 'raw');
     const rawFiles = fs.existsSync(rawDir) ? fs.readdirSync(rawDir).filter(isImageOrMedia).map(f => `images/kurima/${posId}/raw/${f}`) : [];
 
-    // カバー画像（メイン画像）の決定: studio > direct > raw
+    // カバー画像（メイン画像）の決定: studio > direct （※RAW写真は未処理のため絶対に公開カバーに自動設定しない）
     let mainImgRel = '';
     const directPng = path.join(KURIMA_DIR, `${posId}.png`);
     const directJpg = path.join(KURIMA_DIR, `${posId}.jpg`);
@@ -215,16 +215,12 @@ async function main() {
       mainImgRel = studioFiles[0];
     } else if (directFiles.length > 0) {
       mainImgRel = directFiles[0];
-    } else if (rawFiles.length > 0) {
-      mainImgRel = rawFiles[0];
     } else {
-      mainImgRel = `images/kurima/${posId}.jpg`;
+      mainImgRel = '';
     }
 
-    // 公開用のサブ画像リスト（スタジオ完成画像を最優先。RAW写真は未処理の元写真のためPOS商品ギャラリーには載せない）
-    const subImgPaths = studioFiles.length > 0
-      ? [...studioFiles, ...directFiles]
-      : (directFiles.length > 0 ? directFiles : rawFiles);
+    // 公開用のサブ画像リスト（スタジオ完成画像・直下画像のみ。RAW写真は未処理の元写真のため絶対に自動掲載しない）
+    const subImgPaths = [...studioFiles, ...directFiles];
 
     const imagesCode = subImgPaths.length > 0
       ? `\n    images: [\n${subImgPaths.map(p => `      '${p}',`).join('\n')}\n    ],`

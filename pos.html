@@ -16437,11 +16437,12 @@
       // 1. 現在選択中のスロットに応じたお品書き画像一覧の取得
       const currentList = [];
       if (currentSelectorTargetSlot === 'group') {
+        const hasExplicitGroup = 'catalogGroupImage' in wData || Array.isArray(wData.catalogGroupImages);
         if (wData.catalogGroupImage) currentList.push(wData.catalogGroupImage);
         if (Array.isArray(wData.catalogGroupImages)) {
           wData.catalogGroupImages.forEach(u => { if (u && !currentList.includes(u)) currentList.push(u); });
         }
-        if (currentList.length === 0 && pId === 'osuwari_moai_pen' && window.WORK_FOLDER_ASSETS && window.WORK_FOLDER_ASSETS['hadagi_osuwari_moai_pen']) {
+        if (!hasExplicitGroup && currentList.length === 0 && pId === 'osuwari_moai_pen' && window.WORK_FOLDER_ASSETS && window.WORK_FOLDER_ASSETS['hadagi_osuwari_moai_pen']) {
           const ha = window.WORK_FOLDER_ASSETS['hadagi_osuwari_moai_pen'];
           if (Array.isArray(ha.studio)) ha.studio.forEach(u => { if (u && !currentList.includes(u)) currentList.push(u); });
         }
@@ -16455,14 +16456,22 @@
           }
         }
       } else {
-        const mainImg = p.image || wData.image;
-        if (mainImg) currentList.push(mainImg);
-        const subList = Array.isArray(wData.images) && wData.images.length > 0 
-          ? wData.images 
-          : (Array.isArray(p.images) ? p.images : []);
-        subList.forEach(url => {
-          if (url && !currentList.includes(url)) currentList.push(url);
-        });
+        const hasWmConfig = wData && (wData.imageConfigured || 'image' in wData || Array.isArray(wData.images));
+        if (hasWmConfig) {
+          if (wData.image) currentList.push(wData.image);
+          if (Array.isArray(wData.images)) {
+            wData.images.forEach(url => {
+              if (url && !currentList.includes(url)) currentList.push(url);
+            });
+          }
+        } else {
+          if (p.image) currentList.push(p.image);
+          if (Array.isArray(p.images)) {
+            p.images.forEach(url => {
+              if (url && !currentList.includes(url)) currentList.push(url);
+            });
+          }
+        }
       }
 
       currentDraftImages = [...currentList];
@@ -17071,11 +17080,13 @@
           Object.assign(cpData[pId], {
             image: finalMain,
             images: finalSubs,
+            imageConfigured: true,
             updatedAt: Date.now()
           });
           Object.assign(wmData[pId], {
             image: finalMain,
             images: finalSubs,
+            imageConfigured: true,
             updatedAt: Date.now()
           });
 
