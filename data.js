@@ -935,8 +935,8 @@ window.WORK_FOLDER_ASSETS = {
     "raw": [],
     "studio": [
       "images/kurima/hadagi_osuwari_moai_pen/studio/hadagi_trio_desk.jpg",
-      "images/kurima/hadagi_osuwari_moai_pen/studio/tanktop_pair_pen.jpg",
-      "images/kurima/hadagi_osuwari_moai_pen/studio/tanktop_cover.jpg"
+      "images/kurima/hadagi_osuwari_moai_pen/studio/tanktop_cover.jpg",
+      "images/kurima/hadagi_osuwari_moai_pen/studio/tanktop_pair_pen.jpg"
     ]
   },
   "macho_moai_keyholder": {
@@ -957,6 +957,12 @@ window.WORK_FOLDER_ASSETS = {
       "images/kurima/macho_moai_keyholder/studio/15704196-82ad-4bb5-ad26-3b43dda68172.png",
       "images/kurima/macho_moai_keyholder/studio/4d924d16-4899-44d9-857b-d36e813cef4d.png",
       "images/kurima/macho_moai_keyholder/studio/まっちょモアイキーホルダー_master.png"
+    ]
+  },
+  "moai_giveup": {
+    "raw": [],
+    "studio": [
+      "images/kurima/moai_giveup/studio/ChatGPT 画像 2026年11月7日 21_21_15.png"
     ]
   },
   "moai_highleg": {
