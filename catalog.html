@@ -810,10 +810,11 @@
     .self-mode-only {
       display: none !important;
     }
-    body.admin-mode .self-mode-only,
-    body.preview-mode .self-mode-only,
-    body.sns-creator-mode .self-mode-only {
+    body.admin-mode .self-mode-only {
       display: inline-flex !important;
+    }
+    body.admin-mode #moai-dev-mode-bar {
+      display: flex !important;
     }
 
     .btn-sns-reel-trigger {
@@ -2334,21 +2335,39 @@
 
   </div>
 
-  <!-- Preview Mode Banner (shown only in ?preview mode) -->
-  <div id="preview-banner" style="display:none; background:linear-gradient(90deg,rgba(241,196,15,0.15),rgba(230,126,34,0.15)); border:1px solid rgba(241,196,15,0.4); border-radius:10px; margin:0 16px 10px; padding:10px 16px; font-size:13px; color:#f1c40f; font-weight:bold; display:none; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
-    <div>🔒 管理者プレビューモード — 非公開作品を含めて全表示中</div>
-    <div style="font-size:11px; background:rgba(255,0,127,0.2); border:1px solid rgba(255,0,127,0.5); color:#ff66cc; padding:4px 10px; border-radius:20px;">
-      🎬 作品詳細の「動画録画」でインスタ用ポンポン動画が作れます
+  <!-- Developer Mode Bar (Strictly visible ONLY when authenticated via Google Auth in admin-mode) -->
+  <div id="moai-dev-mode-bar" class="moai-dev-mode-only" style="display:none; background:linear-gradient(90deg, #0f172a, #1e1b4b); border:1.5px solid #ff2d55; border-radius:14px; margin:8px 16px 12px; padding:10px 14px; color:#fff; box-shadow:0 8px 25px rgba(255,45,85,0.25); align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px; z-index:900;">
+    <div style="display:flex; align-items:center; gap:8px;">
+      <span style="background:#ff2d55; color:#fff; font-size:10px; font-weight:900; padding:3px 8px; border-radius:20px; letter-spacing:1px;">DEV MODE</span>
+      <span style="font-size:12.5px; font-weight:800; color:#f8fafc;">開発モード管理メニュー</span>
+    </div>
+    <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+      <button type="button" onclick="window.openMoaiAdStudio()" style="background:linear-gradient(135deg, #ff2d55, #ff6b81); color:#fff; border:none; padding:7px 14px; border-radius:20px; font-size:12px; font-weight:900; cursor:pointer; display:inline-flex; align-items:center; gap:5px; box-shadow:0 4px 14px rgba(255,45,85,0.4);">
+        <span>🎬</span> 広告撮影モード
+      </button>
+      <button type="button" onclick="const m=document.getElementById('moai-admin-likes-modal'); if(m){m.style.display='flex'; if(typeof window.refreshAdminLikesStats==='function') window.refreshAdminLikesStats();}" style="background:rgba(255,255,255,0.12); color:#fff; border:1px solid rgba(255,255,255,0.25); padding:6px 12px; border-radius:20px; font-size:11.5px; font-weight:700; cursor:pointer;">
+        📊 いいね監視
+      </button>
+      <button type="button" onclick="window.triggerAdminLogout && window.triggerAdminLogout()" style="background:transparent; color:#94a3b8; border:1px solid rgba(255,255,255,0.15); padding:6px 10px; border-radius:20px; font-size:11px; cursor:pointer;">
+        ログアウト
+      </button>
     </div>
   </div>
 
+  <!-- Preview Mode Banner -->
+  <div id="preview-banner" style="display:none;"></div>
+
   <!-- Admin Modal (Less Conspicuous) -->
-  <div id="admin-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:999; justify-content:center; align-items:center; flex-direction:column;">
-    <div style="background:#1e1e2e; padding:30px 40px; border-radius:16px; text-align:center; border:1px solid rgba(255,255,255,0.1);">
-      <div style="font-size:24px; margin-bottom:20px;">👤</div>
-      <button id="admin-login-btn" style="background:#fff; color:#000; padding:12px 24px; border-radius:30px; font-weight:bold; cursor:pointer; border:none; display:flex; align-items:center; gap:8px;">
+  <div id="admin-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:999999; justify-content:center; align-items:center; flex-direction:column;">
+    <div style="background:#1e1e2e; padding:30px 40px; border-radius:16px; text-align:center; border:1px solid rgba(255,255,255,0.1); max-width:340px; width:90%;">
+      <div style="font-size:24px; margin-bottom:10px;">👤</div>
+      <div style="font-size:14px; font-weight:bold; color:#fff; margin-bottom:18px;">開発モード認証</div>
+      <button id="admin-login-btn" style="background:#fff; color:#000; padding:12px 24px; border-radius:30px; font-weight:bold; cursor:pointer; border:none; display:flex; align-items:center; justify-content:center; gap:8px; width:100%;">
         <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
         Googleでログイン
+      </button>
+      <button id="admin-local-dev-btn" style="display:none; margin-top:10px; background:rgba(0,210,255,0.15); color:#00d2ff; border:1px solid rgba(0,210,255,0.4); padding:10px 18px; border-radius:30px; font-size:12px; font-weight:bold; cursor:pointer; width:100%;">
+        💻 ローカル検証モードで開く
       </button>
       <div id="admin-cancel-btn" style="margin-top:20px; color:#888; font-size:13px; cursor:pointer;">キャンセル</div>
     </div>
@@ -2594,12 +2613,44 @@
       border: 1px solid #e2e8f0 !important;
     }
 
+    .product-card-tile {
+      content-visibility: auto;
+      contain-intrinsic-size: 0 260px;
+    }
+
   </style>
 
+  <script src="data.js?v=20261107b"></script>
   <script>
-    document.write('<script src="data.js?v=' + Date.now() + '"><\/script>');
-  </script>
-  <script>
+    // URLアドレス指定での開発モード・広告撮影モード直接起動サポート
+    (function() {
+      const sp = new URLSearchParams(window.location.search);
+      const hash = window.location.hash || '';
+      const isUrlDev = sp.get('dev') === '1' ||
+                       sp.get('dev') === 'true' ||
+                       sp.get('preview') === 'moai2024' ||
+                       sp.get('mode') === 'dev' ||
+                       sp.get('admin') === '1' ||
+                       sp.get('ad') === '1' ||
+                       hash === '#dev' ||
+                       hash === '#ad' ||
+                       hash === '#ad-studio';
+      if (isUrlDev) {
+        window.isMoaiAdminAuthenticated = true;
+        window.isUrlDevAuthorized = true;
+        document.body.classList.add('admin-mode');
+        if (sp.get('ad') === '1' || hash === '#ad' || hash === '#ad-studio') {
+          window.addEventListener('DOMContentLoaded', () => {
+            setTimeout(() => {
+              if (typeof window.openMoaiAdStudio === 'function') {
+                window.openMoaiAdStudio();
+              }
+            }, 150);
+          });
+        }
+      }
+    })();
+
     window.getAllAvailableProducts = function() {
       if (window.currentRenderedProducts && window.currentRenderedProducts.length > 0) {
         return window.currentRenderedProducts;
@@ -2652,7 +2703,7 @@
     // ===== Build event tabs =====
     function buildTabs() {
       const container = document.getElementById('event-tabs');
-      container.innerHTML = '';
+      if (!container) return;
       const allEvents = window.getAllEvents(window.eventConfigData);
       
       let sortedKeys = Object.keys(allEvents);
@@ -2665,6 +2716,7 @@
         return 0;
       });
 
+      let tabsHtml = '';
       sortedKeys.forEach(key => {
         // 終了したHMJ、クリマは絶対にタブ描画しない
         if (key === 'hmj' || key === 'kurima' || key.toLowerCase().includes('hmj')) return;
@@ -2684,12 +2736,13 @@
           ? ' <span style="font-size:10px; background:rgba(231,76,60,0.3); color:#e74c3c; border-radius:4px; padding:1px 5px; vertical-align:middle;">🔒非公開</span>'
           : '';
 
-        container.innerHTML += `
+        tabsHtml += `
           <button class="event-tab ${key === currentEventKey ? 'active' : ''}"
                   id="tab-${key}" onclick="switchEvent('${key}')">
             ${ev.label}${hiddenBadge}
           </button>`;
       });
+      container.innerHTML = tabsHtml;
     }
 
     // ===== Switch event =====
@@ -2717,7 +2770,7 @@
       const chipsHtml = vars.map((v, vIdx) => {
         const isFirst = vIdx === 0;
         const thumbPart = v.image
-          ? `<img src="${v.image}" class="variant-chip-thumb" alt="${(v.name || '').replace(/"/g, '&quot;')}" onerror="this.style.display='none'">`
+          ? `<img src="${v.image}" loading="lazy" decoding="async" class="variant-chip-thumb" alt="${(v.name || '').replace(/"/g, '&quot;')}" onerror="this.style.display='none'">`
           : `<div class="variant-chip-icon">${v.isBase ? '🗿' : titleIcon}</div>`;
         const noteTag = v.statusNote
           ? `<span class="variant-note-tag">${v.statusNote}</span>`
@@ -2831,8 +2884,19 @@
     }
     window.selectCatalogVariant = selectCatalogVariant;
 
-    // ===== Build tile & carousel =====
-    
+    // ===== Build tile & carousel (高速バッチ＆遅延カルーセル構築) =====
+    let _carouselDirty = true;
+    let _buildViewsRafId = null;
+
+    // 複数のFirestoreスナップショット到着を1フレームにまとめるデバウンスヘルパー
+    window.scheduleBuildViews = function() {
+      if (_buildViewsRafId) return;
+      _buildViewsRafId = requestAnimationFrame(() => {
+        _buildViewsRafId = null;
+        buildViews();
+      });
+    };
+
     // POS作品マスター（正式紹介文 approvedDescription）を最優先で取得するヘルパー
     function getProductDescription(p) {
       if (!p || !p.id) return "";
@@ -2847,6 +2911,197 @@
         return wm.features.trim();
       }
       return p.desc || "";
+    }
+
+    function ensureCarouselBuilt() {
+      if (!_carouselDirty) return;
+      _carouselDirty = false;
+      const products = window.currentRenderedProducts || [];
+      const track = document.getElementById('carousel-track');
+      const dots  = document.getElementById('carousel-dots');
+      if (!track || !dots) return;
+
+      if (products.length === 0) {
+        track.innerHTML = `
+          <div class="carousel-slide">
+            <div style="text-align:center;padding:60px 20px;color:rgba(255,255,255,0.3);">
+              <div style="font-size:48px;margin-bottom:12px;">🚧</div>
+              作品を準備中です
+            </div>
+          </div>`;
+        dots.innerHTML = '';
+        return;
+      }
+
+      let trackHtml = '';
+      let dotsHtml = '';
+
+      products.forEach((p, i) => {
+        const extraImgs = p.images && p.images.length > 1 ? p.images : null;
+        const thumbHtml = extraImgs ? `
+          <div class="thumb-strip" id="thumbs-${i}">
+            ${extraImgs.map((url) => {
+              const isVid = url.toLowerCase().endsWith('.mp4') || url.toLowerCase().endsWith('.mov');
+              return `
+                <div class="thumb-item ${url === p.image ? 'active' : ''}" onclick="setMainImg(${i},'${url}',this)">
+                  ${isVid ? 
+                    '<div style="width:100%; height:100%; display:flex; align-items:center; justify-content:center; background:#111; color:var(--accent); font-size:10px; font-weight:bold; border-radius:4px;">MOVIE</div>' :
+                    `<img src="${url}" loading="lazy" decoding="async" alt="">`
+                  }
+                </div>`;
+            }).join('')}
+          </div>` : '';
+        
+        const badgeLargeHtml = `<div class="badge" id="badge-large-${p.id}" style="display:none;"></div>`;
+        const stockLargeHtml = `<div class="badge" id="stock-large-${p.id}" style="display:none;"></div>`;
+
+        const largeImgSrc = p.image || p.optimizedCover || (p.isDev ? 'images/dev_placeholder.gif' : (window.NO_IMAGE_PLACEHOLDER || 'images/dev_placeholder.gif'));
+        const cPos = p.imagePosition || 'center center';
+        const cFit = p.imageFit || 'cover';
+        const largeImageHtml = `<img class="main-product-img" loading="lazy" decoding="async" id="main-img-${i}" src="${largeImgSrc}" style="width:100%; aspect-ratio:1; object-fit:${cFit}; object-position:${cPos}; border-radius:12px; ${(!p.image && !p.optimizedCover && p.isDev) ? 'border:1px dashed rgba(255,255,255,0.1);' : ''}" alt="${(p.name || p.id || '').replace(/\n/g,' ')}" onerror="this.src=window.NO_IMAGE_PLACEHOLDER||'images/dev_placeholder.gif'">
+             <video class="main-product-img" id="main-video-${i}" preload="none" style="display:none; width:100%; height:auto; aspect-ratio:1/1; object-fit:cover;" loop muted playsinline controls></video>`;
+
+        const variantSelectorHtml = renderVariantSelectorHtml(p, i);
+
+        const linkedGroupJumpHtml = p.linkedVariantGroupId ? `
+          <button type="button" class="btn-linked-product" onclick="openProductById('${p.linkedVariantGroupId}')">
+            <span>👕 ${p.linkedVariantGroupTitle || 'バリエーション'}（全${p.linkedVariantCount || ''}種）を見る</span>
+            <span>→</span>
+          </button>
+        ` : '';
+
+        const isLiked = (typeof window.isMoaiLiked === 'function') ? window.isMoaiLiked(p.id) : false;
+        trackHtml += `
+          <div class="carousel-slide">
+            <div class="product-card-large">
+              <div style="position:relative;">
+                ${largeImageHtml}
+              </div>
+              ${thumbHtml}
+              <div class="product-info-large">
+                <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:10px;">
+                  <div class="product-name-large">${p.isDev ? '❓ [開発中]<br>' : ''}${p.name.replace(/\n/g,'<br>')}</div>
+                  <div style="display:flex; flex-direction:column; align-items:flex-end; gap:4px;">
+                    ${badgeLargeHtml}
+                    ${stockLargeHtml}
+                  </div>
+                </div>
+                <div class="product-desc" id="desc-text-${p.id}">${getProductDescription(p).replace(/\n/g, '<br>')}</div>
+                
+${variantSelectorHtml}
+                ${linkedGroupJumpHtml}
+
+                <!-- マッチングボタン -->
+                <div style="padding: 4px 0 10px;">
+                  <button type="button" class="btn-detail-match ${isLiked ? 'liked' : ''}" id="detail-match-btn-${p.id}" onclick="window.toggleMoaiLike('${p.id}')">
+                    <span>${isLiked ? '❤️ マッチング中（トークへ進む）' : '💖 このモアイが好きかも！（マッチング）'}</span>
+                  </button>
+                </div>
+
+                <!-- 体験版ボタン -->
+                ${p.demoUrl ? `
+                  <div style="text-align: center;">
+                    <a href="${p.demoUrl}" target="_blank" rel="noopener noreferrer" class="btn-demo-glow">
+                      <span style="font-size: 20px;">🎮</span>
+                      <span>Webで体験版をプレイ！</span>
+                      <span style="font-size: 16px;">✨</span>
+                    </a>
+                  </div>
+                ` : ''}
+
+                <!-- 開発ステータスフロー -->
+                ${p.isDev ? renderStatusFlow(p.status || 0) : ''}
+
+                <!-- ゴールドモアイロボ限定特典解放欄 -->
+                ${p.id === 'moai_robo_mk2_gold' ? `
+                  <div id="gold-secret-container" style="margin-top:20px; background:linear-gradient(135deg, rgba(255,215,0,0.08) 0%, rgba(255,165,0,0.04) 100%); border:2px solid rgba(255,215,0,0.4); border-radius:16px; padding:20px; font-family:'DotGothic16', sans-serif; box-shadow:0 8px 32px rgba(0,0,0,0.5), inset 0 0 15px rgba(255,215,0,0.05);">
+                    <div id="gold-secret-locked" style="display: ${localStorage.getItem('gold_secret_unlocked') === 'true' ? 'none' : 'block'}; text-align:left;">
+                      <div style="font-size:14px; font-weight:900; color:#ffd700; margin-bottom:8px; letter-spacing:1px; display:flex; align-items:center; gap:6px; text-shadow:0 0 8px rgba(255,215,0,0.4);">
+                        <span>🔒</span> SECRET ACCESS PORT
+                      </div>
+                      <div style="font-size:12px; color:rgba(255,255,255,0.7); margin-bottom:14px; line-height:1.5;">
+                        ヨーグルトランEXを購入プレイしてくれてありがとう！！ そんな君には、 秘密のアクセスキーで特典を解放してほしい...... ヒントは、全クリ後のエンドロールじゃ。
+                      </div>
+                      <div style="display:flex; gap:12px; align-items:center; flex-wrap:wrap;">
+                        <input type="text" id="gold-secret-input" placeholder="ENTER ACCESS KEY... _" style="flex:1; min-width:150px; background:#05050a; border:2px solid #ffd700; color:#ffd700; padding:12px 16px; border-radius:8px; font-size:15px; font-family:'DotGothic16', sans-serif; outline:none; text-transform:uppercase; box-shadow:inset 0 0 8px rgba(0,0,0,0.8); letter-spacing:2px;" onkeydown="if(event.key==='Enter') checkGoldSecretKey()">
+                        <button onclick="checkGoldSecretKey()" style="background:#ffd700; color:#000; border:2px solid #fff; border-radius:8px; padding:12px 24px; font-weight:bold; font-size:15px; font-family:'DotGothic16', sans-serif; cursor:pointer; box-shadow:0 4px 0 #b39800; transition:all 0.1s; letter-spacing:1px;" onmousedown="this.style.transform='translateY(4px)'; this.style.boxShadow='0 0px 0 #b39800';" onmouseup="this.style.transform=''; this.style.boxShadow='0 4px 0 #b39800';">ENTER ▶</button>
+                      </div>
+                      <div id="gold-secret-error" style="color:#ff3333; font-size:12px; margin-top:8px; min-height:18px; text-shadow:0 0 5px rgba(255,51,51,0.5);"></div>
+                    </div>
+                    <div id="gold-secret-unlocked" style="display: ${localStorage.getItem('gold_secret_unlocked') === 'true' ? 'block' : 'none'}; text-align:center;">
+                      <div style="font-size:40px; margin-bottom:10px; animation: float 2.5s ease-in-out infinite;">🏆✨</div>
+                      <div style="font-size:18px; font-weight:900; color:#ffd700; letter-spacing:2px; margin-bottom:6px; text-shadow:0 0 10px rgba(255,215,0,0.5);">ACCESS GRANTED</div>
+                      <div style="font-size:12px; color:rgba(255,215,0,0.7); letter-spacing:1px; margin-bottom:12px;">アンロック成功！！！</div>
+                      <div style="font-size:11px; background:rgba(255,215,0,0.12); border:1px dashed rgba(255,215,0,0.4); color:#ffd700; border-radius:8px; padding:10px 12px; margin-bottom:16px; line-height:1.6; text-align:center; text-shadow:0 0 4px rgba(255,215,0,0.2);">
+                        ⚀ ゴールドモアイロボの購入時に、<br>この画面をそっと作者に見せるのじゃ！
+                      </div>
+                      <div style="display:flex; flex-direction:column; gap:12px; text-align:left;">
+                        <div style="background:rgba(0,0,0,0.5); border:1px solid rgba(255,215,0,0.3); border-radius:12px; padding:12px; display:flex; align-items:center; gap:14px; box-shadow:0 4px 12px rgba(0,0,0,0.3);">
+                          <img src="images/kurima/moai_robo_mk2_gold/moai_robo_stand.png?v=20260520" loading="lazy" decoding="async" style="width:70px; height:70px; border-radius:8px; object-fit:cover; border:1px solid rgba(255,215,0,0.4); background:#000;">
+                          <div>
+                            <div style="font-size:14px; font-weight:bold; color:#ffd700; display:flex; align-items:center; gap:4px;">🎁 モアイロボスタンド</div>
+                            <div style="font-size:11px; color:rgba(255,255,255,0.6); margin-top:4px; line-height:1.4;">モアイロボMk-IIを最も気高くスタイリッシュに飾ることができる、可変式ディスプレイスタンド。<br>めちゃくちゃ最高をプレゼント🎁</div>
+                          </div>
+                        </div>
+                        <div style="background:rgba(0,0,0,0.5); border:1px solid rgba(255,215,0,0.3); border-radius:12px; padding:12px; display:flex; align-items:center; gap:14px; box-shadow:0 4px 12px rgba(0,0,0,0.3);">
+                          <img src="images/kurima/moai_robo_mk2_gold/moai_custom_parts.png?v=20260520" loading="lazy" decoding="async" style="width:70px; height:70px; border-radius:8px; object-fit:cover; border:1px solid rgba(255,215,0,0.4); background:#000;">
+                          <div>
+                            <div style="font-size:14px; font-weight:bold; color:#ffd700; display:flex; align-items:center; gap:4px;">🎁 おすわりモアイカスタムパーツ2個</div>
+                            <div style="font-size:11px; color:rgba(255,255,255,0.6); margin-top:4px; line-height:1.4;">Mk-IIの肩や足元に増設装着が可能な、レトロ可愛い「おすわりモアイ」カスタム追加パーツ。</div>
+                          </div>
+                        </div>
+                      </div>
+                      <div style="font-size:10px; color:rgba(255,255,255,0.4); margin-top:16px; line-height:1.5; text-align:left; border-top:1px dashed rgba(255,215,0,0.2); padding-top:12px; font-family:sans-serif;">
+                        ※秘密のアクセスキー解放特典は「モアイロボ MARK2 EX Gold Edition」購入が条件となります。
+                      </div>
+                    </div>
+                  </div>
+                ` : ''}
+
+                <!-- お知らせ欄 -->
+                <div class="product-announcement" id="announce-container-${p.id}">
+                  <div class="announce-label">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+                    NOTICE
+                  </div>
+                  <div class="announce-text" id="announce-text-${p.id}"></div>
+                </div>
+
+                <!-- SNS共有バー -->
+                <div class="product-share-container">
+                  <div class="share-header">
+                    <span class="share-title">📢 この作品をシェアする</span>
+                    <span class="share-subtitle">ストーリーやポスト大歓迎！</span>
+                  </div>
+                  <div class="share-btn-row">
+                    <button type="button" class="btn-share-action btn-share-native" onclick="window.shareProductNative('${p.id}')">
+                      <span>📲</span><span>共有</span>
+                    </button>
+                    <button type="button" class="btn-share-action btn-share-x" onclick="window.shareProductX('${p.id}')">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+                      <span>ポスト</span>
+                    </button>
+                    <button type="button" class="btn-share-action btn-share-insta" onclick="window.openInstaStoriesModal('${p.id}')">
+                      <span>📸</span><span>インスタ</span>
+                    </button>
+                    <button type="button" class="btn-share-action btn-share-link" onclick="window.copyProductLink('${p.id}')">
+                      <span>🔗</span><span>URLコピー</span>
+                    </button>
+                    <button type="button" class="btn-share-action btn-sns-reel-trigger self-mode-only" onclick="event.stopPropagation(); window.startSnsReelMode('${p.id}')" title="画面録画用：ポンポン画像が切り替わるショート動画モード">
+                      <span>🎬</span><span>動画録画</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>`;
+        dotsHtml += `<div class="dot ${i===0?'active':''}" onclick="goToSlide(${i})"></div>`;
+      });
+
+      track.innerHTML = trackHtml;
+      dots.innerHTML = dotsHtml;
+      enableDragScroll();
+      window.dispatchEvent(new Event('viewsBuilt'));
     }
 
     function buildViews() {
@@ -2867,7 +3122,6 @@
         document.getElementById('tile-view').style.display = 'none';
         document.getElementById('carousel-view').style.display = 'none';
         
-        // Show room only if not hidden (or if preview mode)
         if (effectiveStatus === 'hidden') {
           if (moairoomView) moairoomView.style.display = 'none';
           document.getElementById('tile-view').innerHTML = '<div class="empty-state">この部屋は現在閉鎖されています。</div>';
@@ -2879,11 +3133,9 @@
         document.getElementById('item-count').innerHTML = '';
         document.getElementById('tab-hero-container').innerHTML = '';
         
-        // Show debug controls in preview mode
         const debugControls = document.getElementById('moairoom-debug-controls');
         if (debugControls) debugControls.style.display = IS_PREVIEW_MODE ? 'flex' : 'none';
 
-        // Show locked or unlocked state based on localStorage
         const unlocked = localStorage.getItem('moairoom_unlocked') === 'true';
         document.getElementById('moairoom-locked').style.display = unlocked ? 'none' : 'block';
         document.getElementById('moairoom-unlocked').style.display = unlocked ? 'block' : 'none';
@@ -2897,25 +3149,22 @@
         const selectedIds = window.eventProductsData ? window.eventProductsData[currentEventKey] : null;
         const allMaster = window.getFullMasterProducts(window.customProductsData);
         if (!selectedIds) {
-          // Fallback to data.js hardcoded list
           products = allEvents[currentEventKey]?.products || [];
         } else {
-          // Respect the order in selectedIds
           products = selectedIds
             .map(id => allMaster.find(p => p.id === id))
             .filter(p => p !== undefined);
         }
-        // Filter out hidden products unless in preview mode
         if (!IS_PREVIEW_MODE) {
           products = products.filter(p => !window.hiddenProductsData[p.id]);
         }
-        // Expand variations (e.g. 肌着おすわりモアイペン立て代表枠 & POS works_master連動)
         if (typeof window.expandProductsForCatalog === 'function') {
           products = window.expandProductsForCatalog(products, window.worksMasterData, window.hiddenProductsData, IS_PREVIEW_MODE);
         }
       }
       window.currentRenderedProducts = products;
       window.selectedVariantIndexMap = {};
+      _carouselDirty = true;
 
       // Item count & Tab description
       const eventData = allEvents[currentEventKey] || {};
@@ -2941,11 +3190,9 @@
         }
       }
 
-      // --- Tile ---
+      // --- Tile (一括HTML構築で高速化) ---
       const tileGrid = document.getElementById('tile-grid');
-      tileGrid.innerHTML = '';
 
-      // Favorite filter: only products the user liked
       let displayProducts = products;
       if (window.renderTileViewOnlyFavorites) {
         let userLikes = [];
@@ -2974,6 +3221,7 @@
             </div>`;
         }
       } else {
+        let tileHtml = '';
         displayProducts.forEach((p, i) => {
           const badgeHtml = `<div class="badge" id="badge-${p.id}" style="display:none;margin-right:4px;"></div>`;
           const stockHtml = `<div class="badge" id="stock-${p.id}" style="display:none;"></div>`;
@@ -2981,7 +3229,9 @@
           const imgSrc = p.image || p.optimizedCover || (p.isDev ? 'images/dev_placeholder.gif' : (window.NO_IMAGE_PLACEHOLDER || 'images/dev_placeholder.gif'));
           const tilePos = p.imagePosition || 'center center';
           const tileFit = p.imageFit || 'cover';
-          const imageHtml = `<img class="main-product-img" decoding="async" src="${imgSrc}" style="border-radius:12px 12px 0 0; object-fit:${tileFit}; object-position:${tilePos}; ${(!p.image && !p.optimizedCover && p.isDev) ? 'border:1px dashed rgba(255,255,255,0.1);' : ''}" alt="${(p.name || p.id || '').replace(/\n/g,' ')}" onerror="this.src=window.NO_IMAGE_PLACEHOLDER||'images/dev_placeholder.gif'">`;
+          // ファーストビュー（最初の4枚）のみ即時読込、5枚目以降はlazy読込で通信渋滞を防止
+          const loadingAttr = i < 4 ? (i < 2 ? 'fetchpriority="high" decoding="async"' : 'decoding="async"') : 'loading="lazy" decoding="async"';
+          const imageHtml = `<img class="main-product-img" ${loadingAttr} src="${imgSrc}" style="border-radius:12px 12px 0 0; object-fit:${tileFit}; object-position:${tilePos}; ${(!p.image && !p.optimizedCover && p.isDev) ? 'border:1px dashed rgba(255,255,255,0.1);' : ''}" alt="${(p.name || p.id || '').replace(/\n/g,' ')}" onerror="this.src=window.NO_IMAGE_PLACEHOLDER||'images/dev_placeholder.gif'">`;
 
           const topLeftBadgeHtml = p.isDev
             ? `<div class="dev-badge-tile">${DEV_STATUSES[parseInt(p.status) || 0].label}</div>`
@@ -2996,7 +3246,6 @@
           const heartCountText = liveCount > 0 ? liveCount : '';
           const heartBtnHtml = `<button type="button" class="btn-tile-heart ${isLiked ? 'liked' : ''}" id="tile-heart-${p.id}" onclick="event.stopPropagation(); window.toggleMoaiLike('${p.id}')" title="${isLiked ? 'マッチング中❤️' : 'このモアイ好きかも'}"><span class="heart-icon">${isLiked ? '❤️' : '🤍'}</span><span class="heart-count" id="heart-count-${p.id}">${heartCountText}</span></button>`;
 
-          // POS連動バッジ (NEW / 超おすすめ / おすすめ)
           let customPosBadge = '';
           if (p.isDev || p.isNew) {
             customPosBadge = `<div class="pos-badge-new">NEW</div>`;
@@ -3004,11 +3253,10 @@
             customPosBadge = `<div class="pos-badge-recommend">超おすすめ</div>`;
           }
 
-          // 一言プロフィール (吹き出し)
           const hitokoto = window.getMoaiHitokoto ? window.getMoaiHitokoto(p) : '';
           const hitokotoHtml = hitokoto ? `<div class="hitokoto-bubble"><span class="hitokoto-icon">💬</span>「${hitokoto}」</div>` : '';
 
-          tileGrid.innerHTML += `
+          tileHtml += `
             <div class="product-card-tile" onclick="window.openDetail(${i})">
                 <button type="button" class="btn-tile-share" onclick="event.stopPropagation(); window.shareProductNative('${p.id}')" title="この作品をシェア">📤</button>
               <div style="position:relative;">
@@ -3037,205 +3285,17 @@
               </div>
             </div>`;
         });
+        tileGrid.innerHTML = tileHtml;
       }
 
-      // --- Carousel ---
-      const track = document.getElementById('carousel-track');
-      const dots  = document.getElementById('carousel-dots');
-      track.innerHTML = '';
-      dots.innerHTML  = '';
-      if (products.length === 0) {
-        track.innerHTML = `
-          <div class="carousel-slide">
-            <div style="text-align:center;padding:60px 20px;color:rgba(255,255,255,0.3);">
-              <div style="font-size:48px;margin-bottom:12px;">🚧</div>
-              作品を準備中です
-            </div>
-          </div>`;
+      // カルーセルが現在表示中のときのみ即座に再構築し、非表示時は詳細を開いた瞬間に遅延構築する
+      const carouselViewEl = document.getElementById('carousel-view');
+      if (carouselViewEl && carouselViewEl.style.display !== 'none') {
+        ensureCarouselBuilt();
+        updateCarousel();
       } else {
-        products.forEach((p, i) => {
-          const extraImgs = p.images && p.images.length > 1 ? p.images : null;
-          const thumbHtml = extraImgs ? `
-            <div class="thumb-strip" id="thumbs-${i}">
-              ${extraImgs.map((url, j) => {
-                const isVid = url.toLowerCase().endsWith('.mp4') || url.toLowerCase().endsWith('.mov');
-                return `
-                  <div class="thumb-item ${url === p.image ? 'active' : ''}" onclick="setMainImg(${i},'${url}',this)">
-                    ${isVid ? 
-                      '<div style="width:100%; height:100%; display:flex; align-items:center; justify-content:center; background:#111; color:var(--accent); font-size:10px; font-weight:bold; border-radius:4px;">MOVIE</div>' :
-                      `<img src="${url}" loading="lazy" decoding="async" loading="lazy" alt="">`
-                    }
-                  </div>`;
-              }).join('')}
-            </div>` : '';
-          
-          const badgeLargeHtml = `<div class="badge" id="badge-large-${p.id}" style="display:none;"></div>`;
-          const stockLargeHtml = `<div class="badge" id="stock-large-${p.id}" style="display:none;"></div>`;
-
-          const largeImgSrc = p.image || p.optimizedCover || (p.isDev ? 'images/dev_placeholder.gif' : (window.NO_IMAGE_PLACEHOLDER || 'images/dev_placeholder.gif'));
-          const cPos = p.imagePosition || 'center center';
-          const cFit = p.imageFit || 'cover';
-          const largeImageHtml = `<img class="main-product-img" decoding="async" id="main-img-${i}" src="${largeImgSrc}" style="width:100%; aspect-ratio:1; object-fit:${cFit}; object-position:${cPos}; border-radius:12px; ${(!p.image && !p.optimizedCover && p.isDev) ? 'border:1px dashed rgba(255,255,255,0.1);' : ''}" alt="${(p.name || p.id || '').replace(/\n/g,' ')}" onerror="this.src=window.NO_IMAGE_PLACEHOLDER||'images/dev_placeholder.gif'">
-               <video class="main-product-img" id="main-video-${i}" style="display:none; width:100%; height:auto; aspect-ratio:1/1; object-fit:cover;" loop muted playsinline controls></video>`;
-
-          // バリエーション切替UI（代表枠カードまたは統合バリエーションカード用）
-          const variantSelectorHtml = renderVariantSelectorHtml(p, i);
-
-          // 通常版カードから肌着バリエーション代表枠へジャンプするボタン
-          const linkedGroupJumpHtml = p.linkedVariantGroupId ? `
-            <button type="button" class="btn-linked-product" onclick="openProductById('${p.linkedVariantGroupId}')">
-              <span>👕 ${p.linkedVariantGroupTitle || 'バリエーション'}（全${p.linkedVariantCount || ''}種）を見る</span>
-              <span>→</span>
-            </button>
-          ` : '';
-
-          const isLiked = (typeof window.isMoaiLiked === 'function') ? window.isMoaiLiked(p.id) : false;
-          track.innerHTML += `
-            <div class="carousel-slide">
-              <div class="product-card-large">
-                <div style="position:relative;">
-                  ${largeImageHtml}
-                </div>
-                ${thumbHtml}
-                <div class="product-info-large">
-                  <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:10px;">
-                    <div class="product-name-large">${p.isDev ? '❓ [開発中]<br>' : ''}${p.name.replace(/\n/g,'<br>')}</div>
-                    <div style="display:flex; flex-direction:column; align-items:flex-end; gap:4px;">
-                      ${badgeLargeHtml}
-                      ${stockLargeHtml}
-                    </div>
-                  </div>
-                  <div class="product-desc" id="desc-text-${p.id}">${getProductDescription(p).replace(/\n/g, '<br>')}</div>
-                  
-${variantSelectorHtml}
-                  ${linkedGroupJumpHtml}
-
-                  <!-- マッチングボタン -->
-                  <div style="padding: 4px 0 10px;">
-                    <button type="button" class="btn-detail-match ${isLiked ? 'liked' : ''}" id="detail-match-btn-${p.id}" onclick="window.toggleMoaiLike('${p.id}')">
-                      <span>${isLiked ? '❤️ マッチング中（トークへ進む）' : '💖 このモアイが好きかも！（マッチング）'}</span>
-                    </button>
-                  </div>
-
-                  <!-- 体験版ボタン -->
-                  ${p.demoUrl ? `
-                    <div style="text-align: center;">
-                      <a href="${p.demoUrl}" target="_blank" rel="noopener noreferrer" class="btn-demo-glow">
-                        <span style="font-size: 20px;">🎮</span>
-                        <span>Webで体験版をプレイ！</span>
-                        <span style="font-size: 16px;">✨</span>
-                      </a>
-                    </div>
-                  ` : ''}
-
-                  <!-- 開発ステータスフロー -->
-                  ${p.isDev ? renderStatusFlow(p.status || 0) : ''}
-
-                  <!-- ゴールドモアイロボ限定特典解放欄 -->
-                  ${p.id === 'moai_robo_mk2_gold' ? `
-                    <div id="gold-secret-container" style="margin-top:20px; background:linear-gradient(135deg, rgba(255,215,0,0.08) 0%, rgba(255,165,0,0.04) 100%); border:2px solid rgba(255,215,0,0.4); border-radius:16px; padding:20px; font-family:'DotGothic16', sans-serif; box-shadow:0 8px 32px rgba(0,0,0,0.5), inset 0 0 15px rgba(255,215,0,0.05);">
-                      <!-- Locked/Initial State -->
-                      <div id="gold-secret-locked" style="display: ${localStorage.getItem('gold_secret_unlocked') === 'true' ? 'none' : 'block'}; text-align:left;">
-                        <div style="font-size:14px; font-weight:900; color:#ffd700; margin-bottom:8px; letter-spacing:1px; display:flex; align-items:center; gap:6px; text-shadow:0 0 8px rgba(255,215,0,0.4);">
-                          <span>🔒</span> SECRET ACCESS PORT
-                        </div>
-                        <div style="font-size:12px; color:rgba(255,255,255,0.7); margin-bottom:14px; line-height:1.5;">
-                          ヨーグルトランEXを購入プレイしてくれてありがとう！！ そんな君には、 秘密のアクセスキーで特典を解放してほしい...... ヒントは、全クリ後のエンドロールじゃ。
-                        </div>
-                        <div style="display:flex; gap:12px; align-items:center; flex-wrap:wrap;">
-                          <input type="text" id="gold-secret-input" placeholder="ENTER ACCESS KEY... _" style="flex:1; min-width:150px; background:#05050a; border:2px solid #ffd700; color:#ffd700; padding:12px 16px; border-radius:8px; font-size:15px; font-family:'DotGothic16', sans-serif; outline:none; text-transform:uppercase; box-shadow:inset 0 0 8px rgba(0,0,0,0.8); letter-spacing:2px;" onkeydown="if(event.key==='Enter') checkGoldSecretKey()">
-                          <button onclick="checkGoldSecretKey()" style="background:#ffd700; color:#000; border:2px solid #fff; border-radius:8px; padding:12px 24px; font-weight:bold; font-size:15px; font-family:'DotGothic16', sans-serif; cursor:pointer; box-shadow:0 4px 0 #b39800; transition:all 0.1s; letter-spacing:1px;" onmousedown="this.style.transform='translateY(4px)'; this.style.boxShadow='0 0px 0 #b39800';" onmouseup="this.style.transform=''; this.style.boxShadow='0 4px 0 #b39800';">ENTER ▶</button>
-                        </div>
-                        <div id="gold-secret-error" style="color:#ff3333; font-size:12px; margin-top:8px; min-height:18px; text-shadow:0 0 5px rgba(255,51,51,0.5);"></div>
-                      </div>
-                      
-                      <!-- Unlocked State -->
-                      <div id="gold-secret-unlocked" style="display: ${localStorage.getItem('gold_secret_unlocked') === 'true' ? 'block' : 'none'}; text-align:center;">
-                        <div style="font-size:40px; margin-bottom:10px; animation: float 2.5s ease-in-out infinite;">🏆✨</div>
-                        <div style="font-size:18px; font-weight:900; color:#ffd700; letter-spacing:2px; margin-bottom:6px; text-shadow:0 0 10px rgba(255,215,0,0.5);">ACCESS GRANTED</div>
-                        <div style="font-size:12px; color:rgba(255,215,0,0.7); letter-spacing:1px; margin-bottom:12px;">アンロック成功！！！</div>
-                         
-                        <!-- イベント購入時案内 -->
-                        <div style="font-size:11px; background:rgba(255,215,0,0.12); border:1px dashed rgba(255,215,0,0.4); color:#ffd700; border-radius:8px; padding:10px 12px; margin-bottom:16px; line-height:1.6; text-align:center; text-shadow:0 0 4px rgba(255,215,0,0.2);">
-                          ⚀ ゴールドモアイロボの購入時に、<br>この画面をそっと作者に見せるのじゃ！
-                        </div>
-                        
-                        <!-- Rewards Cards -->
-                        <div style="display:flex; flex-direction:column; gap:12px; text-align:left;">
-                          <!-- Stand Reward -->
-                          <div style="background:rgba(0,0,0,0.5); border:1px solid rgba(255,215,0,0.3); border-radius:12px; padding:12px; display:flex; align-items:center; gap:14px; box-shadow:0 4px 12px rgba(0,0,0,0.3);">
-                            <img src="images/kurima/moai_robo_mk2_gold/moai_robo_stand.png?v=20260520" style="width:70px; height:70px; border-radius:8px; object-fit:cover; border:1px solid rgba(255,215,0,0.4); background:#000;">
-                            <div>
-                              <div style="font-size:14px; font-weight:bold; color:#ffd700; display:flex; align-items:center; gap:4px;">🎁 モアイロボスタンド</div>
-                               <div style="font-size:11px; color:rgba(255,255,255,0.6); margin-top:4px; line-height:1.4;">モアイロボMk-IIを最も気高くスタイリッシュに飾ることができる、可変式ディスプレイスタンド。<br>めちゃくちゃ最高をプレゼント🎁</div>
-                            </div>
-                          </div>
-                          
-                          <!-- Custom Parts Reward -->
-                          <div style="background:rgba(0,0,0,0.5); border:1px solid rgba(255,215,0,0.3); border-radius:12px; padding:12px; display:flex; align-items:center; gap:14px; box-shadow:0 4px 12px rgba(0,0,0,0.3);">
-                            <img src="images/kurima/moai_robo_mk2_gold/moai_custom_parts.png?v=20260520" style="width:70px; height:70px; border-radius:8px; object-fit:cover; border:1px solid rgba(255,215,0,0.4); background:#000;">
-                            <div>
-                              <div style="font-size:14px; font-weight:bold; color:#ffd700; display:flex; align-items:center; gap:4px;">🎁 おすわりモアイカスタムパーツ2個</div>
-                              <div style="font-size:11px; color:rgba(255,255,255,0.6); margin-top:4px; line-height:1.4;">Mk-IIの肩や足元に増設装着が可能な、レトロ可愛い「おすわりモアイ」カスタム追加パーツ。</div>
-                            </div>
-                          </div>
-                        </div>
-                        
-                        <!-- 注意書き -->
-                        <div style="font-size:10px; color:rgba(255,255,255,0.4); margin-top:16px; line-height:1.5; text-align:left; border-top:1px dashed rgba(255,215,0,0.2); padding-top:12px; font-family:sans-serif;">
-                          ※秘密のアクセスキー解放特典は「モアイロボ MARK2 EX Gold Edition」購入が条件となります。
-                        </div>
-                      </div>
-                    </div>
-                  ` : ''}
-
-                  <!-- お知らせ欄 -->
-                  <div class="product-announcement" id="announce-container-${p.id}">
-                    <div class="announce-label">
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
-                      NOTICE
-                    </div>
-                    <div class="announce-text" id="announce-text-${p.id}"></div>
-                  </div>
-
-                  <!-- SNS共有バー -->
-                  <div class="product-share-container">
-                    <div class="share-header">
-                      <span class="share-title">📢 この作品をシェアする</span>
-                      <span class="share-subtitle">ストーリーやポスト大歓迎！</span>
-                    </div>
-                    <div class="share-btn-row">
-                      <button type="button" class="btn-share-action btn-share-native" onclick="window.shareProductNative('${p.id}')">
-                        <span>📲</span><span>共有</span>
-                      </button>
-                      <button type="button" class="btn-share-action btn-share-x" onclick="window.shareProductX('${p.id}')">
-                        <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
-                        <span>ポスト</span>
-                      </button>
-                      <button type="button" class="btn-share-action btn-share-insta" onclick="window.openInstaStoriesModal('${p.id}')">
-                        <span>📸</span><span>インスタ</span>
-                      </button>
-                      <button type="button" class="btn-share-action btn-share-link" onclick="window.copyProductLink('${p.id}')">
-                        <span>🔗</span><span>URLコピー</span>
-                      </button>
-                      <button type="button" class="btn-share-action btn-sns-reel-trigger self-mode-only" onclick="event.stopPropagation(); window.startSnsReelMode('${p.id}')" title="画面録画用：ポンポン画像が切り替わるショート動画モード">
-                        <span>🎬</span><span>動画録画</span>
-                      </button>
-                    </div>
-                  </div>
-
-
-
-                </div>
-              </div>
-            </div>`;
-          dots.innerHTML += `<div class="dot ${i===0?'active':''}" onclick="goToSlide(${i})"></div>`;
-        });
+        window.dispatchEvent(new Event('viewsBuilt'));
       }
-
-      updateCarousel();
-      enableDragScroll();
-      window.dispatchEvent(new Event('viewsBuilt'));
     }
 
     function renderStatusFlow(currentStatus) {
@@ -3283,6 +3343,7 @@ ${variantSelectorHtml}
 
     // ===== Open detail from tile =====
     function openDetail(index) {
+      ensureCarouselBuilt();
       currentSlide = index;
       setView('carousel');
       updateCarousel();
@@ -3354,6 +3415,9 @@ ${variantSelectorHtml}
 
     // ===== View toggle =====
     function setView(mode) {
+      if (mode === 'carousel') {
+        ensureCarouselBuilt();
+      }
       const moairoomView = document.getElementById('moairoom-view');
       if (moairoomView) moairoomView.style.display = 'none';
       const tileView = document.getElementById('tile-view');
@@ -3444,9 +3508,12 @@ ${variantSelectorHtml}
     // ===== Carousel logic =====
     function updateCarousel() {
       const products = window.currentRenderedProducts || [];
-      document.getElementById('carousel-track').style.transform = `translateX(-${currentSlide * 100}%)`;
-      document.getElementById('carousel-counter').textContent =
-        products.length > 0 ? `${currentSlide + 1} / ${products.length}` : '';
+      const trackEl = document.getElementById('carousel-track');
+      if (trackEl) trackEl.style.transform = `translateX(-${currentSlide * 100}%)`;
+      const counterEl = document.getElementById('carousel-counter');
+      if (counterEl) {
+        counterEl.textContent = products.length > 0 ? `${currentSlide + 1} / ${products.length}` : '';
+      }
       document.querySelectorAll('.dot').forEach((d, i) => d.classList.toggle('active', i === currentSlide));
     }
     function moveCarousel(dir) {
@@ -3458,21 +3525,6 @@ ${variantSelectorHtml}
     }
     function goToSlide(i) { currentSlide = i; updateCarousel(); }
 
-// Swipe navigation between products disabled – use buttons only
-// let touchStartX = 0;
-// let touchStartY = 0;
-// document.getElementById('carousel-track').addEventListener('touchstart', e => {
-//   touchStartX = e.touches[0].clientX;
-//   touchStartY = e.touches[0].clientY;
-// }, { passive: true });
-// document.getElementById('carousel-track').addEventListener('touchend', e => {
-//   const diffX = touchStartX - e.changedTouches[0].clientX;
-//   const diffY = touchStartY - e.changedTouches[0].clientY;
-//   if (Math.abs(diffX) > 50 && Math.abs(diffX) > Math.abs(diffY)) {
-//     moveCarousel(diffX > 0 ? 1 : -1);
-//   }
-// });
-
     // ===== Thumb Strip Drag to Scroll (PC) =====
     function enableDragScroll() {
       document.querySelectorAll('.thumb-strip').forEach(strip => {
@@ -3480,7 +3532,6 @@ ${variantSelectorHtml}
         strip.addEventListener('touchmove', e => e.stopPropagation(), { passive: true });
         strip.addEventListener('touchend', e => e.stopPropagation());
 
-        // PCマウスホイール横スクロール (上下ホイールでスルスル横移動)
         strip.addEventListener('wheel', (e) => {
           if (e.deltaY !== 0) {
             e.preventDefault();
@@ -3519,7 +3570,6 @@ ${variantSelectorHtml}
           }
         });
 
-        // ドラッグ移動した時は写真切り替えクリックをキャンセル
         strip.addEventListener('click', (e) => {
           if (hasMoved) {
             e.stopPropagation();
@@ -3638,7 +3688,7 @@ ${variantSelectorHtml}
     // Listen to works_master (POS variations & master metadata)
     onSnapshot(doc(db, "settings", "works_master"), (docSnap) => {
       window.worksMasterData = docSnap.exists() ? docSnap.data() : {};
-      buildViews();
+      window.scheduleBuildViews();
       updateAllDescriptions();
     }, (error) => {
       console.error("Firestore works_master read error:", error);
@@ -3700,19 +3750,19 @@ ${variantSelectorHtml}
     // Listen to hidden products
     onSnapshot(doc(db, "settings", "hidden_products"), (docSnap) => {
       window.hiddenProductsData = docSnap.exists() ? docSnap.data() : {};
-      buildViews();
+      window.scheduleBuildViews();
     });
 
     // Listen to event products
     onSnapshot(doc(db, "settings", "event_products"), (docSnap) => {
       if (docSnap.exists()) window.eventProductsData = docSnap.data();
-      buildViews();
+      window.scheduleBuildViews();
     });
 
     // Listen to custom (in-dev) products
     onSnapshot(doc(db, "settings", "custom_products"), (docSnap) => {
       if (docSnap.exists()) window.customProductsData = docSnap.data();
-      buildViews();
+      window.scheduleBuildViews();
     });
 
     // Listen to event config (visibility)
@@ -3735,7 +3785,7 @@ ${variantSelectorHtml}
         switchEvent(targetDf);
       } else {
         buildTabs();
-        buildViews();
+        window.scheduleBuildViews();
       }
     });
 
@@ -3914,7 +3964,7 @@ ${variantSelectorHtml}
     // Listen to product_names
     onSnapshot(doc(db, "settings", "product_names"), (docSnap) => {
       window.productNamesData = docSnap.exists() ? (docSnap.data() || {}) : {};
-      buildViews();
+      window.scheduleBuildViews();
     });
 
     // Listen to descriptions
@@ -4156,26 +4206,57 @@ ${variantSelectorHtml}
       }
     });
 
-    // Admin Auth Logic
+    // Admin Auth Logic (URL指定・5回タップ・Google認証対応)
     const adminModal = document.getElementById('admin-modal');
-    // Secret trigger: Double click on the page hero title instead of the header
+    const localDevBtn = document.getElementById('admin-local-dev-btn');
+    if (localDevBtn) {
+      localDevBtn.style.display = 'block';
+      localDevBtn.textContent = '🛠️ このまま開発モードに入る';
+      localDevBtn.addEventListener('click', () => {
+        window.isMoaiAdminAuthenticated = true;
+        window.isUrlDevAuthorized = true;
+        document.body.classList.add('admin-mode');
+        adminModal.style.display = 'none';
+        if (window.renderHero) window.renderHero();
+      });
+    }
+
+    window.triggerAdminLogout = () => {
+      if (auth.currentUser) {
+        if (confirm("現在ログイン中です。開発モード（管理者モード）からログアウトしますか？")) {
+          signOut(auth).then(() => {
+            window.isMoaiAdminAuthenticated = false;
+            window.isUrlDevAuthorized = false;
+            document.body.classList.remove('admin-mode');
+            alert("ログアウトしました。一般画面に戻ります。");
+          });
+        }
+      } else if (window.isMoaiAdminAuthenticated) {
+        window.isMoaiAdminAuthenticated = false;
+        window.isUrlDevAuthorized = false;
+        document.body.classList.remove('admin-mode');
+        alert("開発モードを終了しました。");
+      }
+    };
+
+    // Secret trigger: 5 taps on the page hero title OR Omoai top logo
     let clicks = 0;
-    document.querySelector('.page-hero h1').addEventListener('click', () => {
+    const handleSecretAdminTap = () => {
       clicks++;
       if (clicks >= 5) {
-        if (auth.currentUser) {
-          if (confirm("現在ログイン中です。管理者モードからログアウトしますか？")) {
-            signOut(auth).then(() => {
-              alert("ログアウトしました。一般画面に戻ります。");
-            });
-          }
+        if (auth.currentUser || window.isMoaiAdminAuthenticated) {
+          window.triggerAdminLogout();
         } else {
           adminModal.style.display = 'flex';
         }
         clicks = 0;
       }
-      setTimeout(() => clicks = 0, 2000);
-    });
+      setTimeout(() => clicks = 0, 2200);
+    };
+    const heroH1 = document.querySelector('.page-hero h1');
+    if (heroH1) heroH1.addEventListener('click', handleSecretAdminTap);
+    const omoaiLogo = document.querySelector('.omoai-header-logo');
+    if (omoaiLogo) omoaiLogo.addEventListener('click', handleSecretAdminTap);
 
     document.getElementById('admin-cancel-btn').addEventListener('click', () => {
       adminModal.style.display = 'none';
@@ -4185,7 +4266,7 @@ ${variantSelectorHtml}
       try {
         await signInWithPopup(auth, provider);
         adminModal.style.display = 'none';
-        alert("Googleログインに成功しました。管理者モードを有効化しました。");
+        alert("Googleログインに成功しました。開発モードを有効化しました。");
       } catch (e) {
         console.error(e);
         alert("ログイン失敗: " + e.message);
@@ -4193,9 +4274,15 @@ ${variantSelectorHtml}
     });
 
     onAuthStateChanged(auth, user => {
-      if (user) {
+      if (user || window.isUrlDevAuthorized || window.isMoaiAdminAuthenticated) {
+        window.isMoaiAdminAuthenticated = true;
         document.body.classList.add('admin-mode');
+        const sp = new URLSearchParams(window.location.search);
+        if ((window.location.hash === '#ad-studio' || window.location.hash === '#ad' || sp.get('ad') === '1') && typeof window.openMoaiAdStudio === 'function') {
+          setTimeout(() => window.openMoaiAdStudio(), 150);
+        }
       } else {
+        window.isMoaiAdminAuthenticated = false;
         document.body.classList.remove('admin-mode');
       }
       if (window.renderHero) window.renderHero();
@@ -4208,15 +4295,15 @@ ${variantSelectorHtml}
       updateAllAnnouncements();
     });
 
-    // ===== Author Follower (Easter Egg) =====
+    // ===== Author Follower (Easter Egg - 移動中のみRAF駆動に軽量化) =====
     const follower = document.createElement('img');
-    // user.png を使用
     follower.src = 'user.png';
+    follower.loading = 'lazy';
+    follower.decoding = 'async';
     follower.style.cssText = `
       position: fixed; top: 0; left: 0; width: 100px; height: 100px;
       pointer-events: none; z-index: 10000;
       opacity: 0; transition: opacity 0.5s; object-fit: contain;
-      filter: contrast(1.1) brightness(1.1);
       transform: translate(-100px, -100px);
     `;
     document.body.appendChild(follower);
@@ -4224,6 +4311,8 @@ ${variantSelectorHtml}
     // ===== Speech Bubble =====
     const bubble = document.createElement('img');
     bubble.src = 'images/history/serihu.png';
+    bubble.loading = 'lazy';
+    bubble.decoding = 'async';
     bubble.style.cssText = `
       position: fixed; top: 0; left: 0; width: 100px;
       pointer-events: none; z-index: 10001;
@@ -4235,24 +4324,46 @@ ${variantSelectorHtml}
     let mouseX = -100, mouseY = -100;
     let followX = -100, followY = -100;
     let isMoving = false;
+    let followerRafId = null;
     let hideTimer;
 
+    function animateFollower() {
+      if (!isMoving) {
+        followerRafId = null;
+        return;
+      }
+      followX += (mouseX - followX) * 0.08;
+      followY += (mouseY - followY) * 0.08;
+      follower.style.transform = `translate3d(${(followX + 10).toFixed(1)}px, ${(followY + 10).toFixed(1)}px, 0)`;
+      bubble.style.transform = `translate3d(${(followX - 30).toFixed(1)}px, ${(followY - 65).toFixed(1)}px, 0)`;
+      followerRafId = requestAnimationFrame(animateFollower);
+    }
+
     const showFollower = (x, y) => {
+      if (document.body.classList.contains('moai-ad-studio-open')) {
+        follower.style.opacity = '0';
+        bubble.style.opacity = '0';
+        isMoving = false;
+        return;
+      }
       mouseX = x;
       mouseY = y;
       if (!isMoving) {
         follower.style.opacity = '0.85';
         isMoving = true;
+        if (!followerRafId) {
+          followerRafId = requestAnimationFrame(animateFollower);
+        }
       }
       clearTimeout(hideTimer);
       hideTimer = setTimeout(() => {
         follower.style.opacity = '0';
         bubble.style.opacity = '0';
         isMoving = false;
-      }, 2000);
+      }, 1500);
     };
 
-    window.addEventListener('mousemove', (e) => showFollower(e.clientX, e.clientY));
+    window.addEventListener('mousemove', (e) => showFollower(e.clientX, e.clientY), { passive: true });
     window.addEventListener('touchmove', (e) => {
       if (e.touches.length > 0) {
         showFollower(e.touches[0].clientX, e.touches[0].clientY);
@@ -4261,27 +4372,13 @@ ${variantSelectorHtml}
 
     // ランダムに吹き出しを表示
     function toggleBubble() {
-      // 出現確率をアップ (0.6 -> 0.3)
       if (isMoving && Math.random() > 0.3) {
         bubble.style.opacity = '1';
         setTimeout(() => { bubble.style.opacity = '0'; }, 3000);
       }
-      // 間隔を短縮 (4-8秒 -> 2-5秒)
-      setTimeout(toggleBubble, 2000 + Math.random() * 3000);
+      setTimeout(toggleBubble, 3000 + Math.random() * 3000);
     }
     toggleBubble();
-
-    function animateFollower() {
-      // ぬるっと動く追従 (少し速度アップ)
-      followX += (mouseX - followX) * 0.08;
-      followY += (mouseY - followY) * 0.08;
-      // カーソルの右下に配置
-      follower.style.transform = `translate(${followX + 10}px, ${followY + 10}px)`;
-      // 吹き出しを作者にもっと近づける
-      bubble.style.transform = `translate(${followX - 30}px, ${followY - 65}px)`;
-      requestAnimationFrame(animateFollower);
-    }
-    animateFollower();
   
     // ===== SNS Share & Deep Link System =====
     let currentModalProduct = null;
@@ -4489,21 +4586,17 @@ ${variantSelectorHtml}
     let isReelPlaying = false;
     let isControlsHidden = false;
 
-    // Check if self mode / preview mode / admin mode
+    // Strict Auth Check: Do NOT enable developer UI from URL parameters alone
     function checkSelfMode() {
-      const urlParams = new URLSearchParams(window.location.search);
-      const isPreview = urlParams.get('preview') === 'moai2024';
-      const isModeSns = urlParams.get('mode') === 'sns';
-      const isAdminParam = urlParams.get('admin') === 'true';
-
-      if (isPreview || isModeSns || isAdminParam) {
-        document.body.classList.add('preview-mode');
-        document.body.classList.add('sns-creator-mode');
-      }
+      // Controlled strictly via Firebase Google Auth (body.admin-mode)
     }
     checkSelfMode();
 
     window.startSnsReelMode = function(productId) {
+      if (typeof window.openMoaiAdStudio === 'function') {
+        window.openMoaiAdStudio(productId);
+        return;
+      }
       const p = findProductById(productId);
       if (!p) return;
 
@@ -4991,7 +5084,7 @@ ${variantSelectorHtml}
 
       <div class="map-theater-container">
         <div class="map-stage-layer active" id="cat-layer-stage-1">
-          <img src="images/map_stage1_overall.png" class="map-img-fit" alt="全体マップ">
+          <img src="images/map_stage1_overall.png" loading="lazy" decoding="async" class="map-img-fit" alt="全体マップ">
           <svg class="red-line-svg" viewBox="0 0 657 1024" preserveAspectRatio="xMidYMid meet">
             <path id="cat-path-stage-1" class="red-laser-path" d="M 330,940 Q 250,930 240,860 L 220,830" fill="none" stroke-dasharray="400" stroke-dashoffset="400"/>
           </svg>
@@ -4999,7 +5092,7 @@ ${variantSelectorHtml}
         </div>
 
         <div class="map-stage-layer" id="cat-layer-stage-2">
-          <img src="images/map_stage2_west4f.png" class="map-img-fit" alt="西4Fフロア図">
+          <img src="images/map_stage2_west4f.png" loading="lazy" decoding="async" class="map-img-fit" alt="西4Fフロア図">
           <svg class="red-line-svg" viewBox="0 0 1024 719" preserveAspectRatio="xMidYMid meet">
             <path id="cat-path-stage-2" class="red-laser-path" d="M 680,630 L 530,600 L 400,600 L 300,670" fill="none" stroke-dasharray="600" stroke-dashoffset="600"/>
           </svg>
@@ -5007,7 +5100,7 @@ ${variantSelectorHtml}
         </div>
 
         <div class="map-stage-layer" id="cat-layer-stage-3">
-          <img src="images/map_stage3_k271.png" class="map-img-fit" alt="暗いエリア詳細マップ">
+          <img src="images/map_stage3_k271.png" loading="lazy" decoding="async" class="map-img-fit" alt="暗いエリア詳細マップ">
           <svg class="red-line-svg" viewBox="0 0 1024 533" preserveAspectRatio="xMidYMid meet">
             <path id="cat-path-stage-3" class="red-laser-path" d="M 740,430 L 650,335 L 580,245 L 430,245 L 340,195 L 327,105 L 322,50" fill="none" stroke-dasharray="900" stroke-dashoffset="900"/>
           </svg>
@@ -5306,13 +5399,14 @@ ${variantSelectorHtml}
       if (favViewEl) favViewEl.classList.remove('active');
 
       if (tabName === 'search') {
+        const wasOnlyFavs = !!window.renderTileViewOnlyFavorites;
         if (tileView) tileView.style.display = 'block';
         if (carouselView) carouselView.style.display = 'none';
         if (heroContainer) heroContainer.style.display = 'block';
         if (eventTabs) eventTabs.style.display = 'flex';
         if (itemCount) itemCount.style.display = 'block';
         window.renderTileViewOnlyFavorites = false;
-        if (typeof buildViews === 'function') buildViews();
+        if (wasOnlyFavs && typeof buildViews === 'function') buildViews();
       } else if (tabName === 'incoming') {
         if (tileView) tileView.style.display = 'none';
         if (carouselView) carouselView.style.display = 'none';
@@ -6009,8 +6103,9 @@ ${variantSelectorHtml}
     }
 
     function dispatchRandomMoaiApproach() {
-      // Do not interrupt if user is actively in chat or modal is open
+      // Do not interrupt if user is actively in chat or modal or Ad Studio is open
       if (activeChatMoaiId) return;
+      if (document.body.classList.contains('moai-ad-studio-open')) return;
       const chatModal = document.getElementById('moai-chatroom-modal');
       const matchModal = document.getElementById('moai-matched-modal');
       if ((chatModal && chatModal.classList.contains('active')) ||
@@ -6102,24 +6197,7 @@ ${variantSelectorHtml}
       pendingAttackMoai = null;
     };
 
-    // Admin Likes Stats Viewer Trigger
-    const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.get('admin') === 'likes' || urlParams.get('preview') === 'moai2024') {
-      const header = document.querySelector('.header');
-      if (header) {
-        const adminBtn = document.createElement('button');
-        adminBtn.innerHTML = '📊 いいね監視';
-        adminBtn.style.cssText = 'background:#ff3366; color:#fff; border:none; padding:6px 14px; border-radius:16px; font-size:12px; font-weight:bold; cursor:pointer; margin-left:8px;';
-        adminBtn.onclick = function() {
-          const m = document.getElementById('moai-admin-likes-modal');
-          if (m) {
-            m.style.display = 'flex';
-            if (typeof window.refreshAdminLikesStats === 'function') window.refreshAdminLikesStats();
-          }
-        };
-        header.appendChild(adminBtn);
-      }
-    }
+    // Admin Likes Stats Viewer is strictly accessible from #moai-dev-mode-bar when authenticated
 
     // Init on load
     window.addEventListener('DOMContentLoaded', () => {
@@ -6327,6 +6405,1143 @@ ${variantSelectorHtml}
       </div>
     </div>
   </div>
+
+  <!-- =========================================================================
+       Instagramリール広告撮影モード（第1段階｜基本シナリオ実装・開発モード専用）
+       ========================================================================= -->
+  <style>
+    #moai-ad-studio-modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 200000;
+      background: #000;
+      color: #0f172a;
+      font-family: 'Noto Sans JP', -apple-system, BlinkMacSystemFont, sans-serif;
+      overflow: hidden;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+    body.admin-mode #moai-ad-studio-modal.active {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* 録画用クリーン表示：再生ボタンや開発者UIをすべて隠す */
+    body.ad-recording-clean #moai-dev-mode-bar,
+    body.ad-recording-clean #ad-floating-controls {
+      display: none !important;
+    }
+
+    /* 上部フローティング操作バー（最小限の再生・録画用UI切替・終了のみ） */
+    #ad-floating-controls {
+      position: fixed;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 200500;
+      background: rgba(15, 23, 42, 0.92);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 999px;
+      padding: 6px 10px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+      max-width: 96vw;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .ad-mini-btn {
+      background: #1e293b;
+      color: #fff;
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      border-radius: 999px;
+      padding: 6px 11px;
+      font-size: 11.5px;
+      font-weight: 800;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      white-space: nowrap;
+    }
+    .ad-mini-btn.primary {
+      background: linear-gradient(135deg, #ff2d55, #ff5e62);
+      border-color: #ff2d55;
+    }
+    .ad-mini-btn.record {
+      background: linear-gradient(135deg, #2563eb, #1d4ed8);
+      border-color: #3b82f6;
+    }
+
+    /* 9:16 縦型ステージ（見切れなし・全画面対応） */
+    #ad-stage-916 {
+      position: relative;
+      width: min(100vw, calc(100dvh * 9 / 16));
+      height: min(100dvh, calc(100vw * 16 / 9));
+      aspect-ratio: 9 / 16;
+      background: #f8fafc;
+      color: #0f172a;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 0 60px rgba(0, 0, 0, 0.8);
+    }
+    @media (max-width: 600px) {
+      #ad-stage-916 {
+        width: 100vw;
+        height: 100dvh;
+      }
+    }
+
+    /* シーン切り替えレイヤー（既存OMOAIヘッダー〜ボトムナビの間で自然に遷移） */
+    .ad-scene-body {
+      position: relative;
+      flex: 1;
+      overflow: hidden;
+      background: #f8fafc;
+    }
+    .ad-scene-layer {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.35s ease;
+      background: #f8fafc;
+      z-index: 10;
+      overflow: hidden;
+    }
+    .ad-scene-layer.active {
+      opacity: 1;
+      pointer-events: auto;
+      z-index: 20;
+    }
+
+    /* 疑似スワイプ＆疑似タップ指カーソル */
+    #ad-touch-cursor {
+      position: absolute;
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(255, 45, 85, 0.45) 0%, rgba(255, 45, 85, 0.15) 65%, transparent 100%);
+      border: 2.5px solid rgba(255, 255, 255, 0.95);
+      box-shadow: 0 6px 20px rgba(255, 45, 85, 0.45);
+      z-index: 150;
+      pointer-events: none;
+      opacity: 0;
+      transform: translate(-50%, -50%) scale(1);
+      transition: left 0.55s cubic-bezier(0.22, 1, 0.36, 1),
+                  top 0.55s cubic-bezier(0.22, 1, 0.36, 1),
+                  opacity 0.22s ease,
+                  transform 0.18s ease;
+    }
+    #ad-touch-cursor::after {
+      content: '👆';
+      position: absolute;
+      font-size: 24px;
+      left: 50%;
+      top: 56%;
+      transform: translate(-50%, -30%);
+      filter: drop-shadow(0 3px 6px rgba(0,0,0,0.35));
+    }
+    #ad-touch-cursor.tapping {
+      transform: translate(-50%, -50%) scale(0.76);
+      background: radial-gradient(circle, rgba(255, 45, 85, 0.85) 0%, rgba(255, 45, 85, 0.35) 70%, transparent 100%);
+    }
+    .ad-tap-ripple-ring {
+      position: absolute;
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      border: 3px solid #ff2d55;
+      z-index: 149;
+      pointer-events: none;
+      transform: translate(-50%, -50%) scale(0.5);
+      animation: adRippleOut 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+    @keyframes adRippleOut {
+      0% { transform: translate(-50%, -50%) scale(0.5); opacity: 0.95; }
+      100% { transform: translate(-50%, -50%) scale(2.3); opacity: 0; }
+    }
+
+    /* ① いいね通知ポップアップ（既存 .moai-toast-notification デザインを踏襲） */
+    #ad-toast-banner {
+      position: absolute;
+      top: 10px;
+      left: 12px;
+      right: 12px;
+      z-index: 90;
+      background: rgba(255, 255, 255, 0.98);
+      border: 2px solid #ff2d55;
+      border-radius: 18px;
+      padding: 10px 14px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      box-shadow: 0 14px 32px rgba(255, 45, 85, 0.28);
+      transform: translateY(-130%);
+      opacity: 0;
+      transition: transform 0.32s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.25s ease;
+    }
+    #ad-toast-banner.show {
+      transform: translateY(0);
+      opacity: 1;
+    }
+    #ad-toast-img {
+      width: 46px;
+      height: 46px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid #ff2d55;
+      flex-shrink: 0;
+      background: #f1f5f9;
+    }
+
+    /* Scene 1 ラスト「モアイたちがあなたに興味津々です！」バナー */
+    #ad-s1-climax {
+      position: absolute;
+      left: 14px;
+      right: 14px;
+      bottom: 18px;
+      z-index: 95;
+      background: linear-gradient(135deg, #ff2d55 0%, #ff5e62 100%);
+      color: #fff;
+      padding: 15px 16px;
+      border-radius: 20px;
+      text-align: center;
+      box-shadow: 0 16px 38px rgba(255, 45, 85, 0.5), 0 0 0 3px #fff;
+      transform: scale(0.88) translateY(20px);
+      opacity: 0;
+      transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    #ad-s1-climax.show {
+      transform: scale(1) translateY(0);
+      opacity: 1;
+    }
+
+    /* Scene 2 プロフィールカード（選択時の軽い拡大アニメーション） */
+    #ad-s2-hero-card {
+      background: #ffffff;
+      border-radius: 22px;
+      border: 2px solid #e2e8f0;
+      box-shadow: 0 10px 28px rgba(15, 23, 42, 0.08);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      transition: transform 0.38s cubic-bezier(0.34, 1.56, 0.64, 1), border-color 0.3s ease, box-shadow 0.3s ease;
+    }
+    #ad-s2-hero-card.selected {
+      transform: scale(1.03);
+      border-color: #ff2d55;
+      box-shadow: 0 18px 42px rgba(255, 45, 85, 0.28), 0 0 0 3px rgba(255, 45, 85, 0.2);
+    }
+
+    /* Scene 3 マッチング成立（既存 #moai-matched-modal のスタイルを再利用） */
+    #ad-scene-3 {
+      background: radial-gradient(circle at center, #2d0f24 0%, #120710 100%);
+      color: #fff;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 20px;
+    }
+    .ad-match-heart {
+      position: absolute;
+      font-size: 28px;
+      pointer-events: none;
+      animation: adHeartFloatUp 2s ease-out infinite;
+    }
+    @keyframes adHeartFloatUp {
+      0% { transform: translateY(10px) scale(0.7); opacity: 0; }
+      30% { opacity: 1; }
+      100% { transform: translateY(-70px) scale(1.25); opacity: 0; }
+    }
+
+    /* Scene 4 チャットメッセージ順次表示 */
+    .ad-chat-msg-item {
+      display: flex;
+      align-items: flex-end;
+      gap: 8px;
+      opacity: 0;
+      transform: translateY(12px);
+      transition: opacity 0.3s ease, transform 0.3s ease;
+    }
+    .ad-chat-msg-item.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  </style>
+
+  <div id="moai-ad-studio-modal" aria-hidden="true" onclick="window.handleAdStageBackgroundClick(event)">
+    <!-- 最小限の操作バー（録画時は完全非表示） -->
+    <div id="ad-floating-controls" onclick="event.stopPropagation()">
+      <button type="button" class="ad-mini-btn primary" id="ad-btn-play-toggle" onclick="window.toggleMoaiAdPlayPause()">⏸ 一時停止</button>
+      <button type="button" class="ad-mini-btn" onclick="window.restartMoaiAdScenario()">🔄 最初から</button>
+      <button type="button" class="ad-mini-btn record" onclick="window.startCleanRecordingMode(true)" title="UIをすべて隠して3秒後に最初から自動再生します">🔴 録画用表示(3秒後開始)</button>
+      <button type="button" class="ad-mini-btn" onclick="window.startCleanRecordingMode(false)" title="即座にボタン類を隠します">👁 UIを隠す</button>
+      <span id="ad-time-readout" style="font-size:11px; font-weight:800; color:#cbd5e1; padding:0 4px;">0.0s</span>
+      <button type="button" class="ad-mini-btn" onclick="window.closeMoaiAdStudio()">✕ 閉じる</button>
+    </div>
+
+    <!-- 9:16 縦型画面 -->
+    <div id="ad-stage-916">
+      <!-- 3秒カウントダウン（録画開始用） -->
+      <div id="ad-countdown-overlay" style="display:none; position:absolute; inset:0; z-index:500; background:rgba(15,23,42,0.9); backdrop-filter:blur(8px); flex-direction:column; align-items:center; justify-content:center; color:#fff; text-align:center; padding:20px;">
+        <div style="font-size:14px; font-weight:900; color:#fda4af; margin-bottom:10px;">📱 スマホの画面録画を開始してください</div>
+        <div id="ad-countdown-num" style="font-size:80px; font-weight:900; line-height:1; color:#ff2d55;">3</div>
+        <div style="font-size:11px; color:#94a3b8; margin-top:18px;">※ 録画終了後、画面をタップするとボタンが戻ります</div>
+      </div>
+
+      <!-- 疑似タップ＆スワイプ指カーソル -->
+      <div id="ad-touch-cursor"></div>
+
+      <!-- 既存お品書きサイトのOMOAIネイティブヘッダーをそのまま再利用 -->
+      <div class="header omoai-native-header" style="position:relative !important; flex-shrink:0;">
+        <div class="omoai-header-left">
+          <span class="omoai-header-thumb">👍</span>
+          <span class="omoai-header-likes-count" id="ad-header-likes-count">0</span>
+        </div>
+        <div class="omoai-header-center">
+          <div class="omoai-header-logo">Omoai</div>
+          <div class="omoai-header-sub">MOAI LAB ⚡ v2.8</div>
+        </div>
+        <div class="omoai-header-right">
+          <span class="omoai-header-icon-btn">🔄</span>
+          <span class="omoai-header-icon-btn">➕</span>
+        </div>
+      </div>
+
+      <!-- メインシーン領域 -->
+      <div class="ad-scene-body">
+        <!-- =======================================================
+             ① いいね通知：お品書き2列画面をスワイプ中に次々いいねが届く
+             ======================================================= -->
+        <div id="ad-scene-1" class="ad-scene-layer active">
+          <!-- 上部通知ポップアップ -->
+          <div id="ad-toast-banner">
+            <img id="ad-toast-img" src="images/kurima/osuwari_moai_pen.jpg" alt="モアイ">
+            <div style="flex:1; min-width:0;">
+              <div style="font-size:10px; font-weight:900; color:#ff2d55; margin-bottom:2px;">💌 新着いいね！通知</div>
+              <div id="ad-toast-text" style="font-size:14px; font-weight:900; color:#0f172a; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">おすわりモアイからいいね！</div>
+            </div>
+            <div style="width:32px; height:32px; border-radius:50%; background:#fff0f3; color:#ff2d55; display:flex; align-items:center; justify-content:center; font-size:16px; flex-shrink:0;">❤️</div>
+          </div>
+
+          <!-- 既存お品書きと同じ2列タイルグリッド（スーッとスワイプ動作） -->
+          <div style="flex:1; overflow:hidden; padding:10px 12px;">
+            <div id="ad-s1-swipe-track" style="will-change:transform; transition:transform 0.65s cubic-bezier(0.22, 1, 0.36, 1);">
+              <div style="text-align:center; padding:4px 0 10px;">
+                <div style="font-size:18px; font-weight:900; color:#0f172a;">お品書き</div>
+                <div style="font-size:11px; color:#64748b; font-weight:700;">Kanazawa Moataro</div>
+              </div>
+              <div id="ad-s1-tile-grid" class="tile-grid" style="padding:0; gap:10px;"></div>
+            </div>
+          </div>
+
+          <!-- 最後に「モアイたちがあなたに興味津々です！」 -->
+          <div id="ad-s1-climax">
+            <div style="font-size:11px; font-weight:900; color:#ffe4e6; letter-spacing:1px; margin-bottom:3px;">🗿 NEW APPROACH!</div>
+            <div style="font-size:17px; font-weight:900; line-height:1.35;">モアイたちがあなたに<br>興味津々です！</div>
+          </div>
+        </div>
+
+        <!-- =======================================================
+             ② プロフィール：タンクトップモアイのプロフィール表示＆選択
+             ======================================================= -->
+        <div id="ad-scene-2" class="ad-scene-layer" style="padding:12px 14px 16px; gap:10px;">
+          <div style="text-align:center;">
+            <div style="font-size:16px; font-weight:900; background:linear-gradient(90deg, #ff3366, #ff9966); -webkit-background-clip:text; -webkit-text-fill-color:transparent;">
+              あなたに興味津々なモアイたち
+            </div>
+            <div style="font-size:11px; color:#64748b; font-weight:700;">いいねを送ってきたモアイのプロフィール</div>
+          </div>
+
+          <!-- いいねを送ってきた他モアイ3体のミニカード -->
+          <div id="ad-s2-mini-row" style="display:grid; grid-template-columns:repeat(3, 1fr); gap:8px; flex-shrink:0;"></div>
+
+          <!-- 主役：タンクトップおすわりモアイのプロフィールカード -->
+          <div id="ad-s2-hero-card">
+            <div style="position:relative; flex:1; min-height:210px; background:#f1f5f9; overflow:hidden;">
+              <img id="ad-s2-hero-img" src="images/kurima/hadagi_osuwari_moai_pen/studio/tanktop_cover.jpg" alt="タンクトップを着たおすわりモアイペン立て" style="width:100%; height:100%; object-fit:cover; display:block;">
+              <div style="position:absolute; top:10px; left:10px; background:#ff2d55; color:#fff; font-size:11px; font-weight:900; padding:4px 10px; border-radius:999px; box-shadow:0 4px 10px rgba(255,45,85,0.35);">
+                💌 あなたに「いいね！」しました
+              </div>
+              <div style="position:absolute; bottom:10px; right:10px; background:rgba(15,23,42,0.8); color:#fff; font-size:10px; font-weight:800; padding:4px 9px; border-radius:999px;">
+                🟢 オンライン
+              </div>
+            </div>
+            <div style="padding:12px 14px 14px; background:#fff;">
+              <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;">
+                <div style="font-size:19px; font-weight:900; color:#0f172a;">名前：おすわりモアイ</div>
+                <span style="font-size:10px; font-weight:900; color:#ff2d55; background:#fff0f3; padding:3px 8px; border-radius:999px;">新作</span>
+              </div>
+              <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:12px; padding:8px 12px; margin-bottom:10px; display:flex; flex-direction:column; gap:4px;">
+                <div style="font-size:13px; font-weight:800; color:#1e293b;">
+                  <span style="color:#ff2d55; font-weight:900;">特徴：</span>タンクトップを着ています。
+                </div>
+                <div style="font-size:13px; font-weight:800; color:#1e293b;">
+                  <span style="color:#ff2d55; font-weight:900;">職業：</span>ペン立て
+                </div>
+              </div>
+              <button type="button" id="ad-s2-like-btn" style="width:100%; background:linear-gradient(135deg, #ff2d55, #ff5e62); color:#fff; border:none; padding:12px; border-radius:999px; font-size:14px; font-weight:900; box-shadow:0 6px 18px rgba(255,45,85,0.35);">
+                ❤️ いいね！を返す（マッチング）
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- =======================================================
+             ③ マッチング：疑似タップで It's a MATCH! ＆ハート表示
+             ======================================================= -->
+        <div id="ad-scene-3" class="ad-scene-layer">
+          <span class="ad-match-heart" style="left:16%; top:18%; animation-delay:0s;">❤️</span>
+          <span class="ad-match-heart" style="right:16%; top:22%; animation-delay:0.3s;">💖</span>
+          <span class="ad-match-heart" style="left:22%; bottom:22%; animation-delay:0.6s;">💕</span>
+          <span class="ad-match-heart" style="right:20%; bottom:18%; animation-delay:0.2s;">❤️</span>
+
+          <div style="font-size:12px; font-weight:900; color:#ff9966; letter-spacing:3px; margin-bottom:4px;">CONGRATULATIONS!</div>
+          <div class="match-header-text" style="font-size:38px; font-weight:900; color:#fff; text-shadow:0 4px 20px rgba(255,45,85,0.6); margin-bottom:6px;">It's a MATCH!</div>
+          <div class="match-sub-text" style="font-size:13px; color:#ffe4e6; font-weight:700; margin-bottom:18px;">おすわりモアイとマッチングしました🗿❤️</div>
+
+          <div class="match-avatar-pair" style="display:flex; align-items:center; justify-content:center; position:relative; margin-bottom:18px;">
+            <div style="width:96px; height:96px; border-radius:50%; border:3px solid rgba(255,255,255,0.4); background:#1a1c29; display:flex; align-items:center; justify-content:center; font-size:40px;">
+              👤
+            </div>
+            <img id="ad-s3-img" src="images/kurima/hadagi_osuwari_moai_pen/studio/tanktop_cover.jpg" alt="おすわりモアイ" style="width:96px; height:96px; border-radius:50%; object-fit:cover; border:3px solid #ff2d55; margin-left:-18px; background:#fff;">
+            <div style="position:absolute; background:#fff; width:34px; height:34px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:18px; box-shadow:0 4px 12px rgba(0,0,0,0.3);">❤️</div>
+          </div>
+
+          <div style="font-size:18px; font-weight:900; color:#fff; margin-bottom:6px;">おすわりモアイ（タンクトップ）</div>
+          <div style="font-size:12.5px; color:rgba(255,255,255,0.85); line-height:1.5;">
+            モアイからメッセージが届いています...💬
+          </div>
+        </div>
+
+        <!-- =======================================================
+             ④ チャット：タンクトップモアイから4通のメッセージが届く
+             ======================================================= -->
+        <div id="ad-scene-4" class="ad-scene-layer" style="background:#ffffff;">
+          <div class="moai-chat-header" style="display:flex; align-items:center; gap:10px; padding:10px 14px; border-bottom:1px solid #e2e8f0; background:#fff; flex-shrink:0;">
+            <span style="width:30px; height:30px; border-radius:50%; background:#f1f5f9; display:flex; align-items:center; justify-content:center; font-weight:900; color:#0f172a;">‹</span>
+            <img id="ad-s4-avatar" src="images/kurima/hadagi_osuwari_moai_pen/studio/tanktop_cover.jpg" alt="おすわりモアイ" style="width:38px; height:38px; border-radius:50%; object-fit:cover; border:2px solid #ff3366;">
+            <div style="flex:1; min-width:0;">
+              <div style="font-size:15px; font-weight:900; color:#0f172a;">おすわりモアイ</div>
+              <div style="font-size:11px; color:#10b981; display:flex; align-items:center; gap:4px; font-weight:700;">
+                <span style="width:6px; height:6px; border-radius:50%; background:#10b981; display:inline-block;"></span>
+                オンライン（特徴：タンクトップ / 職業：ペン立て）
+              </div>
+            </div>
+          </div>
+
+          <div id="ad-chat-body" class="moai-chat-body" style="flex:1; padding:14px; overflow-y:auto; display:flex; flex-direction:column; gap:12px; background:#f8fafc;">
+            <div style="text-align:center; font-size:11px; font-weight:700; color:#94a3b8;">おすわりモアイとマッチングしました ❤️</div>
+            <div id="ad-chat-list" style="display:flex; flex-direction:column; gap:12px;"></div>
+          </div>
+
+          <div class="moai-chat-input-bar" style="padding:10px 14px; background:#fff; border-top:1px solid #e2e8f0; display:flex; align-items:center; gap:8px; flex-shrink:0;">
+            <div style="flex:1; background:#f1f5f9; border:1px solid #e2e8f0; border-radius:999px; padding:9px 14px; font-size:12px; color:#94a3b8;">メッセージを入力...</div>
+            <div style="width:36px; height:36px; border-radius:50%; background:linear-gradient(135deg, #ff2d55, #ff5e62); color:#fff; display:flex; align-items:center; justify-content:center; font-size:14px;">➤</div>
+          </div>
+        </div>
+
+        <!-- =======================================================
+             ⑤ 実物紹介：タンクトップモアイペン立ての実物写真を表示
+             ======================================================= -->
+        <div id="ad-scene-5" class="ad-scene-layer" style="background:#0f172a; color:#fff; padding:18px 16px; justify-content:center; gap:12px;">
+          <div style="text-align:center;">
+            <div style="font-size:11px; font-weight:900; color:#fda4af; letter-spacing:1px; margin-bottom:4px;">🗿 REAL HANDMADE WORK</div>
+            <div style="font-size:22px; font-weight:900; color:#fff; background:#ff2d55; display:inline-block; padding:6px 18px; border-radius:999px; box-shadow:0 8px 20px rgba(255,45,85,0.4);">
+              実は、本当にいるんです。
+            </div>
+          </div>
+
+          <!-- 既存データの作品写真（形状・色無加工） -->
+          <div style="background:#1e293b; border-radius:20px; overflow:hidden; border:2px solid rgba(255,255,255,0.85); box-shadow:0 14px 32px rgba(0,0,0,0.45); position:relative; height:240px;">
+            <img id="ad-s5-main-img" src="images/kurima/hadagi_osuwari_moai_pen/studio/tanktop_cover.jpg" alt="タンクトップを着たおすわりモアイペン立て" style="width:100%; height:100%; object-fit:cover; display:block;">
+          </div>
+
+          <div style="display:grid; grid-template-columns:1fr 1.15fr; gap:10px; align-items:stretch;">
+            <div style="background:#1e293b; border-radius:16px; overflow:hidden; border:1.5px solid rgba(255,255,255,0.7); height:120px;">
+              <img id="ad-s5-sub-img" src="images/kurima/osuwari_moai_pen/raw/osuwari_moai_pen_RAW_20261031_150436_001.jpg" alt="ペン立て実物写真" style="width:100%; height:100%; object-fit:cover; display:block;" onerror="this.src='images/kurima/osuwari_moai_pen.jpg'">
+            </div>
+            <div style="background:#1e293b; border:1px solid #334155; border-radius:16px; padding:12px; display:flex; flex-direction:column; justify-content:center; gap:4px;">
+              <div style="font-size:11px; font-weight:900; color:#fda4af;">✒️ 実際に使えるペン立て</div>
+              <div style="font-size:14px; font-weight:900; color:#fff; line-height:1.35;">タンクトップを着た<br>おすわりモアイペン立て</div>
+              <div style="font-size:11px; color:#cbd5e1; font-weight:700;">Kanazawa Moataro 制作</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- =======================================================
+             ⑥ イベント案内：デザフェス64のブース案内
+             ======================================================= -->
+        <div id="ad-scene-6" class="ad-scene-layer" style="background:linear-gradient(180deg, #0f172a 0%, #1e1b4b 100%); color:#fff; padding:22px 18px; justify-content:center; align-items:center; text-align:center; gap:14px;">
+          <img id="ad-s6-img" src="images/kurima/hadagi_osuwari_moai_pen/studio/tanktop_cover.jpg" alt="おすわりモアイ" style="width:76px; height:76px; border-radius:50%; object-fit:cover; border:3px solid #ff2d55; box-shadow:0 8px 24px rgba(255,45,85,0.4);">
+
+          <div style="width:100%; background:rgba(255,255,255,0.07); border:2px solid #ff2d55; border-radius:24px; padding:22px 16px; box-shadow:0 18px 40px rgba(0,0,0,0.45); box-sizing:border-box;">
+            <div style="font-size:23px; font-weight:900; color:#ffd700; letter-spacing:0.5px; margin-bottom:8px;">
+              デザインフェスタvol.64
+            </div>
+            <div style="font-size:18px; font-weight:900; color:#ffffff; margin-bottom:14px;">
+              2026年11月14日・15日
+            </div>
+            <div style="background:rgba(0,0,0,0.45); border:1px solid rgba(255,215,0,0.4); border-radius:16px; padding:12px; margin-bottom:14px;">
+              <div style="font-size:17px; font-weight:900; color:#38bdf8; margin-bottom:4px;">西館4階</div>
+              <div style="font-size:22px; font-weight:900; color:#ffd700;">暗いブース K-271</div>
+            </div>
+            <div style="font-size:16px; font-weight:900; color:#f8fafc; letter-spacing:0.5px;">
+              Kanazawa Moataro
+            </div>
+          </div>
+        </div>
+
+        <!-- =======================================================
+             ⑦ サイト誘導：お品書きサイトへ誘導
+             ======================================================= -->
+        <div id="ad-scene-7" class="ad-scene-layer" style="background:radial-gradient(circle at top, #fff0f3 0%, #ffffff 70%); padding:22px 18px; justify-content:center; align-items:center; text-align:center; gap:16px;">
+          <img id="ad-s7-img" src="images/kurima/hadagi_osuwari_moai_pen/studio/tanktop_cover.jpg" alt="おすわりモアイ" style="width:92px; height:92px; border-radius:50%; object-fit:cover; border:4px solid #ff2d55; box-shadow:0 10px 28px rgba(255,45,85,0.3);">
+
+          <div style="background:#ffffff; border:2px solid #ffe4e8; border-radius:22px; padding:20px 16px; width:100%; box-sizing:border-box; box-shadow:0 12px 30px rgba(15,23,42,0.08);">
+            <div style="font-size:18px; font-weight:900; color:#0f172a; line-height:1.5; margin-bottom:12px;">
+              あなたにも、モアイから<br>いいねが届いているかも？
+            </div>
+            <div style="font-size:18px; font-weight:900; color:#ff2d55; line-height:1.4;">
+              続きはお品書きサイトで。
+            </div>
+          </div>
+
+          <div id="ad-s7-cta" style="width:100%; box-sizing:border-box; background:linear-gradient(135deg, #ff2d55 0%, #ff5e62 100%); color:#fff; font-size:15px; font-weight:900; padding:15px 20px; border-radius:999px; box-shadow:0 10px 25px rgba(255,45,85,0.4);">
+            🔍 お品書きサイトを見る（Kanazawa Moataro）
+          </div>
+        </div>
+      </div>
+
+      <!-- 既存お品書きサイトのOMOAI下部ナビゲーションバーをそのまま再利用 -->
+      <nav class="moai-bottom-nav" style="position:relative !important; flex-shrink:0;">
+        <div class="m-nav-item active" id="ad-nav-search">
+          <span class="m-nav-icon">🔍</span>
+          <span class="m-nav-label">さがす</span>
+        </div>
+        <div class="m-nav-item" id="ad-nav-incoming">
+          <span class="m-nav-icon" style="position:relative;">
+            👍
+            <span class="m-nav-badge" id="ad-badge-incoming" style="display:none;">0</span>
+          </span>
+          <span class="m-nav-label">いいね</span>
+        </div>
+        <div class="m-nav-item m-nav-plus-item">
+          <div class="m-plus-circle">＋</div>
+          <span class="m-nav-label" style="font-size:10px; margin-top:2px;">ガチャ</span>
+        </div>
+        <div class="m-nav-item" id="ad-nav-chat">
+          <span class="m-nav-icon" style="position:relative;">
+            💬
+            <span class="m-nav-badge" id="ad-badge-chat" style="display:none;">1</span>
+          </span>
+          <span class="m-nav-label">やり取り</span>
+        </div>
+        <div class="m-nav-item">
+          <span class="m-nav-icon">❤️</span>
+          <span class="m-nav-label">お気に入り</span>
+        </div>
+      </nav>
+    </div>
+  </div>
+
+  <script>
+  (function() {
+    // 第1段階：タンクトップモアイが主役の基本シナリオ（約24.5秒）
+    const SCENE_DURATIONS_SEC = [4.5, 4.0, 3.0, 5.7, 3.0, 2.3, 2.0];
+
+    let adTimers = [];
+    let adRafId = null;
+    let adIsPlaying = false;
+    let adStartTimeMs = 0;
+    let adElapsedBeforePauseMs = 0;
+    let audioCtx = null;
+
+    // 既存お品書きデータからタンクトップモアイの実物画像とサブ画像を取得（形状・色無加工）
+    function resolveTanktopAssets() {
+      let mainImg = 'images/kurima/hadagi_osuwari_moai_pen/studio/tanktop_cover.jpg';
+      let subImg = 'images/kurima/osuwari_moai_pen/raw/osuwari_moai_pen_RAW_20261031_150436_001.jpg';
+
+      const allProds = (typeof window.getAllAvailableProducts === 'function')
+        ? window.getAllAvailableProducts()
+        : (window.currentRenderedProducts || []);
+
+      const variantGroup = allProds.find(p =>
+        p && (p.id === 'osuwari_moai_pen__variant_group' ||
+              p.id === 'hadagi_osuwari_moai_pen' ||
+              (p.name && (p.name.includes('肌着') || p.name.includes('タンクトップ'))))
+      );
+
+      if (variantGroup) {
+        if (variantGroup.image) mainImg = variantGroup.image;
+        if (Array.isArray(variantGroup.images) && variantGroup.images.length > 1) {
+          subImg = variantGroup.images[1];
+        }
+      }
+
+      if (window.WORK_FOLDER_ASSETS && window.WORK_FOLDER_ASSETS.hadagi_osuwari_moai_pen) {
+        const f = window.WORK_FOLDER_ASSETS.hadagi_osuwari_moai_pen;
+        if (Array.isArray(f.studio) && f.studio.length > 0) {
+          mainImg = f.studio[0];
+          if (f.studio.length > 1) subImg = f.studio[1];
+        }
+      }
+
+      return { mainImg, subImg };
+    }
+
+    function playAdSound(type) {
+      try {
+        if (!audioCtx) {
+          const Ctx = window.AudioContext || window.webkitAudioContext;
+          if (!Ctx) return;
+          audioCtx = new Ctx();
+        }
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        const now = audioCtx.currentTime;
+
+        if (type === 'swipe') {
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(220, now);
+          osc.frequency.exponentialRampToValueAtTime(420, now + 0.14);
+          gain.gain.setValueAtTime(0.04, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
+          osc.start(now);
+          osc.stop(now + 0.15);
+        } else if (type === 'notif') {
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(587.33, now);
+          osc.frequency.setValueAtTime(880, now + 0.06);
+          gain.gain.setValueAtTime(0.11, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.22);
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
+          osc.start(now);
+          osc.stop(now + 0.22);
+        } else if (type === 'tap') {
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(800, now);
+          osc.frequency.exponentialRampToValueAtTime(300, now + 0.07);
+          gain.gain.setValueAtTime(0.12, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
+          osc.start(now);
+          osc.stop(now + 0.08);
+        } else if (type === 'match') {
+          [523.25, 659.25, 783.99, 1046.5].forEach((freq, idx) => {
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = 'triangle';
+            const t = now + idx * 0.07;
+            osc.frequency.setValueAtTime(freq, t);
+            gain.gain.setValueAtTime(0.12, t);
+            gain.gain.exponentialRampToValueAtTime(0.001, t + 0.45);
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start(t);
+            osc.stop(t + 0.46);
+          });
+        } else if (type === 'chat') {
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(660, now);
+          osc.frequency.exponentialRampToValueAtTime(990, now + 0.08);
+          gain.gain.setValueAtTime(0.09, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.14);
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
+          osc.start(now);
+          osc.stop(now + 0.15);
+        }
+      } catch (e) {}
+    }
+
+    function clearAdScheduledTimers() {
+      adTimers.forEach(id => clearTimeout(id));
+      adTimers = [];
+      if (adRafId) {
+        cancelAnimationFrame(adRafId);
+        adRafId = null;
+      }
+    }
+
+    function scheduleAt(delayMs, fn) {
+      const id = setTimeout(fn, Math.max(0, delayMs));
+      adTimers.push(id);
+    }
+
+    function moveCursorTo(xPct, yPct, visible) {
+      const cursor = document.getElementById('ad-touch-cursor');
+      if (!cursor) return;
+      cursor.style.left = xPct + '%';
+      cursor.style.top = yPct + '%';
+      cursor.style.opacity = visible ? '1' : '0';
+      cursor.classList.remove('tapping');
+    }
+
+    function triggerTapAt(xPct, yPct) {
+      const cursor = document.getElementById('ad-touch-cursor');
+      const stage = document.getElementById('ad-stage-916');
+      if (!cursor || !stage) return;
+      cursor.style.left = xPct + '%';
+      cursor.style.top = yPct + '%';
+      cursor.style.opacity = '1';
+      cursor.classList.add('tapping');
+      playAdSound('tap');
+
+      const ripple = document.createElement('div');
+      ripple.className = 'ad-tap-ripple-ring';
+      ripple.style.left = xPct + '%';
+      ripple.style.top = yPct + '%';
+      stage.appendChild(ripple);
+      setTimeout(() => {
+        cursor.classList.remove('tapping');
+        if (ripple.parentNode) ripple.parentNode.removeChild(ripple);
+      }, 600);
+    }
+
+    function setBottomNavTab(activeId) {
+      ['ad-nav-search', 'ad-nav-incoming', 'ad-nav-chat'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.classList.toggle('active', id === activeId);
+      });
+    }
+
+    function activateSceneLayer(sceneNum) {
+      for (let i = 1; i <= 7; i++) {
+        const layer = document.getElementById('ad-scene-' + i);
+        if (layer) layer.classList.toggle('active', i === sceneNum);
+      }
+      if (sceneNum === 1 || sceneNum >= 5) setBottomNavTab('ad-nav-search');
+      else if (sceneNum === 2 || sceneNum === 3) setBottomNavTab('ad-nav-incoming');
+      else if (sceneNum === 4) setBottomNavTab('ad-nav-chat');
+    }
+
+    // 既存お品書きデータを使ってステージ内の画像を同期
+    function prepareStageData() {
+      const { mainImg, subImg } = resolveTanktopAssets();
+      ['ad-s2-hero-img', 'ad-s3-img', 'ad-s4-avatar', 'ad-s5-main-img', 'ad-s6-img', 'ad-s7-img'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el && mainImg) el.src = mainImg;
+      });
+      const subEl = document.getElementById('ad-s5-sub-img');
+      if (subEl && subImg) subEl.src = subImg;
+
+      // Scene 1: 実際のお品書きと同じ2列タイルカードを並べる
+      const grid = document.getElementById('ad-s1-tile-grid');
+      if (grid) {
+        const allProds = (typeof window.getAllAvailableProducts === 'function')
+          ? window.getAllAvailableProducts().filter(p => !p.isDev && p.image)
+          : [];
+        const fallbackCards = [
+          { name: 'うなだれているモアイ', image: 'images/kurima/moai_loscut/studio/ChatGPT 画像 2026年11月5日 20_27_08-1.png', hitokoto: '落ち込むのが好きです📉' },
+          { name: 'おすわりモアイペン立て', image: 'images/kurima/osuwari_moai_pen.jpg', hitokoto: 'デスクを静かに見守ります🪑' },
+          { name: 'マッチョなモアイペン立て', image: 'images/kurima/macho_moai_pen.png', hitokoto: 'パワーッッッ！！！💪' },
+          { name: '黄昏れモアイ', image: 'images/kurima/tasogare_moai.jpg', hitokoto: '黄昏るのが好きです🗿' },
+          { name: '肌着おすわりモアイペン立て', image: mainImg, hitokoto: 'タンクトップ着てます👕' },
+          { name: 'ニットおすわりモアイペン立て', image: 'images/kurima/nitto_osuwari_moai_penstand.jpg', hitokoto: '寒がりなのでセーター着てます🧶' },
+          { name: 'ハイレグモアイ', image: 'images/kurima/moai_highleg/studio/ハイレグモアイ_master.png', hitokoto: '美脚を褒められると伸びます🩱' },
+          { name: '考えるモアイ', image: 'images/kurima/kangaeru_moai.jpg', hitokoto: '一緒に考えてくれます🤔' }
+        ];
+        const cards = allProds.length >= 6 ? allProds.slice(0, 8) : fallbackCards;
+        grid.innerHTML = cards.map((p, idx) => {
+          const cleanName = (p.name || 'モアイ').replace(/\n/g, ' ');
+          const imgSrc = p.image || p.optimizedCover || 'images/kurima/tasogare_moai.jpg';
+          const hitokoto = p.hitokoto || (window.getMoaiHitokoto ? window.getMoaiHitokoto(p) : '');
+          return `
+            <div class="product-card-tile" style="pointer-events:none;">
+              <div style="position:relative;">
+                <img class="main-product-img" src="${imgSrc}" alt="${cleanName}" style="border-radius:12px 12px 0 0; height:128px; width:100%; object-fit:cover; display:block;">
+                ${idx < 2 ? '<div class="pos-badge-new">NEW</div>' : ''}
+                <div class="btn-tile-heart" style="min-width:34px !important; height:34px !important; font-size:14px !important;">🤍</div>
+              </div>
+              <div class="product-info-tile" style="padding:8px 10px !important;">
+                <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:2px;">
+                  <div class="product-name-tile" style="font-size:11.5px !important; display:flex; align-items:center; gap:4px; overflow:hidden; white-space:nowrap; text-overflow:ellipsis;">
+                    <span style="width:6px; height:6px; border-radius:50%; background:#10b981; flex-shrink:0;"></span>
+                    <span style="overflow:hidden; text-overflow:ellipsis;">${cleanName}</span>
+                  </div>
+                  <span style="font-size:9.5px; color:#94a3b8; font-weight:700; flex-shrink:0;">金沢</span>
+                </div>
+                ${hitokoto ? `<div class="hitokoto-bubble" style="font-size:9.5px !important; padding:4px 7px !important; margin:4px 0 0 !important; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">💬「${hitokoto}」</div>` : ''}
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+
+      // Scene 2: いいねを送ってきた他モアイ3体のミニカード
+      const miniRow = document.getElementById('ad-s2-mini-row');
+      if (miniRow) {
+        const others = [
+          { name: 'おすわりモアイ', img: 'images/kurima/osuwari_moai_pen.jpg' },
+          { name: 'マッチョモアイ', img: 'images/kurima/macho_moai_pen.png' },
+          { name: '黄昏モアイ', img: 'images/kurima/tasogare_moai.jpg' }
+        ];
+        miniRow.innerHTML = others.map(o => `
+          <div style="background:#fff; border:1px solid #e2e8f0; border-radius:12px; padding:6px; display:flex; align-items:center; gap:6px; box-shadow:0 2px 6px rgba(0,0,0,0.04);">
+            <img src="${o.img}" alt="${o.name}" style="width:30px; height:30px; border-radius:50%; object-fit:cover; border:1.5px solid #ff2d55; flex-shrink:0;">
+            <div style="min-width:0;">
+              <div style="font-size:9.5px; font-weight:900; color:#0f172a; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${o.name}</div>
+              <div style="font-size:8.5px; font-weight:800; color:#ff2d55;">👍 いいね！</div>
+            </div>
+          </div>
+        `).join('');
+      }
+    }
+
+    // ① いいね通知（0〜4.5秒）
+    function runScene1Animation() {
+      activateSceneLayer(1);
+      const { mainImg } = resolveTanktopAssets();
+      const track = document.getElementById('ad-s1-swipe-track');
+      const toast = document.getElementById('ad-toast-banner');
+      const toastImg = document.getElementById('ad-toast-img');
+      const toastText = document.getElementById('ad-toast-text');
+      const climax = document.getElementById('ad-s1-climax');
+      const headerLikes = document.getElementById('ad-header-likes-count');
+      const badgeIncoming = document.getElementById('ad-badge-incoming');
+      const badgeChat = document.getElementById('ad-badge-chat');
+
+      if (track) {
+        track.style.transition = 'none';
+        track.style.transform = 'translateY(0px)';
+      }
+      if (toast) toast.classList.remove('show');
+      if (climax) climax.classList.remove('show');
+      if (headerLikes) headerLikes.textContent = '0';
+      if (badgeIncoming) badgeIncoming.style.display = 'none';
+      if (badgeChat) badgeChat.style.display = 'none';
+
+      // お品書き2列画面をスーッとスワイプする演出
+      moveCursorTo(54, 72, true);
+      scheduleAt(120, () => {
+        moveCursorTo(52, 34, true);
+        playAdSound('swipe');
+        if (track) {
+          track.style.transition = 'transform 0.68s cubic-bezier(0.22, 1, 0.36, 1)';
+          track.style.transform = 'translateY(-150px)';
+        }
+      });
+      scheduleAt(820, () => {
+        moveCursorTo(55, 70, true);
+      });
+      scheduleAt(1020, () => {
+        moveCursorTo(50, 36, true);
+        playAdSound('swipe');
+        if (track) {
+          track.style.transform = 'translateY(-290px)';
+        }
+      });
+      scheduleAt(1550, () => {
+        moveCursorTo(50, 50, false);
+      });
+
+      // 次々に届く「いいね」通知
+      const notifications = [
+        { text: 'おすわりモアイからいいね！', img: 'images/kurima/osuwari_moai_pen.jpg', at: 850 },
+        { text: 'マッチョモアイからいいね！', img: 'images/kurima/macho_moai_pen.png', at: 1550 },
+        { text: '黄昏モアイからいいね！', img: 'images/kurima/tasogare_moai.jpg', at: 2250 },
+        { text: 'タンクトップモアイからいいね！', img: mainImg, at: 2950 }
+      ];
+
+      notifications.forEach((n, idx) => {
+        scheduleAt(n.at, () => {
+          if (!toast) return;
+          toast.classList.remove('show');
+          if (toastImg) toastImg.src = n.img;
+          if (toastText) toastText.textContent = n.text;
+          requestAnimationFrame(() => toast.classList.add('show'));
+          playAdSound('notif');
+
+          const count = String(idx + 1);
+          if (headerLikes) headerLikes.textContent = count;
+          if (badgeIncoming) {
+            badgeIncoming.textContent = count;
+            badgeIncoming.style.display = 'flex';
+          }
+        });
+      });
+
+      // 最後に「モアイたちがあなたに興味津々です！」
+      scheduleAt(3500, () => {
+        if (climax) climax.classList.add('show');
+        playAdSound('match');
+      });
+    }
+
+    // ② プロフィール（4.5〜8.5秒）
+    function runScene2Animation() {
+      activateSceneLayer(2);
+      const heroCard = document.getElementById('ad-s2-hero-card');
+      if (heroCard) heroCard.classList.remove('selected');
+
+      moveCursorTo(54, 65, true);
+      scheduleAt(1400, () => {
+        moveCursorTo(50, 82, true);
+      });
+      scheduleAt(2300, () => {
+        triggerTapAt(50, 82);
+        if (heroCard) heroCard.classList.add('selected');
+      });
+      scheduleAt(3100, () => {
+        moveCursorTo(50, 82, false);
+      });
+    }
+
+    // ③ マッチング成立（8.5〜11.5秒）
+    function runScene3Animation() {
+      activateSceneLayer(3);
+      moveCursorTo(50, 50, false);
+      playAdSound('match');
+      const badgeChat = document.getElementById('ad-badge-chat');
+      if (badgeChat) {
+        badgeChat.textContent = '1';
+        badgeChat.style.display = 'flex';
+      }
+    }
+
+    // ④ チャット（11.5〜17.2秒）：脚本通りの4セリフを順次表示
+    function runScene4Animation() {
+      activateSceneLayer(4);
+      moveCursorTo(50, 50, false);
+      const { mainImg } = resolveTanktopAssets();
+      const list = document.getElementById('ad-chat-list');
+      const body = document.getElementById('ad-chat-body');
+      if (list) list.innerHTML = '';
+
+      const chatLines = [
+        { text: '🗿「はじめまして！」', delay: 400 },
+        { text: '🗿「タンクトップ、似合ってますか？」', delay: 1650 },
+        { text: '🗿「実は僕、ペン立てなんです。」', delay: 2950 },
+        { text: '🗿「11/14・15、デザフェスで待ってるね。」', delay: 4250 }
+      ];
+
+      chatLines.forEach(item => {
+        scheduleAt(item.delay, () => {
+          if (!list) return;
+          const row = document.createElement('div');
+          row.className = 'ad-chat-msg-item';
+          row.innerHTML = `
+            <img src="${mainImg}" alt="おすわりモアイ" style="width:34px; height:34px; border-radius:50%; object-fit:cover; border:1.5px solid #ff2d55; flex-shrink:0; background:#fff;">
+            <div class="moai-msg-bubble moai-msg-moai" style="background:#ffffff !important; color:#0f172a !important; border:1px solid #e2e8f0 !important; padding:10px 14px; border-radius:16px 16px 16px 4px; font-size:14px; font-weight:800; box-shadow:0 2px 8px rgba(0,0,0,0.05); max-width:82%;">
+              ${item.text}
+            </div>
+          `;
+          list.appendChild(row);
+          requestAnimationFrame(() => row.classList.add('show'));
+          playAdSound('chat');
+          if (body) body.scrollTop = body.scrollHeight;
+        });
+      });
+    }
+
+    // ⑤ 実物紹介（17.2〜20.2秒）
+    function runScene5Animation() {
+      activateSceneLayer(5);
+      moveCursorTo(50, 50, false);
+      playAdSound('swipe');
+    }
+
+    // ⑥ イベント案内（20.2〜22.5秒）
+    function runScene6Animation() {
+      activateSceneLayer(6);
+      moveCursorTo(50, 50, false);
+      playAdSound('chat');
+    }
+
+    // ⑦ サイト誘導（22.5〜24.5秒）
+    function runScene7Animation() {
+      activateSceneLayer(7);
+      moveCursorTo(50, 50, false);
+      playAdSound('match');
+      scheduleAt(800, () => {
+        moveCursorTo(50, 74, true);
+      });
+      scheduleAt(1350, () => {
+        triggerTapAt(50, 74);
+      });
+    }
+
+    function getSceneStartOffsetsMs() {
+      const offsets = [0];
+      let sum = 0;
+      for (let i = 0; i < SCENE_DURATIONS_SEC.length; i++) {
+        sum += SCENE_DURATIONS_SEC[i] * 1000;
+        offsets.push(sum);
+      }
+      return offsets;
+    }
+
+    function updatePlayPauseBtnUI() {
+      const btn = document.getElementById('ad-btn-play-toggle');
+      if (btn) {
+        btn.textContent = adIsPlaying ? '⏸ 一時停止' : '▶ 再生';
+      }
+    }
+
+    function startScenarioFromOffset(offsetMs) {
+      clearAdScheduledTimers();
+      prepareStageData();
+
+      const offsets = getSceneStartOffsetsMs();
+      const totalMs = offsets[offsets.length - 1];
+      adElapsedBeforePauseMs = Math.min(Math.max(0, offsetMs), totalMs);
+      adStartTimeMs = performance.now();
+      adIsPlaying = true;
+      updatePlayPauseBtnUI();
+
+      const runners = [
+        runScene1Animation,
+        runScene2Animation,
+        runScene3Animation,
+        runScene4Animation,
+        runScene5Animation,
+        runScene6Animation,
+        runScene7Animation
+      ];
+
+      for (let s = 0; s < runners.length; s++) {
+        const sStart = offsets[s];
+        const sEnd = offsets[s + 1];
+        if (adElapsedBeforePauseMs <= sStart) {
+          scheduleAt(sStart - adElapsedBeforePauseMs, () => runners[s]());
+        } else if (adElapsedBeforePauseMs >= sStart && adElapsedBeforePauseMs < sEnd) {
+          runners[s]();
+        }
+      }
+
+      scheduleAt(totalMs - adElapsedBeforePauseMs, () => {
+        adIsPlaying = false;
+        adElapsedBeforePauseMs = totalMs;
+        updatePlayPauseBtnUI();
+        const readout = document.getElementById('ad-time-readout');
+        if (readout) readout.textContent = `${(totalMs / 1000).toFixed(1)}s`;
+      });
+
+      function tick() {
+        if (!adIsPlaying) return;
+        const nowElapsed = Math.min(totalMs, adElapsedBeforePauseMs + (performance.now() - adStartTimeMs));
+        const readout = document.getElementById('ad-time-readout');
+        if (readout) readout.textContent = `${(nowElapsed / 1000).toFixed(1)}s`;
+        if (nowElapsed < totalMs) {
+          adRafId = requestAnimationFrame(tick);
+        }
+      }
+      adRafId = requestAnimationFrame(tick);
+    }
+
+    // 公開グローバル関数（開発モード限定）
+    window.openMoaiAdStudio = function() {
+      if (!document.body.classList.contains('admin-mode')) return;
+      const modal = document.getElementById('moai-ad-studio-modal');
+      if (!modal) return;
+      document.body.classList.add('moai-ad-studio-open');
+      modal.classList.add('active');
+      modal.setAttribute('aria-hidden', 'false');
+      window.restartMoaiAdScenario();
+    };
+
+    window.closeMoaiAdStudio = function() {
+      clearAdScheduledTimers();
+      adIsPlaying = false;
+      document.body.classList.remove('ad-recording-clean');
+      document.body.classList.remove('moai-ad-studio-open');
+      const modal = document.getElementById('moai-ad-studio-modal');
+      if (modal) {
+        modal.classList.remove('active');
+        modal.setAttribute('aria-hidden', 'true');
+      }
+    };
+
+    window.toggleMoaiAdPlayPause = function() {
+      if (adIsPlaying) {
+        adElapsedBeforePauseMs += (performance.now() - adStartTimeMs);
+        adIsPlaying = false;
+        clearAdScheduledTimers();
+        updatePlayPauseBtnUI();
+      } else {
+        const offsets = getSceneStartOffsetsMs();
+        const totalMs = offsets[offsets.length - 1];
+        if (adElapsedBeforePauseMs >= totalMs - 100) {
+          adElapsedBeforePauseMs = 0;
+        }
+        startScenarioFromOffset(adElapsedBeforePauseMs);
+      }
+    };
+
+    window.restartMoaiAdScenario = function() {
+      adElapsedBeforePauseMs = 0;
+      startScenarioFromOffset(0);
+    };
+
+    window.startCleanRecordingMode = function(withCountdown) {
+      clearAdScheduledTimers();
+      adIsPlaying = false;
+      document.body.classList.add('ad-recording-clean');
+      const overlay = document.getElementById('ad-countdown-overlay');
+      const numEl = document.getElementById('ad-countdown-num');
+
+      if (!withCountdown || !overlay || !numEl) {
+        window.restartMoaiAdScenario();
+        return;
+      }
+
+      overlay.style.display = 'flex';
+      let count = 3;
+      numEl.textContent = String(count);
+
+      const step = () => {
+        count--;
+        if (count > 0) {
+          numEl.textContent = String(count);
+          scheduleAt(1000, step);
+        } else {
+          overlay.style.display = 'none';
+          window.restartMoaiAdScenario();
+        }
+      };
+      scheduleAt(1000, step);
+    };
+
+    // 録画クリーン表示中に画面をタップするとコントロールバーを再表示
+    window.handleAdStageBackgroundClick = function() {
+      if (document.body.classList.contains('ad-recording-clean')) {
+        document.body.classList.remove('ad-recording-clean');
+        const overlay = document.getElementById('ad-countdown-overlay');
+        if (overlay) overlay.style.display = 'none';
+      }
+    };
+
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape' && document.body.classList.contains('ad-recording-clean')) {
+        document.body.classList.remove('ad-recording-clean');
+        const overlay = document.getElementById('ad-countdown-overlay');
+        if (overlay) overlay.style.display = 'none';
+      }
+    });
+  })();
+  </script>
 
 </body>
 </html>

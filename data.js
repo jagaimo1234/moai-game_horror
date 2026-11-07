@@ -606,9 +606,15 @@ window.getFullMasterProducts = function(customProductsData) {
         masterItem.id = key;
         if (p.name) masterItem.name = p.name;
         if (p.desc) masterItem.desc = p.desc;
-        if (p.image) masterItem.image = p.image;
-        if (p.images) masterItem.images = p.images;
-        if (p.optimizedCover) masterItem.optimizedCover = p.optimizedCover;
+        // 既にローカル画像パス(images/...)がある場合は、Firestoreの巨大Base64(data:image/...)で上書きしない
+        const hasLocalMainImg = masterItem.image && !masterItem.image.startsWith('data:');
+        if (p.image && (!hasLocalMainImg || !p.image.startsWith('data:'))) {
+          masterItem.image = p.image;
+        }
+        if (p.images && (!Array.isArray(masterItem.images) || masterItem.images.length === 0)) {
+          masterItem.images = p.images;
+        }
+        if (p.optimizedCover && !hasLocalMainImg) masterItem.optimizedCover = p.optimizedCover;
         if (p.optimizedImages) masterItem.optimizedImages = p.optimizedImages;
         if (p.isDev !== undefined) masterItem.isDev = p.isDev;
         if (p.isTempImage !== undefined) masterItem.isTempImage = p.isTempImage;
@@ -705,7 +711,6 @@ window.expandProductsForCatalog = function(baseProducts, worksMasterData, hidden
       if (isPreviewMode || !hiddenMap[groupId]) {
         const varImages = [];
         const addImg = (u) => { if (u && typeof u === 'string' && !varImages.includes(u)) varImages.push(u); };
-        if (wData.catalogGroupImage) addImg(wData.catalogGroupImage);
         if (typeof window !== 'undefined' && window.WORK_FOLDER_ASSETS) {
           const folderKey = p.id === 'osuwari_moai_pen' ? 'hadagi_osuwari_moai_pen' : `${p.id}_variants`;
           const fAssets = window.WORK_FOLDER_ASSETS[folderKey];
@@ -713,6 +718,10 @@ window.expandProductsForCatalog = function(baseProducts, worksMasterData, hidden
             if (Array.isArray(fAssets.studio)) fAssets.studio.forEach(addImg);
             if (Array.isArray(fAssets.raw)) fAssets.raw.forEach(addImg);
           }
+        }
+        // ローカルスタジオ画像が存在しない場合のみ、FirestoreのcatalogGroupImageを追加（巨大Base64の重複読込を防止）
+        if (wData.catalogGroupImage && (!wData.catalogGroupImage.startsWith('data:') || varImages.length === 0)) {
+          addImg(wData.catalogGroupImage);
         }
         nonBaseVars.forEach(v => {
           if (v.image) addImg(v.image);
@@ -735,7 +744,7 @@ window.expandProductsForCatalog = function(baseProducts, worksMasterData, hidden
           image: varImages[0] || p.image || p.optimizedCover || null,
           imagePosition: wData.catalogGroupImagePosition || "center center",
           imageFit: wData.catalogGroupImageFit || "cover",
-          catalogGroupImage: wData.catalogGroupImage || varImages[0] || null,
+          catalogGroupImage: varImages[0] || wData.catalogGroupImage || null,
           images: varImages.length > 0 ? varImages : (p.images || []),
           catalogVariants: nonBaseVars,
           variantBadgeLabel: p.id === 'osuwari_moai_pen' ? `👕 肌着 全${nonBaseVars.length}種` : `🎨 全${nonBaseVars.length}種`,
