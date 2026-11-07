@@ -934,6 +934,7 @@ window.WORK_FOLDER_ASSETS = {
   "hadagi_osuwari_moai_pen": {
     "raw": [],
     "studio": [
+      "images/kurima/hadagi_osuwari_moai_pen/studio/hadagi_trio_desk.jpg",
       "images/kurima/hadagi_osuwari_moai_pen/studio/tanktop_pair_pen.jpg",
       "images/kurima/hadagi_osuwari_moai_pen/studio/tanktop_cover.jpg"
     ]
