@@ -6491,33 +6491,36 @@ ${variantSelectorHtml}
     /* 疑似スワイプ＆疑似タップ指カーソル */
     #ad-touch-cursor {
       position: absolute;
-      width: 48px;
-      height: 48px;
+      width: 50px;
+      height: 50px;
       border-radius: 50%;
-      background: radial-gradient(circle, rgba(255, 45, 85, 0.45) 0%, rgba(255, 45, 85, 0.15) 65%, transparent 100%);
+      background: radial-gradient(circle, rgba(255, 45, 85, 0.55) 0%, rgba(255, 45, 85, 0.2) 65%, transparent 100%);
       border: 2.5px solid rgba(255, 255, 255, 0.95);
-      box-shadow: 0 6px 20px rgba(255, 45, 85, 0.45);
-      z-index: 250;
+      box-shadow: 0 6px 22px rgba(255, 45, 85, 0.5);
+      z-index: 400;
       pointer-events: none;
       opacity: 0;
       transform: translate(-50%, -50%) scale(1);
-      transition: left 0.52s cubic-bezier(0.22, 1, 0.36, 1),
-                  top 0.52s cubic-bezier(0.22, 1, 0.36, 1),
-                  opacity 0.22s ease,
-                  transform 0.18s ease;
+      transition: left 0.45s cubic-bezier(0.22, 1, 0.36, 1),
+                  top 0.45s cubic-bezier(0.22, 1, 0.36, 1),
+                  opacity 0.2s ease,
+                  transform 0.16s ease;
+    }
+    #ad-touch-cursor.active {
+      opacity: 1 !important;
     }
     #ad-touch-cursor::after {
       content: '👆';
       position: absolute;
-      font-size: 24px;
+      font-size: 28px;
       left: 50%;
-      top: 56%;
+      top: 54%;
       transform: translate(-50%, -30%);
-      filter: drop-shadow(0 3px 6px rgba(0,0,0,0.35));
+      filter: drop-shadow(0 4px 8px rgba(0,0,0,0.45));
     }
     #ad-touch-cursor.tapping {
       transform: translate(-50%, -50%) scale(0.75);
-      background: radial-gradient(circle, rgba(255, 45, 85, 0.85) 0%, rgba(255, 45, 85, 0.35) 70%, transparent 100%);
+      background: radial-gradient(circle, rgba(255, 45, 85, 0.9) 0%, rgba(255, 45, 85, 0.45) 70%, transparent 100%);
     }
     .ad-tap-ripple-ring {
       position: absolute;
@@ -7364,6 +7367,7 @@ ${variantSelectorHtml}
     };
 
     window.switchAdScenario = function(key) {
+      ensureAudioContext();
       if (!AD_SCENARIOS[key]) return;
       currentScenarioKey = key;
       const select = document.getElementById('ad-scenario-select');
@@ -7375,23 +7379,46 @@ ${variantSelectorHtml}
       return AD_SCENARIOS[currentScenarioKey] || AD_SCENARIOS.hadagi_osuwari;
     }
 
-    function playAdSound(type) {
+    function ensureAudioContext() {
       try {
         if (!audioCtx) {
           const Ctx = window.AudioContext || window.webkitAudioContext;
-          if (!Ctx) return;
-          audioCtx = new Ctx();
+          if (Ctx) audioCtx = new Ctx();
         }
-        if (audioCtx.state === 'suspended') audioCtx.resume();
+        if (audioCtx && audioCtx.state === 'suspended') {
+          audioCtx.resume();
+        }
+      } catch (e) {
+        console.warn('AudioContext init/resume failed:', e);
+      }
+    }
+
+    // ブラウザの自動再生ポリシー解除のため、ユーザー操作時に即時アンロック
+    if (typeof window !== 'undefined') {
+      ['click', 'touchstart', 'pointerdown'].forEach(evt => {
+        window.addEventListener(evt, () => ensureAudioContext(), { passive: true });
+      });
+    }
+
+    function playAdSound(type) {
+      try {
+        ensureAudioContext();
+        if (!audioCtx) return;
+        if (audioCtx.state === 'suspended') {
+          audioCtx.resume().then(() => {
+            if (audioCtx && audioCtx.state === 'running') playAdSound(type);
+          });
+          return;
+        }
         const now = audioCtx.currentTime;
 
         if (type === 'swipe') {
           const osc = audioCtx.createOscillator();
           const gain = audioCtx.createGain();
           osc.type = 'sine';
-          osc.frequency.setValueAtTime(320, now);
-          osc.frequency.exponentialRampToValueAtTime(140, now + 0.12);
-          gain.gain.setValueAtTime(0.08, now);
+          osc.frequency.setValueAtTime(360, now);
+          osc.frequency.exponentialRampToValueAtTime(160, now + 0.12);
+          gain.gain.setValueAtTime(0.25, now);
           gain.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
           osc.connect(gain);
           gain.connect(audioCtx.destination);
@@ -7403,7 +7430,7 @@ ${variantSelectorHtml}
           osc.type = 'triangle';
           osc.frequency.setValueAtTime(587.33, now); // D5
           osc.frequency.setValueAtTime(880, now + 0.08); // A5
-          gain.gain.setValueAtTime(0.12, now);
+          gain.gain.setValueAtTime(0.32, now);
           gain.gain.exponentialRampToValueAtTime(0.001, now + 0.28);
           osc.connect(gain);
           gain.connect(audioCtx.destination);
@@ -7413,8 +7440,8 @@ ${variantSelectorHtml}
           const osc = audioCtx.createOscillator();
           const gain = audioCtx.createGain();
           osc.type = 'sine';
-          osc.frequency.setValueAtTime(800, now);
-          gain.gain.setValueAtTime(0.15, now);
+          osc.frequency.setValueAtTime(950, now);
+          gain.gain.setValueAtTime(0.28, now);
           gain.gain.exponentialRampToValueAtTime(0.001, now + 0.06);
           osc.connect(gain);
           gain.connect(audioCtx.destination);
@@ -7427,7 +7454,7 @@ ${variantSelectorHtml}
             const gain = audioCtx.createGain();
             osc.type = 'triangle';
             osc.frequency.setValueAtTime(f, now + i * 0.07);
-            gain.gain.setValueAtTime(0.15, now + i * 0.07);
+            gain.gain.setValueAtTime(0.3, now + i * 0.07);
             gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.07 + 0.35);
             osc.connect(gain);
             gain.connect(audioCtx.destination);
@@ -7439,8 +7466,8 @@ ${variantSelectorHtml}
           const gain = audioCtx.createGain();
           osc.type = 'sine';
           osc.frequency.setValueAtTime(440, now);
-          osc.frequency.exponentialRampToValueAtTime(660, now + 0.08);
-          gain.gain.setValueAtTime(0.1, now);
+          osc.frequency.exponentialRampToValueAtTime(700, now + 0.08);
+          gain.gain.setValueAtTime(0.25, now);
           gain.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
           osc.connect(gain);
           gain.connect(audioCtx.destination);
@@ -7448,7 +7475,7 @@ ${variantSelectorHtml}
           osc.stop(now + 0.12);
         }
       } catch (err) {
-        // audio fail silent
+        console.warn('playAdSound error:', err);
       }
     }
 
@@ -7485,13 +7512,15 @@ ${variantSelectorHtml}
     function moveCursorTo(xPct, yPct, show = true) {
       const cursor = document.getElementById('ad-touch-cursor');
       if (!cursor) return;
-      if (!show) {
-        cursor.classList.remove('active');
-        return;
-      }
       cursor.style.left = `${xPct}%`;
       cursor.style.top = `${yPct}%`;
-      cursor.classList.add('active');
+      if (show) {
+        cursor.style.opacity = '1';
+        cursor.classList.add('active');
+      } else {
+        cursor.style.opacity = '0';
+        cursor.classList.remove('active');
+      }
     }
 
     function moveCursorToElement(elementId, fallbackXPct, fallbackYPct, show = true) {
@@ -7508,6 +7537,7 @@ ${variantSelectorHtml}
       if (cursor) {
         cursor.style.left = `${xPct}%`;
         cursor.style.top = `${yPct}%`;
+        cursor.style.opacity = '1';
         cursor.classList.add('active', 'tapping');
         setTimeout(() => cursor.classList.remove('tapping'), 240);
       }
@@ -8036,6 +8066,7 @@ ${variantSelectorHtml}
     }
 
     function startScenarioFromOffset(offsetMs) {
+      ensureAudioContext();
       clearAdScheduledTimers();
       prepareStageData();
 
@@ -8087,6 +8118,7 @@ ${variantSelectorHtml}
     }
 
     window.toggleMoaiAdPlayPause = function() {
+      ensureAudioContext();
       if (adIsPlaying) {
         adElapsedBeforePauseMs += (performance.now() - adStartTimeMs);
         clearAdScheduledTimers();
@@ -8101,10 +8133,12 @@ ${variantSelectorHtml}
     };
 
     window.restartMoaiAdScenario = function() {
+      ensureAudioContext();
       startScenarioFromOffset(0);
     };
 
     window.openMoaiAdStudio = function() {
+      ensureAudioContext();
       if (!window.isMoaiAdminAuthenticated || !document.body.classList.contains('admin-mode')) return;
       const modal = document.getElementById('moai-ad-studio-modal');
       if (!modal) return;
@@ -8128,6 +8162,7 @@ ${variantSelectorHtml}
     };
 
     window.handleAdStageBackgroundClick = function(e) {
+      ensureAudioContext();
       if (document.body.classList.contains('ad-recording-clean')) {
         document.body.classList.remove('ad-recording-clean');
         const overlay = document.getElementById('ad-countdown-overlay');
@@ -8136,6 +8171,7 @@ ${variantSelectorHtml}
     };
 
     window.startCleanRecordingMode = function(withCountdown) {
+      ensureAudioContext();
       clearAdScheduledTimers();
       adIsPlaying = false;
       document.body.classList.add('ad-recording-clean');
