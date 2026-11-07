@@ -16,6 +16,12 @@
 // 全作品のマスターリスト
 const MASTER_PRODUCTS = [
   {
+    image: 'images/kurima/moai_giveup.jpg',
+    name: 'あきらめたモアイ',
+    desc: 'この世の摂理を受けいれた。\n足掻いても無駄。あきらめた。',
+  },
+
+  {
     image: 'images/kurima/moai_loscut/studio/ChatGPT 画像 2026年11月5日 20_27_08-1.png',
     images: [
       'images/kurima/moai_loscut/studio/ChatGPT 画像 2026年11月5日 20_27_08-1.png',
@@ -861,6 +867,13 @@ window.WORK_FOLDER_ASSETS = {
   },
   "moai_loscut": {
     "raw": [
+      "images/kurima/moai_loscut/raw/moai_loscut_RAW_20261107_083031_001.jpg",
+      "images/kurima/moai_loscut/raw/moai_loscut_RAW_20261107_083039_002.jpg",
+      "images/kurima/moai_loscut/raw/moai_loscut_RAW_20261107_083047_003.jpg",
+      "images/kurima/moai_loscut/raw/moai_loscut_RAW_20261107_083054_004.jpg",
+      "images/kurima/moai_loscut/raw/moai_loscut_RAW_20261107_083104_005.jpg",
+      "images/kurima/moai_loscut/raw/moai_loscut_RAW_20261107_083108_006.jpg",
+      "images/kurima/moai_loscut/raw/moai_loscut_RAW_20261107_083130_007.jpg",
       "images/kurima/moai_loscut/raw/moai_losscut_RAW_20261105_201128_001.jpg",
       "images/kurima/moai_loscut/raw/moai_losscut_RAW_20261105_201205_002.jpg",
       "images/kurima/moai_loscut/raw/moai_losscut_RAW_20261105_201208_003.jpg",
