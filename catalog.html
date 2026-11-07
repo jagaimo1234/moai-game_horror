@@ -6395,7 +6395,8 @@ ${variantSelectorHtml}
 
     /* 録画用クリーン表示：再生ボタンや開発者UIをすべて隠す */
     body.ad-recording-clean #moai-dev-mode-bar,
-    body.ad-recording-clean #ad-floating-controls {
+    body.ad-recording-clean #ad-floating-controls,
+    body.ad-recording-clean #ad-scenario-selector-bar {
       display: none !important;
     }
 
@@ -6717,6 +6718,18 @@ ${variantSelectorHtml}
   </style>
 
   <div id="moai-ad-studio-modal" aria-hidden="true" onclick="window.handleAdStageBackgroundClick(event)">
+    <!-- シナリオ切り替えバー（録画時は完全非表示） -->
+    <div id="ad-scenario-selector-bar" style="position:fixed; top:12px; left:50%; transform:translateX(-50%); z-index:9999; display:flex; align-items:center; gap:8px; background:rgba(15,23,42,0.92); border:1.5px solid rgba(255,255,255,0.2); padding:6px 14px; border-radius:999px; box-shadow:0 8px 24px rgba(0,0,0,0.5); backdrop-filter:blur(8px);" onclick="event.stopPropagation()">
+      <span style="font-size:11.5px; font-weight:900; color:#ffd700;">🎬 シナリオ切替:</span>
+      <select id="ad-scenario-select" onchange="window.switchAdScenario(this.value)" style="background:#1e293b; color:#fff; font-size:12px; font-weight:800; border:1.5px solid #ff2d55; border-radius:8px; padding:4px 10px; cursor:pointer; outline:none;">
+        <option value="hadagi_osuwari" selected>👕 肌着おすわりモアイ（完成版）</option>
+        <option value="glasses_stand">💪 まちょいメガネスタンド（タンクトップ）</option>
+        <option value="moai_giveup">🙇 諦めたモアイ</option>
+        <option value="moai_loscut">📉 含み損モアイ（うなだれているモアイ）</option>
+        <option value="macho_moai_pen">🏋️ マッチョモアイペン立て</option>
+      </select>
+    </div>
+
     <!-- 最小限の操作バー（録画時は完全非表示） -->
     <div id="ad-floating-controls" onclick="event.stopPropagation()">
       <button type="button" class="ad-mini-btn primary" id="ad-btn-play-toggle" onclick="window.toggleMoaiAdPlayPause()">⏸ 一時停止</button>
@@ -7041,9 +7054,10 @@ ${variantSelectorHtml}
 
   <script>
   (function() {
-    // 第1段階：ハイレグモアイ寄り道→タンクトップモアイとマッチ→双方向トーク（約30.6秒）
+    // 各モアイごとの特化シナリオ定義（おすわりモアイ完成版＋他4作品）
     const SCENE_DURATIONS_SEC = [7.8, 11.5, 2.8, 8.8, 2.8, 4.5, 2.5];
 
+    let currentScenarioKey = 'hadagi_osuwari';
     let adTimers = [];
     let adRafId = null;
     let adIsPlaying = false;
@@ -7051,40 +7065,314 @@ ${variantSelectorHtml}
     let adElapsedBeforePauseMs = 0;
     let audioCtx = null;
 
-    // 既存お品書きデータからタンクトップモアイの実物画像とサブ画像を取得（RAW画像は一切使用しない）
-    function resolveTanktopAssets() {
-      let mainImg = 'images/kurima/hadagi_osuwari_moai_pen/studio/tanktop_cover.jpg';
-      let subImg = 'images/kurima/osuwari_moai_pen/cover.jpg';
-
-      const allProds = (typeof window.getAllAvailableProducts === 'function')
-        ? window.getAllAvailableProducts()
-        : (window.currentRenderedProducts || []);
-
-      const variantGroup = allProds.find(p =>
-        p && (p.id === 'osuwari_moai_pen__variant_group' ||
-              p.id === 'hadagi_osuwari_moai_pen' ||
-              (p.name && (p.name.includes('肌着') || p.name.includes('タンクトップ'))))
-      );
-
-      if (variantGroup) {
-        if (variantGroup.image && !String(variantGroup.image).includes('/raw/')) {
-          mainImg = variantGroup.image;
+    const AD_SCENARIOS = {
+      hadagi_osuwari: {
+        id: 'hadagi_osuwari',
+        label: '👕 肌着おすわりモアイ（完成版）',
+        heroName: '肌着おすわり モアイペン立て',
+        heroBadge: 'NEW',
+        mainImg: 'images/kurima/hadagi_osuwari_moai_pen/studio/tanktop_pair_pen.jpg',
+        subImg: 'images/kurima/osuwari_moai_pen/cover.jpg',
+        s5SubTitle: '✒️ 実際に使える3D造形ペン立て',
+        s5SubName: 'タンクトップを着た<br>おすわりモアイペン立て',
+        matchSubText: '肌着おすわりモアイとマッチング成立🗿❤️',
+        matchAvatarTitle: 'おすわりモアイ（タンクトップ）',
+        photo1: 'images/kurima/hadagi_osuwari_moai_pen/studio/tanktop_pair_pen.jpg',
+        photo1Caption: '📸 俺のタンクトップ姿（相棒と）',
+        photo2: 'images/kurima/hadagi_osuwari_moai_pen/studio/hadagi_trio_desk.jpg',
+        photo2Caption: '📸 仲間たちと肌着合わせしてみたよ🗿🔥',
+        chatMoaiMsg1: '🗿「やったー！マッチングありがとう✨ 俺、どう？タンクトップ姿どうかな？」',
+        chatUserMsg1: 'え、似合ってる！仲間たちも個性的で実物見てみたいな😂',
+        chatMoaiMsg2: '🗿「えっ本当！？じゃあ11/14・15のデザフェス【西館4階 暗いブース K-271】で会おうよ！✨」',
+        chatMoaiMsg3: '🗿「タンクトップ洗濯して、他のモアイ仲間たちと最前列で待ってるね！！約束だよ🗿🔥」',
+        chatUserMsg2: 'なんかこのモアイ、めっちゃグイグイくるな…😂 ちょっとK-271見に行ってみよっと！',
+        notifs: [
+          { text: 'おすわりモアイからいいね！', img: 'images/kurima/osuwari_moai_pen.jpg' },
+          { text: 'ハイレグモアイからいいね！', img: 'images/kurima/moai_highleg/studio/ハイレグモアイ_master.png' },
+          { text: '肌着おすわりモアイからいいね！', img: 'images/kurima/hadagi_osuwari_moai_pen/studio/tanktop_pair_pen.jpg' }
+        ],
+        incomingCards: [
+          { name: 'ハイレグモアイ', img: 'images/kurima/moai_highleg/studio/ハイレグモアイ_master.png', quote: '私、セクシーだと思わない？🩱 美脚には自信あるんだけど…💋', rowId: 'ad-incoming-skip1-row', btnId: 'ad-incoming-skip1-btn', zoomKey: 'skip1' },
+          { name: 'タンクトップ まちょいモアイメガネスタンド', img: 'images/kurima/glasses_stand/studio/Moataro.jpg', quote: '俺の胸筋とタンクトップで、君のメガネを24時間ガッチリ支えるぜ💪👓', rowId: 'ad-incoming-skip2-row', btnId: 'ad-incoming-skip2-btn', zoomKey: 'skip2' },
+          { name: '肌着おすわり モアイペン立て', img: 'images/kurima/hadagi_osuwari_moai_pen/studio/tanktop_pair_pen.jpg', quote: 'お隣、失礼しますね🪑 タンクトップ姿でデスクワークを静かに見守るのが日課です。', rowId: 'ad-incoming-target-row', btnId: 'ad-incoming-target-btn', zoomKey: 'hero' },
+          { name: 'ももひき どやがおモアイペン立て', img: 'images/kurima/doyagao_moai/studio/momohiki_doyagao.jpg', quote: '腕組みドヤ顔が決まり手😏 ももひき履いて自信満々に佇みます。' },
+          { name: '黄昏れモアイ', img: 'images/kurima/tasogare_moai.jpg', quote: '黄昏るのが好きです🗿 明日仕事行きたくないな…って時にそばにいて。' }
+        ],
+        zoomProfiles: {
+          skip1: {
+            name: 'ハイレグモアイ',
+            badge: '美脚自慢',
+            img: 'images/kurima/moai_highleg/studio/ハイレグモアイ_master.png',
+            quote: '💬「私、セクシーだと思わない？🩱 美脚には自信あるんだけど…どうかな？💋」',
+            trait1: '🩱 特徴：ハイレグ美脚',
+            trait2: '🦵 魅力：圧倒的脚線美'
+          },
+          skip2: {
+            name: 'タンクトップ まちょいモアイメガネスタンド',
+            badge: '筋トレ中',
+            img: 'images/kurima/glasses_stand/studio/Moataro.jpg',
+            quote: '💬「俺の胸筋とタンクトップで、君のメガネを24時間ガッチリ支えるぜ💪👓」',
+            trait1: '💪 特徴：屈強マッチョ',
+            trait2: '👓 職業：メガネスタンド'
+          },
+          hero: {
+            name: '肌着おすわり モアイペン立て',
+            badge: 'NEW',
+            img: 'images/kurima/hadagi_osuwari_moai_pen/studio/tanktop_pair_pen.jpg',
+            quote: '💬「お隣、失礼しますね🪑 タンクトップ姿でデスクワークを静かに見守るのが日課です。」',
+            trait1: '👕 特徴：タンクトップ',
+            trait2: '🖊️ 職業：ペン立て'
+          }
         }
-        if (Array.isArray(variantGroup.images)) {
-          const safeImgs = variantGroup.images.filter(u => u && !String(u).includes('/raw/'));
-          if (safeImgs.length > 1) subImg = safeImgs[1];
+      },
+      glasses_stand: {
+        id: 'glasses_stand',
+        label: '💪 まちょいメガネスタンド（タンクトップ）',
+        heroName: 'タンクトップ まちょいモアイメガネスタンド',
+        heroBadge: '筋トレ中',
+        mainImg: 'images/kurima/glasses_stand/studio/Moataro.jpg',
+        subImg: 'images/kurima/glasses_stand/cover.jpg',
+        s5SubTitle: '👓 実際に使える屈強メガネスタンド',
+        s5SubName: 'タンクトップ まちょい<br>モアイメガネスタンド',
+        matchSubText: 'まちょいメガネスタンドとマッチング成立🗿💪',
+        matchAvatarTitle: 'まちょいメガネスタンド（タンクトップ）',
+        photo1: 'images/kurima/glasses_stand/studio/Moataro.jpg',
+        photo1Caption: '📸 ジムで鍛え上げた胸筋とタンクトップ💪',
+        photo2: 'images/kurima/glasses_stand/cover.jpg',
+        photo2Caption: '📸 24時間メガネをガッチリ守るぜ👓',
+        chatMoaiMsg1: '🗿「マッチング感謝だぜ！💪 どうだい、この屈強な大胸筋とタンクトップの仕上がりは！？」',
+        chatUserMsg1: 'え、筋肉すごすぎる！メガネ預けてみたいかも😂',
+        chatMoaiMsg2: '🗿「おうよ！じゃあ11/14・15のデザフェス【西館4階 暗いブース K-271】で合流しようぜ！✨」',
+        chatMoaiMsg3: '🗿「メガネクロス頭に乗せて、大胸筋パンプアップして最前列で待ってるからな！！約束だぜ💪🔥」',
+        chatUserMsg2: 'このモアイ、熱量と筋肉アピールが凄まじいな…😂 ちょっとK-271見に行ってみよっと！',
+        notifs: [
+          { text: 'おすわりモアイからいいね！', img: 'images/kurima/osuwari_moai_pen.jpg' },
+          { text: 'ハイレグモアイからいいね！', img: 'images/kurima/moai_highleg/studio/ハイレグモアイ_master.png' },
+          { text: 'まちょいメガネスタンドからいいね！', img: 'images/kurima/glasses_stand/studio/Moataro.jpg' }
+        ],
+        incomingCards: [
+          { name: 'ハイレグモアイ', img: 'images/kurima/moai_highleg/studio/ハイレグモアイ_master.png', quote: '私、セクシーだと思わない？🩱 美脚には自信あるんだけど…💋', rowId: 'ad-incoming-skip1-row', btnId: 'ad-incoming-skip1-btn', zoomKey: 'skip1' },
+          { name: '肌着おすわり モアイペン立て', img: 'images/kurima/hadagi_osuwari_moai_pen/studio/tanktop_pair_pen.jpg', quote: 'お隣、失礼しますね🪑 タンクトップ姿でデスクワークを静かに見守るのが日課です。', rowId: 'ad-incoming-skip2-row', btnId: 'ad-incoming-skip2-btn', zoomKey: 'skip2' },
+          { name: 'タンクトップ まちょいモアイメガネスタンド', img: 'images/kurima/glasses_stand/studio/Moataro.jpg', quote: '俺の胸筋とタンクトップで、君のメガネを24時間ガッチリ支えるぜ💪👓', rowId: 'ad-incoming-target-row', btnId: 'ad-incoming-target-btn', zoomKey: 'hero' },
+          { name: 'マッチョなモアイペン立て', img: 'images/kurima/macho_moai_pen.png', quote: 'パワーッッッ！！！💪 あなたのペンを大胸筋で挟み込みます！' },
+          { name: '黄昏れモアイ', img: 'images/kurima/tasogare_moai.jpg', quote: '黄昏るのが好きです🗿 明日仕事行きたくないな…って時にそばにいて。' }
+        ],
+        zoomProfiles: {
+          skip1: {
+            name: 'ハイレグモアイ',
+            badge: '美脚自慢',
+            img: 'images/kurima/moai_highleg/studio/ハイレグモアイ_master.png',
+            quote: '💬「私、セクシーだと思わない？🩱 美脚には自信あるんだけど…どうかな？💋」',
+            trait1: '🩱 特徴：ハイレグ美脚',
+            trait2: '🦵 魅力：圧倒的脚線美'
+          },
+          skip2: {
+            name: '肌着おすわり モアイペン立て',
+            badge: 'NEW',
+            img: 'images/kurima/hadagi_osuwari_moai_pen/studio/tanktop_pair_pen.jpg',
+            quote: '💬「お隣、失礼しますね🪑 タンクトップ姿でデスクワークを静かに見守るのが日課です。」',
+            trait1: '👕 特徴：タンクトップ',
+            trait2: '🖊️ 職業：ペン立て'
+          },
+          hero: {
+            name: 'タンクトップ まちょいモアイメガネスタンド',
+            badge: '筋トレ中',
+            img: 'images/kurima/glasses_stand/studio/Moataro.jpg',
+            quote: '💬「俺の胸筋とタンクトップで、君のメガネを24時間ガッチリ支えるぜ💪👓」',
+            trait1: '💪 特徴：屈強マッチョ',
+            trait2: '👓 職業：メガネスタンド'
+          }
+        }
+      },
+      moai_giveup: {
+        id: 'moai_giveup',
+        label: '🙇 諦めたモアイ',
+        heroName: 'あきらめたモアイ',
+        heroBadge: '哀愁',
+        mainImg: 'images/kurima/moai_giveup.jpg',
+        subImg: 'images/kurima/moai_giveup/studio/ChatGPT 画像 2026年11月7日 21_21_15.png',
+        s5SubTitle: '🛋️ 心をそっと軽くする癒やしオブジェ',
+        s5SubName: 'すべてを手放した<br>あきらめたモアイ',
+        matchSubText: 'あきらめたモアイとマッチング成立🗿✨',
+        matchAvatarTitle: 'あきらめたモアイ（脱力系）',
+        photo1: 'images/kurima/moai_giveup.jpg',
+        photo1Caption: '📸 こりゃもうだめだ…と諦めた瞬間',
+        photo2: 'images/kurima/moai_giveup/studio/ChatGPT 画像 2026年11月7日 21_21_15.png',
+        photo2Caption: '📸 窓辺で静かに脱力しているところ☀️',
+        chatMoaiMsg1: '🗿「マッチングありがとう…もう何もかも諦めかけてたけど、あなたに届いて本当によかった…」',
+        chatUserMsg1: '脱力感と哀愁がたまらない…😂 癒やされるから実物見てみたい！',
+        chatMoaiMsg2: '🗿「本当ですか…！？じゃあ11/14・15のデザフェス【西館4階 暗いブース K-271】で待っててもいいですか…？✨」',
+        chatMoaiMsg3: '🗿「ブースの片隅で、体育座りして静かに諦めて待ってます…来てくれたらすごく嬉しいです🗿」',
+        chatUserMsg2: '諦めてるのにデザフェスには来てほしいの可愛すぎる😂 ちょっとK-271見に行ってみよっと！',
+        notifs: [
+          { text: 'ハイレグモアイからいいね！', img: 'images/kurima/moai_highleg/studio/ハイレグモアイ_master.png' },
+          { text: 'マッチョなモアイペン立てからいいね！', img: 'images/kurima/macho_moai_pen.png' },
+          { text: 'あきらめたモアイからいいね！', img: 'images/kurima/moai_giveup.jpg' }
+        ],
+        incomingCards: [
+          { name: 'ハイレグモアイ', img: 'images/kurima/moai_highleg/studio/ハイレグモアイ_master.png', quote: '私、セクシーだと思わない？🩱 美脚には自信あるんだけど…💋', rowId: 'ad-incoming-skip1-row', btnId: 'ad-incoming-skip1-btn', zoomKey: 'skip1' },
+          { name: 'マッチョなモアイペン立て', img: 'images/kurima/macho_moai_pen.png', quote: 'パワーッッッ！！！💪 あなたのペンを大胸筋で挟み込みます！', rowId: 'ad-incoming-skip2-row', btnId: 'ad-incoming-skip2-btn', zoomKey: 'skip2' },
+          { name: 'あきらめたモアイ', img: 'images/kurima/moai_giveup.jpg', quote: 'もう何もかも諦めました…でもあなたにだけはいいねを押したくて…', rowId: 'ad-incoming-target-row', btnId: 'ad-incoming-target-btn', zoomKey: 'hero' },
+          { name: 'うなだれているモアイ', img: 'images/kurima/moai_loscut/studio/含み損モアイ_master.png', quote: '落ち込むのが好きです📉 含み損は心の栄養。' },
+          { name: '黄昏れモアイ', img: 'images/kurima/tasogare_moai.jpg', quote: '黄昏るのが好きです🗿 明日仕事行きたくないな…って時にそばにいて。' }
+        ],
+        zoomProfiles: {
+          skip1: {
+            name: 'ハイレグモアイ',
+            badge: '美脚自慢',
+            img: 'images/kurima/moai_highleg/studio/ハイレグモアイ_master.png',
+            quote: '💬「私、セクシーだと思わない？🩱 美脚には自信あるんだけど…どうかな？💋」',
+            trait1: '🩱 特徴：ハイレグ美脚',
+            trait2: '🦵 魅力：圧倒的脚線美'
+          },
+          skip2: {
+            name: 'マッチョなモアイペン立て',
+            badge: '筋肉',
+            img: 'images/kurima/macho_moai_pen.png',
+            quote: '💬「パワーッッッ！！！💪 あなたのペンを大胸筋で挟み込みます！」',
+            trait1: '💪 特徴：圧倒的筋肉',
+            trait2: '🖊️ 職業：ペン立て'
+          },
+          hero: {
+            name: 'あきらめたモアイ',
+            badge: '哀愁',
+            img: 'images/kurima/moai_giveup.jpg',
+            quote: '💬「もう何もかも諦めました…でもあなたにだけはいいねを押したくて…」',
+            trait1: '🛋️ 特徴：脱力ポーズ',
+            trait2: '✨ 魅力：心のデトックス'
+          }
+        }
+      },
+      moai_loscut: {
+        id: 'moai_loscut',
+        label: '📉 含み損モアイ（うなだれているモアイ）',
+        heroName: '含み損モアイ（うなだれているモアイ）',
+        heroBadge: '人気',
+        mainImg: 'images/kurima/moai_loscut/studio/含み損モアイ_master.png',
+        subImg: 'images/kurima/moai_loscut/studio/20261105.png',
+        s5SubTitle: '📉 現代人の哀愁を背負うアート作品',
+        s5SubName: '損失額を見て固まった<br>うなだれているモアイ',
+        matchSubText: '含み損モアイとマッチング成立🗿📉',
+        matchAvatarTitle: 'うなだれているモアイ（含み損）',
+        photo1: 'images/kurima/moai_loscut/studio/含み損モアイ_master.png',
+        photo1Caption: '📸 損失額を見て固まった決定的瞬間📉',
+        photo2: 'images/kurima/moai_loscut/studio/20261105.png',
+        photo2Caption: '📸 観葉植物の陰で為す術なくうなだれてます🌱',
+        chatMoaiMsg1: '🗿「マッチング感謝です…📉 チャート見たら含み損が止まらなくて…でもあなたとマッチできて救われました…」',
+        chatUserMsg1: 'うなだれっぷりが哀愁漂ってて愛おしい😂 実物見て励ましたい！',
+        chatMoaiMsg2: '🗿「励ましてくれるんですか…！？じゃあ11/14・15のデザフェス【西館4階 暗いブース K-271】で会いましょう…！✨」',
+        chatMoaiMsg3: '🗿「暗いブースの鉢植えの横で、うなだれて待ってます…一緒にナンピン耐えましょう🗿📉🔥」',
+        chatUserMsg2: '含み損仲間として親近感湧きまくり😂 ちょっとK-271に会いに行ってみよっと！',
+        notifs: [
+          { text: 'ダンシングモアイからいいね！', img: 'images/kurima/moai_dance_test.jpg' },
+          { text: 'ハイレグモアイからいいね！', img: 'images/kurima/moai_highleg/studio/ハイレグモアイ_master.png' },
+          { text: '含み損モアイからいいね！', img: 'images/kurima/moai_loscut/studio/含み損モアイ_master.png' }
+        ],
+        incomingCards: [
+          { name: 'ダンシングモアイ', img: 'images/kurima/moai_dance_test.jpg', quote: '音楽が鳴ればどこでもダンスフロア🕺 一緒に踊ろうよ！', rowId: 'ad-incoming-skip1-row', btnId: 'ad-incoming-skip1-btn', zoomKey: 'skip1' },
+          { name: 'ハイレグモアイ', img: 'images/kurima/moai_highleg/studio/ハイレグモアイ_master.png', quote: '私、セクシーだと思わない？🩱 美脚には自信あるんだけど…💋', rowId: 'ad-incoming-skip2-row', btnId: 'ad-incoming-skip2-btn', zoomKey: 'skip2' },
+          { name: 'うなだれているモアイ', img: 'images/kurima/moai_loscut/studio/含み損モアイ_master.png', quote: '落ち込むのが好きです📉 含み損は心の栄養。慰めてくれる人募集中。', rowId: 'ad-incoming-target-row', btnId: 'ad-incoming-target-btn', zoomKey: 'hero' },
+          { name: '肌着おすわり モアイペン立て', img: 'images/kurima/hadagi_osuwari_moai_pen/studio/tanktop_pair_pen.jpg', quote: 'お隣、失礼しますね🪑 デスクワークを静かに見守るのが日課です。' },
+          { name: '黄昏れモアイ', img: 'images/kurima/tasogare_moai.jpg', quote: '黄昏るのが好きです🗿 明日仕事行きたくないな…って時にそばにいて。' }
+        ],
+        zoomProfiles: {
+          skip1: {
+            name: 'ダンシングモアイ',
+            badge: '陽気',
+            img: 'images/kurima/moai_dance_test.jpg',
+            quote: '💬「音楽が鳴ればどこでもダンスフロア🕺 一緒に陽気にステップ踏もうよ！」',
+            trait1: '🕺 特徴：ダンシングポーズ',
+            trait2: '🎵 魅力：底抜けの明るさ'
+          },
+          skip2: {
+            name: 'ハイレグモアイ',
+            badge: '美脚自慢',
+            img: 'images/kurima/moai_highleg/studio/ハイレグモアイ_master.png',
+            quote: '💬「私、セクシーだと思わない？🩱 美脚には自信あるんだけど…どうかな？💋」',
+            trait1: '🩱 特徴：ハイレグ美脚',
+            trait2: '🦵 魅力：圧倒的脚線美'
+          },
+          hero: {
+            name: 'うなだれているモアイ（含み損モアイ）',
+            badge: '人気',
+            img: 'images/kurima/moai_loscut/studio/含み損モアイ_master.png',
+            quote: '💬「落ち込むのが好きです📉 含み損は心の栄養。慰めてくれる人募集中。」',
+            trait1: '📉 特徴：含み損うなだれ',
+            trait2: '🥺 魅力：守りたくなる哀愁'
+          }
+        }
+      },
+      macho_moai_pen: {
+        id: 'macho_moai_pen',
+        label: '🏋️ マッチョモアイペン立て',
+        heroName: 'マッチョなモアイペン立て',
+        heroBadge: '筋肉',
+        mainImg: 'images/kurima/macho_moai_pen.png',
+        subImg: 'images/kurima/macho_moai_pen/detail_01.png',
+        s5SubTitle: '💪 圧倒的バルクの造形ペン立て',
+        s5SubName: '大胸筋でペンを挟み込む<br>マッチョなモアイペン立て',
+        matchSubText: 'マッチョモアイペン立てとマッチング成立🗿💪',
+        matchAvatarTitle: 'マッチョモアイペン立て（大胸筋）',
+        photo1: 'images/kurima/macho_moai_pen.png',
+        photo1Caption: '📸 自慢の大胸筋と上腕二頭筋ポーズ💪',
+        photo2: 'images/kurima/macho_moai_pen/detail_01.png',
+        photo2Caption: '📸 鬼の顔が宿る自慢の背筋（バックポーズ）🔥',
+        chatMoaiMsg1: '🗿「パワーッッッ！！！マッチングありがとう！！💪 俺の鍛え上げた大胸筋、どうだ！？ペンを挟む準備は万端だぜ！」',
+        chatUserMsg1: '背筋まで仕上がりすぎてる😂 ペン立ての域を超えてて実物見たい！',
+        chatMoaiMsg2: '🗿「ナイスバルク！！じゃあ11/14・15のデザフェス【西館4階 暗いブース K-271】でマッスルミートしようぜ！✨」',
+        chatMoaiMsg3: '🗿「プロテイン飲んで、最前列でポージングしながら待ってるぜ！！絶対に来てくれよな🗿💪🔥」',
+        chatUserMsg2: '筋肉モアイの熱量が凄まじくて元気出る😂 パワーもらいにK-271見に行ってみよっと！',
+        notifs: [
+          { text: 'おすわりモアイからいいね！', img: 'images/kurima/osuwari_moai_pen.jpg' },
+          { text: 'タンクトップメガネスタンドからいいね！', img: 'images/kurima/glasses_stand/studio/Moataro.jpg' },
+          { text: 'マッチョなモアイペン立てからいいね！', img: 'images/kurima/macho_moai_pen.png' }
+        ],
+        incomingCards: [
+          { name: '肌着おすわり モアイペン立て', img: 'images/kurima/hadagi_osuwari_moai_pen/studio/tanktop_pair_pen.jpg', quote: 'お隣、失礼しますね🪑 デスクワークを静かに見守るのが日課です。', rowId: 'ad-incoming-skip1-row', btnId: 'ad-incoming-skip1-btn', zoomKey: 'skip1' },
+          { name: 'タンクトップ まちょいモアイメガネスタンド', img: 'images/kurima/glasses_stand/studio/Moataro.jpg', quote: '俺の胸筋とタンクトップで、君のメガネを24時間ガッチリ支えるぜ💪👓', rowId: 'ad-incoming-skip2-row', btnId: 'ad-incoming-skip2-btn', zoomKey: 'skip2' },
+          { name: 'マッチョなモアイペン立て', img: 'images/kurima/macho_moai_pen.png', quote: 'パワーッッッ！！！💪 あなたのペンを大胸筋で挟み込みます！', rowId: 'ad-incoming-target-row', btnId: 'ad-incoming-target-btn', zoomKey: 'hero' },
+          { name: 'ハイレグモアイ', img: 'images/kurima/moai_highleg/studio/ハイレグモアイ_master.png', quote: '私、セクシーだと思わない？🩱 美脚には自信あるんだけど…💋' },
+          { name: '黄昏れモアイ', img: 'images/kurima/tasogare_moai.jpg', quote: '黄昏るのが好きです🗿 明日仕事行きたくないな…って時にそばにいて。' }
+        ],
+        zoomProfiles: {
+          skip1: {
+            name: '肌着おすわり モアイペン立て',
+            badge: 'NEW',
+            img: 'images/kurima/hadagi_osuwari_moai_pen/studio/tanktop_pair_pen.jpg',
+            quote: '💬「お隣、失礼しますね🪑 タンクトップ姿でデスクワークを静かに見守るのが日課です。」',
+            trait1: '👕 特徴：タンクトップ',
+            trait2: '🖊️ 職業：ペン立て'
+          },
+          skip2: {
+            name: 'タンクトップ まちょいモアイメガネスタンド',
+            badge: '筋トレ中',
+            img: 'images/kurima/glasses_stand/studio/Moataro.jpg',
+            quote: '💬「俺の胸筋とタンクトップで、君のメガネを24時間ガッチリ支えるぜ💪👓」',
+            trait1: '💪 特徴：屈強マッチョ',
+            trait2: '👓 職業：メガネスタンド'
+          },
+          hero: {
+            name: 'マッチョなモアイペン立て',
+            badge: '筋肉',
+            img: 'images/kurima/macho_moai_pen.png',
+            quote: '💬「パワーッッッ！！！💪 あなたのペンを大胸筋で挟み込みます！」',
+            trait1: '💪 特徴：圧倒的筋肉',
+            trait2: '🖊️ 職業：ペン立て'
+          }
         }
       }
+    };
 
-      if (window.WORK_FOLDER_ASSETS && window.WORK_FOLDER_ASSETS.hadagi_osuwari_moai_pen) {
-        const f = window.WORK_FOLDER_ASSETS.hadagi_osuwari_moai_pen;
-        if (Array.isArray(f.studio) && f.studio.length > 0) {
-          mainImg = f.studio[0];
-          if (f.studio.length > 1) subImg = f.studio[1];
-        }
-      }
+    window.switchAdScenario = function(key) {
+      if (!AD_SCENARIOS[key]) return;
+      currentScenarioKey = key;
+      const select = document.getElementById('ad-scenario-select');
+      if (select) select.value = key;
+      window.restartMoaiAdScenario();
+    };
 
-      return { mainImg, subImg };
+    function getCurrentScenario() {
+      return AD_SCENARIOS[currentScenarioKey] || AD_SCENARIOS.hadagi_osuwari;
     }
 
     function playAdSound(type) {
@@ -7101,66 +7389,67 @@ ${variantSelectorHtml}
           const osc = audioCtx.createOscillator();
           const gain = audioCtx.createGain();
           osc.type = 'sine';
-          osc.frequency.setValueAtTime(220, now);
-          osc.frequency.exponentialRampToValueAtTime(420, now + 0.14);
-          gain.gain.setValueAtTime(0.04, now);
-          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
+          osc.frequency.setValueAtTime(320, now);
+          osc.frequency.exponentialRampToValueAtTime(140, now + 0.12);
+          gain.gain.setValueAtTime(0.08, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
           osc.connect(gain);
           gain.connect(audioCtx.destination);
           osc.start(now);
-          osc.stop(now + 0.15);
+          osc.stop(now + 0.12);
         } else if (type === 'notif') {
           const osc = audioCtx.createOscillator();
           const gain = audioCtx.createGain();
           osc.type = 'triangle';
-          osc.frequency.setValueAtTime(587.33, now);
-          osc.frequency.setValueAtTime(880, now + 0.06);
-          gain.gain.setValueAtTime(0.11, now);
-          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.22);
+          osc.frequency.setValueAtTime(587.33, now); // D5
+          osc.frequency.setValueAtTime(880, now + 0.08); // A5
+          gain.gain.setValueAtTime(0.12, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.28);
           osc.connect(gain);
           gain.connect(audioCtx.destination);
           osc.start(now);
-          osc.stop(now + 0.22);
+          osc.stop(now + 0.28);
         } else if (type === 'tap') {
           const osc = audioCtx.createOscillator();
           const gain = audioCtx.createGain();
           osc.type = 'sine';
           osc.frequency.setValueAtTime(800, now);
-          osc.frequency.exponentialRampToValueAtTime(300, now + 0.07);
-          gain.gain.setValueAtTime(0.12, now);
-          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
+          gain.gain.setValueAtTime(0.15, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.06);
           osc.connect(gain);
           gain.connect(audioCtx.destination);
           osc.start(now);
-          osc.stop(now + 0.08);
+          osc.stop(now + 0.06);
         } else if (type === 'match') {
-          [523.25, 659.25, 783.99, 1046.5].forEach((freq, idx) => {
+          const freqs = [523.25, 659.25, 783.99, 1046.50]; // C5, E5, G5, C6
+          freqs.forEach((f, i) => {
             const osc = audioCtx.createOscillator();
             const gain = audioCtx.createGain();
             osc.type = 'triangle';
-            const t = now + idx * 0.07;
-            osc.frequency.setValueAtTime(freq, t);
-            gain.gain.setValueAtTime(0.12, t);
-            gain.gain.exponentialRampToValueAtTime(0.001, t + 0.45);
+            osc.frequency.setValueAtTime(f, now + i * 0.07);
+            gain.gain.setValueAtTime(0.15, now + i * 0.07);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.07 + 0.35);
             osc.connect(gain);
             gain.connect(audioCtx.destination);
-            osc.start(t);
-            osc.stop(t + 0.46);
+            osc.start(now + i * 0.07);
+            osc.stop(now + i * 0.07 + 0.35);
           });
         } else if (type === 'chat') {
           const osc = audioCtx.createOscillator();
           const gain = audioCtx.createGain();
           osc.type = 'sine';
-          osc.frequency.setValueAtTime(660, now);
-          osc.frequency.exponentialRampToValueAtTime(990, now + 0.08);
-          gain.gain.setValueAtTime(0.09, now);
-          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.14);
+          osc.frequency.setValueAtTime(440, now);
+          osc.frequency.exponentialRampToValueAtTime(660, now + 0.08);
+          gain.gain.setValueAtTime(0.1, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
           osc.connect(gain);
           gain.connect(audioCtx.destination);
           osc.start(now);
-          osc.stop(now + 0.15);
+          osc.stop(now + 0.12);
         }
-      } catch (e) {}
+      } catch (err) {
+        // audio fail silent
+      }
     }
 
     function clearAdScheduledTimers() {
@@ -7172,71 +7461,71 @@ ${variantSelectorHtml}
       }
     }
 
-    function scheduleAt(delayMs, fn) {
-      const id = setTimeout(fn, Math.max(0, delayMs));
+    function scheduleAt(ms, callback) {
+      const id = setTimeout(() => {
+        try { callback(); } catch(err) { console.warn('Ad animation step error:', err); }
+      }, ms);
       adTimers.push(id);
+      return id;
     }
 
-    function moveCursorTo(xPct, yPct, visible) {
+    function getElementCenterPct(elementId) {
+      const stage = document.getElementById('ad-stage-916');
+      const target = document.getElementById(elementId);
+      if (!stage || !target) return null;
+      const sRect = stage.getBoundingClientRect();
+      const tRect = target.getBoundingClientRect();
+      const cX = tRect.left + tRect.width / 2;
+      const cY = tRect.top + tRect.height / 2;
+      const xPct = ((cX - sRect.left) / sRect.width) * 100;
+      const yPct = ((cY - sRect.top) / sRect.height) * 100;
+      return { x: Math.max(4, Math.min(96, xPct)), y: Math.max(4, Math.min(96, yPct)) };
+    }
+
+    function moveCursorTo(xPct, yPct, show = true) {
       const cursor = document.getElementById('ad-touch-cursor');
       if (!cursor) return;
-      cursor.style.left = xPct + '%';
-      cursor.style.top = yPct + '%';
-      cursor.style.opacity = visible ? '1' : '0';
-      cursor.classList.remove('tapping');
-    }
-
-    function triggerTapAt(xPct, yPct) {
-      const cursor = document.getElementById('ad-touch-cursor');
-      const stage = document.getElementById('ad-stage-916');
-      if (!cursor || !stage) return;
-      cursor.style.left = xPct + '%';
-      cursor.style.top = yPct + '%';
-      cursor.style.opacity = '1';
-      cursor.classList.add('tapping');
-      playAdSound('tap');
-
-      const ripple = document.createElement('div');
-      ripple.className = 'ad-tap-ripple-ring';
-      ripple.style.left = xPct + '%';
-      ripple.style.top = yPct + '%';
-      stage.appendChild(ripple);
-      setTimeout(() => {
-        cursor.classList.remove('tapping');
-        if (ripple.parentNode) ripple.parentNode.removeChild(ripple);
-      }, 600);
-    }
-
-    // 対象DOM要素のステージ内中心座標（%）を厳密に計算してタップずれを防止
-    function getElementCenterPct(elOrId, fallbackX = 50, fallbackY = 50) {
-      const stage = document.getElementById('ad-stage-916');
-      const el = typeof elOrId === 'string' ? document.getElementById(elOrId) : elOrId;
-      if (!stage || !el) return { x: fallbackX, y: fallbackY };
-      const sRect = stage.getBoundingClientRect();
-      const eRect = el.getBoundingClientRect();
-      if (!sRect.width || !sRect.height || (!eRect.width && !eRect.height)) {
-        return { x: fallbackX, y: fallbackY };
+      if (!show) {
+        cursor.classList.remove('active');
+        return;
       }
-      const x = ((eRect.left + eRect.width / 2 - sRect.left) / sRect.width) * 100;
-      const y = ((eRect.top + eRect.height / 2 - sRect.top) / sRect.height) * 100;
-      return {
-        x: Math.max(4, Math.min(96, x)),
-        y: Math.max(4, Math.min(96, y))
-      };
+      cursor.style.left = `${xPct}%`;
+      cursor.style.top = `${yPct}%`;
+      cursor.classList.add('active');
     }
 
-    function moveCursorToElement(elOrId, fallbackX = 50, fallbackY = 50, visible = true) {
-      const pos = getElementCenterPct(elOrId, fallbackX, fallbackY);
-      moveCursorTo(pos.x, pos.y, visible);
+    function moveCursorToElement(elementId, fallbackXPct, fallbackYPct, show = true) {
+      const pos = getElementCenterPct(elementId);
+      if (pos) {
+        moveCursorTo(pos.x, pos.y, show);
+      } else {
+        moveCursorTo(fallbackXPct, fallbackYPct, show);
+      }
     }
 
-    function triggerTapOnElement(elOrId, fallbackX = 50, fallbackY = 50) {
-      const pos = getElementCenterPct(elOrId, fallbackX, fallbackY);
-      triggerTapAt(pos.x, pos.y);
+    function triggerTap(xPct, yPct) {
+      const cursor = document.getElementById('ad-touch-cursor');
+      if (cursor) {
+        cursor.style.left = `${xPct}%`;
+        cursor.style.top = `${yPct}%`;
+        cursor.classList.add('active', 'tapping');
+        setTimeout(() => cursor.classList.remove('tapping'), 240);
+      }
+      playAdSound('tap');
+    }
+
+    function triggerTapOnElement(elementId, fallbackXPct, fallbackYPct) {
+      const pos = getElementCenterPct(elementId);
+      if (pos) {
+        triggerTap(pos.x, pos.y);
+      } else {
+        triggerTap(fallbackXPct, fallbackYPct);
+      }
     }
 
     function setBottomNavTab(activeId) {
-      ['ad-nav-search', 'ad-nav-incoming', 'ad-nav-chat'].forEach(id => {
+      const ids = ['ad-nav-search', 'ad-nav-incoming', 'ad-nav-gacha', 'ad-nav-chat', 'ad-nav-fav'];
+      ids.forEach(id => {
         const el = document.getElementById(id);
         if (el) el.classList.toggle('active', id === activeId);
       });
@@ -7252,17 +7541,35 @@ ${variantSelectorHtml}
       else if (sceneNum === 4) setBottomNavTab('ad-nav-chat');
     }
 
-    // 既存お品書きデータを使ってステージ内の画像を同期
+    // シナリオに応じたステージデータ初期化
     function prepareStageData() {
-      const { mainImg, subImg } = resolveTanktopAssets();
+      const sc = getCurrentScenario();
+
+      // 各画像要素にシナリオの画像を設定
       ['ad-s2-hero-img', 'ad-s3-img', 'ad-s4-avatar', 'ad-s5-main-img', 'ad-s6-img'].forEach(id => {
         const el = document.getElementById(id);
-        if (el && mainImg) el.src = mainImg;
+        if (el && sc.mainImg) el.src = sc.mainImg;
       });
       const subEl = document.getElementById('ad-s5-sub-img');
-      if (subEl && subImg) subEl.src = subImg;
+      if (subEl && sc.subImg) subEl.src = sc.subImg;
 
-      // Scene 1: 実際のお品書きと完全同一の2列タイルカード（ニットお座りモアイは除外）
+      // Scene 3 テキスト更新
+      const s3Sub = document.querySelector('#ad-scene-3 .match-sub-text');
+      if (s3Sub) s3Sub.textContent = sc.matchSubText;
+      const s3Title = document.querySelector('#ad-scene-3 div[style*="font-size:17px"]');
+      if (s3Title) s3Title.textContent = sc.matchAvatarTitle;
+
+      // Scene 4 ヘッダー名称更新
+      const s4Name = document.querySelector('.moai-chat-header div[style*="font-size:14.5px"]');
+      if (s4Name) s4Name.textContent = sc.heroName;
+
+      // Scene 5 説明更新
+      const s5TitleEl = document.querySelector('#ad-scene-5 div[style*="font-size:11px; font-weight:900; color:#fda4af"]');
+      if (s5TitleEl) s5TitleEl.textContent = sc.s5SubTitle;
+      const s5NameEl = document.querySelector('#ad-scene-5 div[style*="font-size:15px; font-weight:900; color:#fff"]');
+      if (s5NameEl) s5NameEl.innerHTML = sc.s5SubName;
+
+      // Scene 1: お品書きタイルグリッド
       const grid = document.getElementById('ad-s1-tile-grid');
       if (grid) {
         const allProds = (typeof window.getAllAvailableProducts === 'function')
@@ -7275,7 +7582,7 @@ ${variantSelectorHtml}
           : [];
         const fallbackCards = [
           { id: 'moai_loscut', name: 'うなだれているモアイ', image: 'images/kurima/moai_loscut/studio/含み損モアイ_master.png', hitokoto: '落ち込むのが好きです📉 含み損は心の栄養。', isRecommend: true },
-          { id: 'hadagi_osuwari_moai_pen', name: '肌着おすわり モアイペン立て', image: mainImg, hitokoto: 'お隣、失礼しますね🪑 デスクワークを静かに見守るのが日課です。', isNew: true },
+          { id: 'hadagi_osuwari_moai_pen', name: '肌着おすわり モアイペン立て', image: 'images/kurima/hadagi_osuwari_moai_pen/studio/tanktop_pair_pen.jpg', hitokoto: 'お隣、失礼しますね🪑 デスクワークを静かに見守るのが日課です。', isNew: true },
           { id: 'moai_highleg', name: 'ハイレグモアイ', image: 'images/kurima/moai_highleg/studio/ハイレグモアイ_master.png', hitokoto: '美脚を褒められると伸びます🩱 恥じらいは置いてきました。', isRecommend: true },
           { id: 'glasses_stand', name: 'タンクトップ まちょいモアイメガネスタンド', image: 'images/kurima/glasses_stand/studio/Moataro.jpg', hitokoto: '屈強な大胸筋で君のメガネを24時間ガッチリ支えるぜ💪👓' },
           { id: 'doyagao_moai', name: 'ももひき どやがおモアイペン立て', image: 'images/kurima/doyagao_moai/studio/momohiki_doyagao.jpg', hitokoto: 'ももひき履いて腕組みドヤ顔😏 デスクで誰よりも自信満々。' },
@@ -7322,24 +7629,17 @@ ${variantSelectorHtml}
           'images/kurima/osuwari_moai_pen.jpg',
           'images/kurima/macho_moai_pen.png',
           'images/kurima/moai_highleg/studio/ハイレグモアイ_master.png',
-          mainImg
+          sc.mainImg
         ];
         attackAvatars.innerHTML = imgs.map((src, i) => `
           <img src="${src}" alt="モアイ" style="width:48px; height:48px; border-radius:50%; object-fit:cover; border:2.5px solid #ff2d55; background:#fff; margin-left:${i === 0 ? '0' : '-12px'}; box-shadow:0 4px 12px rgba(255,45,85,0.3);">
         `).join('');
       }
 
-      // Scene 2: 実際の「いいね」タブ（あなたに興味津々なモアイたち）一覧リストを再現
+      // Scene 2: シナリオの「いいね一覧」リストを注入
       const incomingList = document.getElementById('ad-s2-incoming-list');
       if (incomingList) {
-        const items = [
-          { name: 'ハイレグモアイ', img: 'images/kurima/moai_highleg/studio/ハイレグモアイ_master.png', quote: '私、セクシーだと思わない？🩱 美脚には自信あるんだけど…💋', rowId: 'ad-incoming-highleg-row', btnId: 'ad-incoming-highleg-btn' },
-          { name: 'タンクトップ まちょいモアイメガネスタンド', img: 'images/kurima/glasses_stand/studio/Moataro.jpg', quote: '俺の胸筋とタンクトップで、君のメガネを24時間ガッチリ支えるぜ💪👓', rowId: 'ad-incoming-glasses-row', btnId: 'ad-incoming-glasses-btn' },
-          { name: '肌着おすわり モアイペン立て', img: mainImg, quote: 'お隣、失礼しますね🪑 タンクトップ姿でデスクワークを静かに見守るのが日課です。', rowId: 'ad-incoming-target-row', btnId: 'ad-incoming-target-btn' },
-          { name: 'ももひき どやがおモアイペン立て', img: 'images/kurima/doyagao_moai/studio/momohiki_doyagao.jpg', quote: '腕組みドヤ顔が決まり手😏 ももひき履いて自信満々に佇みます。', rowId: '', btnId: '' },
-          { name: '黄昏れモアイ', img: 'images/kurima/tasogare_moai.jpg', quote: '黄昏るのが好きです🗿 明日仕事行きたくないな…って時にそばにいて。', rowId: '', btnId: '' }
-        ];
-        incomingList.innerHTML = items.map(item => `
+        incomingList.innerHTML = sc.incomingCards.map(item => `
           <div class="ad-incoming-card" ${item.rowId ? `id="${item.rowId}"` : ''}>
             <img src="${item.img}" alt="${item.name}" style="width:48px; height:48px; border-radius:50%; object-fit:cover; border:1px solid #e2e8f0; flex-shrink:0;" onerror="this.src='images/kurima/osuwari_moai_pen.jpg'">
             <div style="flex:1; min-width:0;">
@@ -7358,12 +7658,12 @@ ${variantSelectorHtml}
         `).join('');
       }
 
-      // Scene 7: 「他にも個性豊かなモアイ作品がいっぱい！」に指定8作品（ニットお座りモアイ除外・正しいダンシングモアイ画像）を表示
+      // Scene 7: ラインナップ8作品
       const s7Grid = document.getElementById('ad-s7-lineup-grid');
       if (s7Grid) {
         const lineupItems = [
-          { name: '肌着おすわりモアイ', img: mainImg, badge: 'NEW' },
-          { name: 'モアイなメガネスタンド', img: 'images/kurima/glasses_stand.jpg', badge: '眼鏡' },
+          { name: '肌着おすわりモアイ', img: 'images/kurima/hadagi_osuwari_moai_pen/studio/tanktop_pair_pen.jpg', badge: 'NEW' },
+          { name: 'モアイなメガネスタンド', img: 'images/kurima/glasses_stand/studio/Moataro.jpg', badge: '眼鏡' },
           { name: 'マッチョモアイペン立て', img: 'images/kurima/macho_moai_pen.png', badge: '筋肉' },
           { name: 'MOAI ROBO MARK 2', img: 'images/kurima/moai_robo_mk2_gray.jpg', badge: '可動' },
           { name: 'ダンシングモアイ', img: 'images/kurima/moai_dance_test.jpg', badge: '陽気' },
@@ -7383,9 +7683,10 @@ ${variantSelectorHtml}
       }
     }
 
-    // Scene 2 の拡大いいねカードを「ハイレグモアイ」「メガネスタンド」「肌着おすわりモアイ」に切り替え
+    // Scene 2 の拡大いいねカード内容更新
     function setZoomCardProfile(mode) {
-      const { mainImg } = resolveTanktopAssets();
+      const sc = getCurrentScenario();
+      const profile = (sc.zoomProfiles && sc.zoomProfiles[mode]) ? sc.zoomProfiles[mode] : sc.zoomProfiles.hero;
       const heroImg = document.getElementById('ad-s2-hero-img');
       const heroName = document.getElementById('ad-s2-hero-name');
       const heroBadge = document.getElementById('ad-s2-hero-badge');
@@ -7393,34 +7694,18 @@ ${variantSelectorHtml}
       const trait1 = document.getElementById('ad-s2-trait-1');
       const trait2 = document.getElementById('ad-s2-trait-2');
 
-      if (mode === 'highleg') {
-        if (heroImg) heroImg.src = 'images/kurima/moai_highleg/studio/ハイレグモアイ_master.png';
-        if (heroName) heroName.textContent = 'ハイレグモアイ';
-        if (heroBadge) heroBadge.textContent = '美脚自慢';
-        if (heroQuote) heroQuote.textContent = '💬「私、セクシーだと思わない？🩱 美脚には自信あるんだけど…どうかな？💋」';
-        if (trait1) trait1.textContent = '🩱 特徴：ハイレグ美脚';
-        if (trait2) trait2.textContent = '🦵 魅力：圧倒的脚線美';
-      } else if (mode === 'glasses_stand') {
-        if (heroImg) heroImg.src = 'images/kurima/glasses_stand/studio/Moataro.jpg';
-        if (heroName) heroName.textContent = 'タンクトップ まちょいモアイメガネスタンド';
-        if (heroBadge) heroBadge.textContent = '筋トレ中';
-        if (heroQuote) heroQuote.textContent = '💬「俺の胸筋とタンクトップで、君のメガネを24時間ガッチリ支えるぜ💪👓」';
-        if (trait1) trait1.textContent = '💪 特徴：屈強マッチョ';
-        if (trait2) trait2.textContent = '👓 職業：メガネスタンド';
-      } else {
-        if (heroImg) heroImg.src = mainImg;
-        if (heroName) heroName.textContent = '肌着おすわり モアイペン立て';
-        if (heroBadge) heroBadge.textContent = 'NEW';
-        if (heroQuote) heroQuote.textContent = '💬「お隣、失礼しますね🪑 タンクトップ姿でデスクワークを静かに見守るのが日課です。」';
-        if (trait1) trait1.textContent = '👕 特徴：タンクトップ';
-        if (trait2) trait2.textContent = '🖊️ 職業：ペン立て';
-      }
+      if (heroImg) heroImg.src = profile.img;
+      if (heroName) heroName.textContent = profile.name;
+      if (heroBadge) heroBadge.textContent = profile.badge;
+      if (heroQuote) heroQuote.textContent = profile.quote;
+      if (trait1) trait1.textContent = profile.trait1;
+      if (trait2) trait2.textContent = profile.trait2;
     }
 
     // ① お品書き閲覧（スーッとスワイプして全体を見る）→ 次々に「いいね！」通知が届く → 下部「いいね」タブをタップ（0〜7.8秒）
     function runScene1Animation() {
       activateSceneLayer(1);
-      const { mainImg } = resolveTanktopAssets();
+      const sc = getCurrentScenario();
       const track = document.getElementById('ad-s1-swipe-track');
       const toast = document.getElementById('ad-toast-banner');
       const toastImg = document.getElementById('ad-toast-img');
@@ -7466,14 +7751,16 @@ ${variantSelectorHtml}
       });
 
       // ── フェーズ2: スワイプを満喫した直後、次々に「いいね」大型通知バーが届く！ ──
-      const notifications = [
-        { text: 'おすわりモアイからいいね！', img: 'images/kurima/osuwari_moai_pen.jpg', at: 3550, count: 1 },
-        { text: 'ハイレグモアイからいいね！', img: 'images/kurima/moai_highleg/studio/ハイレグモアイ_master.png', at: 4350, count: 3 },
-        { text: '肌着おすわりモアイからいいね！', img: mainImg, at: 5150, count: 5 }
+      const notifs = sc.notifs || [
+        { text: 'モアイからいいね！', img: sc.mainImg }
       ];
+      const notifScheduleTimes = [3550, 4350, 5150];
+      const notifCounts = [1, 3, 5];
 
-      notifications.forEach(n => {
-        scheduleAt(n.at, () => {
+      notifs.slice(0, 3).forEach((n, idx) => {
+        const atMs = notifScheduleTimes[idx] || (3550 + idx * 800);
+        const cnt = notifCounts[idx] || (idx + 1);
+        scheduleAt(atMs, () => {
           if (!toast) return;
           toast.classList.remove('show');
           if (toastImg) toastImg.src = n.img;
@@ -7481,9 +7768,9 @@ ${variantSelectorHtml}
           requestAnimationFrame(() => toast.classList.add('show'));
           playAdSound('notif');
 
-          if (headerLikes) headerLikes.textContent = String(n.count);
+          if (headerLikes) headerLikes.textContent = String(cnt);
           if (badgeIncoming) {
-            badgeIncoming.textContent = String(n.count);
+            badgeIncoming.textContent = String(cnt);
             badgeIncoming.style.display = 'flex';
           }
         });
@@ -7507,35 +7794,36 @@ ${variantSelectorHtml}
       });
     }
 
-    // ② いいねページ：ハイレグモアイ確認→スキップ、タンクトップメガネスタンド確認→スキップ、肌着おすわりモアイでマッチング！（11.5秒）
+    // ② いいねページ：Skip 1 → Skip 2 → ターゲットモアイでマッチング！（11.5秒）
     function runScene2Animation() {
       activateSceneLayer(2);
       const incomingList = document.getElementById('ad-s2-incoming-list');
-      const highlegRow = document.getElementById('ad-incoming-highleg-row');
-      const glassesRow = document.getElementById('ad-incoming-glasses-row');
+      const skip1Row = document.getElementById('ad-incoming-skip1-row') || document.getElementById('ad-incoming-highleg-row');
+      const skip2Row = document.getElementById('ad-incoming-skip2-row') || document.getElementById('ad-incoming-glasses-row');
       const targetRow = document.getElementById('ad-incoming-target-row');
       const zoomOverlay = document.getElementById('ad-s2-zoom-overlay');
       const heroCard = document.getElementById('ad-s2-hero-card');
 
       if (incomingList) incomingList.style.transform = 'translateY(0px)';
-      if (highlegRow) highlegRow.classList.remove('highlight-target');
-      if (glassesRow) glassesRow.classList.remove('highlight-target');
+      if (skip1Row) skip1Row.classList.remove('highlight-target');
+      if (skip2Row) skip2Row.classList.remove('highlight-target');
       if (targetRow) targetRow.classList.remove('highlight-target');
       if (zoomOverlay) zoomOverlay.classList.remove('show');
       if (heroCard) heroCard.classList.remove('selected');
-      setZoomCardProfile('highleg');
+      setZoomCardProfile('skip1');
 
-      // ── Step 1: まず「ハイレグモアイ」のいいねを開いてスキップ ──
+      // ── Step 1: まず1番目のモアイのいいねを開いてスキップ ──
+      const skip1BtnId = (document.getElementById('ad-incoming-skip1-btn')) ? 'ad-incoming-skip1-btn' : 'ad-incoming-highleg-btn';
       moveCursorTo(55, 34, true);
       scheduleAt(400, () => {
-        if (highlegRow) highlegRow.classList.add('highlight-target');
-        moveCursorToElement('ad-incoming-highleg-btn', 82, 34, true);
+        if (skip1Row) skip1Row.classList.add('highlight-target');
+        moveCursorToElement(skip1BtnId, 82, 34, true);
       });
       scheduleAt(950, () => {
-        triggerTapOnElement('ad-incoming-highleg-btn', 82, 34);
+        triggerTapOnElement(skip1BtnId, 82, 34);
       });
       scheduleAt(1250, () => {
-        setZoomCardProfile('highleg');
+        setZoomCardProfile('skip1');
         if (zoomOverlay) zoomOverlay.classList.add('show');
         playAdSound('swipe');
       });
@@ -7547,20 +7835,21 @@ ${variantSelectorHtml}
       });
       scheduleAt(3150, () => {
         if (zoomOverlay) zoomOverlay.classList.remove('show');
-        if (highlegRow) highlegRow.classList.remove('highlight-target');
+        if (skip1Row) skip1Row.classList.remove('highlight-target');
         playAdSound('swipe');
       });
 
-      // ── Step 2: 次に「タンクトップ まちょいモアイメガネスタンド」のいいねを開いてスキップ ──
+      // ── Step 2: 次に2番目のモアイのいいねを開いてスキップ ──
+      const skip2BtnId = (document.getElementById('ad-incoming-skip2-btn')) ? 'ad-incoming-skip2-btn' : 'ad-incoming-glasses-btn';
       scheduleAt(3650, () => {
-        if (glassesRow) glassesRow.classList.add('highlight-target');
-        moveCursorToElement('ad-incoming-glasses-btn', 82, 42, true);
+        if (skip2Row) skip2Row.classList.add('highlight-target');
+        moveCursorToElement(skip2BtnId, 82, 42, true);
       });
       scheduleAt(4200, () => {
-        triggerTapOnElement('ad-incoming-glasses-btn', 82, 42);
+        triggerTapOnElement(skip2BtnId, 82, 42);
       });
       scheduleAt(4500, () => {
-        setZoomCardProfile('glasses_stand');
+        setZoomCardProfile('skip2');
         if (zoomOverlay) zoomOverlay.classList.add('show');
         playAdSound('swipe');
       });
@@ -7572,11 +7861,11 @@ ${variantSelectorHtml}
       });
       scheduleAt(6400, () => {
         if (zoomOverlay) zoomOverlay.classList.remove('show');
-        if (glassesRow) glassesRow.classList.remove('highlight-target');
+        if (skip2Row) skip2Row.classList.remove('highlight-target');
         playAdSound('swipe');
       });
 
-      // ── Step 3: すっと「肌着おすわり モアイペン立て」を開く ──
+      // ── Step 3: すっとターゲットのモアイを開く ──
       scheduleAt(6900, () => {
         if (targetRow) targetRow.classList.add('highlight-target');
         moveCursorToElement('ad-incoming-target-btn', 82, 50, true);
@@ -7585,7 +7874,7 @@ ${variantSelectorHtml}
         triggerTapOnElement('ad-incoming-target-btn', 82, 50);
       });
       scheduleAt(7750, () => {
-        setZoomCardProfile('tanktop');
+        setZoomCardProfile('hero');
         if (zoomOverlay) zoomOverlay.classList.add('show');
         playAdSound('swipe');
       });
@@ -7625,7 +7914,7 @@ ${variantSelectorHtml}
     function runScene4Animation() {
       activateSceneLayer(4);
       moveCursorTo(50, 50, false);
-      const { mainImg } = resolveTanktopAssets();
+      const sc = getCurrentScenario();
       const list = document.getElementById('ad-chat-list');
       const body = document.getElementById('ad-chat-body');
       const inputPreview = document.getElementById('ad-chat-input-preview');
@@ -7645,10 +7934,10 @@ ${variantSelectorHtml}
             </div>
           `;
         } else {
-          const captionText = photoCaption || '📸 俺のタンクトップ姿（相棒と）';
+          const captionText = photoCaption || '📸 モアイの日常フォト';
           const contentHtml = isPhoto ? `
             <div style="background:#ffffff; border:1px solid #e2e8f0; padding:6px; border-radius:16px 16px 16px 4px; box-shadow:0 4px 14px rgba(0,0,0,0.08); max-width:210px;">
-              <img src="${textOrHtml}" alt="タンクトップ姿のモアイ" style="width:100%; aspect-ratio:1/1; object-fit:cover; border-radius:12px; display:block;">
+              <img src="${textOrHtml}" alt="モアイ写真" style="width:100%; aspect-ratio:1/1; object-fit:cover; border-radius:12px; display:block;">
               <div style="font-size:10px; font-weight:800; color:#ff2d55; text-align:center; margin-top:4px;">${captionText}</div>
             </div>
           ` : `
@@ -7658,7 +7947,7 @@ ${variantSelectorHtml}
           `;
 
           row.innerHTML = `
-            <img src="${mainImg}" alt="おすわりモアイ" style="width:34px; height:34px; border-radius:50%; object-fit:cover; border:1.5px solid #ff2d55; flex-shrink:0; background:#fff; margin-top:2px;">
+            <img src="${sc.mainImg}" alt="モアイ" style="width:34px; height:34px; border-radius:50%; object-fit:cover; border:1.5px solid #ff2d55; flex-shrink:0; background:#fff; margin-top:2px;">
             ${contentHtml}
           `;
         }
@@ -7670,35 +7959,35 @@ ${variantSelectorHtml}
 
       // 1. モアイからの初回メッセージ
       scheduleAt(250, () => {
-        appendChatBubble('moai', '🗿「やったー！マッチングありがとう✨ 俺、どう？タンクトップ姿どうかな？」');
+        appendChatBubble('moai', sc.chatMoaiMsg1);
       });
 
-      // 2. モアイが1枚目の添付写真を送信（白黒タンクトップペア写真）
+      // 2. モアイが1枚目の添付写真を送信
       scheduleAt(1450, () => {
-        appendChatBubble('moai', 'images/kurima/hadagi_osuwari_moai_pen/studio/tanktop_pair_pen.jpg', true, '📸 俺のタンクトップ姿（相棒と）');
+        appendChatBubble('moai', sc.photo1, true, sc.photo1Caption);
       });
 
-      // 3. 連続で2枚目の添付写真を送信！（白肌着3人衆の集合写真）
+      // 3. 連続で2枚目の添付写真を送信！
       scheduleAt(2450, () => {
-        appendChatBubble('moai', 'images/kurima/hadagi_osuwari_moai_pen/studio/hadagi_trio_desk.jpg', true, '📸 仲間たちと肌着合わせしてみたよ🗿🔥');
+        appendChatBubble('moai', sc.photo2, true, sc.photo2Caption);
       });
 
-      // 4. お客さんからの返信「え、似合ってる！仲間たちも個性的で実物見てみたいな😂」
+      // 4. お客さんからの返信
       scheduleAt(3850, () => {
-        appendChatBubble('user', 'え、似合ってる！仲間たちも個性的で実物見てみたいな😂');
+        appendChatBubble('user', sc.chatUserMsg1);
       });
 
       // 5. モアイからのデザフェス K-271 お誘い＆グイグイ連投
       scheduleAt(5150, () => {
-        appendChatBubble('moai', '🗿「えっ本当！？じゃあ11/14・15のデザフェス【西館4階 暗いブース K-271】で会おうよ！✨」');
+        appendChatBubble('moai', sc.chatMoaiMsg2);
       });
       scheduleAt(6400, () => {
-        appendChatBubble('moai', '🗿「タンクトップ洗濯して、他のモアイ仲間たちと最前列で待ってるね！！約束だよ🗿🔥」');
+        appendChatBubble('moai', sc.chatMoaiMsg3);
       });
 
       // 6. お客さん側の最後のツッコミ返信
       scheduleAt(7650, () => {
-        appendChatBubble('user', 'なんかこのモアイ、めっちゃグイグイくるな…😂 ちょっとK-271見に行ってみよっと！');
+        appendChatBubble('user', sc.chatUserMsg2);
       });
     }
 
@@ -7709,14 +7998,14 @@ ${variantSelectorHtml}
       playAdSound('swipe');
     }
 
-    // ⑥ イベント案内（20.2〜22.5秒）
+    // ⑥ イベント案内（20.2〜24.7秒）
     function runScene6Animation() {
       activateSceneLayer(6);
       moveCursorTo(50, 50, false);
       playAdSound('chat');
     }
 
-    // ⑦ サイト誘導（22.5〜24.5秒）
+    // ⑦ サイト誘導（24.7〜27.2秒）
     function runScene7Animation() {
       activateSceneLayer(7);
       moveCursorTo(50, 50, false);
@@ -7797,14 +8086,32 @@ ${variantSelectorHtml}
       adRafId = requestAnimationFrame(tick);
     }
 
-    // 公開グローバル関数（開発モード限定）
+    window.toggleMoaiAdPlayPause = function() {
+      if (adIsPlaying) {
+        adElapsedBeforePauseMs += (performance.now() - adStartTimeMs);
+        clearAdScheduledTimers();
+        adIsPlaying = false;
+        updatePlayPauseBtnUI();
+      } else {
+        const offsets = getSceneStartOffsetsMs();
+        const totalMs = offsets[offsets.length - 1];
+        if (adElapsedBeforePauseMs >= totalMs) adElapsedBeforePauseMs = 0;
+        startScenarioFromOffset(adElapsedBeforePauseMs);
+      }
+    };
+
+    window.restartMoaiAdScenario = function() {
+      startScenarioFromOffset(0);
+    };
+
     window.openMoaiAdStudio = function() {
       if (!window.isMoaiAdminAuthenticated || !document.body.classList.contains('admin-mode')) return;
       const modal = document.getElementById('moai-ad-studio-modal');
       if (!modal) return;
       document.body.classList.add('moai-ad-studio-open');
-      modal.classList.add('active');
+      document.body.classList.remove('ad-recording-clean');
       modal.setAttribute('aria-hidden', 'false');
+      modal.classList.add('active');
       window.restartMoaiAdScenario();
     };
 
@@ -7820,25 +8127,12 @@ ${variantSelectorHtml}
       }
     };
 
-    window.toggleMoaiAdPlayPause = function() {
-      if (adIsPlaying) {
-        adElapsedBeforePauseMs += (performance.now() - adStartTimeMs);
-        adIsPlaying = false;
-        clearAdScheduledTimers();
-        updatePlayPauseBtnUI();
-      } else {
-        const offsets = getSceneStartOffsetsMs();
-        const totalMs = offsets[offsets.length - 1];
-        if (adElapsedBeforePauseMs >= totalMs - 100) {
-          adElapsedBeforePauseMs = 0;
-        }
-        startScenarioFromOffset(adElapsedBeforePauseMs);
+    window.handleAdStageBackgroundClick = function(e) {
+      if (document.body.classList.contains('ad-recording-clean')) {
+        document.body.classList.remove('ad-recording-clean');
+        const overlay = document.getElementById('ad-countdown-overlay');
+        if (overlay) overlay.style.display = 'none';
       }
-    };
-
-    window.restartMoaiAdScenario = function() {
-      adElapsedBeforePauseMs = 0;
-      startScenarioFromOffset(0);
     };
 
     window.startCleanRecordingMode = function(withCountdown) {
