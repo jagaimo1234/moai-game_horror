@@ -6534,37 +6534,38 @@ ${variantSelectorHtml}
       100% { transform: translate(-50%, -50%) scale(2.3); opacity: 0; }
     }
 
-    /* ① いいね通知ポップアップ */
+    /* ① いいね通知ポップアップ（大きく見やすく強調） */
     #ad-toast-banner {
       position: absolute;
       top: 10px;
-      left: 12px;
-      right: 12px;
+      left: 10px;
+      right: 10px;
       z-index: 90;
-      background: rgba(255, 255, 255, 0.98);
-      border: 2px solid #ff2d55;
-      border-radius: 18px;
-      padding: 9px 14px;
+      background: rgba(255, 255, 255, 0.99);
+      border: 3px solid #ff2d55;
+      border-radius: 22px;
+      padding: 14px 16px;
       display: flex;
       align-items: center;
-      gap: 12px;
-      box-shadow: 0 14px 32px rgba(255, 45, 85, 0.28);
-      transform: translateY(-130%);
+      gap: 14px;
+      box-shadow: 0 18px 40px rgba(255, 45, 85, 0.42), 0 0 0 4px rgba(255, 45, 85, 0.14);
+      transform: translateY(-140%) scale(0.95);
       opacity: 0;
-      transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.25s ease;
+      transition: transform 0.32s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.25s ease;
     }
     #ad-toast-banner.show {
-      transform: translateY(0);
+      transform: translateY(0) scale(1);
       opacity: 1;
     }
     #ad-toast-img {
-      width: 44px;
-      height: 44px;
+      width: 62px;
+      height: 62px;
       border-radius: 50%;
       object-fit: cover;
-      border: 2px solid #ff2d55;
+      border: 3px solid #ff2d55;
       flex-shrink: 0;
       background: #f1f5f9;
+      box-shadow: 0 4px 12px rgba(255, 45, 85, 0.25);
     }
 
     /* ① 「💘 いいね来た！！」カットイン演出（既存 .moai-attack-overlay 風のド派手ポップアップ） */
@@ -6760,14 +6761,14 @@ ${variantSelectorHtml}
              ① お品書き閲覧＆「いいね来た！」演出 → いいねタブをタップ
              ======================================================= -->
         <div id="ad-scene-1" class="ad-scene-layer active">
-          <!-- 上部通知ポップアップ -->
+          <!-- 上部通知ポップアップ（大きく見やすく表示） -->
           <div id="ad-toast-banner">
             <img id="ad-toast-img" src="images/kurima/osuwari_moai_pen.jpg" alt="モアイ">
             <div style="flex:1; min-width:0;">
-              <div style="font-size:10px; font-weight:900; color:#ff2d55; margin-bottom:2px;">💌 モアイからアプローチ着信！</div>
-              <div id="ad-toast-text" style="font-size:13.5px; font-weight:900; color:#0f172a; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">おすわりモアイからいいね！</div>
+              <div style="display:inline-block; background:#fff0f3; color:#ff2d55; font-size:12px; font-weight:900; padding:2px 10px; border-radius:999px; border:1px solid #fecdd3; margin-bottom:4px;">💌 モアイからアプローチ着信！</div>
+              <div id="ad-toast-text" style="font-size:17.5px; font-weight:900; color:#0f172a; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; line-height:1.25;">おすわりモアイからいいね！</div>
             </div>
-            <div style="width:32px; height:32px; border-radius:50%; background:#fff0f3; color:#ff2d55; display:flex; align-items:center; justify-content:center; font-size:16px; flex-shrink:0;">❤️</div>
+            <div style="width:44px; height:44px; border-radius:50%; background:#fff0f3; color:#ff2d55; display:flex; align-items:center; justify-content:center; font-size:22px; flex-shrink:0; border:1.5px solid #fecdd3;">❤️</div>
           </div>
 
           <!-- 既存お品書きと完全同一の2列タイルグリッド（正方形1:1画像・長方形にならない） -->
@@ -6794,7 +6795,7 @@ ${variantSelectorHtml}
                 モアイたちがあなたに興味津々です🗿💓
               </div>
               <div id="ad-s1-attack-avatars" style="display:flex; justify-content:center; align-items:center; margin-bottom:12px;"></div>
-              <div style="background:linear-gradient(135deg, #ff2d55, #ff5e62); color:#fff; font-size:13px; font-weight:900; padding:10px 16px; border-radius:999px; box-shadow:0 6px 18px rgba(255,45,85,0.35);">
+              <div id="ad-s1-attack-btn" style="background:linear-gradient(135deg, #ff2d55, #ff5e62); color:#fff; font-size:13px; font-weight:900; padding:10px 16px; border-radius:999px; box-shadow:0 6px 18px rgba(255,45,85,0.35);">
                 👍 下の「いいね」タブから確認する
               </div>
             </div>
@@ -6816,37 +6817,39 @@ ${variantSelectorHtml}
             </p>
           </div>
 
-          <!-- いいね一覧リスト（画像2と同一デザイン） -->
+          <!-- いいね一覧リスト -->
           <div style="flex:1; overflow:hidden;">
             <div id="ad-s2-incoming-list" style="display:flex; flex-direction:column; gap:9px; transition:transform 0.55s cubic-bezier(0.22, 1, 0.36, 1);"></div>
           </div>
 
-          <!-- いいね一覧から「アップ」で飛び出すおすわりモアイペン立てのプロフィール＆いいね返しカード -->
+          <!-- いいね一覧から「アップ」で飛び出すおすわりモアイペン立てのプロフィール＆いいね返しカード（1:1正方形で見切れなし） -->
           <div id="ad-s2-zoom-overlay">
-            <div id="ad-s2-hero-card">
+            <div id="ad-s2-hero-card" style="max-width:350px; margin:0 auto;">
               <div style="background:linear-gradient(90deg, #ff2d55, #ff5e62); color:#fff; padding:8px 14px; font-size:12px; font-weight:900; display:flex; align-items:center; justify-content:space-between;">
                 <span>💌 あなたに熱烈な「いいね！」が届いています</span>
                 <span style="background:rgba(255,255,255,0.22); padding:2px 8px; border-radius:999px; font-size:10px;">たった今</span>
               </div>
-              <div style="position:relative; width:100%; aspect-ratio:1/1; max-height:240px; background:#f8fafc; overflow:hidden;">
-                <img id="ad-s2-hero-img" src="images/kurima/hadagi_osuwari_moai_pen/studio/tanktop_cover.jpg" alt="タンクトップを着たおすわりモアイペン立て" style="width:100%; height:100%; object-fit:cover; display:block;">
-                <div style="position:absolute; bottom:10px; left:10px; background:rgba(15,23,42,0.82); color:#fff; font-size:10.5px; font-weight:800; padding:4px 10px; border-radius:999px; backdrop-filter:blur(4px);">
-                  🟢 金沢・オンライン
+              <div style="padding:10px 14px 0; background:#fff;">
+                <div style="position:relative; width:min(100%, 260px); aspect-ratio:1/1; margin:0 auto; border-radius:16px; background:#f8fafc; overflow:hidden; border:1.5px solid #e2e8f0;">
+                  <img id="ad-s2-hero-img" src="images/kurima/hadagi_osuwari_moai_pen/studio/tanktop_cover.jpg" alt="タンクトップを着たおすわりモアイペン立て" style="width:100%; height:100%; object-fit:cover; display:block;">
+                  <div style="position:absolute; bottom:8px; left:8px; background:rgba(15,23,42,0.82); color:#fff; font-size:10px; font-weight:800; padding:3px 9px; border-radius:999px; backdrop-filter:blur(4px);">
+                    🟢 金沢・オンライン
+                  </div>
                 </div>
               </div>
-              <div style="padding:12px 14px 14px; background:#fff;">
-                <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:6px;">
-                  <div style="font-size:17px; font-weight:900; color:#0f172a;">肌着おすわり モアイペン立て</div>
+              <div style="padding:10px 14px 14px; background:#fff;">
+                <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:5px;">
+                  <div style="font-size:16px; font-weight:900; color:#0f172a;">肌着おすわり モアイペン立て</div>
                   <span style="font-size:10px; font-weight:900; color:#ff2d55; background:#fff0f3; padding:3px 8px; border-radius:999px; border:1px solid #fecdd3;">NEW</span>
                 </div>
-                <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:12px; padding:7px 10px; margin-bottom:8px; font-size:11.5px; color:#334155; font-weight:700; line-height:1.45;">
+                <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:12px; padding:6px 10px; margin-bottom:7px; font-size:11px; color:#334155; font-weight:700; line-height:1.4;">
                   💬「お隣、失礼しますね🪑 タンクトップ姿でデスクワークを静かに見守るのが日課です。」
                 </div>
-                <div style="display:flex; gap:6px; margin-bottom:10px;">
-                  <span style="flex:1; background:#fff0f3; color:#e11d48; font-size:11px; font-weight:900; padding:5px 8px; border-radius:8px; text-align:center;">👕 特徴：タンクトップ</span>
-                  <span style="flex:1; background:#f1f5f9; color:#0f172a; font-size:11px; font-weight:900; padding:5px 8px; border-radius:8px; text-align:center;">🖊️ 職業：ペン立て</span>
+                <div style="display:flex; gap:6px; margin-bottom:9px;">
+                  <span style="flex:1; background:#fff0f3; color:#e11d48; font-size:10.5px; font-weight:900; padding:5px 8px; border-radius:8px; text-align:center;">👕 特徴：タンクトップ</span>
+                  <span style="flex:1; background:#f1f5f9; color:#0f172a; font-size:10.5px; font-weight:900; padding:5px 8px; border-radius:8px; text-align:center;">🖊️ 職業：ペン立て</span>
                 </div>
-                <button type="button" id="ad-s2-like-btn" style="width:100%; background:linear-gradient(135deg, #ff2d55, #ff5e62); color:#fff; border:none; padding:12px; border-radius:999px; font-size:14px; font-weight:900; box-shadow:0 6px 18px rgba(255,45,85,0.4);">
+                <button type="button" id="ad-s2-like-btn" style="width:100%; background:linear-gradient(135deg, #ff2d55, #ff5e62); color:#fff; border:none; padding:11px; border-radius:999px; font-size:13.5px; font-weight:900; box-shadow:0 6px 18px rgba(255,45,85,0.4);">
                   ❤️ いいね返し（マッチングする）
                 </button>
               </div>
@@ -6876,7 +6879,7 @@ ${variantSelectorHtml}
           </div>
 
           <div style="font-size:17px; font-weight:900; color:#fff; margin-bottom:12px;">おすわりモアイ（タンクトップ）</div>
-          <div style="background:linear-gradient(135deg, #ff2d55, #ff5e62); color:#fff; font-size:13px; font-weight:900; padding:11px 22px; border-radius:999px; box-shadow:0 6px 20px rgba(255,45,85,0.45);">
+          <div id="ad-s3-talk-btn" style="background:linear-gradient(135deg, #ff2d55, #ff5e62); color:#fff; font-size:13px; font-weight:900; padding:11px 22px; border-radius:999px; box-shadow:0 6px 20px rgba(255,45,85,0.45);">
             💬 トーク画面を開く
           </div>
         </div>
@@ -6905,7 +6908,7 @@ ${variantSelectorHtml}
           <!-- お客さん側のクイック返信チップ＆入力欄（タップして返信する演出用） -->
           <div style="background:#ffffff; border-top:1px solid #f1f5f9; padding:7px 10px; display:flex; gap:6px; overflow:hidden; flex-shrink:0;">
             <span class="ad-quick-chip" id="ad-chip-1">似合ってる！実物見てみたいな😂</span>
-            <span class="ad-quick-chip" id="ad-chip-2">暗いブース K-271だね！会いに行くよ！</span>
+            <span class="ad-quick-chip" id="ad-chip-2">このモアイめっちゃグイグイくるな😂 見に行こ！</span>
           </div>
           <div class="moai-chat-input-bar" style="padding:8px 12px; background:#fff; border-top:1px solid #e2e8f0; display:flex; align-items:center; gap:8px; flex-shrink:0;">
             <div id="ad-chat-input-preview" style="flex:1; background:#f1f5f9; border:1px solid #e2e8f0; border-radius:999px; padding:8px 14px; font-size:12px; color:#64748b; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">メッセージを入力...</div>
@@ -6914,29 +6917,28 @@ ${variantSelectorHtml}
         </div>
 
         <!-- =======================================================
-             ⑤ 実物紹介：タンクトップモアイペン立ての実物写真を表示
+             ⑤ 実物紹介：タンクトップおすわりモアイの作品画像を1:1正方形で見切れなく表示
              ======================================================= -->
-        <div id="ad-scene-5" class="ad-scene-layer" style="background:#0f172a; color:#fff; padding:18px 16px; justify-content:center; gap:12px;">
+        <div id="ad-scene-5" class="ad-scene-layer" style="background:#0f172a; color:#fff; padding:18px 16px; justify-content:center; align-items:center; gap:14px;">
           <div style="text-align:center;">
-            <div style="font-size:11px; font-weight:900; color:#fda4af; letter-spacing:1px; margin-bottom:4px;">🗿 REAL HANDMADE WORK</div>
-            <div style="font-size:22px; font-weight:900; color:#fff; background:#ff2d55; display:inline-block; padding:6px 18px; border-radius:999px; box-shadow:0 8px 20px rgba(255,45,85,0.4);">
+            <div style="font-size:11px; font-weight:900; color:#fda4af; letter-spacing:1.5px; margin-bottom:5px;">🗿 REAL HANDMADE WORK</div>
+            <div style="font-size:21px; font-weight:900; color:#fff; background:#ff2d55; display:inline-block; padding:6px 20px; border-radius:999px; box-shadow:0 8px 20px rgba(255,45,85,0.4);">
               実は、本当にいるんです。
             </div>
           </div>
 
-          <!-- 既存データの作品写真（形状・色無加工） -->
-          <div style="background:#1e293b; border-radius:20px; overflow:hidden; border:2px solid rgba(255,255,255,0.85); box-shadow:0 14px 32px rgba(0,0,0,0.45); position:relative; aspect-ratio:1/1; max-height:250px; margin:0 auto; width:100%;">
+          <!-- 1:1正方形の作品写真（見切れ・長方形歪みなし） -->
+          <div style="background:#1e293b; border-radius:22px; overflow:hidden; border:2.5px solid rgba(255,255,255,0.9); box-shadow:0 16px 36px rgba(0,0,0,0.5); position:relative; width:min(100%, 300px); aspect-ratio:1/1; margin:0 auto;">
             <img id="ad-s5-main-img" src="images/kurima/hadagi_osuwari_moai_pen/studio/tanktop_cover.jpg" alt="タンクトップを着たおすわりモアイペン立て" style="width:100%; height:100%; object-fit:cover; display:block;">
           </div>
 
-          <div style="display:grid; grid-template-columns:1fr 1.15fr; gap:10px; align-items:stretch;">
-            <div style="background:#1e293b; border-radius:16px; overflow:hidden; border:1.5px solid rgba(255,255,255,0.7); height:120px;">
-              <img id="ad-s5-sub-img" src="images/kurima/osuwari_moai_pen/raw/osuwari_moai_pen_RAW_20261031_150436_001.jpg" alt="ペン立て実物写真" style="width:100%; height:100%; object-fit:cover; display:block;" onerror="this.src='images/kurima/osuwari_moai_pen.jpg'">
-            </div>
-            <div style="background:#1e293b; border:1px solid #334155; border-radius:16px; padding:12px; display:flex; flex-direction:column; justify-content:center; gap:4px;">
-              <div style="font-size:11px; font-weight:900; color:#fda4af;">✒️ 実際に使えるペン立て</div>
-              <div style="font-size:14px; font-weight:900; color:#fff; line-height:1.35;">タンクトップを着た<br>おすわりモアイペン立て</div>
-              <div style="font-size:11px; color:#cbd5e1; font-weight:700;">Kanazawa Moataro 制作</div>
+          <!-- 作品紹介カード -->
+          <div style="width:min(100%, 300px); background:#1e293b; border:1.5px solid #334155; border-radius:18px; padding:12px 16px; display:flex; align-items:center; gap:12px; box-sizing:border-box; box-shadow:0 8px 24px rgba(0,0,0,0.35);">
+            <img id="ad-s5-sub-img" src="images/kurima/osuwari_moai_pen/cover.jpg" alt="おすわりモアイペン立て" style="width:62px; height:62px; border-radius:14px; object-fit:cover; border:1.5px solid rgba(255,255,255,0.4); flex-shrink:0;">
+            <div style="flex:1; min-width:0; text-align:left;">
+              <div style="font-size:11px; font-weight:900; color:#fda4af; margin-bottom:2px;">✒️ 実際に使える3D造形ペン立て</div>
+              <div style="font-size:15px; font-weight:900; color:#fff; line-height:1.3;">タンクトップを着た<br>おすわりモアイペン立て</div>
+              <div style="font-size:10.5px; color:#cbd5e1; font-weight:700; margin-top:2px;">Kanazawa Moataro 制作</div>
             </div>
           </div>
         </div>
@@ -6965,21 +6967,26 @@ ${variantSelectorHtml}
         </div>
 
         <!-- =======================================================
-             ⑦ サイト誘導：お品書きサイトへ誘導
+             ⑦ サイト誘導：他にもたくさんのモアイ作品があることを並べてお品書きサイトへ誘導
              ======================================================= -->
-        <div id="ad-scene-7" class="ad-scene-layer" style="background:radial-gradient(circle at top, #fff0f3 0%, #ffffff 70%); padding:22px 18px; justify-content:center; align-items:center; text-align:center; gap:16px;">
-          <img id="ad-s7-img" src="images/kurima/hadagi_osuwari_moai_pen/studio/tanktop_cover.jpg" alt="おすわりモアイ" style="width:92px; height:92px; border-radius:50%; object-fit:cover; border:4px solid #ff2d55; box-shadow:0 10px 28px rgba(255,45,85,0.3);">
+        <div id="ad-scene-7" class="ad-scene-layer" style="background:radial-gradient(circle at top, #fff0f3 0%, #ffffff 70%); padding:14px 14px; justify-content:center; align-items:center; text-align:center; gap:12px;">
+          <div style="display:inline-block; background:#fff0f3; color:#ff2d55; font-size:11.5px; font-weight:900; padding:4px 14px; border-radius:999px; border:1.5px solid #fecdd3;">
+            🗿 他にも個性豊かなモアイ作品がいっぱい！
+          </div>
 
-          <div style="background:#ffffff; border:2px solid #ffe4e8; border-radius:22px; padding:20px 16px; width:100%; box-sizing:border-box; box-shadow:0 12px 30px rgba(15,23,42,0.08);">
-            <div style="font-size:18px; font-weight:900; color:#0f172a; line-height:1.5; margin-bottom:12px;">
+          <!-- 複数の作品ラインナップ（8作品・正方形サムネイル一覧） -->
+          <div id="ad-s7-lineup-grid" style="display:grid; grid-template-columns:repeat(4, 1fr); gap:8px; width:100%; box-sizing:border-box;"></div>
+
+          <div style="background:#ffffff; border:2px solid #ffe4e8; border-radius:20px; padding:14px 14px; width:100%; box-sizing:border-box; box-shadow:0 10px 26px rgba(15,23,42,0.08);">
+            <div style="font-size:17px; font-weight:900; color:#0f172a; line-height:1.45; margin-bottom:6px;">
               あなたにも、モアイから<br>いいねが届いているかも？
             </div>
-            <div style="font-size:18px; font-weight:900; color:#ff2d55; line-height:1.4;">
+            <div style="font-size:16.5px; font-weight:900; color:#ff2d55; line-height:1.35;">
               続きはお品書きサイトで。
             </div>
           </div>
 
-          <div id="ad-s7-cta" style="width:100%; box-sizing:border-box; background:linear-gradient(135deg, #ff2d55 0%, #ff5e62 100%); color:#fff; font-size:15px; font-weight:900; padding:15px 20px; border-radius:999px; box-shadow:0 10px 25px rgba(255,45,85,0.4);">
+          <div id="ad-s7-cta" style="width:100%; box-sizing:border-box; background:linear-gradient(135deg, #ff2d55 0%, #ff5e62 100%); color:#fff; font-size:14.5px; font-weight:900; padding:14px 18px; border-radius:999px; box-shadow:0 10px 25px rgba(255,45,85,0.4);">
             🔍 お品書きサイトを見る（Kanazawa Moataro）
           </div>
         </div>
@@ -7029,10 +7036,10 @@ ${variantSelectorHtml}
     let adElapsedBeforePauseMs = 0;
     let audioCtx = null;
 
-    // 既存お品書きデータからタンクトップモアイの実物画像とサブ画像を取得（形状・色無加工）
+    // 既存お品書きデータからタンクトップモアイの実物画像とサブ画像を取得（RAW画像は一切使用しない）
     function resolveTanktopAssets() {
       let mainImg = 'images/kurima/hadagi_osuwari_moai_pen/studio/tanktop_cover.jpg';
-      let subImg = 'images/kurima/osuwari_moai_pen/raw/osuwari_moai_pen_RAW_20261031_150436_001.jpg';
+      let subImg = 'images/kurima/osuwari_moai_pen/cover.jpg';
 
       const allProds = (typeof window.getAllAvailableProducts === 'function')
         ? window.getAllAvailableProducts()
@@ -7045,9 +7052,12 @@ ${variantSelectorHtml}
       );
 
       if (variantGroup) {
-        if (variantGroup.image) mainImg = variantGroup.image;
-        if (Array.isArray(variantGroup.images) && variantGroup.images.length > 1) {
-          subImg = variantGroup.images[1];
+        if (variantGroup.image && !String(variantGroup.image).includes('/raw/')) {
+          mainImg = variantGroup.image;
+        }
+        if (Array.isArray(variantGroup.images)) {
+          const safeImgs = variantGroup.images.filter(u => u && !String(u).includes('/raw/'));
+          if (safeImgs.length > 1) subImg = safeImgs[1];
         }
       }
 
@@ -7182,6 +7192,34 @@ ${variantSelectorHtml}
       }, 600);
     }
 
+    // 対象DOM要素のステージ内中心座標（%）を厳密に計算してタップずれを防止
+    function getElementCenterPct(elOrId, fallbackX = 50, fallbackY = 50) {
+      const stage = document.getElementById('ad-stage-916');
+      const el = typeof elOrId === 'string' ? document.getElementById(elOrId) : elOrId;
+      if (!stage || !el) return { x: fallbackX, y: fallbackY };
+      const sRect = stage.getBoundingClientRect();
+      const eRect = el.getBoundingClientRect();
+      if (!sRect.width || !sRect.height || (!eRect.width && !eRect.height)) {
+        return { x: fallbackX, y: fallbackY };
+      }
+      const x = ((eRect.left + eRect.width / 2 - sRect.left) / sRect.width) * 100;
+      const y = ((eRect.top + eRect.height / 2 - sRect.top) / sRect.height) * 100;
+      return {
+        x: Math.max(4, Math.min(96, x)),
+        y: Math.max(4, Math.min(96, y))
+      };
+    }
+
+    function moveCursorToElement(elOrId, fallbackX = 50, fallbackY = 50, visible = true) {
+      const pos = getElementCenterPct(elOrId, fallbackX, fallbackY);
+      moveCursorTo(pos.x, pos.y, visible);
+    }
+
+    function triggerTapOnElement(elOrId, fallbackX = 50, fallbackY = 50) {
+      const pos = getElementCenterPct(elOrId, fallbackX, fallbackY);
+      triggerTapAt(pos.x, pos.y);
+    }
+
     function setBottomNavTab(activeId) {
       ['ad-nav-search', 'ad-nav-incoming', 'ad-nav-chat'].forEach(id => {
         const el = document.getElementById(id);
@@ -7202,7 +7240,7 @@ ${variantSelectorHtml}
     // 既存お品書きデータを使ってステージ内の画像を同期
     function prepareStageData() {
       const { mainImg, subImg } = resolveTanktopAssets();
-      ['ad-s2-hero-img', 'ad-s3-img', 'ad-s4-avatar', 'ad-s5-main-img', 'ad-s6-img', 'ad-s7-img'].forEach(id => {
+      ['ad-s2-hero-img', 'ad-s3-img', 'ad-s4-avatar', 'ad-s5-main-img', 'ad-s6-img'].forEach(id => {
         const el = document.getElementById(id);
         if (el && mainImg) el.src = mainImg;
       });
@@ -7290,9 +7328,33 @@ ${variantSelectorHtml}
                 「${item.quote}」
               </div>
             </div>
-            <span style="background:linear-gradient(135deg, #ff2d55, #ff5e62); color:#fff; padding:8px 12px; border-radius:20px; font-weight:900; font-size:11px; white-space:nowrap; box-shadow:0 4px 12px rgba(255,45,85,0.35); flex-shrink:0;">
+            <span ${item.isTarget ? 'id="ad-incoming-target-btn"' : ''} style="background:linear-gradient(135deg, #ff2d55, #ff5e62); color:#fff; padding:8px 12px; border-radius:20px; font-weight:900; font-size:11px; white-space:nowrap; box-shadow:0 4px 12px rgba(255,45,85,0.35); flex-shrink:0;">
               ❤️ いいね返し
             </span>
+          </div>
+        `).join('');
+      }
+
+      // Scene 7: 「あなたにも、モアイからいいねが届いているかも？」に多数の作品ラインナップ（8作品・4×2グリッド）を表示
+      const s7Grid = document.getElementById('ad-s7-lineup-grid');
+      if (s7Grid) {
+        const lineupItems = [
+          { name: '肌着おすわりモアイ', img: mainImg, badge: 'NEW' },
+          { name: 'うなだれているモアイ', img: 'images/kurima/moai_loscut/studio/ChatGPT 画像 2026年11月5日 20_27_08-1.png', badge: '人気' },
+          { name: 'MOAI ROBO MARK 2', img: 'images/kurima/moai_robo_mark2/studio/ChatGPT Image 2026年6月24日 22_05_32.png', badge: '可動' },
+          { name: 'ハイレグモアイ', img: 'images/kurima/moai_highleg/studio/ハイレグモアイ_master.png', badge: '注目' },
+          { name: 'まっちょキーホルダー', img: 'images/kurima/macho_keyholder.jpg', badge: '筋肉' },
+          { name: 'ダンシングモアイ', img: 'images/kurima/dancing_moai.jpg', badge: '陽気' },
+          { name: 'あきらめたモアイ', img: 'images/kurima/moai_giveup.jpg', badge: '哀愁' },
+          { name: 'ニットおすわりモアイ', img: 'images/kurima/nitto_osuwari_moai_penstand.jpg', badge: '冬服' }
+        ];
+        s7Grid.innerHTML = lineupItems.map(item => `
+          <div style="background:#ffffff; border-radius:14px; padding:5px; box-shadow:0 6px 16px rgba(15,23,42,0.08); border:1.5px solid #fecdd3; display:flex; flex-direction:column; align-items:center; position:relative; overflow:hidden;">
+            <div style="width:100%; aspect-ratio:1/1; border-radius:10px; overflow:hidden; position:relative; background:#f8fafc;">
+              <img src="${item.img}" alt="${item.name}" style="width:100%; height:100%; object-fit:cover; display:block;" onerror="this.src='images/kurima/osuwari_moai_pen.jpg'">
+              <span style="position:absolute; top:4px; left:4px; background:rgba(255,45,85,0.92); color:#fff; font-size:8.5px; font-weight:900; padding:1.5px 5px; border-radius:999px; letter-spacing:0.02em;">❤️ ${item.badge}</span>
+            </div>
+            <div style="font-size:9.5px; font-weight:900; color:#0f172a; margin-top:4px; width:100%; text-align:center; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${item.name}</div>
           </div>
         `).join('');
       }
@@ -7342,7 +7404,7 @@ ${variantSelectorHtml}
         }
       });
 
-      // 次々に届く「いいね」通知
+      // 次々に届く「いいね」大型通知バー
       const notifications = [
         { text: 'おすわりモアイからいいね！', img: 'images/kurima/osuwari_moai_pen.jpg', at: 650, count: 1 },
         { text: 'ハイレグモアイからいいね！', img: 'images/kurima/moai_highleg/studio/ハイレグモアイ_master.png', at: 1350, count: 3 },
@@ -7371,15 +7433,15 @@ ${variantSelectorHtml}
         if (toast) toast.classList.remove('show');
         if (attackPopup) attackPopup.classList.add('show');
         playAdSound('match');
-        moveCursorTo(50, 66, true);
+        moveCursorToElement('ad-s1-attack-btn', 50, 62, true);
       });
 
-      // 下部ナビの「👍 いいね」タブ（または確認ボタン）へ指が動いてタップ！
+      // 下部ナビの「👍 いいね」タブへ指が正確に動いてタップ！
       scheduleAt(4100, () => {
-        moveCursorTo(30, 94, true);
+        moveCursorToElement('ad-nav-incoming', 30, 96, true);
       });
       scheduleAt(4650, () => {
-        triggerTapAt(30, 94);
+        triggerTapOnElement('ad-nav-incoming', 30, 96);
         setBottomNavTab('ad-nav-incoming');
       });
     }
@@ -7397,33 +7459,35 @@ ${variantSelectorHtml}
       if (zoomOverlay) zoomOverlay.classList.remove('show');
       if (heroCard) heroCard.classList.remove('selected');
 
-      // まず「いいね」一覧ページを見せ、肌着おすわりモアイペン立ての行に注目＆タップ
-      moveCursorTo(55, 52, true);
+      // まず「いいね」一覧ページを見せ、肌着おすわりモアイペン立ての「❤️ いいね返し」ボタンに指が正確に移動＆タップ
+      moveCursorTo(55, 48, true);
       scheduleAt(900, () => {
         if (targetRow) targetRow.classList.add('highlight-target');
-        moveCursorTo(82, 50, true);
+        moveCursorToElement('ad-incoming-target-btn', 82, 46, true);
       });
       scheduleAt(1550, () => {
-        triggerTapAt(82, 50);
+        triggerTapOnElement('ad-incoming-target-btn', 82, 46);
       });
 
-      // そこからアップで「肌着おすわりモアイペン立て」のいいね＆プロフィールカードが飛び出す！
+      // そこからアップで「肌着おすわりモアイペン立て」の正方形カードが飛び出す！
       scheduleAt(1950, () => {
         if (zoomOverlay) zoomOverlay.classList.add('show');
         playAdSound('swipe');
-        moveCursorTo(54, 65, true);
+      });
+      scheduleAt(2350, () => {
+        moveCursorToElement('ad-s2-like-btn', 50, 78, true);
       });
 
-      // 「❤️ いいね返し（マッチングする）」ボタンをタップ！
+      // 「❤️ いいね返し（マッチングする）」ボタンのど真ん中をタップ！
       scheduleAt(3400, () => {
-        moveCursorTo(50, 84, true);
+        moveCursorToElement('ad-s2-like-btn', 50, 78, true);
       });
       scheduleAt(4150, () => {
-        triggerTapAt(50, 84);
+        triggerTapOnElement('ad-s2-like-btn', 50, 78);
         if (heroCard) heroCard.classList.add('selected');
       });
       scheduleAt(4850, () => {
-        moveCursorTo(50, 84, false);
+        moveCursorToElement('ad-s2-like-btn', 50, 78, false);
       });
     }
 
@@ -7437,15 +7501,15 @@ ${variantSelectorHtml}
         badgeChat.textContent = '1';
         badgeChat.style.display = 'flex';
       }
-      scheduleAt(1500, () => {
-        moveCursorTo(50, 74, true);
+      scheduleAt(1400, () => {
+        moveCursorToElement('ad-s3-talk-btn', 50, 70, true);
       });
-      scheduleAt(2100, () => {
-        triggerTapAt(50, 74);
+      scheduleAt(2050, () => {
+        triggerTapOnElement('ad-s3-talk-btn', 50, 70);
       });
     }
 
-    // ④ チャット（13.3〜21.8秒）：モアイからのお誘い＆お客さん側からの返信がある楽しい双方向トーク
+    // ④ チャット（13.3〜21.8秒）：デザフェスK-271へのグイグイお誘い＆お客さんの遊び心あるツッコミ返信
     function runScene4Animation() {
       activateSceneLayer(4);
       moveCursorTo(50, 50, false);
@@ -7468,7 +7532,7 @@ ${variantSelectorHtml}
         row.className = 'ad-chat-msg-item' + (isUser ? ' user-side' : '');
         if (isUser) {
           row.innerHTML = `
-            <div class="moai-msg-bubble moai-msg-user" style="background:linear-gradient(135deg, #ff2d55, #ff5e62) !important; color:#ffffff !important; padding:9px 13px; border-radius:16px 16px 4px 16px; font-size:13px; font-weight:800; box-shadow:0 3px 10px rgba(255,45,85,0.3); max-width:80%; text-align:left;">
+            <div class="moai-msg-bubble moai-msg-user" style="background:linear-gradient(135deg, #ff2d55, #ff5e62) !important; color:#ffffff !important; padding:9px 13px; border-radius:16px 16px 4px 16px; font-size:13px; font-weight:800; box-shadow:0 3px 10px rgba(255,45,85,0.3); max-width:82%; text-align:left; line-height:1.4;">
               ${text}
             </div>
           `;
@@ -7487,48 +7551,46 @@ ${variantSelectorHtml}
       }
 
       // 1. モアイからの初回メッセージ
-      scheduleAt(300, () => {
-        appendChatBubble('moai', '🗿「はじめまして！いいね返しありがとう✨ タンクトップ、似合ってますか？実は僕、こう見えてペン立てなんです🖊️」');
+      scheduleAt(250, () => {
+        appendChatBubble('moai', '🗿「やったー！マッチングありがとう✨ このタンクトップ姿どうかな？実は僕、こう見えてペン立てなんだけど…🖊️」');
       });
 
-      // 2. お客さん側から返信1（クイック返信をタップして送信する演出）
-      scheduleAt(1650, () => {
-        moveCursorTo(30, 81, true);
+      // 2. お客さん側から返信1（クイック返信チップ1を正確にタップ）
+      scheduleAt(1550, () => {
+        moveCursorToElement('ad-chip-1', 28, 80, true);
       });
-      scheduleAt(2100, () => {
-        triggerTapAt(30, 81);
+      scheduleAt(2000, () => {
+        triggerTapOnElement('ad-chip-1', 28, 80);
         if (chip1) chip1.classList.add('tapped');
         if (inputPreview) inputPreview.textContent = '似合ってる！実物見てみたいな😂';
       });
-      scheduleAt(2450, () => {
+      scheduleAt(2350, () => {
         moveCursorTo(50, 50, false);
         if (inputPreview) inputPreview.textContent = 'メッセージを入力...';
         appendChatBubble('user', '似合ってる！実物見てみたいな😂');
       });
 
-      // 3. モアイからのデザフェス暗いブースお誘いメッセージ
-      scheduleAt(3750, () => {
-        appendChatBubble('moai', '🗿「えっ本当！？嬉しい…！実は11/14・15のデザフェス【西4F 暗いブース K-271】にいるんだけど、そこで会えないかな？🥺」');
+      // 3. モアイからのデザフェス K-271 お誘い＋グイグイ連投メッセージ
+      scheduleAt(3450, () => {
+        appendChatBubble('moai', '🗿「えっ本当！？じゃあ11/14・15のデザフェス【西館4階 暗いブース K-271】で会おうよ！✨」');
+      });
+      scheduleAt(4650, () => {
+        appendChatBubble('moai', '🗿「タンクトップ洗濯して、他のモアイ仲間たちと最前列で待ってるね！！約束だよ🗿🔥」');
       });
 
-      // 4. お客さん側から返信2
-      scheduleAt(5350, () => {
-        moveCursorTo(72, 81, true);
+      // 4. お客さん側の最後の返信（「なんかこのモアイグイグイくるな😂」の遊び心ある返信）
+      scheduleAt(5950, () => {
+        moveCursorToElement('ad-chip-2', 70, 80, true);
       });
-      scheduleAt(5800, () => {
-        triggerTapAt(72, 81);
+      scheduleAt(6400, () => {
+        triggerTapOnElement('ad-chip-2', 70, 80);
         if (chip2) chip2.classList.add('tapped');
-        if (inputPreview) inputPreview.textContent = '暗いブース K-271だね！会いに行くよ！';
+        if (inputPreview) inputPreview.textContent = 'なんかこのモアイ、めっちゃグイグイくるな…😂 ちょっとK-271見に行ってみよっと！';
       });
-      scheduleAt(6150, () => {
+      scheduleAt(6800, () => {
         moveCursorTo(50, 50, false);
         if (inputPreview) inputPreview.textContent = 'メッセージを入力...';
-        appendChatBubble('user', '暗いブース K-271だね！会いに行くよ！');
-      });
-
-      // 5. モアイの歓喜の返答
-      scheduleAt(7200, () => {
-        appendChatBubble('moai', '🗿「やったー！！タンクトップ着て首を長〜くして待ってるね！約束だよ🗿❤️」');
+        appendChatBubble('user', 'なんかこのモアイ、めっちゃグイグイくるな…😂 ちょっとK-271見に行ってみよっと！');
       });
     }
 
@@ -7551,11 +7613,11 @@ ${variantSelectorHtml}
       activateSceneLayer(7);
       moveCursorTo(50, 50, false);
       playAdSound('match');
-      scheduleAt(800, () => {
-        moveCursorTo(50, 74, true);
+      scheduleAt(750, () => {
+        moveCursorToElement('ad-s7-cta', 50, 82, true);
       });
-      scheduleAt(1350, () => {
-        triggerTapAt(50, 74);
+      scheduleAt(1300, () => {
+        triggerTapOnElement('ad-s7-cta', 50, 82);
       });
     }
 
