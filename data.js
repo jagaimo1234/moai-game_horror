@@ -826,6 +826,12 @@ window.WORK_FOLDER_ASSETS = {
       "images/kurima/glasses_stand/studio/Moataro.jpg"
     ]
   },
+  "hadagi_osuwari_moai_pen": {
+    "raw": [],
+    "studio": [
+      "images/kurima/hadagi_osuwari_moai_pen/studio/tanktop_cover.jpg"
+    ]
+  },
   "macho_moai_keyholder": {
     "raw": [
       "images/kurima/macho_moai_keyholder/raw/macho_moai_keyholder_RAW_20261101_162055_001.jpg",
