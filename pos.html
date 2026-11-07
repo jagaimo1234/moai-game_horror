@@ -16891,10 +16891,10 @@
         delete cItem.imageBackups;
         delete cItem.optimizedCover;
         if (Array.isArray(cItem.images)) {
-          cItem.images = cItem.images.filter(img => typeof img === "string" && (!img.startsWith("data:image/") || img.length < 50000));
+          cItem.images = cItem.images.filter(img => typeof img === "string" && (!img.startsWith("data:image/") || img.length < 300000));
         }
         if (Array.isArray(cItem.catalogGroupImages)) {
-          cItem.catalogGroupImages = cItem.catalogGroupImages.filter(img => typeof img === "string" && (!img.startsWith("data:image/") || img.length < 50000));
+          cItem.catalogGroupImages = cItem.catalogGroupImages.filter(img => typeof img === "string" && (!img.startsWith("data:image/") || img.length < 300000));
         }
         cleaned[id] = cItem;
       }
@@ -17065,22 +17065,17 @@
           alert('✅ 個別バリエーション画像をお品書きに反映しました！');
         } else {
           // 通常版（本体）の画像として保存
-          let currentBackups = [];
+          const finalMain = optimizedMain || mainImg;
+          const finalSubs = optimizedSubs.filter(Boolean);
 
           Object.assign(cpData[pId], {
-            image: mainImg,
-            images: subImgs,
-            optimizedCover: optimizedMain || mainImg,
-            optimizedImages: optimizedSubs,
-            imageBackups: currentBackups,
+            image: finalMain,
+            images: finalSubs,
             updatedAt: Date.now()
           });
           Object.assign(wmData[pId], {
-            image: mainImg,
-            images: subImgs,
-            optimizedCover: optimizedMain || mainImg,
-            optimizedImages: optimizedSubs,
-            imageBackups: currentBackups,
+            image: finalMain,
+            images: finalSubs,
             updatedAt: Date.now()
           });
 
