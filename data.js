@@ -16,6 +16,25 @@
 // 全作品のマスターリスト
 const MASTER_PRODUCTS = [
   {
+    id: 'trio_collab',
+    isDev: true,
+    image: 'images/kurima/trio_collab/trio_collab_master.jpg',
+    images: [
+      'images/kurima/trio_collab/trio_collab_master.jpg',
+      'images/kurima/trio_collab/trio_collab_desk.jpg',
+    ],
+    name: '哀愁ズッ友トリオ',
+    desc: '考えるモアイ・含み損モアイ・諦めたモアイのコラボセット。',
+  },
+
+  {
+    id: 'moai_Noliferobot',
+    image: '',
+    name: '人生ままならぬロボット',
+    desc: '複数バリエーションを予定してはいるが、ひとまず爆誕。',
+  },
+
+  {
     id: 'mark2_blight',
     image: 'images/kurima/mark2_blight.jpg',
     name: 'モアイロボmark2_怪しく光るver.',
@@ -895,13 +914,6 @@ window.NO_IMAGE_PLACEHOLDER = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3
 
 // === WORK_FOLDER_ASSETS_START ===
 window.WORK_FOLDER_ASSETS = {
-  "trio_collab": {
-    "raw": [],
-    "studio": [
-      "images/kurima/trio_collab/trio_collab_master.jpg",
-      "images/kurima/trio_collab/trio_collab_desk.jpg"
-    ]
-  },
   "dot_osuwari_keyholder": {
     "raw": [
       "images/kurima/dot_osuwari_keyholder/raw/dot_osuwari_keyholder_RAW_20261031_153943_003.jpg",
@@ -965,6 +977,15 @@ window.WORK_FOLDER_ASSETS = {
       "images/kurima/macho_moai_keyholder/studio/4d924d16-4899-44d9-857b-d36e813cef4d.png",
       "images/kurima/macho_moai_keyholder/studio/まっちょモアイキーホルダー_master.png"
     ]
+  },
+  "moai_dance_test": {
+    "raw": [
+      "images/kurima/moai_dance_test/raw/moai_dance_test_RAW_20261108_183729_001.mp4",
+      "images/kurima/moai_dance_test/raw/moai_dance_test_RAW_20261108_183742_002.jpg",
+      "images/kurima/moai_dance_test/raw/moai_dance_test_RAW_20261108_183749_003.jpg",
+      "images/kurima/moai_dance_test/raw/moai_dance_test_RAW_20261108_183752_004.jpg"
+    ],
+    "studio": []
   },
   "moai_giveup": {
     "raw": [],
@@ -1047,6 +1068,13 @@ window.WORK_FOLDER_ASSETS = {
       "images/kurima/osuwari_moai_pen/raw/osuwari_moai_pen_RAW_20261031_150436_001.jpg"
     ],
     "studio": []
+  },
+  "trio_collab": {
+    "raw": [],
+    "studio": [
+      "images/kurima/trio_collab/studio/trio_collab_desk.jpg",
+      "images/kurima/trio_collab/studio/trio_collab_master.jpg"
+    ]
   }
 };
 // === WORK_FOLDER_ASSETS_END ===

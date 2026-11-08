@@ -230,6 +230,7 @@ async function main() {
     const safeDesc = String(desc || '').replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/\r?\n/g, '\\n');
 
     const newEntry = `  {
+    id: '${posId}',
     image: '${mainImgRel}',${imagesCode}
     name: '${safeName}',
     desc: '${safeDesc}',
