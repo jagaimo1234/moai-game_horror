@@ -895,6 +895,13 @@ window.NO_IMAGE_PLACEHOLDER = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3
 
 // === WORK_FOLDER_ASSETS_START ===
 window.WORK_FOLDER_ASSETS = {
+  "trio_collab": {
+    "raw": [],
+    "studio": [
+      "images/kurima/trio_collab/trio_collab_master.jpg",
+      "images/kurima/trio_collab/trio_collab_desk.jpg"
+    ]
+  },
   "dot_osuwari_keyholder": {
     "raw": [
       "images/kurima/dot_osuwari_keyholder/raw/dot_osuwari_keyholder_RAW_20261031_153943_003.jpg",
