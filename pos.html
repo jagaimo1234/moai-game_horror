@@ -3171,31 +3171,39 @@
     const rankingApp = initializeApp(rankingConfig, "rankingApp");
     const rdb = getDatabase(rankingApp);
 
-    // Firestore 1MB上限対策：既存マスター作品の巨大なBase64 DataURLを一掃し、ローカル画像パスに置換＆不要なキャッシュを除去
+    // Firestore 1MB上限対策：既存マスター作品の巨大なBase64 DataURLを一掃し、正規ローカル画像パスに置換＆不要なキャッシュを除去
     function cleanseMasterData(data) {
       if (!data || typeof data !== "object") return {};
       const cleaned = {};
-      const masterList = Array.isArray(window.MASTER_PRODUCTS) ? window.MASTER_PRODUCTS : [];
+      const masterList = window.getFullMasterProducts ? window.getFullMasterProducts() : (Array.isArray(window.MASTER_PRODUCTS) ? window.MASTER_PRODUCTS : []);
 
       for (const [id, item] of Object.entries(data)) {
-        if (!item || typeof item !== "object" || id.includes(".") || id === "dev_1792332209364" || id === "moai_losscut" || id === "moai_losscut_RAW_20261105_201128_001") continue;
+        if (!item || typeof item !== "object" || id.includes(".") || id === "dev_1792332209364" || id === "moai_losscut_RAW_20261105_201128_001") continue;
         const cItem = { ...item };
         delete cItem.optimizedImages;
         delete cItem.imageBackups;
         delete cItem.optimizedCover;
 
-        // MASTER_PRODUCTS（data.js）に登録されているか確認
-        const masterProd = masterList.find(m => m.id === id || (m.image && m.image.split('/').pop().split('.')[0] === id));
+        // MASTER_PRODUCTS（data.js）から正規の作品アセットを厳密に特定
+        const normalize = (s) => (s || '').replace(/\s+/g, '').replace(/\n/g, '').toLowerCase();
+        const masterProd = masterList.find(m => {
+          if (m.id === id) return true;
+          if (m.image && m.image.split('/').pop().split('.')[0] === id) return true;
+          if (cItem.name && m.name && normalize(m.name) === normalize(cItem.name)) return true;
+          return false;
+        });
+
         const masterImg = (masterProd && masterProd.image && !masterProd.image.startsWith('data:')) ? masterProd.image : null;
-        const localFallbackImg = masterImg || `images/kurima/${id}.jpg`;
 
         // 1. カバー画像（image）のクレンジング
         if (typeof cItem.image === 'string') {
           if (cItem.image.startsWith('data:image/')) {
-            cItem.image = localFallbackImg;
+            // Base64画像は正規パス、またはローカル保存パスへ置換
+            cItem.image = masterImg || `images/kurima/${id}.jpg`;
+          } else if (!cItem.imageConfigured && masterImg && cItem.image !== masterImg) {
+            // 個別手動設定されていない既存作品に紛れ込んだ架空パス（images/kurima/<id>.jpg 等）を除去し、data.jsを優先！
+            delete cItem.image;
           }
-        } else if (!cItem.image && localFallbackImg) {
-          cItem.image = localFallbackImg;
         }
 
         // 2. サブ画像（images）のクレンジング
@@ -3210,7 +3218,7 @@
 
         // 3. バリエーションまとめ画像（catalogGroupImages）のクレンジング
         if (typeof cItem.catalogGroupImage === 'string' && cItem.catalogGroupImage.startsWith('data:image/')) {
-          cItem.catalogGroupImage = localFallbackImg;
+          cItem.catalogGroupImage = masterImg || `images/kurima/${id}.jpg`;
         }
         if (Array.isArray(cItem.catalogGroupImages)) {
           cItem.catalogGroupImages = cItem.catalogGroupImages.filter(img => typeof img === 'string' && !img.startsWith('data:image/'));

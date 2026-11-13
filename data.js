@@ -790,12 +790,14 @@ window.expandProductsForCatalog = function(baseProducts, worksMasterData, hidden
     const p = { ...orig };
     const wData = wmMap[p.id] || {};
 
-    // works_master側の画像・説明文設定があれば最優先で反映（POSで手動差し替え・削除された構成をそのまま反映し、削除した画像を復活させない）
-    if (wData.imageConfigured || 'image' in wData || Array.isArray(wData.images)) {
-      p.image = wData.image || null;
-      const wSubs = Array.isArray(wData.images) ? wData.images : [];
-      p.images = [p.image, ...wSubs.filter(u => u && u !== p.image)].filter(Boolean);
+    // works_master側の明示的な画像設定（imageConfigured）があれば反映。それ以外はorig.image（正規マスター画像）を最優先で維持！
+    if (wData.imageConfigured && wData.image) {
+      p.image = wData.image;
+    } else if (!p.image && wData.image) {
+      p.image = wData.image;
     }
+    const wSubs = Array.isArray(wData.images) ? wData.images : [];
+    p.images = [p.image, ...wSubs.filter(u => u && u !== p.image)].filter(Boolean);
     p.imagePosition = wData.imagePosition || p.imagePosition || "center center";
     p.imageFit = wData.imageFit || p.imageFit || "cover";
     if (wData.optimizedCover) p.optimizedCover = wData.optimizedCover;
