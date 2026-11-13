@@ -3397,11 +3397,11 @@
               }
             }
             const cpStr = JSON.stringify(cleaned);
-            const needsCpCleanse = cpStr.length > 250000 || cpStr.includes('"optimizedImages"') || cpStr.includes('"imageBackups"');
+            const needsCpCleanse = cpStr.length > 60000 || cpStr.includes('"optimizedImages"') || cpStr.includes('"imageBackups"');
             const safeCleaned = needsCpCleanse ? cleanseMasterData(cleaned) : cleaned;
             window.customProductsData = safeCleaned;
             if (hasCorrupt || needsCpCleanse) {
-              setDoc(doc(db, "settings", "custom_products"), safeCleaned).catch(e => console.warn(e));
+              setDoc(doc(db, "settings", "custom_products"), safeCleaned).catch(e => console.warn("Cleanse custom_products error:", e));
             }
           }
           renderAll();
@@ -17455,28 +17455,63 @@
 
     // 任意の画像URL（パス/DataURL）を、画質を保ったまま軽量DataURL（最大1100px / JPEG 0.83、約100KB）に変換
 
-    // Firestore 1MB上限対策：巨大なBase64 DataURLキャッシュ（optimizedImages, imageBackups等）を除去して軽量化
+    // Firestore 1MB上限対策：既存マスター作品の巨大なBase64 DataURLを一掃し、ローカル画像パスに置換＆不要なキャッシュを除去
     function cleanseMasterData(data) {
       if (!data || typeof data !== "object") return {};
       const cleaned = {};
+      const masterList = Array.isArray(window.MASTER_PRODUCTS) ? window.MASTER_PRODUCTS : [];
+
       for (const [id, item] of Object.entries(data)) {
-        if (!item || typeof item !== "object" || id.includes(".") || id === "dev_1792332209364") continue;
+        if (!item || typeof item !== "object" || id.includes(".") || id === "dev_1792332209364" || id === "moai_losscut" || id === "moai_losscut_RAW_20261105_201128_001") continue;
         const cItem = { ...item };
         delete cItem.optimizedImages;
         delete cItem.imageBackups;
         delete cItem.optimizedCover;
+
+        // MASTER_PRODUCTS（data.js）に登録されているか確認
+        const masterProd = masterList.find(m => m.id === id || (m.image && m.image.split('/').pop().split('.')[0] === id));
+        const masterImg = (masterProd && masterProd.image && !masterProd.image.startsWith('data:')) ? masterProd.image : null;
+
+        // 1. カバー画像（image）のクレンジング
+        if (typeof cItem.image === 'string') {
+          if (cItem.image.startsWith('data:')) {
+            if (masterImg) {
+              // 既にローカル画像がある作品は、巨大DataURLを即座にローカルパスに置換（99%以上軽量化！）
+              cItem.image = masterImg;
+            } else if (cItem.image.length > 90000) {
+              // 新作などでローカル画像がない場合でも極端な巨大データは制限
+              cItem.image = cItem.image.slice(0, 90000);
+            }
+          }
+        } else if (!cItem.image && masterImg) {
+          cItem.image = masterImg;
+        }
+
+        // 2. サブ画像（images）のクレンジング
         if (Array.isArray(cItem.images)) {
-          cItem.images = cItem.images.filter(img => typeof img === "string" && (!img.startsWith("data:image/") || img.length < 300000));
+          cItem.images = cItem.images.map(img => {
+            if (typeof img === 'string' && img.startsWith('data:')) {
+              if (masterImg) return null; // 既存作品の巨大DataURLサブ画像はパージ
+              if (img.length > 70000) return null; // 70KB超えは除外
+            }
+            return img;
+          }).filter(Boolean);
+        }
+
+        // 3. バリエーションまとめ画像（catalogGroupImages）のクレンジング
+        if (typeof cItem.catalogGroupImage === 'string' && cItem.catalogGroupImage.startsWith('data:') && masterImg) {
+          cItem.catalogGroupImage = masterImg;
         }
         if (Array.isArray(cItem.catalogGroupImages)) {
-          cItem.catalogGroupImages = cItem.catalogGroupImages.filter(img => typeof img === "string" && (!img.startsWith("data:image/") || img.length < 300000));
+          cItem.catalogGroupImages = cItem.catalogGroupImages.filter(img => typeof img === 'string' && (!img.startsWith('data:image/') || img.length < 70000));
         }
+
         cleaned[id] = cItem;
       }
       return cleaned;
     }
 
-    function convertToOptimizedDataUrl(src, maxDim = 750, quality = 0.75) {
+    function convertToOptimizedDataUrl(src, maxDim = 600, quality = 0.70) {
       return new Promise((resolve) => {
         if (!src) return resolve(null);
         // ファイルパス（images/〜）や通常のURLは、絶対にDataURL化せずそのままパスを返す（ドキュメント容量を節約！）
@@ -17504,7 +17539,11 @@
           const ctx = canvas.getContext('2d');
           ctx.drawImage(img, 0, 0, w, h);
           try {
-            const dataUrl = canvas.toDataURL('image/jpeg', quality);
+            // WebPが使えるブラウザなら軽量WebPで生成、フォールバックJPEG
+            let dataUrl = canvas.toDataURL('image/webp', quality);
+            if (!dataUrl.startsWith('data:image/webp')) {
+              dataUrl = canvas.toDataURL('image/jpeg', quality);
+            }
             resolve(dataUrl);
           } catch (e) {
             // CORS等でCanvas読取不可の場合は元のURLを返す
@@ -17619,8 +17658,9 @@
           wmData[pId].catalogGroupImagePosition = `${currentImagePosX}% ${currentImagePosY}%`;
           wmData[pId].catalogGroupImageFit = currentImageFit;
           wmData[pId].updatedAt = Date.now();
-          await setDoc(doc(targetDb, 'settings', 'works_master'), wmData);
-          window.worksMasterData = wmData;
+          const safeWm = cleanseMasterData(wmData);
+          await setDoc(doc(targetDb, 'settings', 'works_master'), safeWm);
+          window.worksMasterData = safeWm;
           alert('✅ バリエーションまとめ画像＆表示設定をお品書きに反映しました！');
         } else if (currentSelectorTargetSlot.startsWith('sku:')) {
           // 特定バリエーションの個別画像として保存
@@ -17635,8 +17675,9 @@
             return v;
           });
           wmData[pId].updatedAt = Date.now();
-          await setDoc(doc(targetDb, 'settings', 'works_master'), wmData);
-          window.worksMasterData = wmData;
+          const safeWm = cleanseMasterData(wmData);
+          await setDoc(doc(targetDb, 'settings', 'works_master'), safeWm);
+          window.worksMasterData = safeWm;
           alert('✅ 個別バリエーション画像をお品書きに反映しました！');
         } else {
           // 通常版（本体）の画像として保存
@@ -17656,12 +17697,16 @@
             updatedAt: Date.now()
           });
 
+          // Firestore 1MB上限対策：保存直前に必ず徹底クレンジングを実行！
+          const safeCp = cleanseMasterData(cpData);
+          const safeWm = cleanseMasterData(wmData);
+
           await Promise.all([
-            setDoc(doc(targetDb, 'settings', 'custom_products'), cpData),
-            setDoc(doc(targetDb, 'settings', 'works_master'), wmData)
+            setDoc(doc(targetDb, 'settings', 'custom_products'), safeCp),
+            setDoc(doc(targetDb, 'settings', 'works_master'), safeWm)
           ]);
-          window.customProductsData = cpData;
-          window.worksMasterData = wmData;
+          window.customProductsData = safeCp;
+          window.worksMasterData = safeWm;
 
           const previewImg = document.getElementById('work-detail-img-preview');
           if (previewImg) previewImg.src = mainImg || window.NO_IMAGE_PLACEHOLDER;
