@@ -992,6 +992,12 @@ window.WORK_FOLDER_ASSETS = {
       "images/kurima/macho_moai_keyholder/studio/まっちょモアイキーホルダー_master.png"
     ]
   },
+  "mark2_blight": {
+    "raw": [],
+    "studio": [
+      "images/kurima/mark2_blight/studio/Moataro.jpg"
+    ]
+  },
   "moai_dance_test": {
     "raw": [
       "images/kurima/moai_dance_test/raw/moai_dance_test_RAW_20261108_183729_001.mp4",

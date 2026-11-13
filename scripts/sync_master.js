@@ -132,20 +132,46 @@ async function main() {
     if (!fs.existsSync(rawFolder)) fs.mkdirSync(rawFolder, { recursive: true });
     if (!fs.existsSync(studioFolder)) fs.mkdirSync(studioFolder, { recursive: true });
 
-    // 手動アップロード・差し替えされたDataURL画像がFirestoreにあればローカルカバー画像として保存・更新
-    const dataUrl = worksMaster[posId]?.image || customProducts[posId]?.image || '';
-    const directJpg = path.join(KURIMA_DIR, `${posId}.jpg`);
-    if (typeof dataUrl === 'string' && dataUrl.startsWith('data:image/')) {
-      const match = dataUrl.match(/^data:image\/([a-zA-Z0-9+]+);base64,(.+)$/);
+    // 手動アップロード・差し替えされたDataURL画像がFirestoreにあればローカルカバー画像・サブ画像として完全同期
+    const candidates = [];
+    const mainDataUrl = worksMaster[posId]?.image || customProducts[posId]?.image || '';
+    if (typeof mainDataUrl === 'string' && mainDataUrl.startsWith('data:image/')) {
+      candidates.push({ type: 'main', data: mainDataUrl });
+    }
+    const subList = worksMaster[posId]?.images || customProducts[posId]?.images || [];
+    if (Array.isArray(subList)) {
+      subList.forEach((s, sIdx) => {
+        if (typeof s === 'string' && s.startsWith('data:image/')) {
+          candidates.push({ type: 'sub_' + sIdx, data: s });
+        }
+      });
+    }
+
+    candidates.forEach(c => {
+      const match = c.data.match(/^data:image\/([a-zA-Z0-9+]+);base64,(.+)$/);
       if (match) {
+        const rawExt = match[1].toLowerCase();
+        const ext = rawExt.includes('png') ? 'png' : (rawExt.includes('webp') ? 'webp' : 'jpg');
         const buf = Buffer.from(match[2], 'base64');
-        const existingSize = fs.existsSync(directJpg) ? fs.statSync(directJpg).size : -1;
-        if (existingSize !== buf.length) {
-          fs.writeFileSync(directJpg, buf);
-          console.log(`   🖼️ 手動追加・差し替えのカバー画像をローカル同期: images/kurima/${posId}.jpg`);
+        if (c.type === 'main') {
+          const directFile = path.join(KURIMA_DIR, `${posId}.${ext}`);
+          const itemFolderFile = path.join(itemFolder, `${posId}.${ext}`);
+          const existingSize = fs.existsSync(directFile) ? fs.statSync(directFile).size : -1;
+          if (existingSize !== buf.length) {
+            fs.writeFileSync(directFile, buf);
+            fs.writeFileSync(itemFolderFile, buf);
+            console.log(`   🖼️ 手動追加・差し替えのカバー画像をローカル同期: images/kurima/${posId}.${ext}`);
+          }
+        } else {
+          const subFile = path.join(itemFolder, `${posId}_${c.type}.${ext}`);
+          const existingSize = fs.existsSync(subFile) ? fs.statSync(subFile).size : -1;
+          if (existingSize !== buf.length) {
+            fs.writeFileSync(subFile, buf);
+            console.log(`   🖼️ サブ画像をローカル同期: images/kurima/${posId}/${posId}_${c.type}.${ext}`);
+          }
         }
       }
-    }
+    });
 
     if (created) {
       const name = worksMaster[posId]?.name || customProducts[posId]?.name || posId;

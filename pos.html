@@ -3397,10 +3397,10 @@
               }
             }
             const cpStr = JSON.stringify(cleaned);
-            const needsCpCleanse = cpStr.length > 60000 || cpStr.includes('"optimizedImages"') || cpStr.includes('"imageBackups"');
+            const needsCpCleanse = cpStr.length > 30000 || cpStr.includes('data:image/') || cpStr.includes('"optimizedImages"') || cpStr.includes('"imageBackups"');
             const safeCleaned = needsCpCleanse ? cleanseMasterData(cleaned) : cleaned;
             window.customProductsData = safeCleaned;
-            if (hasCorrupt || needsCpCleanse) {
+            if ((hasCorrupt || needsCpCleanse) && auth && auth.currentUser) {
               setDoc(doc(db, "settings", "custom_products"), safeCleaned).catch(e => console.warn("Cleanse custom_products error:", e));
             }
           }
@@ -3556,7 +3556,7 @@
           if (needsRemoveDuplicate) hasNewSeed = true;
 
           const rawDocStr = JSON.stringify(currentData);
-          const needsCleanse = rawDocStr.length > 250000 || rawDocStr.includes('"optimizedImages"') || rawDocStr.includes('"imageBackups"');
+          const needsCleanse = rawDocStr.length > 50000 || rawDocStr.includes('data:image/') || rawDocStr.includes('"optimizedImages"') || rawDocStr.includes('"imageBackups"');
           if (needsCleanse && auth.currentUser) {
             console.log("works_master auto-cleanse triggered, original size: " + rawDocStr.length);
             const cleanedWM = cleanseMasterData(currentData);
@@ -17473,37 +17473,33 @@
         const masterImg = (masterProd && masterProd.image && !masterProd.image.startsWith('data:')) ? masterProd.image : null;
 
         // 1. カバー画像（image）のクレンジング
+        // Base64画像があれば、ローカルパス（images/kurima/<id>.jpg）に即座に置換して巨大データを完全消去！
+        const localFallbackImg = masterImg || `images/kurima/${id}.jpg`;
         if (typeof cItem.image === 'string') {
-          if (cItem.image.startsWith('data:')) {
-            if (masterImg) {
-              // 既にローカル画像がある作品は、巨大DataURLを即座にローカルパスに置換（99%以上軽量化！）
-              cItem.image = masterImg;
-            } else if (cItem.image.length > 90000) {
-              // 新作などでローカル画像がない場合でも極端な巨大データは制限
-              cItem.image = cItem.image.slice(0, 90000);
-            }
+          if (cItem.image.startsWith('data:image/')) {
+            cItem.image = localFallbackImg;
           }
-        } else if (!cItem.image && masterImg) {
-          cItem.image = masterImg;
+        } else if (!cItem.image && localFallbackImg) {
+          cItem.image = localFallbackImg;
         }
 
         // 2. サブ画像（images）のクレンジング
+        // Base64データはFirestore 1MB制限防止のためパージし、通常パスのみ保持
         if (Array.isArray(cItem.images)) {
           cItem.images = cItem.images.map(img => {
-            if (typeof img === 'string' && img.startsWith('data:')) {
-              if (masterImg) return null; // 既存作品の巨大DataURLサブ画像はパージ
-              if (img.length > 70000) return null; // 70KB超えは除外
+            if (typeof img === 'string' && img.startsWith('data:image/')) {
+              return null; // Base64サブ画像はFirestoreから消去
             }
             return img;
           }).filter(Boolean);
         }
 
         // 3. バリエーションまとめ画像（catalogGroupImages）のクレンジング
-        if (typeof cItem.catalogGroupImage === 'string' && cItem.catalogGroupImage.startsWith('data:') && masterImg) {
-          cItem.catalogGroupImage = masterImg;
+        if (typeof cItem.catalogGroupImage === 'string' && cItem.catalogGroupImage.startsWith('data:image/')) {
+          cItem.catalogGroupImage = localFallbackImg;
         }
         if (Array.isArray(cItem.catalogGroupImages)) {
-          cItem.catalogGroupImages = cItem.catalogGroupImages.filter(img => typeof img === 'string' && (!img.startsWith('data:image/') || img.length < 70000));
+          cItem.catalogGroupImages = cItem.catalogGroupImages.filter(img => typeof img === 'string' && !img.startsWith('data:image/'));
         }
 
         cleaned[id] = cItem;

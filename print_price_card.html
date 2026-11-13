@@ -145,7 +145,7 @@
             box-sizing: border-box;
             position: relative;
             overflow: hidden;
-            padding: 3.5mm 4.5mm 3.5mm 4.5mm;
+            padding: 3mm 4mm 2.2mm 4.2mm;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
@@ -155,7 +155,7 @@
 
         /* 切り取りガイド線（デフォルトON） */
         .show-cut-guides .price-card {
-            outline: 1px dashed rgba(0, 0, 0, 0.18);
+            outline: 1px dashed rgba(0, 0, 0, 0.22);
             outline-offset: -1px;
         }
         .theme-dark.show-cut-guides .price-card {
@@ -180,66 +180,93 @@
             width: 100%;
         }
         .card-title {
-            font-size: 13.5px;
-            font-weight: 700;
-            line-height: 1.25;
-            letter-spacing: -0.2px;
+            font-size: 21px;
+            font-weight: 900;
+            line-height: 1.15;
+            letter-spacing: -0.5px;
             display: -webkit-box;
             -webkit-line-clamp: 2;
             -webkit-box-orient: vertical;
             overflow: hidden;
             word-break: break-all;
         }
+        .card-title.medium-text {
+            font-size: 17px;
+            line-height: 1.15;
+            letter-spacing: -0.4px;
+        }
         .card-title.long-text {
-            font-size: 11.5px;
-            line-height: 1.2;
+            font-size: 14.5px;
+            line-height: 1.12;
+            letter-spacing: -0.4px;
         }
         .card-divider {
-            margin-top: 2.2mm;
+            margin-top: 1.5mm;
             transition: all 0.2s ease;
         }
         .card-bottom {
             display: flex;
             align-items: baseline;
-            justify-content: space-between;
+            justify-content: flex-start;
             width: 100%;
             margin-top: auto;
+            padding-bottom: 0.5mm;
         }
         .card-price-wrap {
             display: flex;
             align-items: baseline;
             font-family: 'Montserrat', sans-serif;
             font-feature-settings: "pnum" 1, "tnum" 0;
-            letter-spacing: -0.6px;
+            letter-spacing: -1.5px;
+            line-height: 0.92;
         }
         .card-currency {
-            font-size: 16px;
-            font-weight: 800;
-            margin-right: 2px;
+            font-size: 28px;
+            font-weight: 900;
+            margin-right: 3px;
         }
         .card-amount {
-            font-size: 26px;
+            font-size: 47px;
             font-weight: 900;
-            line-height: 1;
+            line-height: 0.92;
+            letter-spacing: -1.8px;
         }
         .card-tax-note {
-            font-size: 9px;
-            font-weight: 600;
-            letter-spacing: 0.2px;
-            text-transform: uppercase;
+            display: none;
         }
 
-        /* ─── テーマA: クラフトモダン (★おすすめ・視認性抜群) ─── */
+        /* ─── テーマ1: Canvaクラフト (★Canva完全再現・ベージュ紙調) ─── */
+        .theme-canva .price-card:not(.empty-slot) {
+            background-color: #CDC2AB;
+            color: #1A1614;
+        }
+        .theme-canva .card-title {
+            color: #1A1614;
+        }
+        .theme-canva .card-divider {
+            height: 3.8px;
+            width: 48px;
+            background: #9B7833;
+            border-radius: 2px;
+        }
+        .theme-canva .card-currency {
+            color: #1A1614;
+        }
+        .theme-canva .card-amount {
+            color: #1A1614;
+        }
+
+        /* ─── テーマ2: クラフトモダン (明るいナチュラル白紙) ─── */
         .theme-craft .price-card:not(.empty-slot) {
             background-color: #FAF8F5;
             color: #1A1A1A;
         }
         .theme-craft .card-title {
-            color: #1E2024;
+            color: #1A1A1A;
         }
         .theme-craft .card-divider {
-            height: 2.5px;
-            width: 36px;
+            height: 3.5px;
+            width: 44px;
             background: #C5A059;
             border-radius: 2px;
         }
@@ -249,34 +276,29 @@
         .theme-craft .card-amount {
             color: #111111;
         }
-        .theme-craft .card-tax-note {
-            color: #8C8270;
-        }
 
-        /* ─── テーマB: ギャラリーホワイト (美術館・ミニマル) ─── */
+        /* ─── テーマ3: ギャラリーホワイト (洗練ミニマル) ─── */
         .theme-white .price-card:not(.empty-slot) {
             background-color: #FFFFFF;
             color: #111111;
         }
         .theme-white .card-title {
-            color: #111111;
+            color: #000000;
         }
         .theme-white .card-divider {
-            height: 1px;
-            width: 100%;
-            background: #E2E8F0;
+            height: 3px;
+            width: 44px;
+            background: #222222;
+            border-radius: 2px;
         }
         .theme-white .card-currency {
-            color: #111111;
+            color: #000000;
         }
         .theme-white .card-amount {
             color: #000000;
         }
-        .theme-white .card-tax-note {
-            color: #94A3B8;
-        }
 
-        /* ─── テーマC: プレミアムダーク (サイバー・高級感) ─── */
+        /* ─── テーマ4: プレミアムダーク (サイバー・高級黒) ─── */
         .theme-dark .page {
             background: #111319;
         }
@@ -285,23 +307,20 @@
             color: #FFFFFF;
         }
         .theme-dark .card-title {
-            color: #F1F5F9;
+            color: #FFFFFF;
         }
         .theme-dark .card-divider {
-            height: 2px;
-            width: 32px;
+            height: 3.5px;
+            width: 44px;
             background: #00D2FF;
-            box-shadow: 0 0 6px rgba(0, 210, 255, 0.4);
-            border-radius: 1px;
+            box-shadow: 0 0 8px rgba(0, 210, 255, 0.5);
+            border-radius: 2px;
         }
         .theme-dark .card-currency {
             color: #00D2FF;
         }
         .theme-dark .card-amount {
             color: #FFFFFF;
-        }
-        .theme-dark .card-tax-note {
-            color: #64748B;
         }
 
         /* 印刷時設定 */
@@ -325,7 +344,7 @@
         }
     </style>
 </head>
-<body class="theme-craft show-cut-guides">
+<body class="theme-canva show-cut-guides">
     <!-- 上部操作バー -->
     <div class="no-print-bar">
         <div class="title-box">
@@ -336,9 +355,10 @@
             <div class="control-group">
                 <span>🎨 スタイル:</span>
                 <select id="theme-select" onchange="changeTheme(this.value)">
-                    <option value="theme-craft" selected>✨ クラフトモダン (高視認・おすすめ)</option>
+                    <option value="theme-canva" selected>🌾 Canvaクラフト (ベージュ紙・完全再現)</option>
+                    <option value="theme-craft">✨ クラフトモダン (明るい白紙・高視認)</option>
                     <option value="theme-white">🏛️ ギャラリーホワイト (洗練ミニマル)</option>
-                    <option value="theme-dark">🌌 プレミアムダーク (サイバー・高級)</option>
+                    <option value="theme-dark">🌌 プレミアムダーク (サイバー・高級黒)</option>
                 </select>
             </div>
             <div class="control-group">
@@ -489,11 +509,16 @@
                     if (card) {
                         cardEl.className = 'price-card';
                         const titleText = (card.name || card.id || '').replace(/\n/g, ' ').trim();
-                        const isLong = titleText.length >= 14;
+                        let sizeClass = '';
+                        if (titleText.length >= 17) {
+                            sizeClass = 'long-text';
+                        } else if (titleText.length >= 11) {
+                            sizeClass = 'medium-text';
+                        }
 
                         cardEl.innerHTML = `
                             <div class="card-top">
-                                <div class="card-title ${isLong ? 'long-text' : ''}" title="${titleText}">${titleText}</div>
+                                <div class="card-title ${sizeClass}" title="${titleText}">${titleText}</div>
                                 <div class="card-divider"></div>
                             </div>
                             <div class="card-bottom">
@@ -501,7 +526,6 @@
                                     <span class="card-currency">¥</span>
                                     <span class="card-amount">${formatCurrency(card.price)}</span>
                                 </div>
-                                <div class="card-tax-note">tax in</div>
                             </div>
                         `;
                     } else {
@@ -522,7 +546,7 @@
         }
 
         function changeTheme(themeClass) {
-            document.body.classList.remove('theme-craft', 'theme-white', 'theme-dark');
+            document.body.classList.remove('theme-canva', 'theme-craft', 'theme-white', 'theme-dark');
             document.body.classList.add(themeClass);
         }
 
