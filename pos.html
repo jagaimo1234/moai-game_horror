@@ -3171,6 +3171,57 @@
     const rankingApp = initializeApp(rankingConfig, "rankingApp");
     const rdb = getDatabase(rankingApp);
 
+    // Firestore 1MB上限対策：既存マスター作品の巨大なBase64 DataURLを一掃し、ローカル画像パスに置換＆不要なキャッシュを除去
+    function cleanseMasterData(data) {
+      if (!data || typeof data !== "object") return {};
+      const cleaned = {};
+      const masterList = Array.isArray(window.MASTER_PRODUCTS) ? window.MASTER_PRODUCTS : [];
+
+      for (const [id, item] of Object.entries(data)) {
+        if (!item || typeof item !== "object" || id.includes(".") || id === "dev_1792332209364" || id === "moai_losscut" || id === "moai_losscut_RAW_20261105_201128_001") continue;
+        const cItem = { ...item };
+        delete cItem.optimizedImages;
+        delete cItem.imageBackups;
+        delete cItem.optimizedCover;
+
+        // MASTER_PRODUCTS（data.js）に登録されているか確認
+        const masterProd = masterList.find(m => m.id === id || (m.image && m.image.split('/').pop().split('.')[0] === id));
+        const masterImg = (masterProd && masterProd.image && !masterProd.image.startsWith('data:')) ? masterProd.image : null;
+        const localFallbackImg = masterImg || `images/kurima/${id}.jpg`;
+
+        // 1. カバー画像（image）のクレンジング
+        if (typeof cItem.image === 'string') {
+          if (cItem.image.startsWith('data:image/')) {
+            cItem.image = localFallbackImg;
+          }
+        } else if (!cItem.image && localFallbackImg) {
+          cItem.image = localFallbackImg;
+        }
+
+        // 2. サブ画像（images）のクレンジング
+        if (Array.isArray(cItem.images)) {
+          cItem.images = cItem.images.map(img => {
+            if (typeof img === 'string' && img.startsWith('data:image/')) {
+              return null;
+            }
+            return img;
+          }).filter(Boolean);
+        }
+
+        // 3. バリエーションまとめ画像（catalogGroupImages）のクレンジング
+        if (typeof cItem.catalogGroupImage === 'string' && cItem.catalogGroupImage.startsWith('data:image/')) {
+          cItem.catalogGroupImage = localFallbackImg;
+        }
+        if (Array.isArray(cItem.catalogGroupImages)) {
+          cItem.catalogGroupImages = cItem.catalogGroupImages.filter(img => typeof img === 'string' && !img.startsWith('data:image/'));
+        }
+
+        cleaned[id] = cItem;
+      }
+      return cleaned;
+    }
+    window.cleanseMasterData = cleanseMasterData;
+
     // App State
     let currentEventKey = localStorage.getItem("moai_pos_current_event") || "designfesta64";
     let lastListenedEventKey = null;
