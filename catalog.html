@@ -2617,7 +2617,9 @@
 
   </style>
 
-  <script src="data.js?v=20261107d"></script>
+  <script>
+    document.write('<script src="data.js?v=' + Date.now() + '"><\/script>');
+  </script>
   <script>
     window.getAllAvailableProducts = function() {
       if (window.currentRenderedProducts && window.currentRenderedProducts.length > 0) {
@@ -2926,7 +2928,7 @@
         const largeImgSrc = p.image || p.optimizedCover || (p.isDev ? 'images/dev_placeholder.gif' : (window.NO_IMAGE_PLACEHOLDER || 'images/dev_placeholder.gif'));
         const cPos = p.imagePosition || 'center center';
         const cFit = p.imageFit || 'cover';
-        const largeImageHtml = `<img class="main-product-img" loading="lazy" decoding="async" id="main-img-${i}" src="${largeImgSrc}" style="width:100%; aspect-ratio:1; object-fit:${cFit}; object-position:${cPos}; border-radius:12px; ${(!p.image && !p.optimizedCover && p.isDev) ? 'border:1px dashed rgba(255,255,255,0.1);' : ''}" alt="${(p.name || p.id || '').replace(/\n/g,' ')}" onerror="this.src=window.NO_IMAGE_PLACEHOLDER||'images/dev_placeholder.gif'">
+        const largeImageHtml = `<img class="main-product-img" loading="lazy" decoding="async" id="main-img-${i}" src="${largeImgSrc}" style="width:100%; aspect-ratio:1; object-fit:${cFit}; object-position:${cPos}; border-radius:12px; ${(!p.image && !p.optimizedCover && p.isDev) ? 'border:1px dashed rgba(255,255,255,0.1);' : ''}" alt="${(p.name || p.id || '').replace(/\n/g,' ')}" onerror="this.onerror=null; this.src = (window.resolveFallbackImage ? window.resolveFallbackImage('${p.id}') : (window.NO_IMAGE_PLACEHOLDER||'images/kurima/osuwari_moai_pen.jpg'));">
              <video class="main-product-img" id="main-video-${i}" preload="none" style="display:none; width:100%; height:auto; aspect-ratio:1/1; object-fit:cover;" loop muted playsinline controls></video>`;
 
         const variantSelectorHtml = renderVariantSelectorHtml(p, i);
@@ -3199,7 +3201,7 @@ ${variantSelectorHtml}
           const tileFit = p.imageFit || 'cover';
           // ファーストビュー（最初の4枚）のみ即時読込、5枚目以降はlazy読込で通信渋滞を防止
           const loadingAttr = i < 4 ? (i < 2 ? 'fetchpriority="high" decoding="async"' : 'decoding="async"') : 'loading="lazy" decoding="async"';
-          const imageHtml = `<img class="main-product-img" ${loadingAttr} src="${imgSrc}" style="border-radius:12px 12px 0 0; object-fit:${tileFit}; object-position:${tilePos}; ${(!p.image && !p.optimizedCover && p.isDev) ? 'border:1px dashed rgba(255,255,255,0.1);' : ''}" alt="${(p.name || p.id || '').replace(/\n/g,' ')}" onerror="this.src=window.NO_IMAGE_PLACEHOLDER||'images/dev_placeholder.gif'">`;
+          const imageHtml = `<img class="main-product-img" ${loadingAttr} src="${imgSrc}" style="border-radius:12px 12px 0 0; object-fit:${tileFit}; object-position:${tilePos}; ${(!p.image && !p.optimizedCover && p.isDev) ? 'border:1px dashed rgba(255,255,255,0.1);' : ''}" alt="${(p.name || p.id || '').replace(/\n/g,' ')}" onerror="this.onerror=null; this.src = (window.resolveFallbackImage ? window.resolveFallbackImage('${p.id}') : (window.NO_IMAGE_PLACEHOLDER||'images/kurima/osuwari_moai_pen.jpg'));">`;
 
           const topLeftBadgeHtml = p.isDev
             ? `<div class="dev-badge-tile">${DEV_STATUSES[parseInt(p.status) || 0].label}</div>`

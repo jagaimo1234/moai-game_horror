@@ -16,20 +16,6 @@
 // 全作品のマスターリスト
 const MASTER_PRODUCTS = [
   {
-    id: 'ハイレグモアイ_master',
-    image: '',
-    name: 'ハイレグモアイ master',
-    desc: '',
-  },
-
-  {
-    id: 'ChatGPT 画像 2026年11月5日 20_27_08-1',
-    image: '',
-    name: 'ChatGPT 画像 2026年11月5日 20 27 08-1',
-    desc: '',
-  },
-
-  {
     id: 'trio_collab',
     isDev: true,
     image: 'images/kurima/trio_collab/trio_collab_master.jpg',
@@ -43,7 +29,7 @@ const MASTER_PRODUCTS = [
 
   {
     id: 'moai_Noliferobot',
-    image: '',
+    image: 'images/kurima/moai_Noliferobot.jpg',
     name: '人生ままならぬロボット',
     desc: '複数バリエーションを予定してはいるが、ひとまず爆誕。',
   },
@@ -640,6 +626,24 @@ window.getAllEvents = function(configData) {
     });
   }
   return merged;
+};
+
+// 確実な画像表示を保証するフォールバックマップ
+window.resolveFallbackImage = function(id) {
+  const fallbacks = {
+    'moai_highleg': 'images/kurima/moai_highleg/studio/ハイレグモアイ_master.png',
+    'moai_loscut': 'images/kurima/moai_loscut/studio/含み損モアイ_master.png',
+    'macho_moai_pen': 'images/kurima/macho_moai_pen.png',
+    'tegotae_moai_pen': 'images/kurima/tegotae_moai_pen.jpg',
+    'moai_lure_stand': 'images/kurima/machoi_moai_lure_stand.jpg',
+    'mini_osuwari_keychain': 'images/kurima/mini_osuwari_keychain.jpg',
+    'dev_1777653497790': 'images/kurima/mini_osuwari_keychain.jpg',
+    'moai_robo_mk2_blue': 'images/kurima/moai_robo_mk2_blue.png',
+    'moai_robo_mk2_pink': 'images/kurima/moai_robo_mk2_pink.png',
+    'moai_robo_stand': 'images/kurima/moai_robo_yogurt_lover.jpg',
+    'osuwari_moai_pen': 'images/kurima/osuwari_moai_pen.jpg'
+  };
+  return fallbacks[id] || (typeof window !== 'undefined' && window.NO_IMAGE_PLACEHOLDER) || 'images/kurima/osuwari_moai_pen.jpg';
 };
 
 // Firestoreのcustom_productsをマージして全作品マスターリストを返すヘルパー
