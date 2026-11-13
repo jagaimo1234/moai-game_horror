@@ -719,10 +719,21 @@ window.getFullMasterProducts = function(customProductsData) {
     } else if (wData?.name) {
       item.name = wData.name;
     }
-    if (wData && (wData.imageConfigured || 'image' in wData || Array.isArray(wData.images))) {
-      item.image = wData.image || null;
-      const wSubs = Array.isArray(wData.images) ? wData.images : [];
-      item.images = [item.image, ...wSubs.filter(u => u && u !== item.image)].filter(Boolean);
+    const baseImages = Array.isArray(item.images) && item.images.length > 0 ? item.images : (item.image ? [item.image] : []);
+    if (wData?.imageConfigured && Array.isArray(wData?.images) && wData.images.length > 0) {
+      // ユーザーがお品書き画像管理で明示的にサブ画像を設定した場合
+      const targetCover = wData.image || item.image;
+      item.image = targetCover;
+      item.images = [targetCover, ...wData.images.filter(u => u && u !== targetCover)].filter(Boolean);
+    } else {
+      // それ以外は、data.jsに登録された全サブ画像（2枚目以降の写真）をそのまま100%保持・公開！
+      const targetCover = (wData?.imageConfigured && wData?.image) ? wData.image : item.image;
+      item.image = targetCover;
+      const combined = [targetCover, ...baseImages.filter(u => u && u !== targetCover)];
+      if (Array.isArray(wData?.images)) {
+        wData.images.forEach(u => { if (u && !combined.includes(u)) combined.push(u); });
+      }
+      item.images = combined.filter(Boolean);
     }
     if (wData?.optimizedCover) {
       item.optimizedCover = wData.optimizedCover;
@@ -795,13 +806,20 @@ window.expandProductsForCatalog = function(baseProducts, worksMasterData, hidden
     const wData = wmMap[p.id] || {};
 
     // works_master側の明示的な画像設定（imageConfigured）があれば反映。それ以外はorig.image（正規マスター画像）を最優先で維持！
-    if (wData.imageConfigured && wData.image) {
-      p.image = wData.image;
-    } else if (!p.image && wData.image) {
-      p.image = wData.image;
+    const targetCover = (wData.imageConfigured && wData.image) ? wData.image : (p.image || wData.image || null);
+    p.image = targetCover;
+
+    // サブ画像の完全保持・公開：data.jsマスターの全サブ画像を1枚たりとも解除・消去しない！
+    const baseSubs = Array.isArray(orig.images) && orig.images.length > 0 ? orig.images : (orig.image ? [orig.image] : []);
+    if (wData.imageConfigured && Array.isArray(wData.images) && wData.images.length > 0) {
+      p.images = [targetCover, ...wData.images.filter(u => u && u !== targetCover)].filter(Boolean);
+    } else {
+      const combined = [targetCover, ...baseSubs.filter(u => u && u !== targetCover)];
+      if (Array.isArray(wData.images)) {
+        wData.images.forEach(u => { if (u && !combined.includes(u)) combined.push(u); });
+      }
+      p.images = combined.filter(Boolean);
     }
-    const wSubs = Array.isArray(wData.images) ? wData.images : [];
-    p.images = [p.image, ...wSubs.filter(u => u && u !== p.image)].filter(Boolean);
     p.imagePosition = wData.imagePosition || p.imagePosition || "center center";
     p.imageFit = wData.imageFit || p.imageFit || "cover";
     if (wData.optimizedCover) p.optimizedCover = wData.optimizedCover;
