@@ -292,9 +292,10 @@ const MASTER_PRODUCTS = [
     desc:  '頭にはメガネクロス付き。マッチョなモアイがメガネをがっしりホールド。'
   },
   {
-    image: 'images/kurima/macho_moai_pen.png',
+    id: 'macho_moai_pen',
+    image: 'images/kurima/macho_moai_pen/studio/まっちょモアイペン立て_master.png',
     images: [
-      'images/kurima/macho_moai_pen.png',
+      'images/kurima/macho_moai_pen/studio/まっちょモアイペン立て_master.png',
       'images/kurima/macho_moai_pen/detail_01.png',
       'images/kurima/macho_moai_pen/detail_02.png',
       'images/kurima/macho_moai_pen/detail_03.png',
@@ -618,7 +619,7 @@ window.resolveFallbackImage = function(id) {
   const fallbacks = {
     'moai_highleg': 'images/kurima/moai_highleg/studio/ハイレグモアイ_master.png',
     'moai_loscut': 'images/kurima/moai_loscut/studio/含み損モアイ_master.png',
-    'macho_moai_pen': 'images/kurima/macho_moai_pen.png',
+    'macho_moai_pen': 'images/kurima/macho_moai_pen/studio/まっちょモアイペン立て_master.png',
     'tegotae_moai_pen': 'images/kurima/tegotae_moai_pen.jpg',
     'moai_lure_stand': 'images/kurima/machoi_moai_lure_stand.jpg',
     'mini_osuwari_keychain': 'images/kurima/mini_osuwari_keychain.jpg',
