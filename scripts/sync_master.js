@@ -245,8 +245,8 @@ async function main() {
       mainImgRel = '';
     }
 
-    // 公開用のサブ画像リスト（スタジオ完成画像・直下画像のみ。RAW写真は未処理の元写真のため絶対に自動掲載しない）
-    const subImgPaths = [...studioFiles, ...directFiles];
+    // 公開用のサブ画像リスト（スタジオフォルダ内の画像は候補プールWORK_FOLDER_ASSETS用とし、ユーザーがPOSで明示選択する前に勝手に全画像を data.js の公開 images に自動登録しない）
+    const subImgPaths = directFiles.length > 0 ? directFiles : [];
 
     const imagesCode = subImgPaths.length > 0
       ? `\n    images: [\n${subImgPaths.map(p => `      '${p}',`).join('\n')}\n    ],`

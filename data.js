@@ -16,6 +16,23 @@
 // 全作品のマスターリスト
 const MASTER_PRODUCTS = [
   {
+    id: 'ハイレグモアイ_master',
+    image: 'images/kurima/ハイレグモアイ_master.jpg',
+    images: [
+      'images/kurima/ハイレグモアイ_master/ハイレグモアイ_master.jpg',
+    ],
+    name: 'ハイレグモアイ master',
+    desc: '',
+  },
+
+  {
+    id: 'ChatGPT 画像 2026年11月5日 20_27_08-1',
+    image: '',
+    name: 'ChatGPT 画像 2026年11月5日 20 27 08-1',
+    desc: '',
+  },
+
+  {
     id: 'trio_collab',
     isDev: true,
     image: 'images/kurima/trio_collab/trio_collab_master.jpg',
@@ -56,22 +73,6 @@ const MASTER_PRODUCTS = [
     image: 'images/kurima/moai_loscut/studio/含み損モアイ_master.png',
     images: [
       'images/kurima/moai_loscut/studio/含み損モアイ_master.png',
-      'images/kurima/moai_loscut/studio/ChatGPT 画像 2026年11月5日 20_27_08-1.png',
-      'images/kurima/moai_loscut/studio/ChatGPT 画像 2026年11月5日 20_28_08-2.png',
-      'images/kurima/moai_loscut/studio/ChatGPT 画像 2026年11月5日 20_28_21-3.png',
-      'images/kurima/moai_loscut/studio/ChatGPT 画像 2026年11月5日 20_28_26-4.png',
-      'images/kurima/moai_loscut/studio/ChatGPT 画像 2026年11月5日 20_29_02-5.png',
-      'images/kurima/moai_loscut/studio/ChatGPT 画像 2026年11月5日 20_29_06-6.png',
-      'images/kurima/moai_loscut/studio/ChatGPT 画像 2026年11月5日 20_34_12-1.png',
-      'images/kurima/moai_loscut/studio/ChatGPT 画像 2026年11月5日 20_34_27-2.png',
-      'images/kurima/moai_loscut/studio/ChatGPT 画像 2026年11月5日 20_34_38-3.png',
-      'images/kurima/moai_loscut/studio/ChatGPT 画像 2026年11月5日 20_34_42-4.png',
-      'images/kurima/moai_loscut/studio/ChatGPT 画像 2026年11月5日 20_34_55-5.png',
-      'images/kurima/moai_loscut/studio/ChatGPT 画像 2026年11月5日 20_35_00-6.png',
-      'images/kurima/moai_loscut/studio/ChatGPT 画像 2026年11月5日 20_35_04-7.png',
-      'images/kurima/moai_loscut/studio/ChatGPT 画像 2026年11月5日 20_35_09-8.png',
-      'images/kurima/moai_loscut/studio/ChatGPT 画像 2026年11月5日 20_35_14-9.png',
-      'images/kurima/moai_loscut/studio/ChatGPT 画像 2026年11月5日 20_35_18-10.png'
     ],
     name: 'うなだれているモアイ',
     desc: 'うなだれてるモアイ\nそれはまるで相場で大負けしたような様子。\nロスカットモアイ🗿',
@@ -82,12 +83,6 @@ const MASTER_PRODUCTS = [
     image: 'images/kurima/moai_highleg/studio/ハイレグモアイ_master.png',
     images: [
       'images/kurima/moai_highleg/studio/ハイレグモアイ_master.png',
-      'images/kurima/moai_highleg/studio/ChatGPT 画像 2026年11月4日 22_17_22-1.png',
-      'images/kurima/moai_highleg/studio/ChatGPT 画像 2026年11月4日 22_17_52-2.png',
-      'images/kurima/moai_highleg/studio/ChatGPT 画像 2026年11月4日 22_17_56-3.png',
-      'images/kurima/moai_highleg/studio/ChatGPT 画像 2026年11月4日 22_19_07-4.png',
-      'images/kurima/moai_highleg/studio/ChatGPT 画像 2026年11月4日 22_19_12-5.png',
-      'images/kurima/moai_highleg/studio/ChatGPT 画像 2026年11月4日 22_19_16-6.png'
     ],
     name: 'ハイレグモアイ',
     desc: 'もはや変態を超えた変態ハイレグモアイ\\nペン立てとかなにか物立て。\\n受付とかのペン立てに使うのがいいかも\\n(知らんけど)🗿\\nシャチハタ立てサイズも検討している。',
@@ -98,8 +93,6 @@ const MASTER_PRODUCTS = [
     image: 'images/kurima/nitto_osuwari_moai_penstand.jpg',
     images: [
       'images/kurima/nitto_osuwari_moai_penstand.jpg',
-      'images/kurima/nitto_osuwari_moai_penstand/studio/雪白と黒のモアイ型ペンホルダー.png',
-      'images/kurima/nitto_osuwari_moai_penstand/studio/20261101.png',
     ],
     name: 'ニットおすわりモアイペン立て',
     desc: 'ニット版(冬仕様）',
@@ -110,9 +103,6 @@ const MASTER_PRODUCTS = [
     image: 'images/kurima/macho_moai_keyholder.jpg',
     images: [
       'images/kurima/macho_moai_keyholder.jpg',
-      'images/kurima/macho_moai_keyholder/studio/まっちょモアイキーホルダー_master.png',
-      'images/kurima/macho_moai_keyholder/studio/15704196-82ad-4bb5-ad26-3b43dda68172.png',
-      'images/kurima/macho_moai_keyholder/studio/4d924d16-4899-44d9-857b-d36e813cef4d.png',
     ],
     name: 'まっちょモアイキーホルダー',
     desc: '',
@@ -134,11 +124,6 @@ const MASTER_PRODUCTS = [
     images: [
       'images/kurima/dot_osuwari_keyholder/cover.jpg',
       'images/kurima/dot_osuwari_keyholder.jpg',
-      'images/kurima/dot_osuwari_keyholder/studio/20261031_ボクセルモアイキーホルダー_001_studio.png',
-      'images/kurima/dot_osuwari_keyholder/studio/20261031_ボクセルモアイキーホルダー_002_studio.png',
-      'images/kurima/dot_osuwari_keyholder/studio/20261031_ボクセルモアイキーホルダー_003_studio.png',
-      'images/kurima/dot_osuwari_keyholder/studio/20261031_ボクセルモアイキーホルダー_004_studio.png',
-      'images/kurima/dot_osuwari_keyholder/studio/Moataro (1).jpg'
     ],
     name: 'おすわりドットキーホルダー',
     desc: 'ドット風でかわよい',
@@ -721,19 +706,24 @@ window.getFullMasterProducts = function(customProductsData) {
     }
     const baseImages = Array.isArray(item.images) && item.images.length > 0 ? item.images : (item.image ? [item.image] : []);
     if (wData?.imageConfigured && Array.isArray(wData?.images) && wData.images.length > 0) {
-      // ユーザーがお品書き画像管理で明示的にサブ画像を設定した場合
+      // ユーザーがお品書き画像管理で明示的にサブ画像を設定した場合：ユーザーの選択のみを厳格に反映
       const targetCover = wData.image || item.image;
       item.image = targetCover;
       item.images = [targetCover, ...wData.images.filter(u => u && u !== targetCover)].filter(Boolean);
-    } else {
-      // それ以外は、data.jsに登録された全サブ画像（2枚目以降の写真）をそのまま100%保持・公開！
-      const targetCover = (wData?.imageConfigured && wData?.image) ? wData.image : item.image;
+    } else if (wData?.imageConfigured) {
+      // ユーザーが明示設定したがサブ画像はなし（1枚のみ）の場合
+      const targetCover = wData.image || item.image;
       item.image = targetCover;
-      const combined = [targetCover, ...baseImages.filter(u => u && u !== targetCover)];
-      if (Array.isArray(wData?.images)) {
-        wData.images.forEach(u => { if (u && !combined.includes(u)) combined.push(u); });
-      }
-      item.images = combined.filter(Boolean);
+      item.images = targetCover ? [targetCover] : [];
+    } else {
+      // デフォルト状態（未設定）：フォルダ内のstudio画像を勝手にサブ画像として丸ごと公開しない！
+      const targetCover = (wData?.image) ? wData.image : item.image;
+      item.image = targetCover;
+      const cleanBase = baseImages.filter(u => {
+        if (typeof u === 'string' && (u.includes('/studio/') || u.includes('_raw') || u.includes('/raw/'))) return false;
+        return true;
+      });
+      item.images = cleanBase.length > 0 ? cleanBase : (targetCover ? [targetCover] : []);
     }
     if (wData?.optimizedCover) {
       item.optimizedCover = wData.optimizedCover;
@@ -809,16 +799,18 @@ window.expandProductsForCatalog = function(baseProducts, worksMasterData, hidden
     const targetCover = (wData.imageConfigured && wData.image) ? wData.image : (p.image || wData.image || null);
     p.image = targetCover;
 
-    // サブ画像の完全保持・公開：data.jsマスターの全サブ画像を1枚たりとも解除・消去しない！
+    // サブ画像設定：ユーザーがPOSで明示設定した場合はその選択を厳密に反映。未設定（デフォルト）時はフォルダ丸ごと公開を厳格防止！
     const baseSubs = Array.isArray(orig.images) && orig.images.length > 0 ? orig.images : (orig.image ? [orig.image] : []);
     if (wData.imageConfigured && Array.isArray(wData.images) && wData.images.length > 0) {
       p.images = [targetCover, ...wData.images.filter(u => u && u !== targetCover)].filter(Boolean);
+    } else if (wData.imageConfigured) {
+      p.images = targetCover ? [targetCover] : [];
     } else {
-      const combined = [targetCover, ...baseSubs.filter(u => u && u !== targetCover)];
-      if (Array.isArray(wData.images)) {
-        wData.images.forEach(u => { if (u && !combined.includes(u)) combined.push(u); });
-      }
-      p.images = combined.filter(Boolean);
+      const cleanBase = baseSubs.filter(u => {
+        if (typeof u === 'string' && (u.includes('/studio/') || u.includes('_raw') || u.includes('/raw/'))) return false;
+        return true;
+      });
+      p.images = cleanBase.length > 0 ? cleanBase : (targetCover ? [targetCover] : []);
     }
     p.imagePosition = wData.imagePosition || p.imagePosition || "center center";
     p.imageFit = wData.imageFit || p.imageFit || "cover";
@@ -1016,6 +1008,12 @@ window.WORK_FOLDER_ASSETS = {
       "images/kurima/macho_moai_keyholder/studio/まっちょモアイキーホルダー_master.png"
     ]
   },
+  "macho_moai_pen": {
+    "raw": [],
+    "studio": [
+      "images/kurima/macho_moai_pen/studio/まっちょモアイペン立て_master.png"
+    ]
+  },
   "mark2_blight": {
     "raw": [],
     "studio": [
@@ -1105,6 +1103,39 @@ window.WORK_FOLDER_ASSETS = {
     "raw": [],
     "studio": [
       "images/kurima/moai_Noliferobot/studio/人生ままならぬロボット_「前のめり」_master.png"
+    ]
+  },
+  "moai_robo_mk2_gray": {
+    "raw": [],
+    "studio": [
+      "images/kurima/moai_robo_mk2_gray/studio/action_01.png",
+      "images/kurima/moai_robo_mk2_gray/studio/action_02.png",
+      "images/kurima/moai_robo_mk2_gray/studio/action_03.png",
+      "images/kurima/moai_robo_mk2_gray/studio/duo_01.png",
+      "images/kurima/moai_robo_mk2_gray/studio/duo_02.png",
+      "images/kurima/moai_robo_mk2_gray/studio/hand_01.png",
+      "images/kurima/moai_robo_mk2_gray/studio/hand_02.png",
+      "images/kurima/moai_robo_mk2_gray/studio/hat_01.png",
+      "images/kurima/moai_robo_mk2_gray/studio/hat_02.png",
+      "images/kurima/moai_robo_mk2_gray/studio/hat_03.png",
+      "images/kurima/moai_robo_mk2_gray/studio/hat_04.png",
+      "images/kurima/moai_robo_mk2_gray/studio/laying_01.png",
+      "images/kurima/moai_robo_mk2_gray/studio/moai_robo_mk2_23.png",
+      "images/kurima/moai_robo_mk2_gray/studio/moai_robo_mk2_24.png",
+      "images/kurima/moai_robo_mk2_gray/studio/moai_robo_mk2_25.png",
+      "images/kurima/moai_robo_mk2_gray/studio/moai_robo_mk2_26.png",
+      "images/kurima/moai_robo_mk2_gray/studio/moai_robo_mk2_27.png",
+      "images/kurima/moai_robo_mk2_gray/studio/moai_robo_mk2_28.png",
+      "images/kurima/moai_robo_mk2_gray/studio/moai_robo_mk2_29.png",
+      "images/kurima/moai_robo_mk2_gray/studio/movie.mp4",
+      "images/kurima/moai_robo_mk2_gray/studio/parts_01.png",
+      "images/kurima/moai_robo_mk2_gray/studio/parts_02.png",
+      "images/kurima/moai_robo_mk2_gray/studio/parts_03.png",
+      "images/kurima/moai_robo_mk2_gray/studio/parts_04.png",
+      "images/kurima/moai_robo_mk2_gray/studio/stand_01.png",
+      "images/kurima/moai_robo_mk2_gray/studio/stand_02.png",
+      "images/kurima/moai_robo_mk2_gray/studio/stand_03.png",
+      "images/kurima/moai_robo_mk2_gray/studio/stand_04.png"
     ]
   },
   "nitto_osuwari_moai_penstand": {
