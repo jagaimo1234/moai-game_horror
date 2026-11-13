@@ -6709,6 +6709,114 @@
       }
     };
 
+    // --- Tile Print Store & Image Resolvers ---
+    const MoaiPrintStore = {
+      DB_NAME: 'MoaiPrintTileDB',
+      STORE_NAME: 'jobs',
+      open() {
+        return new Promise((resolve, reject) => {
+          const req = indexedDB.open(this.DB_NAME, 1);
+          req.onupgradeneeded = () => {
+            const db = req.result;
+            if (!db.objectStoreNames.contains(this.STORE_NAME)) {
+              db.createObjectStore(this.STORE_NAME, { keyPath: 'id' });
+            }
+          };
+          req.onsuccess = () => resolve(req.result);
+          req.onerror = () => reject(req.error);
+        });
+      },
+      async save(job) {
+        try {
+          const db = await this.open();
+          return new Promise((resolve, reject) => {
+            const tx = db.transaction(this.STORE_NAME, 'readwrite');
+            tx.objectStore(this.STORE_NAME).put(job);
+            tx.oncomplete = () => resolve(true);
+            tx.onerror = () => reject(tx.error);
+          });
+        } catch (e) {
+          console.warn('IndexedDB save failed:', e);
+          return false;
+        }
+      }
+    };
+
+    window.resolveProductPrintImage = (p) => {
+      if (!p) return '';
+      // 1. 作品自身のimage
+      if (typeof p.image === 'string' && p.image.trim()) return p.image.trim();
+      // 2. 最適化カバー画像
+      if (typeof p.optimizedCover === 'string' && p.optimizedCover.trim()) return p.optimizedCover.trim();
+      // 3. images配列の先頭
+      if (Array.isArray(p.images) && p.images.length > 0 && typeof p.images[0] === 'string' && p.images[0].trim()) {
+        return p.images[0].trim();
+      }
+      // 4. worksMasterData
+      const wm = window.worksMasterData && window.worksMasterData[p.id];
+      if (wm) {
+        if (typeof wm.image === 'string' && wm.image.trim()) return wm.image.trim();
+        if (typeof wm.optimizedCover === 'string' && wm.optimizedCover.trim()) return wm.optimizedCover.trim();
+        if (Array.isArray(wm.images) && wm.images.length > 0 && typeof wm.images[0] === 'string' && wm.images[0].trim()) {
+          return wm.images[0].trim();
+        }
+      }
+      // 5. customProductsData
+      const cp = window.customProductsData && window.customProductsData[p.id];
+      if (cp) {
+        if (typeof cp.image === 'string' && cp.image.trim()) return cp.image.trim();
+        if (typeof cp.optimizedCover === 'string' && cp.optimizedCover.trim()) return cp.optimizedCover.trim();
+        if (Array.isArray(cp.images) && cp.images.length > 0 && typeof cp.images[0] === 'string' && cp.images[0].trim()) {
+          return cp.images[0].trim();
+        }
+      }
+      // 6. ローカルクリマフォルダ規定パス
+      if (p.id) {
+        return `images/kurima/${p.id}.jpg`;
+      }
+      return '';
+    };
+
+    window.openPrintTileWindow = async (payload) => {
+      const jobId = 'job_' + Date.now();
+      payload.jobId = jobId;
+
+      // 1. 親ウィンドウのグローバルプロパティ（メモリ直接参照・URL長制限完全回避）
+      window.__PRINT_TILE_PAYLOAD = payload;
+
+      // 2. 同オリジン別タブバックアップ（sessionStorage）
+      try {
+        sessionStorage.setItem('moai_print_tile_payload', JSON.stringify(payload));
+      } catch (e) {
+        console.warn('sessionStorage backup skipped (payload too large):', e);
+      }
+
+      // 3. 永続ストレージ保存（IndexedDB・メガバイト級Base64でもOK）
+      try {
+        await MoaiPrintStore.save({ id: jobId, payload: payload, createdAt: Date.now() });
+      } catch (e) {
+        console.warn('MoaiPrintStore save failed:', e);
+      }
+
+      // 4. URL生成（※DataURLは長大化してERR_INVALID_URL等の原因となるためURLパラメータには絶対に入れない）
+      let query = `?jobId=${encodeURIComponent(jobId)}&count=${encodeURIComponent(payload.count)}&name=${encodeURIComponent(payload.title || '印刷')}`;
+
+      // 1作品のみで、かつDataURLでなく短いURL（1000文字未満）の場合のみ直リンク互換用に付与
+      if (payload.items.length === 1) {
+        const firstImg = payload.items[0].image || '';
+        if (firstImg && !firstImg.startsWith('data:') && firstImg.length < 1000) {
+          query += `&img=${encodeURIComponent(firstImg)}`;
+        }
+      }
+
+      const printWin = window.open(`print_tile.html${query}`, '_blank');
+      if (printWin) {
+        try {
+          printWin.__PRINT_TILE_PAYLOAD = payload;
+        } catch (e) {}
+      }
+    };
+
     window.togglePrintSelection = (id) => {
       const index = printSelection.indexOf(id);
       if (index === -1) printSelection.push(id);
@@ -6716,19 +6824,33 @@
       renderSelection();
     };
 
-    window.generateBulkTilePrint = () => {
+    window.generateBulkTilePrint = async () => {
       if (printSelection.length === 0) return alert("印刷したい作品の右下にある「🖨️チェック」を入れてください。");
 
-      const count = prompt("A4用紙1枚につき各作品を何枚並べますか？\n(例: 2, 6, 12, 20, 24)", "12") || "12";
+      const countStr = prompt("A4用紙1枚につき各作品を何枚並べますか？\n(例: 1, 2, 4, 6, 8, 12, 16, 20, 24)", "12");
+      if (countStr === null) return;
+      const count = parseInt(countStr, 10) || 12;
       
       const allMaster = window.getFullMasterProducts(window.customProductsData);
       const selectedProducts = allMaster.filter(p => printSelection.includes(p.id));
-      const imgUrls = selectedProducts.map(p => encodeURIComponent(p.image));
 
-      if (imgUrls.length === 0) return alert("画像が見つかりません。");
+      if (selectedProducts.length === 0) return alert("選択された作品が見つかりません。");
 
-      const url = `print_tile.html?imgs=${imgUrls.join(',')}&count=${count}&name=一括出力`;
-      window.open(url, '_blank');
+      const items = selectedProducts.map(p => {
+        return {
+          id: p.id,
+          name: (p.name || p.id || '').replace(/\n/g, ' '),
+          image: window.resolveProductPrintImage(p)
+        };
+      });
+
+      const payload = {
+        title: `一括出力 (${items.length}作品)`,
+        count: count,
+        items: items
+      };
+
+      await window.openPrintTileWindow(payload);
     };
 
     window.moveProductToEdge = (id, edge) => {
@@ -6896,18 +7018,28 @@
       });
     };
 
-    window.generateTiledPrint = () => {
+    window.generateTiledPrint = async () => {
       const allMaster = window.getFullMasterProducts(window.customProductsData);
       const p = allMaster.find(x => x.id === currentPrintProductId);
-      if (!p) return;
+      if (!p) return alert("作品が見つかりません。");
 
-      const count = currentPrintCount;
-      const imgUrl = encodeURIComponent(p.image);
-      const name = encodeURIComponent(p.name);
-      
-      const printUrl = `print_tile.html?img=${imgUrl}&count=${count}&name=${name}`;
-      window.open(printUrl, '_blank');
-      
+      const count = currentPrintCount || 12;
+      const imgUrl = window.resolveProductPrintImage(p);
+      const name = (p.name || p.id || '').replace(/\n/g, ' ');
+
+      const payload = {
+        title: name,
+        count: count,
+        items: [
+          {
+            id: p.id,
+            name: name,
+            image: imgUrl
+          }
+        ]
+      };
+
+      await window.openPrintTileWindow(payload);
       closePrintTileModal();
     };
 

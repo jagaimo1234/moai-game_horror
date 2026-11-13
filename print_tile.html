@@ -2,103 +2,459 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <title>タイル印刷</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>タイル印刷 | MOAI POS</title>
     <style>
-        @page { size: A4; margin: 0; }
-        body { margin: 0; padding: 0; background: #f0f0f0; }
+        @page {
+            size: A4 portrait;
+            margin: 0;
+        }
+        * {
+            box-sizing: border-box;
+        }
+        body {
+            margin: 0;
+            padding: 0;
+            background: #2b2f3a;
+            color: #333;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        }
+        .no-print-bar {
+            position: sticky;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background: rgba(18, 20, 29, 0.95);
+            backdrop-filter: blur(10px);
+            color: #fff;
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+            z-index: 9999;
+            border-bottom: 1px solid rgba(0, 210, 255, 0.3);
+        }
+        .no-print-bar .title-box {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .no-print-bar h1 {
+            margin: 0;
+            font-size: 16px;
+            font-weight: bold;
+            color: #00d2ff;
+            letter-spacing: 0.5px;
+        }
+        .no-print-bar .status-text {
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.7);
+        }
+        .no-print-bar .action-btns {
+            display: flex;
+            gap: 10px;
+        }
+        .btn {
+            padding: 8px 16px;
+            font-size: 14px;
+            font-weight: bold;
+            border-radius: 6px;
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s ease;
+        }
+        .btn-print {
+            background: #00d2ff;
+            color: #0a0e17;
+            box-shadow: 0 2px 8px rgba(0, 210, 255, 0.4);
+        }
+        .btn-print:hover {
+            background: #33dcff;
+            transform: translateY(-1px);
+        }
+        .btn-close {
+            background: rgba(255, 255, 255, 0.15);
+            color: #fff;
+            border: 1px solid rgba(255, 255, 255, 0.25);
+        }
+        .btn-close:hover {
+            background: rgba(255, 255, 255, 0.25);
+        }
+
+        #pages-container {
+            padding: 20px 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+
         .page {
             width: 210mm;
             height: 297mm;
-            background: white;
-            margin: 0 auto;
+            background: #ffffff;
             position: relative;
             page-break-after: always;
+            break-after: page;
             overflow: hidden;
             display: flex;
             align-items: center;
             justify-content: center;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.35);
         }
+
         .grid {
             display: grid;
             gap: 0;
+            margin: 0 auto;
         }
-        .item { overflow: hidden; }
-        .item img { width: 100%; height: 100%; object-fit: cover; display: block; }
-        
+
+        .item {
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #fff;
+            position: relative;
+        }
+
+        .item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        #loading-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(10, 14, 23, 0.9);
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+            font-size: 16px;
+            gap: 15px;
+        }
+
+        .spinner {
+            width: 48px;
+            height: 48px;
+            border: 4px solid rgba(0, 210, 255, 0.2);
+            border-top-color: #00d2ff;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
         @media print {
-            body { background: none; }
-            .page { margin: 0; page-break-after: always; }
-            #mobile-notice { display: none; }
-        }
-        #mobile-notice {
-            position: sticky; top: 0; left: 0; width: 100%; background: #333; color: white;
-            padding: 15px; text-align: center; font-size: 14px; z-index: 1000;
+            body {
+                background: none !important;
+                color: #000 !important;
+            }
+            .no-print-bar, #loading-overlay {
+                display: none !important;
+            }
+            #pages-container {
+                padding: 0 !important;
+                gap: 0 !important;
+            }
+            .page {
+                box-shadow: none !important;
+                margin: 0 !important;
+                page-break-after: always !important;
+                break-after: page !important;
+            }
         }
     </style>
 </head>
 <body>
-    <div id="mobile-notice">
-        表示されない場合は、ブラウザのメニューから「共有」→「印刷」を選択してください。
+    <div id="loading-overlay">
+        <div class="spinner"></div>
+        <div id="loading-text">タイル画像を準備中...</div>
     </div>
+
+    <div class="no-print-bar">
+        <div class="title-box">
+            <h1 id="bar-title">🖨️ タイル印刷プレビュー</h1>
+            <span class="status-text" id="bar-status">読み込み中...</span>
+        </div>
+        <div class="action-btns">
+            <button class="btn btn-print" onclick="triggerPrint()">🖨️ PDF印刷 / 出力</button>
+            <button class="btn btn-close" onclick="window.close()">閉じる</button>
+        </div>
+    </div>
+
     <div id="pages-container"></div>
 
     <script>
-        const params = new URLSearchParams(window.location.search);
-        const imgsParam = params.get('imgs');
-        const count = parseInt(params.get('count')) || 12;
-        const name = params.get('name');
-        if (name) document.title = "一括印刷 - " + name;
+        // --- IndexedDB Helper ---
+        const PrintStore = {
+            DB_NAME: 'MoaiPrintTileDB',
+            STORE_NAME: 'jobs',
+            open() {
+                return new Promise((resolve, reject) => {
+                    const req = indexedDB.open(this.DB_NAME, 1);
+                    req.onupgradeneeded = () => {
+                        const db = req.result;
+                        if (!db.objectStoreNames.contains(this.STORE_NAME)) {
+                            db.createObjectStore(this.STORE_NAME, { keyPath: 'id' });
+                        }
+                    };
+                    req.onsuccess = () => resolve(req.result);
+                    req.onerror = () => reject(req.error);
+                });
+            },
+            async get(id) {
+                try {
+                    const db = await this.open();
+                    return new Promise((resolve, reject) => {
+                        const tx = db.transaction(this.STORE_NAME, 'readonly');
+                        const req = tx.objectStore(this.STORE_NAME).get(id);
+                        req.onsuccess = () => resolve(req.result || null);
+                        req.onerror = () => reject(req.error);
+                    });
+                } catch (e) {
+                    console.warn('IndexedDB get failed:', e);
+                    return null;
+                }
+            }
+        };
 
-        let imageUrls = [];
-        if (imgsParam) {
-            imageUrls = imgsParam.split(',').map(s => decodeURIComponent(s));
-        } else if (params.get('img')) {
-            imageUrls = [decodeURIComponent(params.get('img'))];
+        // --- Placeholder Generator (画像なし・読込失敗時のフォールバック) ---
+        function createPlaceholderDataUrl(name) {
+            const canvas = document.createElement('canvas');
+            canvas.width = 600;
+            canvas.height = 600;
+            const ctx = canvas.getContext('2d');
+
+            ctx.fillStyle = '#1e222d';
+            ctx.fillRect(0, 0, 600, 600);
+
+            ctx.strokeStyle = '#00d2ff';
+            ctx.lineWidth = 10;
+            ctx.strokeRect(15, 15, 570, 570);
+
+            ctx.font = '90px sans-serif';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('🗿', 300, 210);
+
+            ctx.fillStyle = '#ffffff';
+            ctx.font = 'bold 30px sans-serif';
+            const text = (name || 'NO IMAGE').trim();
+            const maxWidth = 520;
+            let displayLine = text;
+            if (ctx.measureText(displayLine).width > maxWidth) {
+                while (ctx.measureText(displayLine + '...').width > maxWidth && displayLine.length > 0) {
+                    displayLine = displayLine.slice(0, -1);
+                }
+                displayLine += '...';
+            }
+            ctx.fillText(displayLine, 300, 360);
+
+            ctx.fillStyle = '#00d2ff';
+            ctx.font = 'bold 22px sans-serif';
+            ctx.fillText('(画像準備中 / 未設定)', 300, 420);
+
+            return canvas.toDataURL('image/png');
         }
 
-        if (imageUrls.length > 0) {
-            // Calculate best grid once
-            let cols = Math.ceil(Math.sqrt(count * (210/297)));
-            let rows = Math.ceil(count / cols);
-            if (count === 2) { cols = 1; rows = 2; }
-            if (count === 6) { cols = 2; rows = 3; }
-            if (count === 12) { cols = 3; rows = 4; }
-            if (count === 20) { cols = 4; rows = 5; }
-            if (count === 24) { cols = 4; rows = 6; }
+        // --- Payload Loader (多層フォールバック) ---
+        async function resolvePayload() {
+            const params = new URLSearchParams(window.location.search);
+            const jobId = params.get('jobId');
 
+            // 1. window直付プロパティ
+            if (window.__PRINT_TILE_PAYLOAD) {
+                return window.__PRINT_TILE_PAYLOAD;
+            }
+
+            // 2. 親ウィンドウ（window.opener）メモリ直接参照（DataURL制限なし・最速）
+            try {
+                if (window.opener && window.opener.__PRINT_TILE_PAYLOAD) {
+                    const p = window.opener.__PRINT_TILE_PAYLOAD;
+                    if (!jobId || p.jobId === jobId) return p;
+                }
+            } catch (e) {
+                console.warn('Cannot read window.opener payload:', e);
+            }
+
+            // 3. sessionStorage
+            try {
+                const s = sessionStorage.getItem('moai_print_tile_payload');
+                if (s) {
+                    const parsed = JSON.parse(s);
+                    if (!jobId || parsed.jobId === jobId) return parsed;
+                }
+            } catch (e) {}
+
+            // 4. IndexedDB
+            if (jobId) {
+                const record = await PrintStore.get(jobId);
+                if (record && record.payload) {
+                    return record.payload;
+                }
+            }
+
+            // 5. URLパラメータ（後方互換）
+            const count = parseInt(params.get('count'), 10) || 12;
+            const name = params.get('name') || '';
+            const imgsParam = params.get('imgs');
+            const singleImg = params.get('img');
+
+            if (imgsParam) {
+                const urls = imgsParam.split(',').map(s => {
+                    try { return decodeURIComponent(s); } catch (e) { return s; }
+                });
+                return {
+                    title: name || '一括出力',
+                    count: count,
+                    items: urls.map(u => ({ id: '', name: '', image: u }))
+                };
+            } else if (singleImg) {
+                let u = singleImg;
+                try { u = decodeURIComponent(singleImg); } catch (e) {}
+                return {
+                    title: name || '単体印刷',
+                    count: count,
+                    items: [{ id: '', name: name, image: u }]
+                };
+            }
+
+            return null;
+        }
+
+        function calculateGrid(count) {
+            let cols, rows;
+            switch (count) {
+                case 1:  cols = 1; rows = 1; break;
+                case 2:  cols = 1; rows = 2; break;
+                case 4:  cols = 2; rows = 2; break;
+                case 6:  cols = 2; rows = 3; break;
+                case 8:  cols = 2; rows = 4; break;
+                case 12: cols = 3; rows = 4; break;
+                case 16: cols = 4; rows = 4; break;
+                case 20: cols = 4; rows = 5; break;
+                case 24: cols = 4; rows = 6; break;
+                default:
+                    cols = Math.ceil(Math.sqrt(count * (210 / 297)));
+                    rows = Math.ceil(count / cols);
+            }
             const size = Math.min(210 / cols, 297 / rows);
+            return { cols, rows, size };
+        }
+
+        let allRenderedImages = [];
+
+        async function init() {
+            const overlay = document.getElementById('loading-overlay');
+            const loadingText = document.getElementById('loading-text');
+            const barTitle = document.getElementById('bar-title');
+            const barStatus = document.getElementById('bar-status');
             const container = document.getElementById('pages-container');
 
-            // Generate one page per image
-            imageUrls.forEach(url => {
-                const page = document.createElement('div');
-                page.className = 'page';
-                
-                const grid = document.createElement('div');
-                grid.className = 'grid';
-                grid.style.gridTemplateColumns = `repeat(${cols}, ${size}mm)`;
-                grid.style.gridTemplateRows = `repeat(${rows}, ${size}mm)`;
-
-                for (let i = 0; i < count; i++) {
-                    const div = document.createElement('div');
-                    div.className = 'item';
-                    div.style.width = size + 'mm';
-                    div.style.height = size + 'mm';
-                    const image = document.createElement('img');
-                    image.src = url;
-                    div.appendChild(image);
-                    grid.appendChild(div);
+            try {
+                const payload = await resolvePayload();
+                if (!payload || !payload.items || payload.items.length === 0) {
+                    overlay.innerHTML = '<div style="color:#ff6b6b; font-size:18px;">❌ 印刷する作品データが見つかりませんでした。</div><button class="btn btn-close" style="margin-top:20px;" onclick="window.close()">閉じる</button>';
+                    barStatus.textContent = 'データなし';
+                    return;
                 }
-                page.appendChild(grid);
-                container.appendChild(page);
-            });
 
-            window.onload = () => {
-                setTimeout(() => { window.print(); }, 1000);
-            };
-        } else {
-            document.body.innerHTML = "画像データが見つかりません。";
+                const count = parseInt(payload.count, 10) || 12;
+                const title = payload.title || 'タイル印刷';
+                document.title = `${title} (${count}枚/頁) - MOAI POS`;
+                barTitle.textContent = `🖨️ ${title}`;
+                barStatus.textContent = `全 ${payload.items.length} ページ準備中...`;
+
+                const { cols, rows, size } = calculateGrid(count);
+
+                // 各作品ごとに A4 1ページを生成
+                payload.items.forEach((item, pageIdx) => {
+                    const page = document.createElement('div');
+                    page.className = 'page';
+                    page.setAttribute('data-page-index', pageIdx + 1);
+
+                    const grid = document.createElement('div');
+                    grid.className = 'grid';
+                    grid.style.gridTemplateColumns = `repeat(${cols}, ${size}mm)`;
+                    grid.style.gridTemplateRows = `repeat(${rows}, ${size}mm)`;
+
+                    const imgSource = (item.image && typeof item.image === 'string' && item.image.trim()) 
+                        ? item.image.trim() 
+                        : createPlaceholderDataUrl(item.name || item.id);
+
+                    for (let i = 0; i < count; i++) {
+                        const div = document.createElement('div');
+                        div.className = 'item';
+                        div.style.width = size + 'mm';
+                        div.style.height = size + 'mm';
+
+                        const img = document.createElement('img');
+                        img.alt = item.name || item.id || '作品画像';
+                        img.dataset.workName = item.name || item.id || '';
+                        
+                        // 画像読み込みエラー時の自動差し替え
+                        img.onerror = function() {
+                            if (!this.dataset.hasFailed) {
+                                this.dataset.hasFailed = 'true';
+                                this.src = createPlaceholderDataUrl(this.dataset.workName);
+                            }
+                        };
+                        img.src = imgSource;
+
+                        allRenderedImages.push(img);
+                        div.appendChild(img);
+                        grid.appendChild(div);
+                    }
+
+                    page.appendChild(grid);
+                    container.appendChild(page);
+                });
+
+                loadingText.textContent = `全 ${payload.items.length} ページの画像を展開・描画中...`;
+
+                // すべての画像の読み込み完了・デコードを待機
+                const waitPromises = allRenderedImages.map(img => {
+                    if (img.complete && img.naturalWidth !== 0) {
+                        return Promise.resolve();
+                    }
+                    return new Promise(resolve => {
+                        const onDone = () => resolve();
+                        img.addEventListener('load', onDone, { once: true });
+                        img.addEventListener('error', onDone, { once: true });
+                    });
+                });
+
+                await Promise.allSettled(waitPromises);
+
+                // 完了
+                overlay.style.display = 'none';
+                barStatus.textContent = `✅ 全 ${payload.items.length} ページ準備完了（1枚あたり ${count} 分割）`;
+
+                // 自動印刷ダイアログを起動
+                setTimeout(() => {
+                    triggerPrint();
+                }, 350);
+
+            } catch (err) {
+                console.error('Tile print init error:', err);
+                overlay.innerHTML = `<div style="color:#ff6b6b; font-size:18px;">❌ エラーが発生しました: ${err.message}</div><button class="btn btn-close" style="margin-top:20px;" onclick="window.close()">閉じる</button>`;
+                barStatus.textContent = 'エラー';
+            }
         }
+
+        function triggerPrint() {
+            window.print();
+        }
+
+        window.addEventListener('DOMContentLoaded', init);
     </script>
 </body>
 </html>

@@ -16,6 +16,20 @@
 // 全作品のマスターリスト
 const MASTER_PRODUCTS = [
   {
+    id: 'ハイレグモアイ_master',
+    image: '',
+    name: 'ハイレグモアイ master',
+    desc: '',
+  },
+
+  {
+    id: 'ChatGPT 画像 2026年11月5日 20_27_08-1',
+    image: '',
+    name: 'ChatGPT 画像 2026年11月5日 20 27 08-1',
+    desc: '',
+  },
+
+  {
     id: 'trio_collab',
     isDev: true,
     image: 'images/kurima/trio_collab/trio_collab_master.jpg',
@@ -1000,7 +1014,8 @@ window.WORK_FOLDER_ASSETS = {
       "images/kurima/moai_highleg/raw/moai_highleg_RAW_20261104_220709_003.jpg",
       "images/kurima/moai_highleg/raw/moai_highleg_RAW_20261104_220716_004.jpg",
       "images/kurima/moai_highleg/raw/moai_highleg_RAW_20261104_220728_005.jpg",
-      "images/kurima/moai_highleg/raw/moai_highleg_RAW_20261104_220738_006.jpg"
+      "images/kurima/moai_highleg/raw/moai_highleg_RAW_20261104_220738_006.jpg",
+      "images/kurima/moai_highleg/raw/moai_highleg_RAW_20261110_213336_007.jpg"
     ],
     "studio": [
       "images/kurima/moai_highleg/studio/ChatGPT 画像 2026年11月4日 22_17_22-1.png",
@@ -1054,6 +1069,12 @@ window.WORK_FOLDER_ASSETS = {
       "images/kurima/moai_loscut/studio/ChatGPT 画像 2026年11月5日 20_35_14-9.png",
       "images/kurima/moai_loscut/studio/ChatGPT 画像 2026年11月5日 20_35_18-10.png",
       "images/kurima/moai_loscut/studio/含み損モアイ_master.png"
+    ]
+  },
+  "moai_Noliferobot": {
+    "raw": [],
+    "studio": [
+      "images/kurima/moai_Noliferobot/studio/人生ままならぬロボット_「前のめり」_master.png"
     ]
   },
   "nitto_osuwari_moai_penstand": {
