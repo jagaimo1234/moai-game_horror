@@ -640,7 +640,7 @@ window.resolveFallbackImage = function(id) {
     'dev_1777653497790': 'images/kurima/mini_osuwari_keychain.jpg',
     'moai_robo_mk2_blue': 'images/kurima/moai_robo_mk2_blue.png',
     'moai_robo_mk2_pink': 'images/kurima/moai_robo_mk2_pink.png',
-    'moai_robo_stand': 'images/kurima/moai_robo_yogurt_lover.jpg',
+    'moai_robo_stand': 'images/kurima/moai_robo_mk2_gold/moai_robo_stand.png',
     'osuwari_moai_pen': 'images/kurima/osuwari_moai_pen.jpg'
   };
   return fallbacks[id] || (typeof window !== 'undefined' && window.NO_IMAGE_PLACEHOLDER) || 'images/kurima/osuwari_moai_pen.jpg';
