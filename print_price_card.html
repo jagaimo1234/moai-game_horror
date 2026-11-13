@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>値札カード印刷 (6.5cm×4cm) | MOAI POS</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800;900&family=Noto+Sans+JP:wght@500;700;900&display=swap" rel="stylesheet">
+    <style>
+        @page {
+            size: A4 portrait;
+            margin: 0;
+        }
+        * {
+            box-sizing: border-box;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+        }
+        body {
+            margin: 0;
+            padding: 0;
+            background: #2b2f3a;
+            color: #333;
+            font-family: 'Noto Sans JP', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        /* 画面上部操作バー（印刷時は非表示） */
+        .no-print-bar {
+            position: sticky;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background: rgba(18, 20, 29, 0.96);
+            backdrop-filter: blur(10px);
+            color: #fff;
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+            z-index: 9999;
+            border-bottom: 1px solid rgba(0, 210, 255, 0.3);
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+        .no-print-bar .title-box {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .no-print-bar h1 {
+            margin: 0;
+            font-size: 16px;
+            font-weight: bold;
+            color: #00d2ff;
+            letter-spacing: 0.5px;
+        }
+        .no-print-bar .controls {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            flex-wrap: wrap;
+        }
+        .control-group {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 13px;
+        }
+        .control-group select {
+            background: #1a1d26;
+            color: #fff;
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            border-radius: 6px;
+            padding: 5px 10px;
+            font-size: 13px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .btn {
+            padding: 8px 18px;
+            font-size: 14px;
+            font-weight: bold;
+            border-radius: 6px;
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s ease;
+        }
+        .btn-print {
+            background: #00d2ff;
+            color: #0a0e17;
+            box-shadow: 0 2px 8px rgba(0, 210, 255, 0.4);
+        }
+        .btn-print:hover {
+            background: #33dcff;
+            transform: translateY(-1px);
+        }
+        .btn-close {
+            background: rgba(255, 255, 255, 0.15);
+            color: #fff;
+            border: 1px solid rgba(255, 255, 255, 0.25);
+        }
+        .btn-close:hover {
+            background: rgba(255, 255, 255, 0.25);
+        }
+
+        #pages-container {
+            padding: 24px 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 24px;
+        }
+
+        /* A4 用紙 (210mm × 297mm) */
+        .page {
+            width: 210mm;
+            height: 297mm;
+            background: #ffffff;
+            position: relative;
+            page-break-after: always;
+            break-after: page;
+            overflow: hidden;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+            padding: 8.5mm 7.5mm;
+        }
+
+        /* 3列 × 7行 の値札カードグリッド (幅195mm × 高さ280mm) */
+        .card-grid {
+            width: 195mm;
+            height: 280mm;
+            display: grid;
+            grid-template-columns: repeat(3, 65mm);
+            grid-template-rows: repeat(7, 40mm);
+            gap: 0;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* 単体値札カード (65mm × 40mm) */
+        .price-card {
+            width: 65mm;
+            height: 40mm;
+            box-sizing: border-box;
+            position: relative;
+            overflow: hidden;
+            padding: 3.5mm 4.5mm 3.5mm 4.5mm;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            page-break-inside: avoid;
+            break-inside: avoid;
+        }
+
+        /* 切り取りガイド線（デフォルトON） */
+        .show-cut-guides .price-card {
+            outline: 1px dashed rgba(0, 0, 0, 0.18);
+            outline-offset: -1px;
+        }
+        .theme-dark.show-cut-guides .price-card {
+            outline: 1px dashed rgba(255, 255, 255, 0.25);
+            outline-offset: -1px;
+        }
+
+        /* 空白カード（プレースホルダー） */
+        .price-card.empty-slot {
+            background: transparent !important;
+            border: none !important;
+            outline: 1px dashed rgba(0, 0, 0, 0.06) !important;
+        }
+        .theme-dark.show-cut-guides .price-card.empty-slot {
+            outline: 1px dashed rgba(255, 255, 255, 0.08) !important;
+        }
+
+        /* カード内部レイアウト */
+        .card-top {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+        }
+        .card-title {
+            font-size: 13.5px;
+            font-weight: 700;
+            line-height: 1.25;
+            letter-spacing: -0.2px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            word-break: break-all;
+        }
+        .card-title.long-text {
+            font-size: 11.5px;
+            line-height: 1.2;
+        }
+        .card-divider {
+            margin-top: 2.2mm;
+            transition: all 0.2s ease;
+        }
+        .card-bottom {
+            display: flex;
+            align-items: baseline;
+            justify-content: space-between;
+            width: 100%;
+            margin-top: auto;
+        }
+        .card-price-wrap {
+            display: flex;
+            align-items: baseline;
+            font-family: 'Montserrat', sans-serif;
+            font-feature-settings: "pnum" 1, "tnum" 0;
+            letter-spacing: -0.6px;
+        }
+        .card-currency {
+            font-size: 16px;
+            font-weight: 800;
+            margin-right: 2px;
+        }
+        .card-amount {
+            font-size: 26px;
+            font-weight: 900;
+            line-height: 1;
+        }
+        .card-tax-note {
+            font-size: 9px;
+            font-weight: 600;
+            letter-spacing: 0.2px;
+            text-transform: uppercase;
+        }
+
+        /* ─── テーマA: クラフトモダン (★おすすめ・視認性抜群) ─── */
+        .theme-craft .price-card:not(.empty-slot) {
+            background-color: #FAF8F5;
+            color: #1A1A1A;
+        }
+        .theme-craft .card-title {
+            color: #1E2024;
+        }
+        .theme-craft .card-divider {
+            height: 2.5px;
+            width: 36px;
+            background: #C5A059;
+            border-radius: 2px;
+        }
+        .theme-craft .card-currency {
+            color: #C5A059;
+        }
+        .theme-craft .card-amount {
+            color: #111111;
+        }
+        .theme-craft .card-tax-note {
+            color: #8C8270;
+        }
+
+        /* ─── テーマB: ギャラリーホワイト (美術館・ミニマル) ─── */
+        .theme-white .price-card:not(.empty-slot) {
+            background-color: #FFFFFF;
+            color: #111111;
+        }
+        .theme-white .card-title {
+            color: #111111;
+        }
+        .theme-white .card-divider {
+            height: 1px;
+            width: 100%;
+            background: #E2E8F0;
+        }
+        .theme-white .card-currency {
+            color: #111111;
+        }
+        .theme-white .card-amount {
+            color: #000000;
+        }
+        .theme-white .card-tax-note {
+            color: #94A3B8;
+        }
+
+        /* ─── テーマC: プレミアムダーク (サイバー・高級感) ─── */
+        .theme-dark .page {
+            background: #111319;
+        }
+        .theme-dark .price-card:not(.empty-slot) {
+            background-color: #181B24;
+            color: #FFFFFF;
+        }
+        .theme-dark .card-title {
+            color: #F1F5F9;
+        }
+        .theme-dark .card-divider {
+            height: 2px;
+            width: 32px;
+            background: #00D2FF;
+            box-shadow: 0 0 6px rgba(0, 210, 255, 0.4);
+            border-radius: 1px;
+        }
+        .theme-dark .card-currency {
+            color: #00D2FF;
+        }
+        .theme-dark .card-amount {
+            color: #FFFFFF;
+        }
+        .theme-dark .card-tax-note {
+            color: #64748B;
+        }
+
+        /* 印刷時設定 */
+        @media print {
+            body {
+                background: none !important;
+            }
+            .no-print-bar {
+                display: none !important;
+            }
+            #pages-container {
+                padding: 0 !important;
+                gap: 0 !important;
+            }
+            .page {
+                box-shadow: none !important;
+                margin: 0 !important;
+                page-break-after: always !important;
+                break-after: page !important;
+            }
+        }
+    </style>
+</head>
+<body class="theme-craft show-cut-guides">
+    <!-- 上部操作バー -->
+    <div class="no-print-bar">
+        <div class="title-box">
+            <h1 id="bar-title">🏷️ 値札カード印刷 (6.5cm × 4cm)</h1>
+            <span style="font-size:13px; color:rgba(255,255,255,0.7);" id="bar-event-name">イベント: 読み込み中...</span>
+        </div>
+        <div class="controls">
+            <div class="control-group">
+                <span>🎨 スタイル:</span>
+                <select id="theme-select" onchange="changeTheme(this.value)">
+                    <option value="theme-craft" selected>✨ クラフトモダン (高視認・おすすめ)</option>
+                    <option value="theme-white">🏛️ ギャラリーホワイト (洗練ミニマル)</option>
+                    <option value="theme-dark">🌌 プレミアムダーク (サイバー・高級)</option>
+                </select>
+            </div>
+            <div class="control-group">
+                <label style="cursor:pointer; display:flex; align-items:center; gap:5px;">
+                    <input type="checkbox" id="cut-guide-check" checked onchange="toggleCutGuides(this.checked)" style="cursor:pointer; width:16px; height:16px;">
+                    ✂️ 切り取り線ガイド
+                </label>
+            </div>
+            <button class="btn btn-print" onclick="window.print()">🖨️ PDF印刷 / 出力</button>
+            <button class="btn btn-close" onclick="window.close()">閉じる</button>
+        </div>
+    </div>
+
+    <!-- 印刷用紙コンテナ -->
+    <div id="pages-container"></div>
+
+    <script>
+        // --- IndexedDB Helper (Print Cards) ---
+        const PriceCardStore = {
+            DB_NAME: 'MoaiPriceCardDB',
+            STORE_NAME: 'card_jobs',
+            open() {
+                return new Promise((resolve, reject) => {
+                    const req = indexedDB.open(this.DB_NAME, 1);
+                    req.onupgradeneeded = () => {
+                        const db = req.result;
+                        if (!db.objectStoreNames.contains(this.STORE_NAME)) {
+                            db.createObjectStore(this.STORE_NAME, { keyPath: 'id' });
+                        }
+                    };
+                    req.onsuccess = () => resolve(req.result);
+                    req.onerror = () => reject(req.error);
+                });
+            },
+            async get(id) {
+                try {
+                    const db = await this.open();
+                    return new Promise((resolve, reject) => {
+                        const tx = db.transaction(this.STORE_NAME, 'readonly');
+                        const req = tx.objectStore(this.STORE_NAME).get(id);
+                        req.onsuccess = () => resolve(req.result || null);
+                        req.onerror = () => reject(req.error);
+                    });
+                } catch (e) {
+                    console.warn('PriceCardStore get error:', e);
+                    return null;
+                }
+            }
+        };
+
+        // --- Payload Loader ---
+        async function loadPayload() {
+            const params = new URLSearchParams(window.location.search);
+            const jobId = params.get('jobId');
+
+            // 1. window.__PRICE_CARD_PAYLOAD
+            if (window.__PRICE_CARD_PAYLOAD) {
+                return window.__PRICE_CARD_PAYLOAD;
+            }
+
+            // 2. window.opener.__PRICE_CARD_PAYLOAD
+            try {
+                if (window.opener && window.opener.__PRICE_CARD_PAYLOAD) {
+                    const p = window.opener.__PRICE_CARD_PAYLOAD;
+                    if (!jobId || p.jobId === jobId) return p;
+                }
+            } catch (e) {}
+
+            // 3. sessionStorage
+            try {
+                const s = sessionStorage.getItem('moai_price_card_payload');
+                if (s) {
+                    const parsed = JSON.parse(s);
+                    if (!jobId || parsed.jobId === jobId) return parsed;
+                }
+            } catch (e) {}
+
+            // 4. IndexedDB
+            if (jobId) {
+                const rec = await PriceCardStore.get(jobId);
+                if (rec && rec.payload) return rec.payload;
+            }
+
+            return null;
+        }
+
+        function formatCurrency(val) {
+            const num = parseInt(val, 10);
+            if (isNaN(num)) return '0';
+            return num.toLocaleString();
+        }
+
+        async function init() {
+            const container = document.getElementById('pages-container');
+            const eventNameEl = document.getElementById('bar-event-name');
+
+            const payload = await loadPayload();
+            if (!payload || !payload.items || payload.items.length === 0) {
+                container.innerHTML = '<div style="color:#fff; text-align:center; padding:50px; font-size:16px;">値札カードのデータが見つかりませんでした。<br><button class="btn btn-close" style="margin-top:15px;" onclick="window.close()">閉じる</button></div>';
+                if (eventNameEl) eventNameEl.textContent = 'データなし';
+                return;
+            }
+
+            if (payload.eventName && eventNameEl) {
+                eventNameEl.textContent = `イベント: ${payload.eventName}`;
+                document.title = `値札カード (${payload.eventName}) - MOAI POS`;
+            }
+
+            if (payload.theme) {
+                changeTheme(payload.theme);
+                const select = document.getElementById('theme-select');
+                if (select) select.value = payload.theme;
+            }
+
+            // カードの全配列を展開（copies 部数分）
+            const allCards = [];
+            payload.items.forEach(item => {
+                const copies = parseInt(item.copies, 10) || 1;
+                for (let i = 0; i < copies; i++) {
+                    allCards.push(item);
+                }
+            });
+
+            if (allCards.length === 0) {
+                container.innerHTML = '<div style="color:#fff; text-align:center; padding:50px;">印刷部数がすべて0です。</div>';
+                return;
+            }
+
+            // 1ページあたり21枚（3列×7行）でページ分割
+            const CARDS_PER_PAGE = 21;
+            const totalPages = Math.ceil(allCards.length / CARDS_PER_PAGE);
+
+            for (let p = 0; p < totalPages; p++) {
+                const pageCards = allCards.slice(p * CARDS_PER_PAGE, (p + 1) * CARDS_PER_PAGE);
+                
+                const pageEl = document.createElement('div');
+                pageEl.className = 'page';
+                pageEl.setAttribute('data-page-index', p + 1);
+
+                const gridEl = document.createElement('div');
+                gridEl.className = 'card-grid';
+
+                // 21枠分埋める（端数は空白カード）
+                for (let slot = 0; slot < CARDS_PER_PAGE; slot++) {
+                    const card = pageCards[slot];
+                    const cardEl = document.createElement('div');
+
+                    if (card) {
+                        cardEl.className = 'price-card';
+                        const titleText = (card.name || card.id || '').replace(/\n/g, ' ').trim();
+                        const isLong = titleText.length >= 14;
+
+                        cardEl.innerHTML = `
+                            <div class="card-top">
+                                <div class="card-title ${isLong ? 'long-text' : ''}" title="${titleText}">${titleText}</div>
+                                <div class="card-divider"></div>
+                            </div>
+                            <div class="card-bottom">
+                                <div class="card-price-wrap">
+                                    <span class="card-currency">¥</span>
+                                    <span class="card-amount">${formatCurrency(card.price)}</span>
+                                </div>
+                                <div class="card-tax-note">tax in</div>
+                            </div>
+                        `;
+                    } else {
+                        cardEl.className = 'price-card empty-slot';
+                    }
+
+                    gridEl.appendChild(cardEl);
+                }
+
+                pageEl.appendChild(gridEl);
+                container.appendChild(pageEl);
+            }
+
+            // 自動印刷ダイアログ起動
+            setTimeout(() => {
+                window.print();
+            }, 400);
+        }
+
+        function changeTheme(themeClass) {
+            document.body.classList.remove('theme-craft', 'theme-white', 'theme-dark');
+            document.body.classList.add(themeClass);
+        }
+
+        function toggleCutGuides(show) {
+            if (show) {
+                document.body.classList.add('show-cut-guides');
+            } else {
+                document.body.classList.remove('show-cut-guides');
+            }
+        }
+
+        window.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>

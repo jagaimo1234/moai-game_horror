@@ -2803,6 +2803,7 @@
             <button id="selection-mode-btn" class="btn" style="background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.2); color:white; font-size:13px;" onclick="toggleSelectionSortMode()">お品書き並べ替えモードへ</button>
             <button class="btn" style="background:rgba(255,215,0,0.15); border:1px solid gold; color:gold; font-size:13px; font-weight:bold;" onclick="switchSysTab('catalog'); setTimeout(()=>openDevProductModal(), 100);">🚀 📖 作品図鑑で新作宣言する！</button>
             <button class="btn" style="background:rgba(0,210,255,0.15); border:1px solid #00d2ff; color:#00d2ff; font-size:13px; font-weight:bold;" onclick="generateBulkTilePrint()">✅ 選択中を一括タイル印刷</button>
+            <button class="btn" style="background:rgba(255,140,0,0.18); border:1px solid #ffaa33; color:#ffaa33; font-size:13px; font-weight:bold;" onclick="openPriceCardModal()">🏷️ 選択中を一括値札印刷</button>
             <button class="btn btn-primary" onclick="saveSelectedProducts()" style="font-size:14px; padding:8px 20px;">選択内容を保存</button>
           </div>
         </div>
@@ -5699,7 +5700,10 @@
                 🖨️
               </div>
 
-              ${!selectionSortMode ? `<div onclick="event.stopPropagation(); openPrintTileModal('${p.id}')" style="position:absolute; top:8px; left:8px; background:rgba(0,0,0,0.6); border-radius:4px; width:28px; height:28px; display:flex; align-items:center; justify-content:center; font-size:14px; cursor:pointer; color:white; border:1px solid rgba(255,255,255,0.2);" title="この作品を単独で印刷">🔍</div>` : ''}
+              ${!selectionSortMode ? `
+                <div onclick="event.stopPropagation(); openPrintTileModal('${p.id}')" style="position:absolute; top:8px; left:8px; background:rgba(0,0,0,0.6); border-radius:4px; width:28px; height:28px; display:flex; align-items:center; justify-content:center; font-size:14px; cursor:pointer; color:white; border:1px solid rgba(255,255,255,0.2);" title="この作品のタイル画像を印刷">🔍</div>
+                <div onclick="event.stopPropagation(); openSinglePriceCardModal('${p.id}')" style="position:absolute; top:8px; left:40px; background:rgba(255,140,0,0.7); border-radius:4px; width:28px; height:28px; display:flex; align-items:center; justify-content:center; font-size:14px; cursor:pointer; color:white; border:1px solid rgba(255,255,255,0.3); box-shadow:0 2px 4px rgba(0,0,0,0.3);" title="この作品の値札カードを印刷">🏷️</div>
+              ` : ''}
               ${devControls}
               ${sortControls}
             </div>
@@ -6992,6 +6996,268 @@
 
     window.generateBulkTilePrint = () => {
       window.openBulkPrintModal();
+    };
+
+    // --- Price Card Store & Logic (6.5cm x 4cm) ---
+    const MoaiPriceCardStore = {
+      DB_NAME: 'MoaiPriceCardDB',
+      STORE_NAME: 'card_jobs',
+      open() {
+        return new Promise((resolve, reject) => {
+          const req = indexedDB.open(this.DB_NAME, 1);
+          req.onupgradeneeded = () => {
+            const db = req.result;
+            if (!db.objectStoreNames.contains(this.STORE_NAME)) {
+              db.createObjectStore(this.STORE_NAME, { keyPath: 'id' });
+            }
+          };
+          req.onsuccess = () => resolve(req.result);
+          req.onerror = () => reject(req.error);
+        });
+      },
+      async save(job) {
+        try {
+          const db = await this.open();
+          return new Promise((resolve, reject) => {
+            const tx = db.transaction(this.STORE_NAME, 'readwrite');
+            tx.objectStore(this.STORE_NAME).put(job);
+            tx.oncomplete = () => resolve(true);
+            tx.onerror = () => reject(tx.error);
+          });
+        } catch (e) {
+          console.warn('MoaiPriceCardStore save failed:', e);
+          return false;
+        }
+      }
+    };
+
+    window.getProductCurrentEventPrice = (pId) => {
+      if (!pId) return 0;
+      // 1. 現在のイベントの inventoryData
+      if (window.inventoryData && window.inventoryData[pId]?.price !== undefined) {
+        return Number(window.inventoryData[pId].price);
+      }
+      // 2. worksMasterData
+      if (window.worksMasterData && window.worksMasterData[pId]?.price !== undefined) {
+        return Number(window.worksMasterData[pId].price);
+      }
+      // 3. customProductsData
+      if (window.customProductsData && window.customProductsData[pId]?.price !== undefined) {
+        return Number(window.customProductsData[pId].price);
+      }
+      // 4. allMaster
+      const allMaster = window.getFullMasterProducts ? window.getFullMasterProducts(window.customProductsData) : [];
+      const p = allMaster.find(x => x.id === pId);
+      if (p?.price !== undefined) return Number(p.price);
+      return 0;
+    };
+
+    let priceCardConfig = []; // [{ id, name, price, copies: 1 }]
+
+    window.openPriceCardModal = () => {
+      if (printSelection.length === 0) {
+        return alert("値札を作りたい作品の右下にある「🖨️チェック」を入れてください。");
+      }
+
+      const allMaster = window.getFullMasterProducts(window.customProductsData);
+      const selectedProducts = allMaster.filter(p => printSelection.includes(p.id));
+
+      if (selectedProducts.length === 0) {
+        return alert("選択された作品が見つかりません。");
+      }
+
+      // イベント名を取得して表示
+      const allEvents = window.getAllEvents ? window.getAllEvents(window.eventConfigData) : {};
+      const currentEv = allEvents[currentEventKey];
+      const evLabel = currentEv ? currentEv.label : currentEventKey;
+      const subtitleEl = document.getElementById('price-card-modal-subtitle');
+      if (subtitleEl) {
+        subtitleEl.textContent = `イベント「${evLabel}」の設定金額が自動反映されています。`;
+      }
+
+      priceCardConfig = selectedProducts.map(p => {
+        const currentPrice = window.getProductCurrentEventPrice(p.id);
+        const existing = priceCardConfig.find(x => x.id === p.id);
+        return {
+          id: p.id,
+          name: (p.name || p.id || '').replace(/\n/g, ' '),
+          price: existing?.price !== undefined ? existing.price : currentPrice,
+          copies: existing?.copies !== undefined ? existing.copies : 1
+        };
+      });
+
+      renderPriceCardList();
+      const modal = document.getElementById('price-card-modal');
+      if (modal) modal.style.display = 'flex';
+    };
+
+    window.openSinglePriceCardModal = (id) => {
+      const allMaster = window.getFullMasterProducts(window.customProductsData);
+      const p = allMaster.find(x => x.id === id);
+      if (!p) return;
+
+      const allEvents = window.getAllEvents ? window.getAllEvents(window.eventConfigData) : {};
+      const currentEv = allEvents[currentEventKey];
+      const evLabel = currentEv ? currentEv.label : currentEventKey;
+      const subtitleEl = document.getElementById('price-card-modal-subtitle');
+      if (subtitleEl) {
+        subtitleEl.textContent = `イベント「${evLabel}」の設定金額が自動反映されています。`;
+      }
+
+      priceCardConfig = [{
+        id: p.id,
+        name: (p.name || p.id || '').replace(/\n/g, ' '),
+        price: window.getProductCurrentEventPrice(p.id),
+        copies: 1
+      }];
+
+      renderPriceCardList();
+      const modal = document.getElementById('price-card-modal');
+      if (modal) modal.style.display = 'flex';
+    };
+
+    window.closePriceCardModal = () => {
+      const modal = document.getElementById('price-card-modal');
+      if (modal) modal.style.display = 'none';
+    };
+
+    window.renderPriceCardList = () => {
+      const container = document.getElementById('price-card-item-list');
+      if (!container) return;
+
+      let html = '';
+      priceCardConfig.forEach((item, index) => {
+        const isZero = (item.copies || 0) === 0;
+
+        html += `
+          <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; background:${isZero ? 'rgba(255,255,255,0.02)' : 'rgba(255,255,255,0.05)'}; border:1px solid ${isZero ? 'rgba(255,255,255,0.1)' : 'var(--border)'}; border-radius:10px; padding:8px 12px; opacity:${isZero ? '0.45' : '1'}; transition:all 0.15s ease;">
+            <!-- 作品名 -->
+            <div style="flex:1; min-width:0;">
+              <div style="font-size:13px; font-weight:bold; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="${item.name}">${item.name}</div>
+              <div style="font-size:11px; color:rgba(255,255,255,0.6); margin-top:2px;">
+                ${isZero ? '⚠️ 印刷スキップ (0枚)' : `印刷: <strong>${item.copies}枚</strong>`}
+              </div>
+            </div>
+
+            <!-- 金額入力（その場で微調整可能） + 部数ステッパー -->
+            <div style="display:flex; align-items:center; gap:10px; flex-shrink:0;">
+              <!-- 金額 -->
+              <div style="display:flex; align-items:center; gap:3px;">
+                <span style="font-size:13px; font-weight:bold; color:#ffaa33;">¥</span>
+                <input type="number" step="50" min="0" value="${item.price}" onchange="updatePriceCardPrice(${index}, this.value)" style="width:72px; height:28px; text-align:right; background:#12141d; border:1px solid var(--border); border-radius:6px; color:#fff; font-size:13px; font-weight:bold; padding:0 6px;" title="イベント販売価格（微調整可能）">
+              </div>
+
+              <!-- 部数ステッパー -->
+              <div style="display:flex; align-items:center; gap:3px;">
+                <button type="button" onclick="stepPriceCardCopies(${index}, -1)" style="width:28px; height:28px; background:rgba(255,255,255,0.1); border:1px solid var(--border); border-radius:6px; color:#fff; font-size:14px; font-weight:bold; cursor:pointer; display:flex; align-items:center; justify-content:center;">-</button>
+                <input type="number" min="0" max="99" value="${item.copies}" onchange="setPriceCardCopies(${index}, this.value)" style="width:40px; height:28px; text-align:center; background:#12141d; border:1px solid var(--border); border-radius:6px; color:#fff; font-size:13px; font-weight:bold; padding:0;">
+                <button type="button" onclick="stepPriceCardCopies(${index}, 1)" style="width:28px; height:28px; background:#ffaa33; border:none; border-radius:6px; color:#000; font-size:14px; font-weight:bold; cursor:pointer; display:flex; align-items:center; justify-content:center;">+</button>
+                <span style="font-size:11px; color:rgba(255,255,255,0.6); margin-left:2px;">枚</span>
+              </div>
+            </div>
+          </div>
+        `;
+      });
+
+      container.innerHTML = html;
+      updatePriceCardSummary();
+    };
+
+    window.updatePriceCardPrice = (index, val) => {
+      if (priceCardConfig[index]) {
+        priceCardConfig[index].price = Math.max(0, parseInt(val, 10) || 0);
+        renderPriceCardList();
+      }
+    };
+
+    window.stepPriceCardCopies = (index, delta) => {
+      if (priceCardConfig[index]) {
+        const cur = priceCardConfig[index].copies || 0;
+        priceCardConfig[index].copies = Math.max(0, Math.min(99, cur + delta));
+        renderPriceCardList();
+      }
+    };
+
+    window.setPriceCardCopies = (index, val) => {
+      if (priceCardConfig[index]) {
+        priceCardConfig[index].copies = Math.max(0, Math.min(99, parseInt(val, 10) || 0));
+        renderPriceCardList();
+      }
+    };
+
+    window.applyPriceCardGlobalCopies = (val) => {
+      const copies = Math.max(0, parseInt(val, 10) || 0);
+      priceCardConfig.forEach(item => { item.copies = copies; });
+      renderPriceCardList();
+    };
+
+    window.updatePriceCardSummary = () => {
+      const activeItems = priceCardConfig.filter(x => (x.copies || 0) > 0);
+      const totalCards = priceCardConfig.reduce((acc, x) => acc + (x.copies || 0), 0);
+      const totalPages = Math.ceil(totalCards / 21);
+
+      const summaryEl = document.getElementById('price-card-summary');
+      if (summaryEl) {
+        summaryEl.innerHTML = `合計: <span style="color:#ffaa33;">${activeItems.length}</span> 作品 / 計 <strong style="color:#ffaa33; font-size:15px;">${totalCards}</strong> 枚 (A4用紙 <strong>${totalPages}</strong> ページ / 1頁21枚)`;
+      }
+      const btn = document.getElementById('price-card-exec-btn');
+      if (btn) {
+        btn.disabled = totalCards === 0;
+        btn.innerHTML = `🖨️ 値札カードをPDF出力・印刷 (${totalPages} ページ)`;
+      }
+    };
+
+    window.executePriceCardPrint = async () => {
+      const activeItems = priceCardConfig.filter(x => (x.copies || 0) > 0);
+      if (activeItems.length === 0) {
+        return alert("印刷部数が設定されている作品がありません。枚数を1以上にしてください。");
+      }
+
+      const totalCards = activeItems.reduce((acc, x) => acc + (x.copies || 0), 0);
+      const totalPages = Math.ceil(totalCards / 21);
+
+      const allEvents = window.getAllEvents ? window.getAllEvents(window.eventConfigData) : {};
+      const currentEv = allEvents[currentEventKey];
+      const evLabel = currentEv ? currentEv.label : currentEventKey;
+
+      const theme = document.getElementById('price-card-theme-select')?.value || 'theme-craft';
+
+      const jobId = 'card_job_' + Date.now();
+      const payload = {
+        jobId: jobId,
+        eventName: evLabel,
+        theme: theme,
+        title: `値札カード (${evLabel} / 計${totalCards}枚)`,
+        items: activeItems.map(x => ({
+          id: x.id,
+          name: x.name,
+          price: x.price,
+          copies: x.copies
+        }))
+      };
+
+      // 1. メモリ直接保持
+      window.__PRICE_CARD_PAYLOAD = payload;
+
+      // 2. sessionStorage
+      try {
+        sessionStorage.setItem('moai_price_card_payload', JSON.stringify(payload));
+      } catch (e) {}
+
+      // 3. IndexedDB
+      try {
+        await MoaiPriceCardStore.save({ id: jobId, payload: payload, createdAt: Date.now() });
+      } catch (e) {}
+
+      // 4. 新規タブで開く
+      const cardWin = window.open(`print_price_card.html?jobId=${encodeURIComponent(jobId)}`, '_blank');
+      if (cardWin) {
+        try {
+          cardWin.__PRICE_CARD_PAYLOAD = payload;
+        } catch (e) {}
+      }
+
+      closePriceCardModal();
     };
 
     window.moveProductToEdge = (id, edge) => {
@@ -17512,6 +17778,67 @@
           <button type="button" class="btn" onclick="closeBulkPrintModal()" style="background:none; border:1px solid var(--border); color:#fff; padding:8px 16px;">キャンセル</button>
           <button type="button" class="btn btn-primary" onclick="executeBulkTilePrint()" id="bulk-print-exec-btn" style="padding:8px 20px; font-weight:bold; font-size:14px; box-shadow:0 4px 15px rgba(0,210,255,0.4);">
             🖨️ まとめてPDF出力・印刷
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Price Card Settings Modal (6.5cm x 4cm) -->
+  <div id="price-card-modal" class="modal-overlay" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); z-index:2100; justify-content:center; align-items:center; backdrop-filter:blur(6px);">
+    <div class="modal-content" style="background:var(--panel-bg); border:2px solid #ffaa33; border-radius:16px; width:94%; max-width:680px; max-height:88vh; display:flex; flex-direction:column; box-shadow:0 20px 50px rgba(0,0,0,0.8); overflow:hidden;">
+      
+      <!-- ヘッダー -->
+      <div style="padding:16px 20px; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; background:rgba(255,140,0,0.08);">
+        <div>
+          <h3 style="margin:0; font-size:17px; color:#ffaa33; display:flex; align-items:center; gap:8px;">
+            🏷️ 値札カード一括作成 (6.5cm × 4cm)
+          </h3>
+          <p id="price-card-modal-subtitle" style="margin:3px 0 0; font-size:12px; color:rgba(255,255,255,0.7);">
+            イベント設定金額が自動反映されています。
+          </p>
+        </div>
+        <button type="button" onclick="closePriceCardModal()" style="background:none; border:none; color:#aaa; font-size:24px; cursor:pointer; line-height:1;">&times;</button>
+      </div>
+
+      <!-- スタイル選択 ＆ 一括部数バー -->
+      <div style="padding:10px 20px; background:rgba(255,255,255,0.03); border-bottom:1px solid var(--border); display:flex; flex-wrap:wrap; gap:12px; align-items:center; justify-content:space-between;">
+        <div style="display:flex; align-items:center; gap:8px;">
+          <span style="font-size:12px; color:rgba(255,255,255,0.8); font-weight:bold;">🎨 デザイン:</span>
+          <select id="price-card-theme-select" style="background:#1a1d26; color:#fff; border:1px solid #ffaa33; border-radius:6px; padding:4px 8px; font-size:12px; cursor:pointer;">
+            <option value="theme-craft" selected>✨ クラフトモダン (高視認・おすすめ)</option>
+            <option value="theme-white">🏛️ ギャラリーホワイト (洗練ミニマル)</option>
+            <option value="theme-dark">🌌 プレミアムダーク (サイバー・高級)</option>
+          </select>
+        </div>
+
+        <div style="display:flex; align-items:center; gap:6px;">
+          <span style="font-size:12px; color:rgba(255,255,255,0.8); font-weight:bold;">⚡ 一括枚数:</span>
+          <button type="button" onclick="applyPriceCardGlobalCopies(1)" style="padding:3px 9px; font-size:11px; font-weight:bold; background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.2); border-radius:4px; color:#fff; cursor:pointer;">全1枚</button>
+          <button type="button" onclick="applyPriceCardGlobalCopies(2)" style="padding:3px 9px; font-size:11px; font-weight:bold; background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.2); border-radius:4px; color:#fff; cursor:pointer;">全2枚</button>
+          <button type="button" onclick="applyPriceCardGlobalCopies(3)" style="padding:3px 9px; font-size:11px; font-weight:bold; background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.2); border-radius:4px; color:#fff; cursor:pointer;">全3枚</button>
+          <button type="button" onclick="applyPriceCardGlobalCopies(0)" style="padding:3px 9px; font-size:11px; font-weight:bold; background:rgba(255,0,0,0.15); border:1px solid rgba(255,0,0,0.3); border-radius:4px; color:#ff8888; cursor:pointer;">リセット(0枚)</button>
+        </div>
+      </div>
+
+      <!-- スクロール可能な作品リスト -->
+      <div id="price-card-item-list" style="flex:1; overflow-y:auto; padding:14px 20px; display:flex; flex-direction:column; gap:8px;">
+        <!-- JSで動的描画 -->
+      </div>
+
+      <!-- フッター（サマリー ＆ 出力ボタン） -->
+      <div style="padding:14px 20px; border-top:1px solid var(--border); background:rgba(18,20,29,0.95); display:flex; align-items:center; justify-content:space-between; gap:16px;">
+        <div>
+          <div id="price-card-summary" style="font-size:13px; font-weight:bold; color:#fff;">
+            合計: <span style="color:#ffaa33;">0</span> 作品 / 計 0 枚 (A4用紙 0 ページ)
+          </div>
+          <div style="font-size:11px; color:rgba(255,255,255,0.5);">※A4用紙1枚につき21枚（3列×7行）印刷されます</div>
+        </div>
+        <div style="display:flex; gap:10px;">
+          <button type="button" class="btn" onclick="closePriceCardModal()" style="background:none; border:1px solid var(--border); color:#fff; padding:8px 16px;">キャンセル</button>
+          <button type="button" class="btn btn-primary" onclick="executePriceCardPrint()" id="price-card-exec-btn" style="background:#ffaa33; color:#000; border:none; padding:8px 20px; font-weight:bold; font-size:14px; box-shadow:0 4px 15px rgba(255,170,51,0.4);">
+            🖨️ 値札カードをPDF出力・印刷
           </button>
         </div>
       </div>
