@@ -367,58 +367,78 @@
                     return;
                 }
 
-                const count = parseInt(payload.count, 10) || 12;
+                const defaultCount = parseInt(payload.count, 10) || 12;
                 const title = payload.title || 'タイル印刷';
-                document.title = `${title} (${count}枚/頁) - MOAI POS`;
+                
+                // 有効な印刷アイテムを抽出（部数が1以上のもの）
+                const validItems = payload.items.filter(item => (parseInt(item.copies, 10) || 1) > 0);
+                const totalPages = validItems.reduce((acc, item) => acc + (parseInt(item.copies, 10) || 1), 0);
+
+                if (totalPages === 0) {
+                    overlay.innerHTML = '<div style="color:#ff6b6b; font-size:18px;">❌ 印刷部数がすべて0に設定されているため、印刷対象がありません。</div><button class="btn btn-close" style="margin-top:20px;" onclick="window.close()">閉じる</button>';
+                    barStatus.textContent = '印刷対象なし';
+                    return;
+                }
+
+                document.title = `${title} (計${totalPages}頁) - MOAI POS`;
                 barTitle.textContent = `🖨️ ${title}`;
-                barStatus.textContent = `全 ${payload.items.length} ページ準備中...`;
+                barStatus.textContent = `全 ${totalPages} ページ準備中...`;
 
-                const { cols, rows, size } = calculateGrid(count);
+                let currentPageNumber = 0;
 
-                // 各作品ごとに A4 1ページを生成
-                payload.items.forEach((item, pageIdx) => {
-                    const page = document.createElement('div');
-                    page.className = 'page';
-                    page.setAttribute('data-page-index', pageIdx + 1);
-
-                    const grid = document.createElement('div');
-                    grid.className = 'grid';
-                    grid.style.gridTemplateColumns = `repeat(${cols}, ${size}mm)`;
-                    grid.style.gridTemplateRows = `repeat(${rows}, ${size}mm)`;
+                // 各作品ごとに部数（copies）分だけ A4 ページを生成
+                validItems.forEach((item) => {
+                    const itemCount = parseInt(item.count, 10) || defaultCount;
+                    const copies = parseInt(item.copies, 10) || 1;
+                    const { cols, rows, size } = calculateGrid(itemCount);
 
                     const imgSource = (item.image && typeof item.image === 'string' && item.image.trim()) 
                         ? item.image.trim() 
                         : createPlaceholderDataUrl(item.name || item.id);
 
-                    for (let i = 0; i < count; i++) {
-                        const div = document.createElement('div');
-                        div.className = 'item';
-                        div.style.width = size + 'mm';
-                        div.style.height = size + 'mm';
+                    for (let c = 0; c < copies; c++) {
+                        currentPageNumber++;
+                        const page = document.createElement('div');
+                        page.className = 'page';
+                        page.setAttribute('data-page-index', currentPageNumber);
+                        page.setAttribute('data-work-name', item.name || item.id || '');
+                        page.setAttribute('data-copy-index', `${c + 1}/${copies}`);
 
-                        const img = document.createElement('img');
-                        img.alt = item.name || item.id || '作品画像';
-                        img.dataset.workName = item.name || item.id || '';
-                        
-                        // 画像読み込みエラー時の自動差し替え
-                        img.onerror = function() {
-                            if (!this.dataset.hasFailed) {
-                                this.dataset.hasFailed = 'true';
-                                this.src = createPlaceholderDataUrl(this.dataset.workName);
-                            }
-                        };
-                        img.src = imgSource;
+                        const grid = document.createElement('div');
+                        grid.className = 'grid';
+                        grid.style.gridTemplateColumns = `repeat(${cols}, ${size}mm)`;
+                        grid.style.gridTemplateRows = `repeat(${rows}, ${size}mm)`;
 
-                        allRenderedImages.push(img);
-                        div.appendChild(img);
-                        grid.appendChild(div);
+                        for (let i = 0; i < itemCount; i++) {
+                            const div = document.createElement('div');
+                            div.className = 'item';
+                            div.style.width = size + 'mm';
+                            div.style.height = size + 'mm';
+
+                            const img = document.createElement('img');
+                            img.alt = item.name || item.id || '作品画像';
+                            img.dataset.workName = item.name || item.id || '';
+                            
+                            // 画像読み込みエラー時の自動差し替え
+                            img.onerror = function() {
+                                if (!this.dataset.hasFailed) {
+                                    this.dataset.hasFailed = 'true';
+                                    this.src = createPlaceholderDataUrl(this.dataset.workName);
+                                }
+                            };
+                            img.src = imgSource;
+
+                            allRenderedImages.push(img);
+                            div.appendChild(img);
+                            grid.appendChild(div);
+                        }
+
+                        page.appendChild(grid);
+                        container.appendChild(page);
                     }
-
-                    page.appendChild(grid);
-                    container.appendChild(page);
                 });
 
-                loadingText.textContent = `全 ${payload.items.length} ページの画像を展開・描画中...`;
+                loadingText.textContent = `全 ${totalPages} ページの画像を展開・描画中...`;
 
                 // すべての画像の読み込み完了・デコードを待機
                 const waitPromises = allRenderedImages.map(img => {
@@ -436,7 +456,7 @@
 
                 // 完了
                 overlay.style.display = 'none';
-                barStatus.textContent = `✅ 全 ${payload.items.length} ページ準備完了（1枚あたり ${count} 分割）`;
+                barStatus.textContent = `✅ 全 ${totalPages} ページ準備完了（${validItems.length} 作品 / まとめて1つのPDF出力）`;
 
                 // 自動印刷ダイアログを起動
                 setTimeout(() => {

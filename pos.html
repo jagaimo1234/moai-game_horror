@@ -6824,33 +6824,174 @@
       renderSelection();
     };
 
-    window.generateBulkTilePrint = async () => {
-      if (printSelection.length === 0) return alert("印刷したい作品の右下にある「🖨️チェック」を入れてください。");
+    // --- Bulk Tile Print Modal & Logic ---
+    let bulkPrintConfig = []; // [{ id, name, image, count: 12, copies: 1 }, ...]
 
-      const countStr = prompt("A4用紙1枚につき各作品を何枚並べますか？\n(例: 1, 2, 4, 6, 8, 12, 16, 20, 24)", "12");
-      if (countStr === null) return;
-      const count = parseInt(countStr, 10) || 12;
-      
+    window.openBulkPrintModal = () => {
+      if (printSelection.length === 0) {
+        return alert("印刷したい作品の右下にある「🖨️チェック」を入れてください。");
+      }
+
       const allMaster = window.getFullMasterProducts(window.customProductsData);
       const selectedProducts = allMaster.filter(p => printSelection.includes(p.id));
 
-      if (selectedProducts.length === 0) return alert("選択された作品が見つかりません。");
+      if (selectedProducts.length === 0) {
+        return alert("選択された作品が見つかりません。");
+      }
 
-      const items = selectedProducts.map(p => {
+      // 既存の設定があれば部数や面数を維持し、なければ初期化
+      bulkPrintConfig = selectedProducts.map(p => {
+        const existing = bulkPrintConfig.find(x => x.id === p.id);
         return {
           id: p.id,
           name: (p.name || p.id || '').replace(/\n/g, ' '),
-          image: window.resolveProductPrintImage(p)
+          image: window.resolveProductPrintImage(p),
+          count: existing?.count || 12,
+          copies: existing?.copies !== undefined ? existing.copies : 1
         };
       });
 
+      renderBulkPrintList();
+      const modal = document.getElementById('bulk-print-modal');
+      if (modal) modal.style.display = 'flex';
+    };
+
+    window.closeBulkPrintModal = () => {
+      const modal = document.getElementById('bulk-print-modal');
+      if (modal) modal.style.display = 'none';
+    };
+
+    window.renderBulkPrintList = () => {
+      const container = document.getElementById('bulk-print-item-list');
+      if (!container) return;
+
+      let html = '';
+      bulkPrintConfig.forEach((item, index) => {
+        const isZero = (item.copies || 0) === 0;
+        const totalTiles = (item.count || 12) * (item.copies || 0);
+
+        html += `
+          <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; background:${isZero ? 'rgba(255,255,255,0.02)' : 'rgba(255,255,255,0.05)'}; border:1px solid ${isZero ? 'rgba(255,255,255,0.1)' : 'var(--border)'}; border-radius:10px; padding:8px 12px; opacity:${isZero ? '0.45' : '1'}; transition:all 0.15s ease;">
+            <!-- サムネイル + 作品名 -->
+            <div style="display:flex; align-items:center; gap:10px; flex:1; min-width:0;">
+              <img src="${item.image || 'images/kurima/no_image.png'}" 
+                   onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\\'http://www.w3.org/2000/svg\\' width=\\'40\\' height=\\'40\\'><rect width=\\'40\\' height=\\'40\\' fill=\\'%23222\\'/><text x=\\'20\\' y=\\'25\\' fill=\\'%23fff\\' font-size=\\'16\\' text-anchor=\\'middle\\'>🗿</text></svg>'" 
+                   style="width:40px; height:40px; border-radius:6px; object-fit:cover; border:1px solid rgba(255,255,255,0.2); flex-shrink:0;">
+              <div style="min-width:0;">
+                <div style="font-size:13px; font-weight:bold; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="${item.name}">${item.name}</div>
+                <div style="font-size:11px; color:rgba(255,255,255,0.6); margin-top:2px;">
+                  ${isZero ? '⚠️ 印刷スキップ (0部)' : `内訳: ${item.count}面 × ${item.copies}部 = <strong style="color:var(--accent);">${totalTiles}個分</strong>`}
+                </div>
+              </div>
+            </div>
+
+            <!-- タイル面数 + 印刷部数ステッパー -->
+            <div style="display:flex; align-items:center; gap:10px; flex-shrink:0;">
+              <!-- 面数選択 -->
+              <select onchange="updateBulkItemCount(${index}, this.value)" style="background:#12141d; color:#fff; border:1px solid var(--border); border-radius:6px; padding:4px 6px; font-size:12px; cursor:pointer;" title="この作品のA4用紙1枚あたりのタイル分割数">
+                <option value="1" ${item.count === 1 ? 'selected' : ''}>1面 (1×1)</option>
+                <option value="2" ${item.count === 2 ? 'selected' : ''}>2面 (1×2)</option>
+                <option value="4" ${item.count === 4 ? 'selected' : ''}>4面 (2×2)</option>
+                <option value="6" ${item.count === 6 ? 'selected' : ''}>6面 (2×3)</option>
+                <option value="8" ${item.count === 8 ? 'selected' : ''}>8面 (2×4)</option>
+                <option value="12" ${item.count === 12 ? 'selected' : ''}>12面 (3×4)</option>
+                <option value="16" ${item.count === 16 ? 'selected' : ''}>16面 (4×4)</option>
+                <option value="20" ${item.count === 20 ? 'selected' : ''}>20面 (4×5)</option>
+                <option value="24" ${item.count === 24 ? 'selected' : ''}>24面 (4×6)</option>
+              </select>
+
+              <!-- 部数ステッパー -->
+              <div style="display:flex; align-items:center; gap:3px;">
+                <button type="button" onclick="stepBulkItemCopies(${index}, -1)" style="width:28px; height:28px; background:rgba(255,255,255,0.1); border:1px solid var(--border); border-radius:6px; color:#fff; font-size:14px; font-weight:bold; cursor:pointer; display:flex; align-items:center; justify-content:center;" title="1部減らす">-</button>
+                <input type="number" min="0" max="99" value="${item.copies}" onchange="setBulkItemCopies(${index}, this.value)" style="width:40px; height:28px; text-align:center; background:#12141d; border:1px solid var(--border); border-radius:6px; color:#fff; font-size:13px; font-weight:bold; padding:0;" title="印刷部数（0でスキップ）">
+                <button type="button" onclick="stepBulkItemCopies(${index}, 1)" style="width:28px; height:28px; background:var(--accent); border:none; border-radius:6px; color:#000; font-size:14px; font-weight:bold; cursor:pointer; display:flex; align-items:center; justify-content:center;" title="1部増やす">+</button>
+                <span style="font-size:11px; color:rgba(255,255,255,0.6); margin-left:2px;">部</span>
+              </div>
+            </div>
+          </div>
+        `;
+      });
+
+      container.innerHTML = html;
+      updateBulkPrintSummary();
+    };
+
+    window.updateBulkItemCount = (index, val) => {
+      if (bulkPrintConfig[index]) {
+        bulkPrintConfig[index].count = parseInt(val, 10) || 12;
+        renderBulkPrintList();
+      }
+    };
+
+    window.stepBulkItemCopies = (index, delta) => {
+      if (bulkPrintConfig[index]) {
+        const cur = bulkPrintConfig[index].copies || 0;
+        bulkPrintConfig[index].copies = Math.max(0, Math.min(99, cur + delta));
+        renderBulkPrintList();
+      }
+    };
+
+    window.setBulkItemCopies = (index, val) => {
+      if (bulkPrintConfig[index]) {
+        bulkPrintConfig[index].copies = Math.max(0, Math.min(99, parseInt(val, 10) || 0));
+        renderBulkPrintList();
+      }
+    };
+
+    window.applyGlobalCount = (val) => {
+      const count = parseInt(val, 10) || 12;
+      bulkPrintConfig.forEach(item => { item.count = count; });
+      renderBulkPrintList();
+    };
+
+    window.applyGlobalCopies = (val) => {
+      const copies = Math.max(0, parseInt(val, 10) || 0);
+      bulkPrintConfig.forEach(item => { item.copies = copies; });
+      renderBulkPrintList();
+    };
+
+    window.updateBulkPrintSummary = () => {
+      const activeItems = bulkPrintConfig.filter(x => (x.copies || 0) > 0);
+      const totalPages = bulkPrintConfig.reduce((acc, x) => acc + (x.copies || 0), 0);
+      const totalTiles = bulkPrintConfig.reduce((acc, x) => acc + ((x.count || 12) * (x.copies || 0)), 0);
+
+      const summaryEl = document.getElementById('bulk-print-summary');
+      if (summaryEl) {
+        summaryEl.innerHTML = `合計: <span style="color:var(--accent);">${activeItems.length}</span> 作品 / A4用紙 <strong style="color:var(--accent); font-size:16px;">${totalPages}</strong> ページ (計 ${totalTiles} 個分)`;
+      }
+      const btn = document.getElementById('bulk-print-exec-btn');
+      if (btn) {
+        btn.disabled = totalPages === 0;
+        btn.innerHTML = `🖨️ まとめてPDF出力・印刷 (${totalPages} ページ)`;
+      }
+    };
+
+    window.executeBulkTilePrint = async () => {
+      const activeItems = bulkPrintConfig.filter(x => (x.copies || 0) > 0);
+      if (activeItems.length === 0) {
+        return alert("印刷部数が設定されている作品がありません。部数を1以上にしてください。");
+      }
+
+      const totalPages = activeItems.reduce((acc, x) => acc + (x.copies || 0), 0);
+
       const payload = {
-        title: `一括出力 (${items.length}作品)`,
-        count: count,
-        items: items
+        title: `一括タイル出力 (${activeItems.length}作品 / 計${totalPages}頁)`,
+        count: 12,
+        items: activeItems.map(x => ({
+          id: x.id,
+          name: x.name,
+          image: x.image,
+          count: x.count,
+          copies: x.copies
+        }))
       };
 
       await window.openPrintTileWindow(payload);
+      closeBulkPrintModal();
+    };
+
+    window.generateBulkTilePrint = () => {
+      window.openBulkPrintModal();
     };
 
     window.moveProductToEdge = (id, edge) => {
@@ -6994,14 +7135,24 @@
     // --- Tile Print Logic ---
     let currentPrintProductId = null;
     let currentPrintCount = 12;
+    let currentSinglePrintCopies = 1;
 
     window.openPrintTileModal = (id) => {
       currentPrintProductId = id;
+      currentSinglePrintCopies = 1;
+      const copiesInput = document.getElementById('single-print-copies');
+      if (copiesInput) copiesInput.value = 1;
       document.getElementById('print-tile-modal').style.display = 'flex';
     };
 
     window.closePrintTileModal = () => {
       document.getElementById('print-tile-modal').style.display = 'none';
+    };
+
+    window.stepSinglePrintCopies = (delta) => {
+      currentSinglePrintCopies = Math.max(1, Math.min(99, currentSinglePrintCopies + delta));
+      const copiesInput = document.getElementById('single-print-copies');
+      if (copiesInput) copiesInput.value = currentSinglePrintCopies;
     };
 
     window.selectPrintCount = (count) => {
@@ -7024,17 +7175,20 @@
       if (!p) return alert("作品が見つかりません。");
 
       const count = currentPrintCount || 12;
+      const copies = currentSinglePrintCopies || 1;
       const imgUrl = window.resolveProductPrintImage(p);
       const name = (p.name || p.id || '').replace(/\n/g, ' ');
 
       const payload = {
-        title: name,
+        title: `${name} (${copies}部)`,
         count: count,
         items: [
           {
             id: p.id,
             name: name,
-            image: imgUrl
+            image: imgUrl,
+            count: count,
+            copies: copies
           }
         ]
       };
@@ -17266,9 +17420,9 @@
   <div id="print-tile-modal" class="modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:2000; justify-content:center; align-items:center;">
     <div class="modal-content" style="background:var(--panel-bg); padding:30px; border-radius:15px; width:90%; max-width:400px; border:1px solid var(--border);">
       <h3 style="margin-bottom:15px; color:var(--accent);">🖨️ タイル印刷（A4）</h3>
-      <p style="font-size:13px; opacity:0.8;">A4用紙に隙間なく敷き詰めます。<br>枚数を選択してください。</p>
+      <p style="font-size:13px; opacity:0.8;">A4用紙に隙間なく敷き詰めます。<br>1枚あたりの面数を選択してください。</p>
       
-      <div class="print-option-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 20px 0;">
+      <div class="print-option-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 15px 0;">
         <div class="print-option" style="background:rgba(255,255,255,0.05); border:1px solid var(--border); padding:10px; border-radius:8px; cursor:pointer;" onclick="selectPrintCount(1)">1枚</div>
         <div class="print-option" style="background:rgba(255,255,255,0.05); border:1px solid var(--border); padding:10px; border-radius:8px; cursor:pointer;" onclick="selectPrintCount(2)">2枚</div>
         <div class="print-option" style="background:rgba(255,255,255,0.05); border:1px solid var(--border); padding:10px; border-radius:8px; cursor:pointer;" onclick="selectPrintCount(4)">4枚</div>
@@ -17280,10 +17434,88 @@
         <div class="print-option" style="background:rgba(255,255,255,0.05); border:1px solid var(--border); padding:10px; border-radius:8px; cursor:pointer;" onclick="selectPrintCount(24)">24枚</div>
       </div>
 
+      <!-- 単体印刷部数ステッパー -->
+      <div style="display:flex; justify-content:space-between; align-items:center; background:rgba(255,255,255,0.05); padding:10px 14px; border-radius:8px; border:1px solid var(--border); margin:15px 0;">
+        <span style="font-size:13px; font-weight:bold; color:#fff;">📄 印刷部数（用紙枚数）:</span>
+        <div style="display:flex; align-items:center; gap:6px;">
+          <button type="button" onclick="stepSinglePrintCopies(-1)" style="width:30px; height:30px; background:rgba(255,255,255,0.1); border:1px solid var(--border); border-radius:6px; color:#fff; font-size:16px; font-weight:bold; cursor:pointer;">-</button>
+          <input type="number" id="single-print-copies" min="1" max="99" value="1" onchange="currentSinglePrintCopies = Math.max(1, parseInt(this.value)||1); this.value = currentSinglePrintCopies;" style="width:48px; height:30px; text-align:center; background:#12141d; border:1px solid var(--border); border-radius:6px; color:#fff; font-size:14px; font-weight:bold;">
+          <button type="button" onclick="stepSinglePrintCopies(1)" style="width:30px; height:30px; background:var(--accent); border:none; border-radius:6px; color:#000; font-size:16px; font-weight:bold; cursor:pointer;">+</button>
+          <span style="font-size:12px; color:rgba(255,255,255,0.7);">部</span>
+        </div>
+      </div>
+
       <div style="display:flex; gap:10px; margin-top:20px;">
         <button class="btn" style="flex:1; background:none; border:1px solid var(--border); color:white;" onclick="closePrintTileModal()">キャンセル</button>
         <button class="btn btn-primary" style="flex:2;" onclick="generateTiledPrint()">PDF生成・印刷</button>
       </div>
+    </div>
+  </div>
+
+  <!-- Bulk Print Settings Modal -->
+  <div id="bulk-print-modal" class="modal-overlay" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); z-index:2100; justify-content:center; align-items:center; backdrop-filter:blur(6px);">
+    <div class="modal-content" style="background:var(--panel-bg); border:2px solid var(--accent); border-radius:16px; width:94%; max-width:680px; max-height:88vh; display:flex; flex-direction:column; box-shadow:0 20px 50px rgba(0,0,0,0.8); overflow:hidden;">
+      
+      <!-- ヘッダー -->
+      <div style="padding:16px 20px; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; background:rgba(0,0,0,0.2);">
+        <div>
+          <h3 style="margin:0; font-size:17px; color:var(--accent); display:flex; align-items:center; gap:8px;">
+            🖨️ 一括タイル印刷 - 作品別部数設定
+          </h3>
+          <p style="margin:3px 0 0; font-size:12px; color:rgba(255,255,255,0.7);">
+            作品ごとに印刷部数（A4用紙枚数）と面数を個別に設定できます。まとめて1つのPDFに出力されます。
+          </p>
+        </div>
+        <button type="button" onclick="closeBulkPrintModal()" style="background:none; border:none; color:#aaa; font-size:24px; cursor:pointer; line-height:1;">&times;</button>
+      </div>
+
+      <!-- 一括クイック操作バー -->
+      <div style="padding:10px 20px; background:rgba(255,255,255,0.03); border-bottom:1px solid var(--border); display:flex; flex-wrap:wrap; gap:12px; align-items:center; justify-content:space-between;">
+        <div style="display:flex; align-items:center; gap:8px;">
+          <span style="font-size:12px; color:rgba(255,255,255,0.8); font-weight:bold;">⚡ 一括面数:</span>
+          <select id="bulk-global-count" onchange="applyGlobalCount(this.value)" style="background:#1a1d26; color:#fff; border:1px solid var(--border); border-radius:6px; padding:4px 8px; font-size:12px; cursor:pointer;">
+            <option value="1">1面 (1×1)</option>
+            <option value="2">2面 (1×2)</option>
+            <option value="4">4面 (2×2)</option>
+            <option value="6">6面 (2×3)</option>
+            <option value="8">8面 (2×4)</option>
+            <option value="12" selected>12面 (3×4) [標準]</option>
+            <option value="16">16面 (4×4)</option>
+            <option value="20">20面 (4×5)</option>
+            <option value="24">24面 (4×6)</option>
+          </select>
+        </div>
+
+        <div style="display:flex; align-items:center; gap:6px;">
+          <span style="font-size:12px; color:rgba(255,255,255,0.8); font-weight:bold;">⚡ 一括部数:</span>
+          <button type="button" onclick="applyGlobalCopies(1)" style="padding:3px 9px; font-size:11px; font-weight:bold; background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.2); border-radius:4px; color:#fff; cursor:pointer;">全1部</button>
+          <button type="button" onclick="applyGlobalCopies(2)" style="padding:3px 9px; font-size:11px; font-weight:bold; background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.2); border-radius:4px; color:#fff; cursor:pointer;">全2部</button>
+          <button type="button" onclick="applyGlobalCopies(3)" style="padding:3px 9px; font-size:11px; font-weight:bold; background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.2); border-radius:4px; color:#fff; cursor:pointer;">全3部</button>
+          <button type="button" onclick="applyGlobalCopies(0)" style="padding:3px 9px; font-size:11px; font-weight:bold; background:rgba(255,0,0,0.15); border:1px solid rgba(255,0,0,0.3); border-radius:4px; color:#ff8888; cursor:pointer;">リセット(0部)</button>
+        </div>
+      </div>
+
+      <!-- スクロール可能な作品リスト -->
+      <div id="bulk-print-item-list" style="flex:1; overflow-y:auto; padding:14px 20px; display:flex; flex-direction:column; gap:8px;">
+        <!-- JSで動的レンダリング -->
+      </div>
+
+      <!-- フッター（サマリー ＆ 出力ボタン） -->
+      <div style="padding:14px 20px; border-top:1px solid var(--border); background:rgba(18,20,29,0.95); display:flex; align-items:center; justify-content:space-between; gap:16px;">
+        <div>
+          <div id="bulk-print-summary" style="font-size:13px; font-weight:bold; color:#fff;">
+            合計: <span style="color:var(--accent);">0</span> 作品 / A4用紙 <span style="color:var(--accent);">0</span> ページ (計 0 個分)
+          </div>
+          <div style="font-size:11px; color:rgba(255,255,255,0.5);">※部数0の作品は印刷からスキップされます</div>
+        </div>
+        <div style="display:flex; gap:10px;">
+          <button type="button" class="btn" onclick="closeBulkPrintModal()" style="background:none; border:1px solid var(--border); color:#fff; padding:8px 16px;">キャンセル</button>
+          <button type="button" class="btn btn-primary" onclick="executeBulkTilePrint()" id="bulk-print-exec-btn" style="padding:8px 20px; font-weight:bold; font-size:14px; box-shadow:0 4px 15px rgba(0,210,255,0.4);">
+            🖨️ まとめてPDF出力・印刷
+          </button>
+        </div>
+      </div>
+
     </div>
   </div>
 
