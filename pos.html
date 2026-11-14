@@ -997,6 +997,7 @@
             <button id="btn-print-sales-report" class="btn btn-primary" style="font-size:12px; padding:6px 12px;" onclick="printSalesReport()">📄 売上報告書 (確定申告用)</button>
             <span id="badge-non-marche" style="display:none; background:rgba(255,255,255,0.05); border:1px dashed rgba(255,255,255,0.3); color:rgba(255,255,255,0.6); padding:6px 12px; border-radius:8px; font-size:11px; font-weight:bold;">⚠️ 非マルシェ（報告書対象外）</span>
             <button class="btn" style="background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.2); font-size:12px; padding:6px 12px; color:var(--accent);" onclick="openEditEventModal()">⚙️ 出店情報を編集</button>
+            <button class="btn" style="background:rgba(46, 204, 113, 0.2); color:#2ecc71; border:1px solid #2ecc71; font-size:11px; padding:4px 8px; font-weight:bold;" onclick="rollbackSalesAndRestoreInventory()">🔄 売上取消＆在庫を元に戻す</button>
             <button class="btn" style="background:rgba(231,76,60,0.2); color:var(--danger); border:1px solid var(--danger); font-size:11px; padding:4px 8px;" onclick="resetSalesData()">売上のみリセット</button>
             <button class="btn" style="background:rgba(231,76,60,0.2); color:var(--danger); border:1px solid var(--danger); font-size:11px; padding:4px 8px;" onclick="resetInventoryLogData()">在庫履歴のみリセット</button>
           </div>
@@ -5314,6 +5315,75 @@
       }
     };
     // -------- ここまで --------
+
+    window.rollbackSalesAndRestoreInventory = async () => {
+      if (!auth.currentUser) return;
+      const salesDocRef = doc(db, "settings", "sales_" + currentEventKey);
+      const invDocRef = doc(db, "settings", "inventory_" + currentEventKey);
+      
+      try {
+        const salesSnap = await getDoc(salesDocRef);
+        if (!salesSnap.exists()) return alert("売上データが存在しません。");
+        const records = salesSnap.data().records || [];
+        if (records.length === 0) return alert("リセット対象の売上記録がありません。");
+        
+        let totalAmount = 0;
+        let totalQty = 0;
+        const returnMap = {};
+        
+        records.forEach(r => {
+          totalAmount += (r.totalAmount !== undefined ? r.totalAmount : (r.total || 0));
+          (r.items || []).forEach(it => {
+            const qty = it.qty || 1;
+            totalQty += qty;
+            returnMap[it.id] = (returnMap[it.id] || 0) + qty;
+          });
+        });
+        
+        const msg = `現在の仮売上記録（全${records.length}件、計¥${totalAmount.toLocaleString()}、計${totalQty}個）を取り消し、\n減算された在庫数を元の数（イベント開始時）に戻しますか？\n\n※在庫数は販売前の初期状態（搬入総数）に安全に復元されます。`;
+        if (!confirm(msg)) return;
+        
+        const invSnap = await getDoc(invDocRef);
+        let curInv = invSnap.exists() ? { ...invSnap.data() } : { ...inventoryData };
+        
+        for (const [id, addQty] of Object.entries(returnMap)) {
+          if (curInv[id]) {
+            const initial = curInv[id].initial !== undefined ? curInv[id].initial : ((curInv[id].current || 0) + addQty);
+            curInv[id] = {
+              ...curInv[id],
+              current: Math.min(initial, (curInv[id].current || 0) + addQty)
+            };
+          }
+        }
+        
+        const touchedParents = new Set();
+        Object.keys(returnMap).forEach(id => {
+          if (id.includes('__')) touchedParents.add(id.split('__')[0]);
+        });
+        touchedParents.forEach(parentId => {
+          if (window.hasVariants && window.hasVariants(parentId)) {
+            const sumInv = window.getParentInventorySummary(curInv, parentId);
+            curInv[parentId] = { ...curInv[parentId], price: sumInv.price, initial: sumInv.initial, current: sumInv.current };
+          }
+        });
+        
+        await setDoc(invDocRef, curInv);
+        await setDoc(salesDocRef, { records: [] });
+        
+        inventoryData = curInv;
+        salesRecordsCache = [];
+        lastSalesRecords = [];
+        
+        if (window.renderAll) renderAll();
+        if (window.renderSalesDashboard) renderSalesDashboard();
+        if (window.renderInventory) renderInventory();
+        
+        alert(`✅ 売上を取り消し、在庫を元に戻しました！\n（${records.length}件の記録をクリア、全${Object.keys(returnMap).length}品目の在庫を復元完了）`);
+      } catch(e) {
+        console.error(e);
+        alert("復元処理中にエラーが発生しました: " + e.message);
+      }
+    };
 
     window.resetSalesData = async () => {
       if (!auth.currentUser) return;
