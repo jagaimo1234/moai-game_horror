@@ -1956,41 +1956,68 @@
     </div>
 
     <!-- Sale Edit Modal -->
-    <div id="sale-edit-modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); z-index:3000; align-items:center; justify-content:center; padding:20px;">
-      <div style="background:var(--panel-bg); width:100%; max-width:480px; border-radius:12px; padding:20px; border:1px solid var(--border); max-height:90vh; overflow-y:auto;">
-        <h3 style="margin-bottom:16px; color:var(--accent);">✏️ 購入履歴の修正</h3>
+    <div id="sale-edit-modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); z-index:3000; align-items:center; justify-content:center; padding:16px;">
+      <div style="background:var(--panel-bg); width:100%; max-width:540px; border-radius:12px; padding:22px; border:1px solid var(--border); max-height:92vh; overflow-y:auto; box-shadow:0 10px 40px rgba(0,0,0,0.7);">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+          <h3 style="margin:0; color:var(--accent); font-size:18px;">✏️ 購入履歴・個数の修正</h3>
+          <button type="button" onclick="document.getElementById('sale-edit-modal').style.display='none'" style="background:none; border:none; color:#888; font-size:20px; cursor:pointer;">✕</button>
+        </div>
+        <div id="sale-edit-time-display" style="font-size:12px; color:rgba(255,255,255,0.6); margin-bottom:12px; padding-bottom:8px; border-bottom:1px solid rgba(255,255,255,0.1);"></div>
         <input type="hidden" id="sale-edit-timestamp">
-        <div style="font-size:12px; color:rgba(255,255,255,0.5); margin-bottom:12px;" id="sale-edit-items-display"></div>
-        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:10px;">
-          <div class="form-group" style="margin:0;">
-            <label>合計金額 (円)</label>
-            <input type="number" id="sale-edit-total" class="form-input" min="0">
+
+        <!-- アイテム一覧・数量・単価変更セクション -->
+        <div style="margin-bottom:14px;">
+          <div style="font-size:13px; font-weight:bold; color:#fff; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center;">
+            <span>🛍️ 購入内訳（数量・単価の変更）</span>
+            <span style="font-size:11px; color:#00d2ff; font-weight:normal;">※個数の増減は在庫数に自動反映</span>
           </div>
-          <div class="form-group" style="margin:0;">
-            <label>値引き (円)</label>
-            <input type="number" id="sale-edit-discount" class="form-input" min="0" value="0">
+          <div id="sale-edit-items-container" style="display:flex; flex-direction:column; gap:8px;">
+            <!-- JSで動的レンダリング -->
           </div>
         </div>
-        <div class="form-group">
-          <label>支払い方法</label>
+
+        <div style="background:rgba(0,210,255,0.06); border:1px solid rgba(0,210,255,0.2); border-radius:8px; padding:10px 14px; margin-bottom:14px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+            <span style="font-size:12px; color:#aaa;">商品小計:</span>
+            <span style="font-size:15px; font-weight:bold; color:#fff;" id="sale-edit-subtotal-display">¥0</span>
+          </div>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+            <div class="form-group" style="margin:0;">
+              <label style="font-size:11px; color:#aaa;">値引き (円)</label>
+              <input type="number" id="sale-edit-discount" class="form-input" min="0" value="0" oninput="recalcSaleEditTotal()">
+            </div>
+            <div class="form-group" style="margin:0;">
+              <label style="font-size:11px; color:var(--accent); font-weight:bold;">決済合計金額 (円)</label>
+              <input type="number" id="sale-edit-total" class="form-input" min="0" style="font-weight:bold; color:var(--accent);">
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group" style="margin-bottom:10px;">
+          <label style="font-size:12px;">支払い方法</label>
           <select id="sale-edit-method" class="form-select">
             <option value="cash">現金</option>
             <option value="paypay">PayPay</option>
             <option value="credit">クレジット</option>
           </select>
         </div>
-        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
-          <div class="form-group">
-            <label>性別</label>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:10px;">
+          <div class="form-group" style="margin:0;">
+            <label style="font-size:12px;">性別</label>
             <select id="sale-edit-gender" class="form-select">
               <option value="">未選択</option>
               <option value="男性">男性</option>
               <option value="女性">女性</option>
+              <option value="女性グループ">女性グループ</option>
+              <option value="男性グループ">男性グループ</option>
+              <option value="カップル・夫婦">カップル・夫婦</option>
+              <option value="ファミリー">ファミリー</option>
               <option value="不明">不明/その他</option>
             </select>
           </div>
-          <div class="form-group">
-            <label>年代</label>
+          <div class="form-group" style="margin:0;">
+            <label style="font-size:12px;">年代</label>
             <select id="sale-edit-age" class="form-select">
               <option value="">未選択</option>
               <option value="10代">10代</option>
@@ -2002,8 +2029,9 @@
             </select>
           </div>
         </div>
-        <div class="form-group">
-          <label>購入きっかけ</label>
+
+        <div class="form-group" style="margin-bottom:10px;">
+          <label style="font-size:12px;">購入きっかけ</label>
           <select id="sale-edit-reason" class="form-select">
             <option value="">未選択</option>
             <option value="通りすがり">通りすがり(一般)</option>
@@ -2013,13 +2041,15 @@
             <option value="その他">その他</option>
           </select>
         </div>
-        <div class="form-group">
-          <label>対応メモ</label>
-          <input type="text" id="sale-edit-memo" class="form-input" placeholder="メモ">
+
+        <div class="form-group" style="margin-bottom:16px;">
+          <label style="font-size:12px;">対応メモ</label>
+          <input type="text" id="sale-edit-memo" class="form-input" placeholder="例: 2500円で販売、個数打ち間違い修正など">
         </div>
-        <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:16px;">
-          <button class="btn" style="background:#444; color:white;" onclick="document.getElementById('sale-edit-modal').style.display='none'">キャンセル</button>
-          <button class="btn btn-primary" onclick="saveSaleEdit()">💾 保存する</button>
+
+        <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; padding-top:12px; border-top:1px solid rgba(255,255,255,0.1);">
+          <button type="button" class="btn" style="background:#444; color:white; font-size:13px;" onclick="document.getElementById('sale-edit-modal').style.display='none'">キャンセル</button>
+          <button type="button" class="btn btn-primary" onclick="saveSaleEdit()" style="font-size:13px; font-weight:bold; padding:8px 20px;">💾 修正内容を保存する</button>
         </div>
       </div>
     </div>
@@ -5242,76 +5272,391 @@
       }
     };
 
-    // -------- 購入履歴 修正・削除 --------
+    // -------- 購入履歴 修正・削除（在庫自動連動・個数/単価編集機能付き） --------
+    let currentEditingSaleRecord = null;
+    let currentEditingItems = [];
+
     window.editSaleRecord = (timestamp) => {
       const r = salesRecordsCache.find(x => x.timestamp === timestamp);
       if (!r) return alert('履歴が見つかりません。');
+      currentEditingSaleRecord = JSON.parse(JSON.stringify(r));
+      currentEditingItems = JSON.parse(JSON.stringify(r.items || []));
 
-      // アイテム一覧表示
-      const itemsStr = r.items ? r.items.map(i => `${i.name} ×${i.qty} (¥${i.price})`).join('  /  ') : '';
-      document.getElementById('sale-edit-items-display').textContent = '対象: ' + itemsStr;
-
+      const timeStr = new Date(r.timestamp).toLocaleString('ja-JP', {
+        month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit'
+      });
+      const timeDisplay = document.getElementById('sale-edit-time-display');
+      if (timeDisplay) timeDisplay.textContent = `📅 決済日時: ${timeStr} (ID: ${r.timestamp})`;
       document.getElementById('sale-edit-timestamp').value = timestamp;
-      document.getElementById('sale-edit-total').value = r.totalAmount;
+
+      // アイテム一覧の描画
+      renderSaleEditItems();
+
       document.getElementById('sale-edit-discount').value = r.discount || 0;
+      document.getElementById('sale-edit-total').value = (r.totalAmount !== undefined ? r.totalAmount : (r.total || 0));
       document.getElementById('sale-edit-method').value = r.paymentMethod || 'cash';
       document.getElementById('sale-edit-gender').value = r.customer?.gender || '';
       document.getElementById('sale-edit-age').value = r.customer?.age || '';
       document.getElementById('sale-edit-reason').value = r.customer?.reason || '';
       document.getElementById('sale-edit-memo').value = r.memo || '';
 
+      recalcSaleEditTotal();
       document.getElementById('sale-edit-modal').style.display = 'flex';
+    };
+
+    function renderSaleEditItems() {
+      const container = document.getElementById('sale-edit-items-container');
+      if (!container) return;
+      if (currentEditingItems.length === 0) {
+        container.innerHTML = '<div style="color:#aaa; font-size:12px; padding:10px; text-align:center;">商品がありません</div>';
+        return;
+      }
+
+      container.innerHTML = currentEditingItems.map((it, idx) => {
+        const itemTotal = (it.price || 0) * (it.qty || 0);
+        return `
+          <div class="sale-edit-item-row" id="sale-edit-row-${idx}" style="background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.12); border-radius:8px; padding:10px 12px;">
+            <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:8px;">
+              <div style="font-weight:bold; font-size:13px; color:#fff; word-break:break-all; line-height:1.3;">
+                ${it.name || it.id || '商品'}
+              </div>
+              <button type="button" onclick="removeSaleEditItem(${idx})" style="background:rgba(231,76,60,0.15); border:1px solid rgba(231,76,60,0.4); color:#ff6b6b; font-size:11px; cursor:pointer; padding:2px 8px; border-radius:4px;">✕ 削除</button>
+            </div>
+            <div style="display:flex; align-items:center; justify-content:space-between; gap:8px; flex-wrap:wrap;">
+              <div style="display:flex; align-items:center; gap:4px;">
+                <span style="font-size:12px; color:#aaa;">単価: ¥</span>
+                <input type="number" class="form-input sale-edit-item-price" id="sale-edit-price-${idx}" value="${it.price || 0}" min="0" step="50" oninput="recalcSaleEditTotal()" style="width:85px; padding:4px 6px; font-size:13px; text-align:right;">
+              </div>
+              <div style="display:flex; align-items:center; gap:4px;">
+                <span style="font-size:12px; color:#aaa;">数量:</span>
+                <button type="button" onclick="stepSaleEditQty(${idx}, -1)" style="width:28px; height:28px; border-radius:4px; border:1px solid #555; background:#333; color:#fff; font-size:16px; cursor:pointer; display:flex; align-items:center; justify-content:center;">-</button>
+                <input type="number" class="form-input sale-edit-item-qty" id="sale-edit-qty-${idx}" value="${it.qty || 0}" min="0" oninput="recalcSaleEditTotal()" style="width:55px; padding:4px 6px; font-size:13px; text-align:center;">
+                <button type="button" onclick="stepSaleEditQty(${idx}, 1)" style="width:28px; height:28px; border-radius:4px; border:1px solid #555; background:#333; color:#fff; font-size:16px; cursor:pointer; display:flex; align-items:center; justify-content:center;">+</button>
+              </div>
+              <div style="font-size:13px; font-weight:bold; color:var(--accent); min-width:70px; text-align:right;" id="sale-edit-subtotal-${idx}">
+                ¥${itemTotal.toLocaleString()}
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    window.stepSaleEditQty = (idx, delta) => {
+      const input = document.getElementById(`sale-edit-qty-${idx}`);
+      if (!input) return;
+      let val = (parseInt(input.value) || 0) + delta;
+      if (val < 0) val = 0;
+      input.value = val;
+      if (currentEditingItems[idx]) currentEditingItems[idx].qty = val;
+      recalcSaleEditTotal();
+    };
+
+    window.removeSaleEditItem = (idx) => {
+      const input = document.getElementById(`sale-edit-qty-${idx}`);
+      if (input) {
+        input.value = 0;
+        if (currentEditingItems[idx]) currentEditingItems[idx].qty = 0;
+      }
+      const row = document.getElementById(`sale-edit-row-${idx}`);
+      if (row) {
+        row.style.opacity = '0.4';
+        row.style.background = 'rgba(231,76,60,0.1)';
+      }
+      recalcSaleEditTotal();
+    };
+
+    window.recalcSaleEditTotal = () => {
+      let subtotal = 0;
+      currentEditingItems.forEach((it, idx) => {
+        const priceInput = document.getElementById(`sale-edit-price-${idx}`);
+        const qtyInput = document.getElementById(`sale-edit-qty-${idx}`);
+        const price = priceInput ? (parseInt(priceInput.value) || 0) : (it.price || 0);
+        const qty = qtyInput ? (parseInt(qtyInput.value) || 0) : (it.qty || 0);
+        it.price = price;
+        it.qty = qty;
+        const lineTotal = price * qty;
+        subtotal += lineTotal;
+        const subDisplay = document.getElementById(`sale-edit-subtotal-${idx}`);
+        if (subDisplay) subDisplay.textContent = `¥${lineTotal.toLocaleString()}`;
+      });
+
+      const subtotalDisplay = document.getElementById('sale-edit-subtotal-display');
+      if (subtotalDisplay) subtotalDisplay.textContent = `¥${subtotal.toLocaleString()}`;
+
+      const discountInput = document.getElementById('sale-edit-discount');
+      const discount = discountInput ? (parseInt(discountInput.value) || 0) : 0;
+      const totalInput = document.getElementById('sale-edit-total');
+      if (totalInput) {
+        totalInput.value = Math.max(0, subtotal - discount);
+      }
     };
 
     window.saveSaleEdit = async () => {
       if (!auth.currentUser) return;
       const timestamp = document.getElementById('sale-edit-timestamp').value;
+      if (!currentEditingSaleRecord || currentEditingSaleRecord.timestamp !== timestamp) {
+        const r = salesRecordsCache.find(x => x.timestamp === timestamp);
+        if (r) currentEditingSaleRecord = r;
+      }
+      if (!currentEditingSaleRecord) return alert('取引データが見つかりません。');
+
+      // 入力値を最新同期
+      currentEditingItems.forEach((it, idx) => {
+        const pIn = document.getElementById(`sale-edit-price-${idx}`);
+        const qIn = document.getElementById(`sale-edit-qty-${idx}`);
+        if (pIn) it.price = parseInt(pIn.value) || 0;
+        if (qIn) it.qty = parseInt(qIn.value) || 0;
+      });
+
+      const finalItems = currentEditingItems.filter(it => (it.qty || 0) > 0);
+      const newTotal = parseInt(document.getElementById('sale-edit-total').value) || 0;
+      const newDiscount = parseInt(document.getElementById('sale-edit-discount').value) || 0;
+      const newMethod = document.getElementById('sale-edit-method').value;
+      const newMemo = document.getElementById('sale-edit-memo').value.trim();
+      const newCustomer = {
+        gender: document.getElementById('sale-edit-gender').value,
+        age: document.getElementById('sale-edit-age').value,
+        reason: document.getElementById('sale-edit-reason').value
+      };
+
       try {
         const salesDocRef = doc(db, "settings", "sales_" + currentEventKey);
-        const snap = await getDoc(salesDocRef);
-        if (!snap.exists()) return;
+        const salesSnap = await getDoc(salesDocRef);
+        if (!salesSnap.exists()) return alert("売上データが存在しません。");
 
-        const newRecords = (snap.data().records || []).map(r => {
+        const records = salesSnap.data().records || [];
+        const oldRec = records.find(r => r.timestamp === timestamp) || currentEditingSaleRecord;
+
+        // 在庫変動（差分）の計算: delta = new_qty - old_qty
+        // delta > 0: 販売数が増加 -> 在庫から減算 (current - delta)
+        // delta < 0: 販売数が減少 (11個→1個など) -> 在庫に戻す (current - delta = current + |delta|)
+        const oldMap = {};
+        (oldRec.items || []).forEach(it => {
+          const rawId = it.id || it.parentId || it.name;
+          oldMap[rawId] = (oldMap[rawId] || 0) + (it.qty || 0);
+        });
+
+        const newMap = {};
+        finalItems.forEach(it => {
+          const rawId = it.id || it.parentId || it.name;
+          newMap[rawId] = (newMap[rawId] || 0) + (it.qty || 0);
+        });
+
+        const allIds = new Set([...Object.keys(oldMap), ...Object.keys(newMap)]);
+        const stockDiffs = {};
+        allIds.forEach(id => {
+          const oQty = oldMap[id] || 0;
+          const nQty = newMap[id] || 0;
+          const delta = nQty - oQty;
+          if (delta !== 0) {
+            stockDiffs[id] = delta;
+          }
+        });
+
+        const invDocRef = doc(db, "settings", "inventory_" + currentEventKey);
+        const invSnap = await getDoc(invDocRef);
+        let curInv = invSnap.exists() ? { ...invSnap.data() } : { ...inventoryData };
+
+        const touchedParents = new Set();
+        const logsToAdd = [];
+
+        for (const [id, delta] of Object.entries(stockDiffs)) {
+          if (curInv[id]) {
+            const oldCur = curInv[id].current || 0;
+            curInv[id] = {
+              ...curInv[id],
+              current: oldCur - delta
+            };
+          } else {
+            curInv[id] = { price: 0, initial: 0, current: -delta };
+          }
+
+          if (id.includes('__')) {
+            touchedParents.add(id.split('__')[0]);
+          } else {
+            touchedParents.add(id);
+          }
+
+          const matchedItem = finalItems.find(x => (x.id || x.parentId || x.name) === id) || (oldRec.items || []).find(x => (x.id || x.parentId || x.name) === id);
+          const pName = matchedItem?.name || id;
+          logsToAdd.push({
+            timestamp: new Date().toISOString(),
+            type: delta < 0 ? 'restore' : 'sale_adjust',
+            productId: id,
+            productName: pName,
+            qty: -delta, // positive = stock increased, negative = stock decreased
+            reason: `購入履歴修正 (${new Date(timestamp).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}) 数量変更: ${oldMap[id] || 0}個 → ${newMap[id] || 0}個`
+          });
+        }
+
+        // 親作品の合算在庫およびステータスバッジの再計算
+        let newStockStatus = {};
+        touchedParents.forEach(parentId => {
+          if (window.hasVariants && window.hasVariants(parentId)) {
+            const sumInv = window.getParentInventorySummary(curInv, parentId);
+            curInv[parentId] = { ...curInv[parentId], price: sumInv.price, initial: sumInv.initial, current: sumInv.current };
+          }
+          const pInv = curInv[parentId] || { initial: 0, current: 0 };
+          const ratio = pInv.current / (pInv.initial || 1);
+          if (pInv.current <= 0) newStockStatus[parentId] = 'soldout';
+          else if (ratio <= 0.3) newStockStatus[parentId] = 'few';
+          else newStockStatus[parentId] = 'onsale';
+        });
+
+        // 1. 在庫・ステータスバッジ・ログのFirestore反映
+        if (Object.keys(stockDiffs).length > 0) {
+          await setDoc(invDocRef, curInv);
+          await setDoc(doc(db, "settings", "stock"), newStockStatus, { merge: true });
+
+          if (logsToAdd.length > 0) {
+            const logDocRef = doc(db, "settings", "inventory_log_" + currentEventKey);
+            try {
+              await updateDoc(logDocRef, { records: arrayUnion(...logsToAdd) });
+            } catch(e) {
+              await setDoc(logDocRef, { records: logsToAdd });
+            }
+          }
+          inventoryData = curInv;
+        }
+
+        // 2. 売上レコードのFirestore更新
+        const newRecords = records.map(r => {
           if (r.timestamp !== timestamp) return r;
           return {
             ...r,
-            paymentMethod: document.getElementById('sale-edit-method').value,
-            totalAmount: parseInt(document.getElementById('sale-edit-total').value) || 0,
-            discount: parseInt(document.getElementById('sale-edit-discount').value) || 0,
-            memo: document.getElementById('sale-edit-memo').value.trim(),
-            customer: {
-              gender: document.getElementById('sale-edit-gender').value,
-              age: document.getElementById('sale-edit-age').value,
-              reason: document.getElementById('sale-edit-reason').value,
-            }
+            items: finalItems,
+            totalAmount: newTotal,
+            discount: newDiscount,
+            paymentMethod: newMethod,
+            memo: newMemo,
+            customer: newCustomer
           };
         });
 
         await setDoc(salesDocRef, { records: newRecords });
+        lastSalesRecords = newRecords;
+        salesRecordsCache = newRecords;
+
         document.getElementById('sale-edit-modal').style.display = 'none';
-        alert('更新しました！');
+
+        if (window.renderSalesDashboard) renderSalesDashboard();
+        if (window.renderInventory) renderInventory();
+        if (window.renderAll) renderAll();
+
+        let stockMsg = Object.keys(stockDiffs).length > 0
+          ? `\n\n【在庫自動連動】\n数量の変更に伴い、${Object.keys(stockDiffs).length}品目の在庫数を自動調整しました！`
+          : '';
+        alert(`✅ 購入履歴を更新しました！${stockMsg}`);
       } catch(e) {
         console.error(e);
-        alert('更新に失敗しました。');
+        alert('更新処理中にエラーが発生しました: ' + e.message);
       }
     };
 
     window.deleteSaleRecord = async (timestamp) => {
       if (!auth.currentUser) return;
       const r = salesRecordsCache.find(x => x.timestamp === timestamp);
-      const timeStr = r ? new Date(r.timestamp).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) : timestamp;
-      if (!confirm(`${timeStr} の購入履歴を削除しますか？\n※在庫数は自動では戻りません。`)) return;
+      if (!r) return alert('取引データが見つかりません。');
+      const timeStr = new Date(r.timestamp).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+      const items = r.items || [];
+      const totalQty = items.reduce((acc, it) => acc + (it.qty || 0), 0);
+      const totalAmount = r.totalAmount !== undefined ? r.totalAmount : (r.total || 0);
+
+      const confirmMsg = `${timeStr} の購入履歴（計¥${totalAmount.toLocaleString()}）を削除しますか？\n\n` +
+        `【在庫の自動復元】\n` +
+        `この取引で減算されていた全商品（計${totalQty}個）の在庫数を自動で元に戻します。\n\n` +
+        `本当によろしいですか？`;
+
+      if (!confirm(confirmMsg)) return;
+
       try {
         const salesDocRef = doc(db, "settings", "sales_" + currentEventKey);
-        const snap = await getDoc(salesDocRef);
-        if (!snap.exists()) return;
+        const salesSnap = await getDoc(salesDocRef);
+        if (!salesSnap.exists()) return;
 
-        const newRecords = (snap.data().records || []).filter(r => r.timestamp !== timestamp);
+        const invDocRef = doc(db, "settings", "inventory_" + currentEventKey);
+        const invSnap = await getDoc(invDocRef);
+        let curInv = invSnap.exists() ? { ...invSnap.data() } : { ...inventoryData };
+
+        const touchedParents = new Set();
+        const logsToAdd = [];
+
+        // 全商品の在庫を復元
+        items.forEach(it => {
+          const rawId = it.id || it.parentId || it.name;
+          const qty = it.qty || 0;
+          if (qty > 0) {
+            if (curInv[rawId]) {
+              curInv[rawId] = {
+                ...curInv[rawId],
+                current: (curInv[rawId].current || 0) + qty
+              };
+            } else {
+              curInv[rawId] = { price: it.price || 0, initial: qty, current: qty };
+            }
+
+            if (rawId.includes('__')) {
+              touchedParents.add(rawId.split('__')[0]);
+            } else {
+              touchedParents.add(rawId);
+            }
+
+            logsToAdd.push({
+              timestamp: new Date().toISOString(),
+              type: 'restore',
+              productId: rawId,
+              productName: it.name || rawId,
+              qty: qty,
+              reason: `購入履歴削除による在庫復元 (${timeStr} 取消分)`
+            });
+          }
+        });
+
+        // 親作品の合算在庫およびステータスバッジの再計算
+        let newStockStatus = {};
+        touchedParents.forEach(parentId => {
+          if (window.hasVariants && window.hasVariants(parentId)) {
+            const sumInv = window.getParentInventorySummary(curInv, parentId);
+            curInv[parentId] = { ...curInv[parentId], price: sumInv.price, initial: sumInv.initial, current: sumInv.current };
+          }
+          const pInv = curInv[parentId] || { initial: 0, current: 0 };
+          const ratio = pInv.current / (pInv.initial || 1);
+          if (pInv.current <= 0) newStockStatus[parentId] = 'soldout';
+          else if (ratio <= 0.3) newStockStatus[parentId] = 'few';
+          else newStockStatus[parentId] = 'onsale';
+        });
+
+        // 在庫の保存
+        if (items.length > 0) {
+          await setDoc(invDocRef, curInv);
+          await setDoc(doc(db, "settings", "stock"), newStockStatus, { merge: true });
+
+          if (logsToAdd.length > 0) {
+            const logDocRef = doc(db, "settings", "inventory_log_" + currentEventKey);
+            try {
+              await updateDoc(logDocRef, { records: arrayUnion(...logsToAdd) });
+            } catch(e) {
+              await setDoc(logDocRef, { records: logsToAdd });
+            }
+          }
+          inventoryData = curInv;
+        }
+
+        // 売上レコードから削除
+        const newRecords = (salesSnap.data().records || []).filter(rec => rec.timestamp !== timestamp);
         await setDoc(salesDocRef, { records: newRecords });
-        alert('削除しました。');
+        lastSalesRecords = newRecords;
+        salesRecordsCache = newRecords;
+
+        if (window.renderSalesDashboard) renderSalesDashboard();
+        if (window.renderInventory) renderInventory();
+        if (window.renderAll) renderAll();
+
+        alert(`✅ 購入履歴を削除し、在庫数を元に戻しました！（計${totalQty}個を復元）`);
       } catch(e) {
         console.error(e);
-        alert('削除に失敗しました。');
+        alert('削除処理中にエラーが発生しました: ' + e.message);
       }
     };
     // -------- ここまで --------
