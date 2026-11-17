@@ -517,7 +517,7 @@ const EVENTS = {
     isMarche: true,
     defaultStatus: 'public',
     date: '2026-11-22',
-    location: '大和ハウス プレミストドーム',
+    location: '大和ハウス プレミストドーム J-540',
     products: [
       ...MASTER_PRODUCTS
     ]
