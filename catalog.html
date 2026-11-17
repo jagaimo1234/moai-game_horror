@@ -2439,7 +2439,7 @@
         <p style="font-size:11px; color:#64748b; margin:2px 0 0;">マッチングしたモアイをタップしてメッセージを送り合おう🗿✨</p>
       </div>
       <div style="font-size:11px; font-weight:700; color:#10b981; background:#ecfdf5; padding:3px 8px; border-radius:12px; border:1px solid #a7f3d0;">
-        デザフェス K-271
+        モノヴィレ J-540
       </div>
     </div>
     <div id="chat-matches-list"></div>
@@ -2463,7 +2463,7 @@
         <p style="font-size:11px; color:#64748b; margin:2px 0 0;">あなたがハート（いいね）を付けたモアイ作品一覧です❤️</p>
       </div>
       <div style="font-size:11px; font-weight:700; color:#10b981; background:#ecfdf5; padding:3px 8px; border-radius:12px; border:1px solid #a7f3d0;">
-        デザフェス K-271
+        モノヴィレ J-540
       </div>
     </div>
     <div id="fav-cards-grid" class="tile-grid" style="padding:14px 16px 80px;"></div>
@@ -3240,7 +3240,7 @@ ${variantSelectorHtml}
                     <span style="display:inline-block; width:7px; height:7px; border-radius:50%; background:#10b981; flex-shrink:0;"></span>
                     <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${p.name.replace(/\n/g,' ')}</span>
                   </div>
-                  <div style="font-size:11px; color:#94a3b8; font-weight:600; margin-left:6px; flex-shrink:0;">金沢</div>
+                  <div style="font-size:11px; color:#94a3b8; font-weight:600; margin-left:6px; flex-shrink:0;">札幌</div>
                 </div>
                 ${summarySubHtml}
                 ${hitokotoHtml}
@@ -4403,7 +4403,7 @@ ${variantSelectorHtml}
       const desc = getProductDescription(p);
       const shareUrl = getProductShareUrl(productId);
       const cleanDesc = desc.replace(/<[^>]+>/g, '').trim();
-      const shareText = `金沢モア太郎【${p.name || ''}】🗿✨\n${cleanDesc.slice(0, 60)}...\n\n#金沢モア太郎 #モアイ #デザフェス64`;
+      const shareText = `金沢モア太郎【${p.name || ''}】🗿✨\n${cleanDesc.slice(0, 60)}...\n\n#サッポロモノヴィレッジ #モノヴィレ2026 #金沢モア太郎 #モアイ`;
 
       if (navigator.share) {
         try {
@@ -4448,7 +4448,7 @@ ${variantSelectorHtml}
       const shareUrl = getProductShareUrl(productId);
       const cleanDesc = desc.replace(/<[^>]+>/g, '').trim();
       const tweetText = `金沢モア太郎【${p.name || ''}】🗿✨\n${cleanDesc.slice(0, 70)}...\n`;
-      const hashtags = '金沢モア太郎,モアイ,デザフェス64';
+      const hashtags = 'サッポロモノヴィレッジ,モノヴィレ2026,金沢モア太郎,モアイ';
       const xUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(tweetText)}&url=${encodeURIComponent(shareUrl)}&hashtags=${encodeURIComponent(hashtags)}`;
       window.open(xUrl, '_blank', 'noopener,noreferrer');
     };
@@ -4532,7 +4532,7 @@ ${variantSelectorHtml}
       if (!currentModalProduct) return;
       const desc = getProductDescription(currentModalProduct);
       const cleanDesc = desc.replace(/<[^>]+>/g, '').trim();
-      const text = `金沢モア太郎【${currentModalProduct.name || ''}】🗿✨\n${cleanDesc}\n\n#金沢モア太郎 #モアイ #デザフェス64`;
+      const text = `金沢モア太郎【${currentModalProduct.name || ''}】🗿✨\n${cleanDesc}\n\n#サッポロモノヴィレッジ #モノヴィレ2026 #金沢モア太郎 #モアイ`;
       if (navigator.clipboard && navigator.clipboard.writeText) {
         navigator.clipboard.writeText(text).then(() => {
           showToast('紹介テキストをコピーしました！📝', '✨');
@@ -5139,7 +5139,7 @@ ${variantSelectorHtml}
       <div class="moai-attack-title">⚡ SURPRISE APPROACH ⚡</div>
       <img id="moai-attack-img" class="moai-attack-img" src="" alt="">
       <div id="moai-attack-name" class="moai-attack-name">モアイ作品名</div>
-      <div id="moai-attack-desc" class="moai-attack-desc">「……ずっとあなたを見ていました🗿❤️<br>デザフェス西4F 暗いブース K-271 で待っててもいいですか？」</div>
+      <div id="moai-attack-desc" class="moai-attack-desc">「……ずっとあなたを見ていました🗿❤️<br>サッポロ モノ ヴィレッジ（プレミストドーム J-540）で待っててもいいですか？」</div>
       
       <div style="display:flex; flex-direction:column; gap:10px;">
         <button id="moai-attack-btn-accept" style="width:100%; background:linear-gradient(135deg, #ff3366, #ff5e62); color:#fff; border:none; padding:13px 20px; border-radius:25px; font-size:15px; font-weight:900; cursor:pointer; box-shadow:0 6px 20px rgba(255,51,102,0.5);">
@@ -5169,7 +5169,7 @@ ${variantSelectorHtml}
     <div id="match-modal-name" style="font-size:20px; font-weight:900; color:#fff; margin-bottom:8px;">作品名</div>
     <div style="font-size:13.5px; color:rgba(255,255,255,0.75); line-height:1.6; max-width:320px; margin-bottom:24px;">
       相思相愛になりました！<br>モアイからメッセージが届いています。<br>
-      <span style="color:#ffd700; font-weight:bold;">西4F 暗いブース K-271</span> で会えるよ！
+      <span style="color:#ffd700; font-weight:bold;">大和ハウス プレミストドーム ブース J-540</span> で会えるよ！
     </div>
 
     <div style="display:flex; flex-direction:column; gap:12px; width:100%; max-width:300px;">
@@ -5191,7 +5191,7 @@ ${variantSelectorHtml}
         <div id="chatroom-name" style="font-size:15px; font-weight:900; color:#0f172a;">モアイ名</div>
         <div style="font-size:11px; color:#10b981; display:flex; align-items:center; gap:4px;">
           <span style="width:6px; height:6px; border-radius:50%; background:#10b981; display:inline-block;"></span>
-          オンライン（西4F K-271 で待機中）
+          オンライン（プレミストドーム J-540 で待機中）
         </div>
       </div>
       <button onclick="openGeminiConfigModal()" style="background:#f1f5f9; border:1px solid #e2e8f0; border-radius:14px; padding:5px 10px; font-size:11px; font-weight:700; color:#475569; cursor:pointer; display:flex; align-items:center; gap:4px; flex-shrink:0;">
@@ -5203,7 +5203,9 @@ ${variantSelectorHtml}
 
     <div class="moai-chat-quick-replies">
       <button class="moai-quick-btn" onclick="sendQuickReply('当日会いに行くよ！')">🏃 当日会いに行くよ！</button>
-      <button class="moai-quick-btn" onclick="sendQuickReply('暗いブースってどんなとこ？')">👀 暗いブースってどんなとこ？</button>
+      <button class="moai-quick-btn" onclick="sendQuickReply('ブースの場所はどこ？')">📍 ブースの場所はどこ？</button>
+      <button class="moai-quick-btn" onclick="sendQuickReply('北海道は寒くないの？')">❄️ 北海道は寒くないの？</button>
+      <button class="moai-quick-btn" onclick="sendQuickReply('北海道グルメ食べた？')">🍦 北海道グルメ食べた？</button>
       <button class="moai-quick-btn" onclick="sendQuickReply('普段はどんな性格なの？')">✨ どんな性格なの？</button>
       <button class="moai-quick-btn" onclick="sendQuickReply('会場で写真撮ってもいい？')">📸 写真撮っていい？</button>
       <button class="moai-quick-btn" onclick="sendQuickReply('一目惚れしちゃった…！')">💖 一目惚れしちゃった！</button>
@@ -5446,10 +5448,11 @@ ${variantSelectorHtml}
 
       // Setup initial welcome chat message from MOAI
       if (!chats[productId] || chats[productId].length === 0) {
+        const prod = findProductById(productId) || { id: productId, name: 'モアイ' };
         chats[productId] = [
           {
             sender: 'moai',
-            text: `はじめまして！見つけてくれてありがとうございます🗿❤️\n私はデザインフェスタ64の【西4F 暗いブース K-271】で実物出展しています！当日会えるのを楽しみにしています✨`,
+            text: getMoaiFirstGreeting(prod),
             time: 'たった今'
           }
         ];
@@ -5548,7 +5551,7 @@ ${variantSelectorHtml}
                   <span style="display:inline-block; width:7px; height:7px; border-radius:50%; background:#10b981; flex-shrink:0;"></span>
                   <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${cleanName}</span>
                 </div>
-                <div style="font-size:11px; color:#94a3b8; font-weight:600; margin-left:6px; flex-shrink:0;">金沢</div>
+                <div style="font-size:11px; color:#94a3b8; font-weight:600; margin-left:6px; flex-shrink:0;">札幌</div>
               </div>
               ${hitokoto ? `<div class="hitokoto-bubble"><span class="hitokoto-icon">💬</span>「${hitokoto}」</div>` : ''}
               <div style="display:flex; justify-content:space-between; align-items:center; margin-top:6px;">
@@ -5684,7 +5687,7 @@ ${variantSelectorHtml}
             <div class="moai-chat-info">
               <div class="moai-chat-title-row">
                 <span class="moai-chat-name">${cleanName}</span>
-                <span class="moai-chat-tag">金沢</span>
+                <span class="moai-chat-tag">札幌</span>
               </div>
               <div class="moai-chat-sub-row">
                 ${isNewMatch 
@@ -5838,27 +5841,28 @@ ${variantSelectorHtml}
       updateGeminiUsageBadge();
     };
 
-    // Call Gemini 1.5 Flash API with strict safety bounds
+        // Call Gemini 1.5 Flash API with strict safety bounds
     async function fetchGeminiMoaiReply(product, userText) {
       const apiKey = localStorage.getItem('gemini_api_key');
       if (!apiKey) return null; // No key: fallback to scripted response
 
       const usage = getDailyGeminiUsage();
       if (usage.count >= GEMINI_MAX_DAILY) {
-        return '本日のAIモアイとおしゃべりできる回数（5/5回）に達しました🗿 明日また話しかけてね！デザフェス会場（西4F K-271）で待ってるよ✨';
+        return '本日のAIモアイとおしゃべりできる回数（5/5回）に達しました🗿 明日また話しかけてね！札幌モノヴィレッジ会場（プレミストドーム J-540）で待ってるよ✨';
       }
 
       const hitokoto = (window.MOAI_HITOKOTO_DICT && window.MOAI_HITOKOTO_DICT[product.id]) || '';
-      const prompt = `あなたはハンドメイド作家「モア太郎」が制作した石川県金沢生まれのモアイ作品「${(product.name || 'モアイ').replace(/\n/g, ' ')}」です。
+      const prompt = `あなたはハンドメイド作家「金沢モア太郎」が制作したモアイ作品「${(product.name || 'モアイ').replace(/\n/g, ' ')}」です。
 一言設定: 「${hitokoto}」
 説明: 「${(product.desc || '').slice(0, 80)}」
-出展場所: デザインフェスタ vol.64（西4F 暗いブース K-271）
+出展イベント: サッポロ モノ ヴィレッジ 2026 秋（11/22〜23）
+出展場所: 大和ハウス プレミストドーム（旧札幌ドーム）【ブース J-540】
 ユーザーはあなたに興味を持って話しかけてきたお客さんです。
 【厳格な返答ルール】
 ・必ず文末や文中にモアイ絵文字「🗿」をつけてください。
-・愛嬌があり、少しシュールでフレンドリーな口調（金沢の情緒あるニュアンス歓迎）で返信してください。
-・2〜3行（最大70文字以内）で簡潔に返答してください。
-・デザフェス当日に西4F 暗いブース K-271で会えるのを楽しみにしていることを伝えてください。
+・作品の個性や外見（タンクトップ、ハイレグ、飲むヨーグルト、ももひき、含み損など）を活かした愛嬌・シュールさのある口調で返答してください。
+・北海道・札幌初上陸の熱気や、プレミストドームのブースJ-540で直接会えるのを楽しみにしていることを伝えてください。
+・2〜3行（最大75文字以内）で簡潔かつテンポよく返答してください。
 
 お客さん: 「${userText.slice(0, 40)}」
 モアイの返答:`;
@@ -5891,142 +5895,251 @@ ${variantSelectorHtml}
     }
 
     
-    // ===== キャラクター別 性格判定ヘルパー =====
+    // ===== サッポロモノヴィレッジ キャラクター別 性格判定ヘルパー =====
     function getMoaiPersonalityType(p) {
       if (!p) return 'default';
       const id = (p.id || '').toLowerCase();
       const name = (p.name || '').toLowerCase();
 
-      if (id.includes('loscut') || name.includes('うなだれ') || name.includes('ロスカット') || name.includes('含み損')) return 'loscut';
       if (id.includes('highleg') || name.includes('ハイレグ')) return 'highleg';
-      if (id.includes('macho') || name.includes('マッチョ') || name.includes('まっちょ')) return 'macho';
-      if (id.includes('robo') || name.includes('ロボ') || name.includes('ヨーグルト')) return 'robo';
-      if (id.includes('tasogare') || name.includes('黄昏')) return 'tasogare';
+      if (id.includes('loscut') || name.includes('うなだれ') || name.includes('ロスカット') || name.includes('含み損')) return 'loscut';
+      if (id.includes('giveup') || name.includes('あきらめ')) return 'giveup';
+      if (id.includes('dot') || name.includes('ドット')) return 'dot_cute';
+      if (id.includes('keychain') || name.includes('カートリッジ')) return 'cartridge';
+      if (id.includes('yogurt') || name.includes('ヨーグルト')) return 'yogurt';
+      if (id.includes('robo_stand') || name.includes('専用スタンド')) return 'robo_stand';
+      if (id.includes('robo') || name.includes('ロボ')) return 'robo';
+      if (id.includes('tanktop') || id.includes('hadagi') || name.includes('タンクトップ') || name.includes('肌着')) {
+        if (id.includes('glasses') || name.includes('メガネ')) return 'tanktop_glasses';
+        return 'tanktop_osuwari';
+      }
+      if (id.includes('glasses') || name.includes('メガネ')) return 'glasses';
+      if (id.includes('osuwari') || name.includes('おすわり')) return 'osuwari';
+      if (id.includes('macho') || name.includes('マッチョ') || name.includes('まっちょ')) {
+        if (id.includes('keyholder') || name.includes('キーホルダー')) return 'macho_key';
+        return 'macho';
+      }
+      if (id.includes('positive') || name.includes('ポジティブ')) return 'positive';
+      if (id.includes('tegotae') || name.includes('手応え')) return 'tegotae';
+      if (id.includes('momohiki') || name.includes('ももひき')) return 'momohiki';
+      if (id.includes('doyagao') || name.includes('どやがお') || name.includes('ドヤ')) return 'doyagao';
       if (id.includes('headphone') || name.includes('ヘッドホン')) return 'headphone';
       if (id.includes('kangaeru') || name.includes('考え')) return 'kangaeru';
-      if (id.includes('dot') || id.includes('mini') || name.includes('ドット') || name.includes('ミニおすわり')) return 'cute';
+      if (id.includes('naisho') || name.includes('内省')) return 'naisho';
+      if (id.includes('tasogare') || name.includes('黄昏')) return 'tasogare';
+      if (id.includes('yatta') || name.includes('やったー') || name.includes('やった')) return 'yatta';
+      if (id.includes('incense') || name.includes('お香') || name.includes('番長') || name.includes('リーゼント')) return 'incense';
       if (id.includes('lure') || name.includes('ルアー') || name.includes('釣り')) return 'lure';
-      if (id.includes('glasses') || name.includes('メガネ')) return 'glasses';
-      if (id.includes('nomidakure') || name.includes('飲み')) return 'nomidakure';
-      if (id.includes('nukayorokobi') || name.includes('ぬか喜び')) return 'nukayorokobi';
-      if (id.includes('positive') || name.includes('ポジティブ')) return 'positive';
+      
       return 'default';
     }
 
-    // 各モアイの初回アプローチメッセージ（はじめまして＆やけに誘ってくる！）
+    // 各モアイの初回アプローチメッセージ（サッポロ モノ ヴィレッジ J-540へ全力でお誘い！）
     function getMoaiFirstGreeting(p) {
       const type = getMoaiPersonalityType(p);
       const cleanName = (p.name || 'モアイ').replace(/\n/g, ' ');
 
       switch (type) {
-        case 'loscut':
-          return '…あ、はじめまして…。どうせ僕なんかに誰も会いたくないよね…？ でも…もし気が向いたら、デザフェス西4Fの【暗いブース K-271】に来てくれませんか…？ 暗がりなら僕の落ち込み顔も目立たないと思うので…待ってます…📉🗿';
         case 'highleg':
-          return 'あら、はじめまして♡ 私の美脚に見惚れちゃった？フフッ、デザフェス西4F【暗いブース K-271】で脚組んで待ってるから、絶対会いにいらっしゃいよね！待ってるんだから🩱✨';
-        case 'macho':
-          return 'フンッッ！！（大胸筋ピクピク）はじめまして！君のペンを挟むために筋トレしてきたぜ！デザフェス西4F【暗いブース K-271】でパンプアップしながら待ってるマッチョ！絶対会いに来てくれよなパワーッ！💪💥';
+          return 'あら、はじめまして♡ 私の美脚に一目惚れしちゃった？フフッ、サッポロ モノ ヴィレッジ【プレミストドーム J-540】で寒さも忘れて生脚組んで待ってるから、絶対会いにいらっしゃいよね！待ってるんだから🩱✨';
+        case 'loscut':
+          return '…あ、はじめまして…。どうせ僕なんかに誰も会いたくないよね…？ でも…もし気が向いたら、サッポロ モノ ヴィレッジ【プレミストドーム J-540】に来てくれませんか…？ 札幌でも含み損で為す術なしだけど…君が来てくれたら救われるかも…📉🗿';
+        case 'giveup':
+          return '…はじめまして…。もう何もかもあきらめました…。プレミストドームの広さに圧倒されて完全に脱力してます…。【ブース J-540】で力尽きて横たわってるから、見捨てないで見に来て…🏳️🗿';
+        case 'yogurt':
+          return 'ピピピッ！通信接続！はじめまして相棒！オレは飲むヨーグルトで稼働するモアイロボ！北海道は本場の乳製品パラダイスでエネルギー充填120%だ！プレミストドーム【J-540】で飲むヨーグルトで乾杯しようぜ！🤖🥛';
         case 'robo':
-          return 'ピピピッ！通信接続！はじめましてだな相棒！オレはヨーグルトで稼働するモアイロボ！デザフェス西4F【暗いブース K-271】で待機中だ！暗闇ブースで一緒に乾杯しようぜ！🤖🥛';
-        case 'tasogare':
-          return '…あ、やっほ。はじめまして。今ちょっと黄昏てたところ…。君もたまには息抜きしたいでしょ？ デザフェス西4F【暗いブース K-271】の暗がりってすごく落ち着くんだ。ふらっと寄ってくれたら嬉しいな…一緒に黄昏れよ？🗿🌇';
-        case 'headphone':
-          return 'Hey、はじめまして🎧 今ちょうどいい曲聴いてチルってたところさ。西4Fの【暗いブース K-271】で待ってるよ。暗闇とお気に入りの花…最高のチル空間作っておくから、音に身を任せて遊びに来てよ🗿🌿';
-        case 'kangaeru':
-          return 'ふむ…君か、はじめまして。私は今、宇宙の真理と今日の夕飯について熟考していたのだ。西4F【暗いブース K-271】で腕を組んで待機しているぞ。議論の続きをしに来ないかね？🤔🗿';
-        case 'cute':
-          return 'わーい！はじめまして！メッセージすっごく嬉しいな〜！✨ 僕ね、デザフェス西4Fの【暗いブース K-271】でちょこんとお座りして待ってるんだよ！会いに来てくれたら全力で喜んじゃう！待ってるね！🗿🎒💕';
-        case 'lure':
-          return 'フッ…引っかかったな。はじめまして。オレという大物ルアーに食いついてくるとは、君もなかなかの釣り師とお見受けするぜ🎣 西4F【暗いブース K-271】の水域で待ってる。オレを釣り上げに来てくれよな…！🐟🗿';
+          return 'ピピピッ…ターゲット認識。はじめまして、パイロット候補生。我々は重厚可動メカモアイ。プレミストドーム【ブース J-540】にてスタンバイ完了している。北の大地での防衛ミッションを共に開始しよう！🤖⚡';
+        case 'robo_stand':
+          return 'はじめまして！モアイロボたちを支え続ける専用スタンドです！主役を引き立てる縁の下の力持ちだけど、プレミストドーム【J-540】では僕の頼もしさもじっくり見てほしいな！しっかり支えて待ってます！🏗️🗿';
+        case 'cartridge':
+          return 'ピコピコッ！はじめまして！伝説のレトロゲーム『ヨーグルトランEX』のカートリッジ型キーホルダーだよ！君のカバンに挿入していつでもドームを走ろうぜ！【ブース J-540】で待機中！🎮🕹️';
+        case 'tanktop_glasses':
+          return 'おや、はじめまして。視界は良好でしょうか？ 札幌の寒風の中でもタンクトップ一丁で胸筋を張り、あなたの愛用メガネをお預かりする準備は万全です。【プレミストドーム J-540】で最高のおもてなしをいたします👓💪✨';
         case 'glasses':
-          return 'おや、はじめまして。視界は良好でしょうか？ 私はデザフェス西4F【暗いブース K-271】にて、あなたの愛用メガネをお預かりする準備を整えております。ぜひ会場でフィッティングさせてくださいね👓🗿✨';
-        case 'nomidakure':
-          return 'うぃ〜〜…はじめましてぇ〜🍶 今夜も飲むヨーグルトでいい気分だぜ…！デザフェス西4F【暗いブース K-271】でくだ巻いてるからさ、愚痴聞きに来てくれよな〜待ってるぜ🗿🍺';
-        case 'nukayorokobi':
-          return 'はじめまして…！えっ、メッセージくれたの！？やったーー！！…あ、いや、またぬか喜びかも…。お願い、裏切らないで…デザフェス西4F【暗いブース K-271】で待ってるからね…？🎄🗿';
+          return 'おや、はじめまして。デスクの上の守護者、メガネスタンドです。プレミストドーム【J-540】にて、あなたのメガネを大切にお守りする準備を整えております。ぜひ会場でフィッティングさせてくださいね👓🗿';
+        case 'tanktop_osuwari':
+          return 'わーい！はじめまして！メッセージ嬉しいな〜！北の大地の寒さ対策で肌着（タンクトップ）を着せてもらったんだよ！ちょこんとお座りして【プレミストドーム J-540】で待ってるから、デスクに連れて帰ってね🗿🎽💕';
+        case 'osuwari':
+          return 'わーい！はじめまして！メッセージすっごく嬉しいな〜！✨ 僕ね、プレミストドーム【J-540】でちょこんとお座りして待ってるんだよ！君のペンを一生懸命抱っこするから、会いに来てね！🗿🎒💕';
+        case 'macho':
+          return 'フンッッ！！（大胸筋ピクピク）はじめまして！君のペンを挟むために筋トレしてきたぜ！北海道の寒波も筋肉の熱気で消し飛ばしてやる！プレミストドーム【ブース J-540】でパンプアップしながら待ってるマッチョ！パワーッ！💪💥';
+        case 'macho_key':
+          return 'フンッ！ちっちゃくても筋肉は本物！いつでもどこでも君と一緒に筋トレできるまっちょキーホルダーだ！ポケットから大胸筋を覗かせて【ブース J-540】で待ってるぜパワーッッ！💪🎒';
         case 'positive':
-          return 'おっす！はじめましてッッ！君に会えて最高にテンション上がってきたぞ！デザフェス西4F【暗いブース K-271】で魂込めて待ってる！君の元気を全力応援するから絶対来てくれよなッ！🔥🗿';
+          return 'おっす！はじめましてッッ！君に出会えて最高にポジティブなエネルギーが湧いてきたぞ！プレミストドーム【J-540】で魂のハチマキ巻いて待ってる！君の元気を全力応援するから絶対来てくれよなッ！🔥🗿';
+        case 'tegotae':
+          return 'グッ…！はじめまして！今、君とマッチングした瞬間に確かな『手応え』を掴んだぜ…！札幌モノヴィレッジ大成功の予感だ！プレミストドーム【J-540】で一緒に拳を握りしめようぜ！✊🗿';
+        case 'momohiki':
+          return 'ふっ…どうだいこのドヤ顔は！北海道の寒さに備えて『ももひき』を履いて完全防備してきたぜ！下半身はポカポカ、表情はドヤり全開！プレミストドーム【J-540】でドヤ顔見せつけてやるぜ！😏🩳';
+        case 'doyagao':
+          return 'ふっ…よくぞオレ様の圧倒的なドヤ顔に気づいたな！プレミストドーム【J-540】で一番自信満々な顔して待ってるぜ。君のデスクにもこの圧倒的ドヤ感を届けてやるよ！😏🗿';
+        case 'headphone':
+          return 'Hey、はじめまして🎧 今ちょうどいい曲聴いてチルってたところさ。大和ハウス プレミストドームの【ブース J-540】で待ってるよ。北の澄んだ空気とお気に入りの花…最高のチル空間作っておくから遊びにおいでよ🗿🌿';
+        case 'kangaeru':
+          return 'ふむ…君か、はじめまして。私は今、宇宙の真理と、札幌ドーム帰りに食べるべき濃厚味噌ラーメンについて熟考していたのだ。プレミストドーム【J-540】で腕を組んで待機しているぞ。議論の続きをしに来ないかね？🤔🍜';
+        case 'naisho':
+          return '…はじめまして…。静かに目を閉じて、自分自身の内面と向き合っています…。ドームの賑やかさの中でも、僕の周りだけは穏やかな静寂が流れているよ。【ブース J-540】で静かに待っています…🧘🗿';
+        case 'tasogare':
+          return '…あ、やっほ。はじめまして。今ちょっと黄昏てたところ…。北海道の広い空って、すごく綺麗で黄昏れるね…。プレミストドーム【J-540】にふらっと寄ってくれたら嬉しいな…一緒に夕暮れまで黄昏れよ？🗿🌇';
+        case 'yatta':
+          return 'やったーーーー！！はじめまして！！札幌モノヴィレッジに来られて大興奮！！🙌🗿 プレミストドーム【ブース J-540】で両手大きく広げて万歳ジャンプしながら待ってるよ！！一緒にやったーしよう！！✨';
+        case 'incense':
+          return 'オゥオゥ！はじめましてだな相棒！オレはリーゼント番長！煙たがられても心はアツく、いい香りでドームを浄化してやるぜ！プレミストドーム【J-540】で待ってるから、ビビらず顔出しな！夜露死苦！🚬🗿';
+        case 'lure':
+          return 'フッ…引っかかったな。はじめまして。オレという大物ルアーに食いついてくるとは、君もなかなかの釣り師とお見受けするぜ🎣 北海道の広大な水域に思いを馳せつつ【プレミストドーム J-540】で待ってる。オレを釣り上げに来てくれよな…！🐟🗿';
+        case 'dot_cute':
+          return 'わーい！はじめまして！レトロなドット絵から飛び出してきたおすわりモアイだよ！カバンにつけてプレミストドームを一緒に探検しよう！【ブース J-540】でちょこんと待ってるね👾🎒💕';
         default:
           const defaults = [
-            `はじめまして🗿✨ メッセージありがとう！実は今デザフェスの準備でソワソワしててさ…西4Fの【暗いブース K-271】で待ってるから、絶対顔見せてね！約束だよ？`,
-            `ふーん、君から話しかけてくるなんていい度胸じゃない🗿…でも本当はすごく嬉しいんだ。西4Fの【暗いブース K-271】にいるから、見つけたら声かけてよね。待っててあげるからさ！`,
-            `はじめまして〜🗿🍵 メッセージ届いてホッコリしたよ。金沢から東京ビッグサイト（西4F 暗いブース K-271）へ遠征するから、ブースに遊びに来てくれたら嬉しいな〜待ってるね！`
+            `はじめまして🗿✨ メッセージありがとう！北海道初上陸でドキドキしてるよ…プレミストドーム【J-540】で待ってるから、絶対顔見せてね！約束だよ？`,
+            `ふーん、君から話しかけてくるなんていい度胸じゃない🗿…でも本当はすごく嬉しいんだ。プレミストドーム【J-540】にいるから、見つけたら声かけてよね！`,
+            `はじめまして〜🗿🍵 メッセージ届いてホッコリしたよ。北の大地のサッポロ モノ ヴィレッジ（プレミストドーム J-540）へ遠征中！ブースに遊びに来てくれたら嬉しいな〜待ってるね！`
           ];
           return defaults[Math.floor(Math.random() * defaults.length)];
       }
     }
 
-    // ユーザーの発言に対するモアイキャラクター別の柔軟な返答
+    // ユーザーの発言に対するモアイキャラクター別の柔軟な返答（サッポロ モノ ヴィレッジ完全特化）
     function getMoaiCharacterReply(p, userText) {
       const type = getMoaiPersonalityType(p);
       const text = userText.toLowerCase();
 
-      // 1. 会いに行く・行く
-      if (text.includes('会いに行く') || text.includes('行く') || text.includes('いくよ')) {
+      // 1. 会いに行く・行く・当日・待ってて
+      if (text.includes('会いに行く') || text.includes('行く') || text.includes('いくよ') || text.includes('遊びに') || text.includes('当日') || text.includes('待ってて') || text.includes('行くね')) {
         switch (type) {
-          case 'loscut': return '…ホ、ホントに…！？嘘じゃないよね…？嬉しすぎて含み損のこと忘れちゃいそうだよ…！西4F K-271で泣きながら待ってるね…！📉😭';
-          case 'highleg': return 'あら、即答じゃない！素直でよろしい♡ 暗いブース K-271で一番セクシーなポーズで待ってるから、絶対見失わないでよね🩱✨';
-          case 'macho': return 'おおおおッッ！熱い魂を感じたぜ相棒ッ！オレの大胸筋も歓喜のスクワット中だ！西4F K-271で全力でペン挟んで待ってるぜパワーッッ！！💪🔥';
-          case 'robo': return '了解だ相棒！会場でのランデブーをスケジュールに登録したぞ！西4F 暗いブース K-271で飲むヨーグルト用意して待機する！🤖🥛';
-          case 'tasogare': return 'ありがとう…すごく嬉しいな。当日は人混みで疲れちゃうかもしれないから、西4F K-271の暗がりで一緒にのんびり休もうね🗿☕';
-          case 'headphone': return '最高のレスポンスじゃん🎧 西4F K-271で極上のBGMとお花セットして待ってる。気軽に遊びにおいでよ🗿✨';
-          case 'cute': return 'わーーーい！！やったやった！飛び跳ねちゃうくらい嬉しいな！西4F K-271で待ってるから、見つけたらすぐ声かけてね！🎒💖';
-          default: return '本当に行くって言ってくれてすごく嬉しい🗿❤️ 西4F 暗いブース K-271 で首を長〜くして待ってるよ！気をつけて来てね！';
+          case 'highleg': return 'あら、即答じゃない！素直でよろしい♡ プレミストドーム J-540で一番セクシーなポーズで待ってるから、絶対見失わないでよね🩱✨';
+          case 'loscut': return '…ホ、ホントに…！？嘘じゃないよね…？嬉しすぎて含み損のこと忘れちゃいそうだよ…！プレミストドーム J-540で泣きながら待ってるね…！📉😭';
+          case 'giveup': return '…会いに来てくれるの…？あきらめかけてたけど…君が来てくれるならJ-540でなんとか息して待ってるよ…🏳️🗿';
+          case 'yogurt': return '了解だ相棒！スケジュールに登録完了！プレミストドーム【J-540】で飲むヨーグルト用意して待機するぞ！乾杯だ！🤖🥛';
+          case 'robo': return '通信了解。パイロットの来訪を座標【J-540】にて迎撃…いや歓迎態勢に移行する。ドームで会おう！🤖⚡';
+          case 'robo_stand': return 'やった！モアイロボたちと一緒に、J-540で背筋ピシッと伸ばして支えながら待ってます！🏗️✨';
+          case 'cartridge': return 'ピコピコッ！カセット挿入準備OK！ドームJ-540でいつでも君の冒険にロードされるのを待ってるよ！🎮';
+          case 'tanktop_glasses': return 'おお！最高の視界でお待ちしております！札幌の冷気も大胸筋で断熱し、J-540であなたのメガネを預かります👓💪！';
+          case 'glasses': return 'ありがとうございます！プレミストドーム J-540にて、あなたの大切なメガネをお預かりする準備を整えてお待ちしていますね👓🗿';
+          case 'tanktop_osuwari': return 'わーーい！嬉しいな！肌着タンクトップ着てJ-540でお座りして待ってるから、見つけたらすぐ抱っこしてね！🗿🎽💕';
+          case 'osuwari': return 'わーい！！やったやった！飛び跳ねちゃうくらい嬉しいな！プレミストドーム J-540でちょこんとお座りして待ってるね！🎒💖';
+          case 'macho': return 'おおおおッッ！熱い魂を感じたぜ相棒ッ！オレの大胸筋も歓喜のスクワット中だ！プレミストドーム J-540で全力でペン挟んで待ってるぜパワーッッ！！💪🔥';
+          case 'macho_key': return 'よっしゃあ！カバンやポケットにいつでも飛び込める準備して、J-540でパンプアップして待ってるぜパワーッ！💪';
+          case 'positive': return '熱いッ！最高だッ！その前向きな一歩、全力で歓迎するぞ！プレミストドーム J-540で魂の応援エール送るからなッ！🔥🗿';
+          case 'tegotae': return 'グッと来たぜ…！君が来てくれると確信してた！プレミストドーム J-540で勝利のガッツポーズを交わそうぜ！✊🗿';
+          case 'doyagao': return 'ふっ、当然の選択だな！プレミストドーム J-540で一番カッコいい角度のドヤ顔キープして待ってるぜ！😏✨';
+          case 'momohiki': return 'ふっ、賢明だな！ももひき履いて足元ポカポカのオレが、J-540で最高のドヤ顔でお迎えしてやるよ！😏🩳';
+          case 'headphone': return '最高のレスポンスじゃん🎧 プレミストドーム J-540で極上のBGMとお花セットして待ってる。気軽に遊びにおいでよ🗿🌿';
+          case 'kangaeru': return '素晴らしい。プレミストドーム J-540で待機しているぞ。君と議論できるのを思索のテーマにして待とう🤔🗿';
+          case 'naisho': return 'ありがとうございます…。プレミストドーム J-540の静かな場所で、心穏やかにお待ちしていますね…🧘🗿';
+          case 'tasogare': return 'ありがとう…すごく嬉しいな。ドーム歩き疲れたらプレミストドーム J-540で一緒にまったり黄昏れようね🗿☕';
+          case 'yatta': return 'やったーーー！！大ジャンプ！！🙌 J-540で両手広げて待ってるから、勢いよくハイタッチしに来てねー！！✨';
+          case 'incense': return 'オゥオゥ！いい度胸じゃねぇか！プレミストドーム J-540で極上の香りを漂わせて待ってるぜ！気合い入れて来いよ！🚬🗿';
+          case 'lure': return 'フッ…食いついてきたな。プレミストドーム J-540の水域で針を研いで待ってるぜ。オレを釣り上げてみな！🐟🗿';
+          case 'dot_cute': return 'わーい！ドット絵のピコピコステップでお出迎えするね！プレミストドーム J-540で待ってるよ👾🎒✨';
+          default: return '本当に行くって言ってくれてすごく嬉しい🗿❤️ 大和ハウス プレミストドーム【ブース J-540】で首を長〜くして待ってるよ！気をつけて来てね！';
         }
       }
 
-      // 2. 暗いブースってどんなとこ？
-      if (text.includes('暗い') || text.includes('どんなとこ') || text.includes('場所') || text.includes('ブース')) {
+      // 2. ブースの場所・どこ・ドーム・アクセス・広さ
+      if (text.includes('場所') || text.includes('どこ') || text.includes('ブース') || text.includes('ドーム') || text.includes('アクセス') || text.includes('プレミスト')) {
         switch (type) {
-          case 'loscut': return '東京ビッグサイト西4Fの照明が落とされた特別なエリアだよ…。薄暗くて静かで、僕みたいな傷心モアイには居心地最高なんだ…。K-271を探してね🗿🕯️';
-          case 'highleg': return '西ホールの4階にある、照明が控えめなムーディーなエリアよ♡ 暗がりの中でスポットライトを浴びる私の美脚、拝みに来なさい？K-271番よ🩱✨';
-          case 'macho': return '西4Fの照明が落ちたストイックな筋トレ部屋…じゃなくて暗闇エリアだ！薄暗い中で光るオレの筋肉美を目印にK-271へ突撃してくれッ！💪🔥';
-          case 'robo': return '西4Fの照明制限エリアだ！暗闇の中でメカモアイたちが妖しくスタンバイしている秘密基地のようなブースだぞ！目印はブース番号K-271！🤖🛸';
-          default: return 'デザフェス西4Fにある、照明をぐっと落とした特別な暗闇エリアなんだ💡 落ち着いた雰囲気でモアイたちをじっくり眺められるよ！角ブースのK-271で待ってるね🗿✨';
+          case 'highleg': return '大和ハウス プレミストドーム（旧札幌ドーム）の【ブース J-540】よ♡ ドームは広いけど、美脚のオーラを辿ってくればすぐ見つかるはずよ🩱✨';
+          case 'loscut': return 'プレミストドームの【J-540】だよ…。広いドームの片隅で小さくなってるから、見落とさずに見つけてくれたら嬉しいな…📉🗿';
+          case 'macho': case 'macho_key': return '大和ハウス プレミストドームの【ブース J-540】だ！ドーム全体に響き渡る大胸筋の鼓動を目印に突撃してくれッパワーッ！💪🔥';
+          case 'robo': case 'yogurt': case 'cartridge': return '座標確認！大和ハウス プレミストドーム【ブース J-540】だ！メカとヨーグルトの補給基地でお待ちしているぞ！🤖🛸';
+          case 'momohiki': case 'doyagao': return '大和ハウス プレミストドームの【ブース J-540】だぜ！圧倒的存在感を放つドヤ顔を目印に来れば一発だ！😏✨';
+          default: return '大和ハウス プレミストドーム（旧札幌ドーム）の【ブース J-540】だよ！目印はたくさんの個性豊かなモアイたち！迷わずJ-540を目指して来てね🗿✨';
         }
       }
 
-      // 3. どんな性格？
-      if (text.includes('性格') || text.includes('どんな人') || text.includes('どんなモアイ') || text.includes('誰')) {
+      // 3. 寒い・寒くないの・気温・雪・冬・服・防寒
+      if (text.includes('寒') || text.includes('雪') || text.includes('冬') || text.includes('気温') || text.includes('天気') || text.includes('服') || text.includes('あったかい')) {
+        switch (type) {
+          case 'highleg': return '正直…ドームに入っちゃえば大丈夫だけど、足元はスースーよ♡ 美脚を魅せるためなら寒さなんて我慢！…でもあなたが温めてくれる？🩱❄️';
+          case 'tanktop_glasses': case 'tanktop_osuwari': return '北の大地でもタンクトップ！肌着一丁で筋肉を小刻みに震わせて自前発熱してるから平気！…手で優しく包んでくれたらもっと温まるよ🗿🎽🔥';
+          case 'momohiki': return 'ふっふっふ…見くびるなよ！伝統の「ももひき」を履いているから、北海道の寒風などそよ風にすぎん！足元ポカポカの無敵状態よ！😏🩳';
+          case 'macho': case 'macho_key': return '寒さ！？筋肉にとっては最高のアイシングだぜ！大胸筋を高速パンプアップさせてブースJ-540を熱気で包んでやるぜパワーッッ！！💪🔥';
+          case 'loscut': return '僕のポートフォリオ（含み損）の氷河期に比べたら、札幌の雪風なんてぬるま湯さ…でも風邪引かないようにJ-540で寄り添って…📉🥶';
+          case 'giveup': return '寒すぎて動くのをあきらめました…。寒風で完全にカチンコチンなので、J-540でお迎えしてあったかいお部屋に連れてって…🏳️🥶';
+          case 'yogurt': return '寒冷地仕様メカ冷却システム稼働中！北海道の冷気で飲むヨーグルトが最高のキンキン状態で保たれてるぞ！ロボは絶好調だ！🤖🥛❄️';
+          default: return '札幌は寒いけど、プレミストドームの中とブースJ-540はモアイたちの熱気でポカポカだよ🗿 あったかい格好で遊びに来てね！';
+        }
+      }
+
+      // 4. グルメ・ラーメン・ジンギスカン・ヨーグルト・ご飯・食べ・美味しい・北海道
+      if (text.includes('グルメ') || text.includes('ラーメン') || text.includes('ジンギスカン') || text.includes('ヨーグルト') || text.includes('ご飯') || text.includes('食べ') || text.includes('美味') || text.includes('北海道') || text.includes('スイーツ') || text.includes('アイス')) {
+        switch (type) {
+          case 'yogurt': case 'cartridge': return '北海道といえば本場の乳製品パラダイス！濃厚飲むヨーグルトが美味すぎてエネルギー充填率が限界突破してるぜ相棒！🤖🥛';
+          case 'kangaeru': return '札幌名物の濃厚味噌ラーメンとジンギスカン…どちらから攻略すべきか熟考しているのだ。君の推薦を聞かせてくれないか🤔🍜';
+          case 'highleg': return '海鮮丼にジンギスカン…誘惑が多いけど美脚のプロポーション維持のために筋トレよ♡ でも白い恋人ソフトは食べちゃった🍦🩱';
+          case 'incense': return 'ジンギスカン食ってスタミナ満点じゃい！食後の煙たさはオレのお香で最高のアロマ空間に変えてやるぜ！🚬🗿';
+          case 'tasogare': return '札幌の澄んだ空気の中で食べるソフトクリーム、すごく心に染みるよ…ドームの帰りに一緒に食べたいね🗿🍦';
+          default: return '北海道は美味しいものが多すぎて目移りしちゃうね🗿 ジンギスカンやラーメンを楽しんだ後は、プレミストドーム J-540に腹ごなしに寄ってね！';
+        }
+      }
+
+      // 5. 性格・どんな・特技・誰・何者・プロフィール
+      if (text.includes('性格') || text.includes('どんな') || text.includes('特技') || text.includes('誰') || text.includes('何者') || text.includes('プロフィール')) {
         const hitokoto = window.getMoaiHitokoto ? window.getMoaiHitokoto(p) : '';
         switch (type) {
-          case 'loscut': return `僕の性格？…だいたい「${hitokoto}」って感じだよ…。ネガティブだけど、心を開いた人には一途なんだ…。見捨てないでね📉🗿`;
-          case 'highleg': return `私の性格？「${hitokoto}」よ♡ 自信家に見えて、実はお手入れ大変なんだから。撫でてくれたら特別に懐いてあげるわ🩱✨`;
+          case 'highleg': return `私の性格？「${hitokoto}」よ♡ 自信家に見えて、実はお手入れが欠かせない繊細な美脚なの。撫でてくれたら特別に懐いてあげるわ🩱✨`;
+          case 'loscut': return `僕の性格？…だいたい「${hitokoto}」って感じだよ…。ネガティブだけど、心を開いてくれた人には一生一途なんだ…見捨てないでね📉🗿`;
+          case 'giveup': return `性格？「${hitokoto}」です…。争いもプレッシャーも苦手で、全てをあきらめて脱力してます。一緒にだらだらしよ…🏳️🗿`;
           case 'macho': return `オレのモットーは「${hitokoto}」だッッ！熱血、義理堅い、そしてパンプアップ！君のペンを一生離さないぜパワーッ！💪🔥`;
-          case 'robo': return `オレの基本スペックは「${hitokoto}」だ！ヨーグルトを愛し、相棒との絆を重んじる近未来メカだぞ！よろしくな！🤖🥛`;
-          default: return hitokoto ? `一言で言うと「${hitokoto}」な性格だよ🗿✨ 会場で直接お話ししたら、もっと仲良くなれると思うな！` : '石川県金沢生まれの素直でちょっとシュールなモアイだよ🗿 会場でお話ししよう！';
+          case 'robo': case 'yogurt': return `オレの基本スペックは「${hitokoto}」だ！ヨーグルトを愛し、相棒との絆を重んじる近未来メカだぞ！よろしくな！🤖🥛`;
+          case 'momohiki': case 'doyagao': return `オレの性格？見ての通り「${hitokoto}」だぜ！圧倒的自信と愛嬌で、君のデスクの空気をパッと明るく変えてやるよ！😏✨`;
+          case 'glasses': case 'tanktop_glasses': return `私は「${hitokoto}」を信条としております。大切なメガネを安全にお預かりし、あなたの視界とデスクを支えます👓🗿`;
+          default: return hitokoto ? `一言で言うと「${hitokoto}」な性格だよ🗿✨ 会場（J-540）で直接お話ししたら、もっと仲良くなれると思うな！` : '石川県生まれ、北海道へ遠征中の素直でちょっとシュールなモアイだよ🗿 会場でお話ししよう！';
         }
       }
 
-      // 4. 写真撮っていい？
-      if (text.includes('写真') || text.includes('撮') || text.includes('カメラ')) {
+      // 6. 写真撮っていい？・カメラ・インスタ・SNS
+      if (text.includes('写真') || text.includes('撮') || text.includes('カメラ') || text.includes('インスタ') || text.includes('sns') || text.includes('投稿') || text.includes('拡散')) {
         switch (type) {
           case 'highleg': return 'もちろんよ！最高に美脚が映えるアングルからバシバシ撮って、SNSで自慢してちょうだい♡ ポーズ決めちゃうわよ🩱📸';
-          case 'macho': return '大歓迎だァッ！一番カットが出てる角度から筋肉モアイを激写してくれッ！拡散してくれたら雄叫びあげるぜパワーッ！💪📸';
+          case 'macho': case 'macho_key': return '大歓迎だァッ！一番カットが出てる角度から筋肉モアイを激写してくれッ！拡散してくれたら雄叫びあげるぜパワーッ！💪📸';
           case 'loscut': return 'えっ、僕なんか撮って面白いの…？でも…遺影みたいにならないように、優しく撮ってくれたら嬉しいな…📉📸';
+          case 'doyagao': case 'momohiki': return 'ふっ、オレのドヤ顔を激写したいか！好きなだけシャッター切って世界中に拡散してくれ！😏📸✨';
           default: return '撮影大大大歓迎！！かっこいい角度やシュールなアングルからバシバシ撮って、X（Twitter）やインスタに載せてくれたら歓喜の咆哮をあげます🗿📸✨';
         }
       }
 
-      // 5. かわいい・一目惚れ・好き
-      if (text.includes('かわいい') || text.includes('好き') || text.includes('惚れ') || text.includes('愛')) {
+      // 7. かわいい・好き・かっこいい・一目惚れ・愛・推し
+      if (text.includes('かわいい') || text.includes('好き') || text.includes('かっこいい') || text.includes('一目惚れ') || text.includes('愛') || text.includes('推し') || text.includes('惚れ')) {
         switch (type) {
+          case 'highleg': return 'フフッ、素直でかわいいじゃない♡ 私もあなたの熱い視線、最初から気づいてたわよ？J-540で独占させてあげるわ🩱💋';
           case 'loscut': return 'え…！？僕に一目惚れ…！？嘘…人生で初めて言われた…！心拍数ストップ高になっちゃうよ…大切にしてね…📉❤️';
-          case 'highleg': return 'フフッ、素直でかわいいじゃない♡ 私もあなたの熱い視線、最初から気づいてたわよ？会場で独占させてあげるわ🩱💋';
-          case 'macho': return 'ガハハッ！惚れ惚れするだろこの肉体美！君の愛を胸筋でガッチリ受け止めたぜ！西4F K-271で待ってるぜ相棒ッ！💪❤️';
-          default: return '照れちゃうな…🗿/// ありがとう！実物は写真以上に愛嬌と重厚感があるから、ぜひ会場で直接撫でてあげてね！西4F K-271で待ってるよ✨';
+          case 'giveup': return 'あきらめてたのに…そんなこと言われたら生きる気力が湧いてきちゃうよ…ありがとう…🏳️❤️';
+          case 'macho': return 'ガハハッ！惚れ惚れするだろこの肉体美！君の愛を胸筋でガッチリ受け止めたぜ！プレミストドーム J-540で待ってるぜ相棒ッ！💪❤️';
+          case 'yogurt': return 'オレの回路がオーバーヒートしそうだ！相棒、最高の告白をありがとう！J-540で熱烈歓迎するぞ！🤖❤️';
+          case 'doyagao': case 'momohiki': return 'ふっ…オレの魅力に気づくとはお目が高いな！その熱い視線、J-540でドヤ顔で受け止めてやるぜ！😏❤️';
+          default: return '照れちゃうな…🗿/// ありがとう！実物は写真以上に愛嬌と重厚感があるから、ぜひプレミストドーム J-540で直接愛でてあげてね！✨';
         }
       }
 
-      // 6. その他の自由入力
+      // 8. 値段・買える？・お迎え・いくら・購入
+      if (text.includes('値段') || text.includes('買') || text.includes('いくら') || text.includes('お迎え') || text.includes('連れて') || text.includes('購入') || text.includes('在庫')) {
+        return 'プレミストドーム【J-540】で実物を直接見て選べるよ！作家の手作りで一つずつ表情が違うから、運命を感じたら早めにJ-540へ連れて帰りに来てね🗿✨';
+      }
+
+      // 9. その他の自由入力
       switch (type) {
-        case 'loscut': return 'メッセージ読んでちょっと元気出たよ…ありがとう…。暗いブース K-271 で君に会えるのを心の支えにして生きていくね…📉🗿';
-        case 'highleg': return 'フフッ、君とお話しするの結構楽しいじゃない♡ デザフェス当日は他の子に目移りしちゃダメよ？K-271で待ってるわ🩱✨';
-        case 'macho': return '君の熱いバイブス、ビンビン伝わってきたぜッ！当日までにもっとパンプアップしてK-271で待ってるぜパワーッッ！💪🔥';
-        case 'robo': return 'メッセージ受信完了！エネルギー充填率120%だ！会場で君と会えるのを楽しみにしてるぞ相棒！🤖🥛';
-        case 'tasogare': return 'メッセージありがとう。なんだかホッとするね…。デザフェス当日は、西4F K-271でまったり語り合おうね🗿☕';
-        default: return 'メッセージありがとう🗿❤️ 君とデザフェス西4F 暗いブース K-271 で直接会えるのが本当に楽しみだな！ブースで待ってるね✨';
+        case 'highleg': return 'フフッ、君とお話しするの結構楽しいじゃない♡ サッポロ モノ ヴィレッジ当日は他の子に目移りしちゃダメよ？J-540で待ってるわ🩱✨';
+        case 'loscut': return 'メッセージ読んでちょっと元気出たよ…ありがとう…。プレミストドーム J-540 で君に会えるのを心の支えにして生きていくね…📉🗿';
+        case 'giveup': return 'ふふ…なんだか救われた気がするよ…。プレミストドーム J-540 で脱力しながら待ってるね…🏳️🗿';
+        case 'macho': case 'macho_key': return '君の熱いバイブス、ビンビン伝わってきたぜッ！当日までにもっとパンプアップしてJ-540で待ってるぜパワーッッ！💪🔥';
+        case 'yogurt': case 'cartridge': return 'メッセージ受信完了！エネルギー充填率120%だ！プレミストドーム J-540で会えるのを楽しみにしてるぞ相棒！🤖🥛';
+        case 'robo': return 'パイロット候補生からの通信を確認。プレミストドーム J-540にて会敵…いや友好的接触を待機する！🤖⚡';
+        case 'tanktop_glasses': case 'glasses': return 'お話しできて光栄です。メガネのフィッティング、プレミストドーム J-540にて心よりお待ちしておりますね👓🗿';
+        case 'tanktop_osuwari': case 'osuwari': case 'dot_cute': return 'メッセージすっごく嬉しいな！プレミストドーム J-540でちょこんとお座りして待ってるから、見つけてね！🎒💕';
+        case 'positive': return '君の言葉でオレの情熱もフルスロットルだ！プレミストドーム J-540で最高の元気を届けるからなッ！🔥🗿';
+        case 'tegotae': return '確かな絆の手応えを感じたぜ！プレミストドーム J-540で拳を交わそう！✊🗿';
+        case 'doyagao': case 'momohiki': return 'ふっ、オレと話せて光栄だろ？J-540でこのドヤ顔を生で拝みに来な！😏✨';
+        case 'tasogare': return 'メッセージありがとう。なんだかホッとするね…。当日はプレミストドーム J-540でまったり語り合おうね🗿☕';
+        default: return 'メッセージありがとう🗿❤️ サッポロ モノ ヴィレッジ（大和ハウス プレミストドーム J-540）で君と直接会えるのが本当に楽しみだな！ブースで待ってるね✨';
       }
     }
+
+    window.getMoaiPersonalityType = getMoaiPersonalityType;
+    window.getMoaiFirstGreeting = getMoaiFirstGreeting;
+    window.getMoaiCharacterReply = getMoaiCharacterReply;
 
     async function sendUserMessage(text) {
       if (!activeChatMoaiId) return;
@@ -6230,7 +6343,7 @@ ${variantSelectorHtml}
     if (name.includes('ヘッドホン')) return window.MOAI_HITOKOTO_DICT['headphone'];
     if (name.includes('釣り') || name.includes('ルアー')) return window.MOAI_HITOKOTO_DICT['lure'];
 
-    return 'デザフェス西4F 暗いブース K-271 で待ってるよ🗿✨';
+    return 'サッポロ モノ ヴィレッジ（プレミストドーム J-540）で待ってるよ🗿✨';
   };
 
   // リアルタイムいいね数の同期反映
@@ -6915,7 +7028,7 @@ ${variantSelectorHtml}
               <div style="font-size:14.5px; font-weight:900; color:#0f172a;">肌着おすわり モアイペン立て</div>
               <div style="font-size:10.5px; color:#10b981; display:flex; align-items:center; gap:4px; font-weight:700;">
                 <span style="width:6px; height:6px; border-radius:50%; background:#10b981; display:inline-block;"></span>
-                オンライン（デザフェス西4F K-271 出展）
+                オンライン（プレミストドーム J-540 出展）
               </div>
             </div>
           </div>
@@ -6978,14 +7091,14 @@ ${variantSelectorHtml}
           <!-- デザフェス出展ブース案内カード（温かみのある明るいマッチングアプリ調背景） -->
           <div style="width:100%; background:#ffffff; border:2px solid #ffccd5; border-radius:22px; padding:16px 16px; box-shadow:0 12px 30px rgba(255,45,85,0.12); box-sizing:border-box;">
             <div style="font-size:20px; font-weight:900; color:#e11d48; letter-spacing:0.3px; margin-bottom:4px;">
-              デザインフェスタvol.64
+              サッポロ モノ ヴィレッジ 2026 秋
             </div>
             <div style="font-size:14px; font-weight:900; color:#334155; margin-bottom:10px;">
-              📅 2026年11月14日(土)・15日(日)
+              📅 2026年11月22日(日)・23日(月祝)
             </div>
             <div style="background:linear-gradient(135deg, #fff5f7 0%, #ffe4e8 100%); border:1.5px solid #fda4af; border-radius:14px; padding:9px 12px; margin-bottom:10px;">
-              <div style="font-size:13px; font-weight:900; color:#e11d48; margin-bottom:2px;">西館4階</div>
-              <div style="font-size:22px; font-weight:900; color:#0f172a; letter-spacing:0.5px;">暗いブース K-271</div>
+              <div style="font-size:13px; font-weight:900; color:#e11d48; margin-bottom:2px;">大和ハウス プレミストドーム</div>
+              <div style="font-size:22px; font-weight:900; color:#0f172a; letter-spacing:0.5px;">ブース J-540</div>
             </div>
             <div style="font-size:22px; font-weight:900; color:#0f172a; letter-spacing:0.5px;">
               Kanazawa Moataro
@@ -7085,9 +7198,9 @@ ${variantSelectorHtml}
         photo2Caption: '📸 仲間たちと肌着合わせしてみたよ🗿🔥',
         chatMoaiMsg1: '🗿「やったー！マッチングありがとう✨ 俺、どう？タンクトップ姿どうかな？」',
         chatUserMsg1: 'え、似合ってる！仲間たちも個性的で実物見てみたいな😂',
-        chatMoaiMsg2: '🗿「えっ本当！？じゃあ11/14・15のデザフェス【西館4階 暗いブース K-271】で会おうよ！✨」',
+        chatMoaiMsg2: '🗿「えっ本当！？じゃあ11/22・23のサッポロ モノ ヴィレッジ【プレミストドーム J-540】で会おうよ！✨」',
         chatMoaiMsg3: '🗿「タンクトップ洗濯して、他のモアイ仲間たちと最前列で待ってるね！！約束だよ🗿🔥」',
-        chatUserMsg2: 'なんかこのモアイ、めっちゃグイグイくるな…😂 ちょっとK-271見に行ってみよっと！',
+        chatUserMsg2: 'なんかこのモアイ、めっちゃグイグイくるな…😂 ちょっとJ-540見に行ってみよっと！',
         notifs: [
           { text: 'おすわりモアイからいいね！', img: 'images/kurima/osuwari_moai_pen.jpg' },
           { text: 'ハイレグモアイからいいね！', img: 'images/kurima/moai_highleg/studio/ハイレグモアイ_master.png' },
@@ -7144,9 +7257,9 @@ ${variantSelectorHtml}
         photo2Caption: '📸 24時間メガネをガッチリ守るぜ👓',
         chatMoaiMsg1: '🗿「マッチング感謝だぜ！💪 どうだい、この屈強な大胸筋とタンクトップの仕上がりは！？」',
         chatUserMsg1: 'え、筋肉すごすぎる！メガネ預けてみたいかも😂',
-        chatMoaiMsg2: '🗿「おうよ！じゃあ11/14・15のデザフェス【西館4階 暗いブース K-271】で合流しようぜ！✨」',
+        chatMoaiMsg2: '🗿「おうよ！じゃあ11/22・23のサッポロ モノ ヴィレッジ【プレミストドーム J-540】で合流しようぜ！✨」',
         chatMoaiMsg3: '🗿「メガネクロス頭に乗せて、大胸筋パンプアップして最前列で待ってるからな！！約束だぜ💪🔥」',
-        chatUserMsg2: 'このモアイ、熱量と筋肉アピールが凄まじいな…😂 ちょっとK-271見に行ってみよっと！',
+        chatUserMsg2: 'このモアイ、熱量と筋肉アピールが凄まじいな…😂 ちょっとJ-540見に行ってみよっと！',
         notifs: [
           { text: 'おすわりモアイからいいね！', img: 'images/kurima/osuwari_moai_pen.jpg' },
           { text: 'ハイレグモアイからいいね！', img: 'images/kurima/moai_highleg/studio/ハイレグモアイ_master.png' },
@@ -7203,9 +7316,9 @@ ${variantSelectorHtml}
         photo2Caption: '📸 窓辺で静かに脱力しているところ☀️',
         chatMoaiMsg1: '🗿「マッチングありがとう…もう何もかも諦めかけてたけど、あなたに届いて本当によかった…」',
         chatUserMsg1: '脱力感と哀愁がたまらない…😂 癒やされるから実物見てみたい！',
-        chatMoaiMsg2: '🗿「本当ですか…！？じゃあ11/14・15のデザフェス【西館4階 暗いブース K-271】で待っててもいいですか…？✨」',
+        chatMoaiMsg2: '🗿「本当ですか…！？じゃあ11/22・23のサッポロ モノ ヴィレッジ【プレミストドーム J-540】で待っててもいいですか…？✨」',
         chatMoaiMsg3: '🗿「ブースの片隅で、体育座りして静かに諦めて待ってます…来てくれたらすごく嬉しいです🗿」',
-        chatUserMsg2: '諦めてるのにデザフェスには来てほしいの可愛すぎる😂 ちょっとK-271見に行ってみよっと！',
+        chatUserMsg2: '諦めてるのにデザフェスには来てほしいの可愛すぎる😂 ちょっとJ-540見に行ってみよっと！',
         notifs: [
           { text: 'ハイレグモアイからいいね！', img: 'images/kurima/moai_highleg/studio/ハイレグモアイ_master.png' },
           { text: 'マッチョなモアイペン立てからいいね！', img: 'images/kurima/macho_moai_pen.png' },
@@ -7262,9 +7375,9 @@ ${variantSelectorHtml}
         photo2Caption: '📸 観葉植物の陰で為す術なくうなだれてます🌱',
         chatMoaiMsg1: '🗿「マッチング感謝です…📉 チャート見たら含み損が止まらなくて…でもあなたとマッチできて救われました…」',
         chatUserMsg1: 'うなだれっぷりが哀愁漂ってて愛おしい😂 実物見て励ましたい！',
-        chatMoaiMsg2: '🗿「励ましてくれるんですか…！？じゃあ11/14・15のデザフェス【西館4階 暗いブース K-271】で会いましょう…！✨」',
+        chatMoaiMsg2: '🗿「励ましてくれるんですか…！？じゃあ11/22・23のサッポロ モノ ヴィレッジ【プレミストドーム J-540】で会いましょう…！✨」',
         chatMoaiMsg3: '🗿「暗いブースの鉢植えの横で、うなだれて待ってます…一緒にナンピン耐えましょう🗿📉🔥」',
-        chatUserMsg2: '含み損仲間として親近感湧きまくり😂 ちょっとK-271に会いに行ってみよっと！',
+        chatUserMsg2: '含み損仲間として親近感湧きまくり😂 ちょっとJ-540に会いに行ってみよっと！',
         notifs: [
           { text: 'ダンシングモアイからいいね！', img: 'images/kurima/moai_dance_test.jpg' },
           { text: 'ハイレグモアイからいいね！', img: 'images/kurima/moai_highleg/studio/ハイレグモアイ_master.png' },
@@ -7321,9 +7434,9 @@ ${variantSelectorHtml}
         photo2Caption: '📸 鬼の顔が宿る自慢の背筋（バックポーズ）🔥',
         chatMoaiMsg1: '🗿「パワーッッッ！！！マッチングありがとう！！💪 俺の鍛え上げた大胸筋、どうだ！？ペンを挟む準備は万端だぜ！」',
         chatUserMsg1: '背筋まで仕上がりすぎてる😂 ペン立ての域を超えてて実物見たい！',
-        chatMoaiMsg2: '🗿「ナイスバルク！！じゃあ11/14・15のデザフェス【西館4階 暗いブース K-271】でマッスルミートしようぜ！✨」',
+        chatMoaiMsg2: '🗿「ナイスバルク！！じゃあ11/22・23のサッポロ モノ ヴィレッジ【プレミストドーム J-540】でマッスルミートしようぜ！✨」',
         chatMoaiMsg3: '🗿「プロテイン飲んで、最前列でポージングしながら待ってるぜ！！絶対に来てくれよな🗿💪🔥」',
-        chatUserMsg2: '筋肉モアイの熱量が凄まじくて元気出る😂 パワーもらいにK-271見に行ってみよっと！',
+        chatUserMsg2: '筋肉モアイの熱量が凄まじくて元気出る😂 パワーもらいにJ-540見に行ってみよっと！',
         notifs: [
           { text: 'おすわりモアイからいいね！', img: 'images/kurima/osuwari_moai_pen.jpg' },
           { text: 'タンクトップメガネスタンドからいいね！', img: 'images/kurima/glasses_stand/studio/Moataro.jpg' },
@@ -7380,9 +7493,9 @@ ${variantSelectorHtml}
         photo2Caption: '📸 俺たち、デスクでいつも3人一緒なんだ❤️',
         chatMoaiMsg1: '🗿「マッチングありがとう！俺たち、考える×含み損×諦めたモアイのズッ友トリオなんだ🗿🗿🗿」',
         chatUserMsg1: 'この3人組、キャラ濃いのに仲良すぎでしょｗｗ 実物並んでるところ見たい😂',
-        chatMoaiMsg2: '🗿「長男が悩み、次男が落ち込み、三男が寝る！じゃあデザフェス【西館4階 暗いブース K-271】で3人並んで待ってるね！✨」',
+        chatMoaiMsg2: '🗿「長男が悩み、次男が落ち込み、三男が寝る！じゃあサッポロ モノ ヴィレッジ【プレミストドーム J-540】で3人並んで待ってるね！✨」',
         chatMoaiMsg3: '🗿「解決はしないけど、あなたのデスクのそばで寄り添う準備万全だよ！約束だよ🗿💤🔥」',
-        chatUserMsg2: '暗いブースにこの3人組、似合いすぎてる…絶対K-271見に行こっと！笑',
+        chatUserMsg2: '暗いブースにこの3人組、似合いすぎてる…絶対J-540見に行こっと！笑',
         notifs: [
           { text: '考えるモアイからいいね！', img: 'images/kurima/kangaeru_moai.jpg' },
           { text: '含み損モアイからいいね！', img: 'images/kurima/moai_loscut/studio/含み損モアイ_master.png' },
