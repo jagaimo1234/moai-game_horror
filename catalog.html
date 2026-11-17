@@ -2289,7 +2289,7 @@
     <p>Kanazawa Moataro</p>
   </div>
 
-  <!-- デザフェス出店告知 VIPチケット看板 -->
+  <!-- サッポロ モノ ヴィレッジ出店告知 VIPチケット看板 -->
   <div class="ticket-card-catalog">
     <div class="ticket-notch-cl"></div>
     <div class="ticket-notch-cr"></div>
@@ -2297,8 +2297,8 @@
     <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:8px;">
       <div>
         <span style="font-size:10px; font-weight:bold; color:#ffbc69; letter-spacing:2px; text-transform:uppercase;">OFFICIAL EXHIBITION PASS</span>
-        <div style="font-size:clamp(17px, 5vw, 21px); font-weight:900; color:#ffd700; text-shadow:0 0 10px rgba(255,215,0,0.4); margin-top:2px;">
-          DESIGN FESTA vol.64
+        <div style="font-size:clamp(16px, 4.6vw, 20px); font-weight:900; color:#ffd700; text-shadow:0 0 10px rgba(255,215,0,0.4); margin-top:2px;">
+          サッポロ モノ ヴィレッジ 2026 秋
         </div>
       </div>
       <div style="background:rgba(0,255,170,0.15); border:1px solid #00ffaa; color:#00ffaa; font-size:11px; font-weight:bold; padding:2px 8px; border-radius:20px; white-space:nowrap;">
@@ -2310,25 +2310,22 @@
     <div style="display:grid; grid-template-columns:1fr 1fr 1.2fr; gap:6px; background:rgba(0,0,0,0.45); border:1px solid rgba(255,255,255,0.1); border-radius:10px; padding:8px 10px; margin-bottom:10px;">
       <div style="border-right:1px solid rgba(255,255,255,0.1); padding-right:4px;">
         <div style="font-size:9px; color:#aaa; font-weight:bold;">DATE</div>
-        <div style="font-size:11px; font-weight:bold; color:#fff; margin-top:2px;">11/14(土)-15(日)</div>
+        <div style="font-size:11px; font-weight:bold; color:#fff; margin-top:2px;">11/22(日)-23(月祝)</div>
       </div>
       <div style="border-right:1px solid rgba(255,255,255,0.1); padding-right:4px; text-align:center;">
         <div style="font-size:9px; color:#aaa; font-weight:bold;">AREA</div>
-        <div style="font-size:11px; font-weight:bold; color:#00d2ff; margin-top:2px;">西4F 暗いブース</div>
+        <div id="pass-area-display" style="font-size:11px; font-weight:bold; color:#00d2ff; margin-top:2px;">プレミストドーム</div>
       </div>
       <div style="text-align:right;">
         <div style="font-size:9px; color:#ffd700; font-weight:bold;">BOOTH NO.</div>
-        <div style="font-size:14px; font-weight:900; color:#ffd700; margin-top:1px;">K-271 <span style="font-size:9px; font-weight:normal; opacity:0.8;">(角)</span></div>
+        <div id="pass-booth-display" style="font-size:14px; font-weight:900; color:#ffd700; margin-top:1px;">ブース番号</div>
       </div>
     </div>
 
-    <!-- 爽快ルート案内ボタン ＆ ガチャ起動ボタン -->
-    <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
-      <button type="button" onclick="event.stopPropagation(); window.openCatalogRouteModal()" style="background:linear-gradient(135deg, #ff1e56, #d80044); color:#fff; font-size:12px; font-weight:bold; padding:8px 10px; border-radius:8px; border:none; cursor:pointer; box-shadow:0 3px 10px rgba(255,30,86,0.4); display:flex; align-items:center; justify-content:center; gap:5px;">
-        <span>🗺️</span> K-271への行き方
-      </button>
-      <button type="button" onclick="event.stopPropagation(); window.openCatalogGachaModal()" style="background:linear-gradient(135deg, #ffd700, #ff8c00); color:#000; font-size:12px; font-weight:bold; padding:8px 10px; border-radius:8px; border:none; cursor:pointer; box-shadow:0 3px 10px rgba(255,140,0,0.4); display:flex; align-items:center; justify-content:center; gap:5px;">
-        <span>🎰</span> 運命のモアイガチャ
+    <!-- ガチャ起動ボタンのみ配置（行き方ボタンを撤去し、運命のモアイガチャを全面に配置） -->
+    <div>
+      <button type="button" onclick="event.stopPropagation(); window.openCatalogGachaModal()" style="width:100%; background:linear-gradient(135deg, #ffd700, #ff8c00); color:#000; font-size:13px; font-weight:bold; padding:10px 14px; border-radius:8px; border:none; cursor:pointer; box-shadow:0 3px 12px rgba(255,140,0,0.4); display:flex; align-items:center; justify-content:center; gap:8px;">
+        <span style="font-size:16px;">🎰</span> 運命のモアイガチャ
       </button>
     </div>
   </div>
@@ -2650,12 +2647,12 @@
 
     // ============================================================
 
-    // URLパラメータでイベント指定があれば取得 (?event=...)。無ければデザフェスをデフォルトにする
+    // URLパラメータでイベント指定があれば取得 (?event=...)。無ければモノヴィレをデフォルトにする
     const urlEventParam = new URLSearchParams(window.location.search).get('event');
-    let currentEventKey = urlEventParam || DEFAULT_EVENT;
-    // 終了したHMJが指定されていても、一般モードなら強制的にデザフェス64に切り替え
+    let currentEventKey = urlEventParam || 'sapporo2026';
+    // 終了したHMJが指定されていても、一般モードなら強制的にモノヴィレに切り替え
     if ((currentEventKey === 'hmj' || currentEventKey === 'kurima') && !window.location.search.includes('preview=moai2024')) {
-      currentEventKey = 'designfesta64';
+      currentEventKey = 'sapporo2026';
     }
     let currentSlide = 0;
     window.eventProductsData = {};
@@ -2677,10 +2674,12 @@
       const allEvents = window.getAllEvents(window.eventConfigData);
       
       let sortedKeys = Object.keys(allEvents);
-      // デザフェス64を常に最優先（先頭）、歴代図鑑を末尾に配置
+      // サッポロ モノ ヴィレッジ（モノヴィレ）を常に最優先（先頭）、歴代図鑑を末尾に配置
       sortedKeys.sort((a, b) => {
-        if (a === 'designfesta64' || a === 'designfesta') return -1;
-        if (b === 'designfesta64' || b === 'designfesta') return 1;
+        if (a === 'sapporo2026') return -1;
+        if (b === 'sapporo2026') return 1;
+        if (a === 'designfesta64') return -1;
+        if (b === 'designfesta64') return 1;
         if (a === 'history') return 1;
         if (b === 'history') return -1;
         return 0;
@@ -3749,10 +3748,10 @@ ${variantSelectorHtml}
       }
       
       if ((status === 'hidden' || !allEvents[currentEventKey] || currentEventKey === 'hmj' || currentEventKey.includes('hmj')) && !IS_PREVIEW_MODE) {
-        const targetDf = (allEvents['designfesta64'] && window.eventConfigData['designfesta64']?.status !== 'hidden')
-          ? 'designfesta64'
-          : ((allEvents['designfesta'] && window.eventConfigData['designfesta']?.status !== 'hidden') ? 'designfesta' : DEFAULT_EVENT);
-        switchEvent(targetDf);
+        const targetEvent = (allEvents['sapporo2026'] && window.eventConfigData['sapporo2026']?.status !== 'hidden')
+          ? 'sapporo2026'
+          : ((allEvents['designfesta64'] && window.eventConfigData['designfesta64']?.status !== 'hidden') ? 'designfesta64' : DEFAULT_EVENT);
+        switchEvent(targetEvent);
       } else {
         buildTabs();
         window.scheduleBuildViews();

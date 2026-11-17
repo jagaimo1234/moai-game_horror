@@ -511,11 +511,22 @@ const MASTER_PRODUCTS = [
 ];
 
 const EVENTS = {
+  sapporo2026: {
+    label: 'モノヴィレ',
+    fullName: 'サッポロ モノ ヴィレッジ 2026 秋',
+    isMarche: true,
+    defaultStatus: 'public',
+    date: '2026-11-22',
+    location: '大和ハウス プレミストドーム',
+    products: [
+      ...MASTER_PRODUCTS
+    ]
+  },
   designfesta64: {
     label: 'デザフェス64',
     fullName: 'デザインフェスタvol.64',
     isMarche: true,
-    defaultStatus: 'public',
+    defaultStatus: 'hidden',
     date: '2026-11-14',
     location: '東京ビッグサイト 西4F 暗いブース K-271',
     products: [
@@ -574,8 +585,8 @@ const EVENTS = {
   }
 };
 
-// デフォルトで最初に選択されるイベント（デザフェス）
-const DEFAULT_EVENT = 'designfesta64';
+// デフォルトで最初に選択されるイベント（サッポロ モノ ヴィレッジ）
+const DEFAULT_EVENT = 'sapporo2026';
 
 // 全ての作品に自動でidを付与（画像パスから生成）
 function assignIds(list) {
@@ -1097,7 +1108,8 @@ window.WORK_FOLDER_ASSETS = {
       "images/kurima/moai_loscut/studio/ChatGPT 画像 2026年11月5日 20_35_09-8.png",
       "images/kurima/moai_loscut/studio/ChatGPT 画像 2026年11月5日 20_35_14-9.png",
       "images/kurima/moai_loscut/studio/ChatGPT 画像 2026年11月5日 20_35_18-10.png",
-      "images/kurima/moai_loscut/studio/含み損モアイ_master.png"
+      "images/kurima/moai_loscut/studio/含み損モアイ_master.png",
+      "images/kurima/moai_loscut/studio/含み損モアイ_master2.png"
     ]
   },
   "moai_Noliferobot": {

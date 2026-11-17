@@ -1,0 +1,177 @@
+[
+  {
+    "id": "moai_robo_mk2_gray",
+    "name": "MOAI ROBO MARK 2",
+    "image": "images/kurima/moai_robo_mk2_gray.jpg",
+    "badge": "",
+    "price": 0
+  },
+  {
+    "id": "moai_robo_stand",
+    "name": "モアイロボMark2専用スタンド",
+    "image": "images/kurima/moai_robo_mk2_gold/moai_robo_stand.png",
+    "badge": "",
+    "price": 0
+  },
+  {
+    "id": "moai_robo_yogurt_lover",
+    "name": "MOAI ROBO -Yogurt Lover-",
+    "image": "images/kurima/moai_robo_yogurt_lover.jpg",
+    "badge": "",
+    "price": 0
+  },
+  {
+    "id": "macho_moai_pen",
+    "name": "マッチョな モアイペン立て",
+    "image": "images/kurima/macho_moai_pen/studio/まっちょモアイペン立て_master.png",
+    "badge": "",
+    "price": 0
+  },
+  {
+    "id": "positive_moai_pen",
+    "name": "ポジティブモアイ ペン立て ハチマキSP",
+    "image": "images/kurima/positive_moai_pen.jpg",
+    "badge": "",
+    "price": 0
+  },
+  {
+    "id": "glasses_stand",
+    "name": "まちょい モアイな メガネスタンド",
+    "image": "images/kurima/glasses_stand.jpg",
+    "badge": "",
+    "price": 0
+  },
+  {
+    "id": "glasses_stand__variant_group",
+    "name": "タンクトップ まちょい モアイメガネスタンド",
+    "image": "images/kurima/glasses_stand/studio/Moataro.jpg",
+    "badge": "",
+    "price": 0
+  },
+  {
+    "id": "osuwari_moai_pen",
+    "name": "おすわり モアイペン立て",
+    "image": "images/kurima/osuwari_moai_pen.jpg",
+    "badge": "",
+    "price": 0
+  },
+  {
+    "id": "osuwari_moai_pen__variant_group",
+    "name": "肌着おすわり モアイペン立て",
+    "image": "images/kurima/hadagi_osuwari_moai_pen/studio/tanktop_pair_pen.jpg",
+    "badge": "",
+    "price": 0
+  },
+  {
+    "id": "tegotae_moai_pen",
+    "name": "手応えを掴んだ モアイペン立て",
+    "image": "images/kurima/tegotae_moai_pen.jpg",
+    "badge": "",
+    "price": 0
+  },
+  {
+    "id": "headphone_moai_vase",
+    "name": "ヘッドホン モアイ一輪挿し",
+    "image": "images/kurima/headphone_moai_vase.jpg",
+    "badge": "",
+    "price": 0
+  },
+  {
+    "id": "kangaeru_moai",
+    "name": "考えるモアイ",
+    "image": "images/kurima/kangaeru_moai.jpg",
+    "badge": "",
+    "price": 0
+  },
+  {
+    "id": "moai_incense",
+    "name": "モアイお香立て 「半グレリーゼント番長」",
+    "image": "images/kurima/moai_incense.jpg",
+    "badge": "",
+    "price": 0
+  },
+  {
+    "id": "tasogare_moai",
+    "name": "黄昏れモアイ",
+    "image": "images/kurima/tasogare_moai.jpg",
+    "badge": "",
+    "price": 0
+  },
+  {
+    "id": "naisho_moai",
+    "name": "内省するモアイ",
+    "image": "images/kurima/naisho_moai.jpg",
+    "badge": "",
+    "price": 0
+  },
+  {
+    "id": "yatta_moai",
+    "name": "やったー モアイペン立て",
+    "image": "images/kurima/yatta_moai.jpg",
+    "badge": "",
+    "price": 0
+  },
+  {
+    "id": "doyagao_moai",
+    "name": "どやがお モアイペン立て",
+    "image": "images/kurima/doyagao_moai.jpg",
+    "badge": "",
+    "price": 0
+  },
+  {
+    "id": "doyagao_moai__variant_group",
+    "name": "ももひき どやがお モアイペン立て",
+    "image": "images/kurima/doyagao_moai/studio/momohiki_doyagao.jpg",
+    "badge": "",
+    "price": 0
+  },
+  {
+    "id": "moai_lure_stand",
+    "name": "まちょいモアイルアースタンド",
+    "image": "images/kurima/machoi_moai_lure_stand.jpg",
+    "badge": "",
+    "price": 0
+  },
+  {
+    "id": "dot_osuwari_keyholder",
+    "name": "おすわりドットキーホルダー",
+    "image": "images/kurima/dot_osuwari_keyholder/cover.jpg",
+    "badge": "",
+    "price": 0
+  },
+  {
+    "id": "macho_moai_keyholder",
+    "name": "まっちょモアイキーホルダー",
+    "image": "images/kurima/macho_moai_keyholder.jpg",
+    "badge": "",
+    "price": 0
+  },
+  {
+    "id": "moai_giveup",
+    "name": "あきらめたモアイ",
+    "image": "images/kurima/moai_giveup.jpg",
+    "badge": "",
+    "price": 0
+  },
+  {
+    "id": "moai_loscut",
+    "name": "うなだれているモアイ",
+    "image": "images/kurima/moai_loscut/studio/含み損モアイ_master.png",
+    "badge": "",
+    "price": 0
+  },
+  {
+    "id": "keychain",
+    "name": "モアイロボ ヨーグルトランEX カートリッジキーホルダー",
+    "image": "images/kurima/keychain.jpg",
+    "badge": "",
+    "price": 0
+  },
+  {
+    "id": "moai_highleg",
+    "name": "ハイレグモアイ",
+    "image": "images/kurima/moai_highleg/studio/ハイレグモアイ_master.png",
+    "badge": "",
+    "price": 0
+  }
+]
